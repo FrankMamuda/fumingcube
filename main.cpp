@@ -75,7 +75,7 @@ shutdown
 ==========
 */
 void Main::shutdown() {
-    Database::instance().unload();
+    db.unload();
     QApplication::quit();
 }
 
@@ -88,13 +88,6 @@ int main( int argc, char *argv[] ) {
     QApplication a( argc, argv );
     Gui_Main w;
     w.show();
-
- //   m.initialise();
-
-    // boolean test
-   /* bool ok1 = true, ok2 = true;
-    bool ok3 = ok1 && ok2;
-    qDebug() << ok3;*/
 
     return a.exec();
 }

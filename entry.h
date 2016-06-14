@@ -77,14 +77,11 @@ public slots:
         // update database value
         if ( !this->table().isNull()) {
             query.prepare( QString( "update %1 set %2 = :value where id = :id" ).arg( table ).arg( name ));
-
-            qDebug() << QString( "update %1 set %2 = %3 where id = %4" ).arg( table ).arg( name ).arg( update.toString()).arg( this->record().value( "id" ).toInt());
-
             query.bindValue( ":value", update.toString());
             query.bindValue( ":id", this->record().value( "id" ).toInt());
 
             if ( !query.exec())
-                m.error( Main::SoftError, QString( "could not store value, reason - '%1'\n" ).arg( query.lastError().text()));
+                m.error( Main::SoftError, ClassFunc + QString( "could not store value, reason - '%1'\n" ).arg( query.lastError().text()));
         }
     }
     void store() {

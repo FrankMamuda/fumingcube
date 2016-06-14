@@ -38,7 +38,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 constructor
 ==========
 */
-Gui_Main::Gui_Main( QWidget *parent) : QMainWindow( parent ), ui( new Ui::Gui_Main ), m_lock( true ), curentTemplate( NULL ) {
+Gui_Main::Gui_Main( QWidget *parent) : QMainWindow( parent ), curentTemplate( NULL ), ui( new Ui::Gui_Main ), m_lock( true ), m_propertiesDialog( new Gui_Properties( this )) {
     this->ui->setupUi( this );
 
     m.initialise();
@@ -47,7 +47,20 @@ Gui_Main::Gui_Main( QWidget *parent) : QMainWindow( parent ), ui( new Ui::Gui_Ma
     this->recalculate();
     this->fillTemplates();
 
+    // default to water, if no templates on init
+    if ( this->curentTemplate == NULL ) {
+        this->lock();
+        this->setMass( 1.0f );
+        this->setVolume( 1.0f );
+        this->setMolarMass( 18.02f );
+        this->setAssay( 100.0f );
+        this->setDensity( 1.0f );
+        this->unlock();
+        this->recalculate();
+    }
+
     this->on_keepAboveAction_toggled( this->ui->keepAboveAction->isChecked());
+    this->m_propertiesDialog->setWindowFlags( this->windowFlags());
 }
 
 /*
@@ -384,6 +397,7 @@ void Gui_Main::on_solidCheck_stateChanged( int state ) {
     switch ( state ) {
     case Qt::Checked:
         this->ui->massEdit->setReadOnly( false );
+        //this->ui->massEdit->setEnabled( true );
         this->ui->volumeEdit->setDisabled( true );
         this->ui->densityEdit->setDisabled( true );
         this->setState( Template::Solid );
@@ -392,6 +406,7 @@ void Gui_Main::on_solidCheck_stateChanged( int state ) {
 
     case Qt::Unchecked:
         this->ui->massEdit->setReadOnly( true );
+        //this->ui->massEdit->setEnabled( false );
         this->ui->volumeEdit->setEnabled( true );
         this->ui->densityEdit->setEnabled( true );
         this->setState( Template::Liquid );
@@ -446,6 +461,7 @@ void Gui_Main::addTemplate( const QString &name ) {
 
     if ( !amountParsed || !this->assay( assay ) || !this->density( density ) || !this->molarMass( molarMass )) {
         QMessageBox msgBox;
+        msgBox.setWindowFlags( this->windowFlags());
         msgBox.setIcon( QMessageBox::Critical );
         msgBox.setText( QString( "Invalid amount specified" ));
         msgBox.exec();
@@ -583,11 +599,12 @@ void Gui_Main::on_removeAction_triggered() {
     templatePtr = Template::fromId( this->ui->templateCombo->itemData( this->ui->templateCombo->currentIndex(), Qt::UserRole ).toInt());
 
     if ( templatePtr != NULL ) {
+        msgBox.setWindowFlags( this->windowFlags());
         msgBox.setText( this->tr( "Do you really want to remove '%1'?" ).arg( templatePtr->name()));
         msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
         msgBox.setDefaultButton( QMessageBox::Yes );
         msgBox.setIcon( QMessageBox::Warning );
-        //msgBox.setWindowIcon( QIcon( ":/icons/template_remove.png" ));
+        msgBox.setWindowIcon( QIcon( ":/icons/template_remove_24" ));
         state = msgBox.exec();
 
         // check options
@@ -616,6 +633,10 @@ saveAction->triggered
 void Gui_Main::on_saveAction_triggered() {
     double amount, molarMass, density, assay;
 
+    // failsafe
+    if ( this->curentTemplate == NULL )
+        return;
+
     if ( !this->molarMass( molarMass ) || !this->density( density ) || !this->assay( assay ))
         return;
 
@@ -633,3 +654,19 @@ void Gui_Main::on_saveAction_triggered() {
     if ( this->state() == Template::Liquid )
         this->curentTemplate->setDensity( density );
 }
+
+/*
+==========
+closeAction->triggered
+==========
+*/
+void Gui_Main::on_closeAction_triggered() {
+    m.shutdown();
+}
+
+/*
+==========
+closeAction->triggered
+==========
+*/
+

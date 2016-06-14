@@ -29,6 +29,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "gui_addtemplate.h"
 #include "template.h"
 #include "ui_gui_main.h"
+#include "gui_properties.h"
 
 //
 // namespace: Ui
@@ -46,7 +47,7 @@ class Gui_Main : public QMainWindow {
 
 public:
     explicit Gui_Main( QWidget *parent = 0 );
-    ~Gui_Main() { delete this->ui; }
+    ~Gui_Main() { delete this->ui; delete this->m_propertiesDialog; }
 
     // unit enums
     enum MassUnits {
@@ -85,8 +86,10 @@ public:
     bool locked() const { return this->m_lock; }
     Template::State state() const { return m_state; }
 
+    Template *curentTemplate;
+
 public slots:
-    void addTemplate(const QString &name);
+    void addTemplate( const QString &name );
 
 private slots:
     // variable lock state related
@@ -107,13 +110,14 @@ private slots:
     void on_keepAboveAction_toggled( bool );
     void on_removeAction_triggered();
     void on_saveAction_triggered();
+    void on_closeAction_triggered();
+    void on_infoButton_clicked() { if ( this->curentTemplate != NULL ) this->m_propertiesDialog->setReagentId( this->curentTemplate->id()); this->m_propertiesDialog->show(); }
 
     // calculation related
     void recalculate();
     void calculateMass();
 
     void fillTemplates( int forceId = -1 );
-    //void valueChanged( QLineEdit *container );
     void setValue( QLineEdit *container, double value, int precision ) { container->setText( QString( "%1" ).arg( value, 0, 'f', precision, 0 )); }
     void setVolume( double value, int precision = 2 ) { this->setValue( this->ui->volumeEdit, value, precision ); }
     void setMol( double value, int precision = 3 ) { this->setValue( this->ui->molEdit, value, precision ); }
@@ -133,14 +137,12 @@ private slots:
     void setMolarMassUnits( const MolarMassUnits units = GramPerMol ) { this->m_molarMassUnits = units; }
     void setMolUnits( const MolUnits units = Mol ) { this->m_molUnits = units; }
 
-
 private:
     Ui::Gui_Main *ui;
 
     // variable lock state related
     bool m_lock;
     Template::State m_state;
-    Template *curentTemplate;
 
     // units
     MassUnits m_massUnits;
@@ -148,6 +150,7 @@ private:
     DensityUnits m_densityUnits;
     MolarMassUnits m_molarMassUnits;
     MolUnits m_molUnits;
+    Gui_Properties *m_propertiesDialog;
 };
 
 #endif // GUI_MAIN_H

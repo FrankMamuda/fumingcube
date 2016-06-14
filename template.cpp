@@ -40,7 +40,7 @@ void Template::add( const QString &name, const double amount, const double densi
     query.bindValue( ":state", state );
 
     if ( !query.exec()) {
-        m.error( Main::SoftError, QString( "could not add template, reason - '%1'\n" ).arg( query.lastError().text()));
+        m.error( Main::SoftError, QString( "Template::add: could not add template, reason - '%1'\n" ).arg( query.lastError().text()));
         return;
     }
 

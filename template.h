@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-Copyright (C) 2013 Avotu Briezhaudzetava
+Copyright (C) 2016 Avotu Briezhaudzetava
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 #include <QObject>
 #include "entry.h"
+#include "property.h"
 
 //
 // class: Template
@@ -39,7 +40,7 @@ public:
         Liquid = 0,
         Solid
     };
-    Template( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "accounts" ); }
+    Template( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "templates" ); }
     QString name() const { return this->record().value( "name" ).toString(); }
     double amount() const { return this->record().value( "amount" ).toDouble(); }
     double density() const { return this->record().value( "density" ).toDouble(); }
@@ -47,6 +48,8 @@ public:
     double molarMass() const { return this->record().value( "molarMass" ).toDouble(); }
     State state() const { return static_cast<State>( this->record().value( "state" ).toInt()); }
     static Template *fromId( int id );
+
+    QList<Property*> propertyList;
 
 public slots:
     void setName( const QString &name ) { this->setValue( "name", name ); }

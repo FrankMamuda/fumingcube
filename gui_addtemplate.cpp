@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-Copyright (C) 2013 Avotu Briezhaudzetava
+Copyright (C) 2016 Avotu Briezhaudzetava
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ constructor
 ==========
 */
 Gui_AddTemplate::Gui_AddTemplate( QWidget *parent ) : QDialog( parent ), ui( new Ui::Gui_AddTemplate ) {
-    ui->setupUi( this );
+    this->ui->setupUi( this );
 }
 
 /*
@@ -57,6 +57,12 @@ void Gui_AddTemplate::on_buttonBox_accepted() {
     QMessageBox msgBox;
 
     name = this->ui->nameEdit->text();
+    parentWindow = qobject_cast<Gui_Main*>( this->parent());
+
+    if ( parentWindow == NULL )
+        this->close();
+
+    msgBox.setWindowFlags( parentWindow->windowFlags());
 
     if ( name.isEmpty()) {
         msgBox.setIcon( QMessageBox::Warning );
@@ -72,16 +78,6 @@ void Gui_AddTemplate::on_buttonBox_accepted() {
             return;
         }
     }
-
-    parentWindow = qobject_cast<Gui_Main*>( this->parent());
-    if ( this->parent() != NULL )
-        parentWindow->addTemplate( name );
+    parentWindow->addTemplate( name );
 }
 
-/*
-==========
-buttonBox->rejected
-==========
-*/
-void Gui_AddTemplate::on_buttonBox_rejected()  {
-}

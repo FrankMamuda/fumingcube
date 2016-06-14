@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-Copyright (C) 2013 Avotu Briezhaudzetava
+Copyright (C) 2016 Avotu Briezhaudzetava
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,23 +27,28 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include <QString>
 #include <QList>
 #include "template.h"
+#include "property.h"
 
 //
 // class: Database
 //
-class Database {
+class Database : public QObject {
+    Q_OBJECT
+
 public:
     static Database &instance() { static Database *instance = new Database(); return *instance; }
     void load();
     void unload();
     QString encrypt( const QString &input );
     QList<Template*> templateList;
+    QList<Property*> propertyList;
 
 private:
     Database() { }
     void create();
     void makePath();
     void loadTemplates();
+    void loadProperties();
     QString path;
 };
 

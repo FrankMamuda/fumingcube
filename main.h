@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-Copyright (C) 2013 Avotu Briezhaudzetava
+Copyright (C) 2016 Avotu Briezhaudzetava
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,6 +25,14 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 // include
 //
 #include <QString>
+
+// message macro
+#ifdef Q_CC_MSVC
+#define ClassFunc QString( "%1::%2: " ).arg( this->metaObject()->className()).arg( __FUNCTION__ )
+#else
+#define ClassFunc QString( "%1::%2: " ).arg( this->metaObject()->className()).arg( __func__ )
+#endif
+
 
 //
 // singleton class: Main

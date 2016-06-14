@@ -14,7 +14,14 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Add tempate</string>
+   <string>Add template</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>icons/add_template_24.png</normaloff>icons/add_template_24.png</iconset>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
