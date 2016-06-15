@@ -31,6 +31,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //  use actual units, not just parse values (partially done)
 //  adjustable precision
 //  remember units once typed in
+//  disable properties dialog if no template?
 //
 
 /*
@@ -265,7 +266,7 @@ fillTemplates
 ==========
 */
 void Gui_Main::fillTemplates( int forceId ) {
-    int newId, y;
+    int newId = -1, y;
     Template *templatePtr;
 
     if ( forceId != -1 )
@@ -324,7 +325,12 @@ void Gui_Main::on_molEdit_textChanged() {
     this->ui->molEdit->setStyleSheet( "QLineEdit {}" );
 
     this->lock();
-    this->setVolume(( mol * molarMass ) / assay / density );
+
+    if ( this->state() == Template::Liquid )
+        this->setVolume(( mol * molarMass ) / assay / density );
+    else if ( this->state() == Template::Solid )
+        this->setMass(( mol * molarMass ) / assay );
+
     this->calculateMass();
     this->unlock();
 }
@@ -452,7 +458,7 @@ addTemplate
 */
 void Gui_Main::addTemplate( const QString &name ) {
     double amount = 0.0f, assay, density, molarMass;
-    bool amountParsed;
+    bool amountParsed = false;
 
     if ( this->state() == Template::Solid )
         amountParsed = this->mass( amount );
@@ -664,9 +670,4 @@ void Gui_Main::on_closeAction_triggered() {
     m.shutdown();
 }
 
-/*
-==========
-closeAction->triggered
-==========
-*/
 

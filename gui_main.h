@@ -39,7 +39,7 @@ class Gui_Main;
 }
 
 //
-// class: Main (gui)
+// class: Main (ui)
 //
 class Gui_Main : public QMainWindow {
     Q_OBJECT
@@ -103,7 +103,7 @@ private slots:
     void on_molarEdit_textChanged();
     void on_molEdit_textChanged();
     void on_volumeEdit_textChanged();
-    void on_solidCheck_stateChanged(int);
+    void on_solidCheck_stateChanged( int );
     void on_massEdit_textChanged();
     void on_templateCombo_currentIndexChanged( int index );
     void on_addAction_triggered() { Gui_AddTemplate dialog( this ); dialog.exec(); }

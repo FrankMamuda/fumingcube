@@ -18,43 +18,37 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 ===========================================================================
 */
 
-#ifndef GUI_PROPERTIES_H
-#define GUI_PROPERTIES_H
+#ifndef GUI_ADDPROPERTY_H
+#define GUI_ADDPROPERTY_H
 
 //
 // includes
 //
-#include <QMainWindow>
-#include "propertiesmodel.h"
+#include <QDialog>
 
 //
 // namespace: Ui
 //
 namespace Ui {
-class Gui_Properties;
+class Gui_AddProperty;
 }
 
 //
-// class: Properties (ui)
+// class: AddProperty (ui)
 //
-class Gui_Properties : public QMainWindow {
+class Gui_AddProperty : public QDialog {
     Q_OBJECT
 
 public:
-    explicit Gui_Properties( QWidget *parent = 0 , const int templateId = -1 );
-    ~Gui_Properties();
+    explicit Gui_AddProperty( const int reagentId, QWidget *parent = 0 );
+    ~Gui_AddProperty();
 
 private slots:
-    void on_closeButton_clicked() { this->close(); }
-    void on_addPropertyAction_triggered();
-    void on_removePropertyAction_triggered();
-
-public slots:
-    void setReagentId( const int reagentId = -1 );
+    void on_buttonBox_accepted();
 
 private:
-    Ui::Gui_Properties *ui;
-    PropertiesModel *m_model;
+    Ui::Gui_AddProperty *ui;
+    int m_reagentId;
 };
 
-#endif // GUI_PROPERTIES_H
+#endif // GUI_ADDPROPERTY_H

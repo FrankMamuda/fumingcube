@@ -35,49 +35,10 @@ class PropertiesModel : public QAbstractTableModel {
 
 public:
     PropertiesModel( QObject *parent ) : QAbstractTableModel( parent ), m_reagentId( -1 ) {}
-    int rowCount( const QModelIndex & = QModelIndex()) const {
-        if ( this->m_reagentId == -1 )
-            return 0;
-
-        Template *templatePtr = Template::fromId( this->m_reagentId );
-        if ( templatePtr != NULL )
-            return templatePtr->propertyList.count();
-
-        return 0;
-    }
+    int rowCount( const QModelIndex & = QModelIndex()) const;
     int columnCount( const QModelIndex & = QModelIndex()) const { return 2; }
-    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const {
-        if ( this->m_reagentId == -1 )
-            return QVariant();
-
-        if ( role == Qt::DisplayRole ) {
-            Template *templatePtr = Template::fromId( this->m_reagentId );
-            if ( templatePtr != NULL ) {
-                Property *propPtr = templatePtr->propertyList.at( index.row());
-                if ( propPtr != NULL ) {
-                    if ( index.column() == 0 )
-                        return propPtr->propertyName();
-                    else if ( index.column() == 1 )
-                        return propPtr->propertyValue();
-                }
-            }
-        }
-        return QVariant();
-    }
-    QVariant headerData( int section, Qt::Orientation orientation, int role ) const {
-        if ( role == Qt::DisplayRole ) {
-            if ( orientation == Qt::Horizontal ) {
-                switch ( section ) {
-                case 0:
-                    return QString( "Parameter" );
-
-                case 1:
-                    return QString( "Value" );
-                }
-            }
-        }
-        return QVariant();
-    }
+    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+    QVariant headerData( int section, Qt::Orientation orientation, int role ) const;
 
 public slots:
     void setReagentId( const int reagentId = -1 ) {
@@ -86,9 +47,6 @@ public slots:
     }
     void reset() {
         this->beginResetModel();
-        /*QModelIndex topLeft = this->index(0, 0);
-        QModelIndex bottomRight = this->index(this->rowCount()-1, columnCount()-1);
-        emit this->dataChanged( topLeft, bottomRight );*/
         this->endResetModel();
     }
 

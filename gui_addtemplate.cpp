@@ -43,7 +43,7 @@ destructor
 ==========
 */
 Gui_AddTemplate::~Gui_AddTemplate() {
-    delete ui;
+    delete this->ui;
 }
 
 /*

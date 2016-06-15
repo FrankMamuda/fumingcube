@@ -30,7 +30,6 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include <QSqlQuery>
 #include <QSqlError>
 #include "main.h"
-#include <QDebug>
 
 //
 // class: Entry

@@ -6,5 +6,9 @@
         <file alias="keep_above_24">icons/keep_above_24.png</file>
         <file alias="template_save_24">icons/template_save_24.png</file>
         <file alias="exit_24">icons/exit_24.png</file>
+        <file alias="add_propery_24">icons/add_reagent_property_24.png</file>
+        <file alias="properties_24">icons/reagent_properties_24.png</file>
+        <file alias="remove_property_24">icons/remove_reagent_property_24.png</file>
+        <file alias="dialog_close_24">icons/dialog_close_24.png</file>
     </qresource>
 </RCC>

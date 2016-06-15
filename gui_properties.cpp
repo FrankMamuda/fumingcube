@@ -24,7 +24,8 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "gui_properties.h"
 #include "ui_gui_properties.h"
 #include "gui_main.h"
-#include <QDebug>
+#include "database.h"
+#include "gui_addproperty.h"
 
 /*
 ==========
@@ -42,9 +43,6 @@ Gui_Properties::Gui_Properties( QWidget *parent, const int templateId ) : QMainW
     //
     // FIXME/TODO: just bind reagentId to gui_main combobox, if it changes, emit signal
     //
-
-
-    qDebug() << "show";
 }
 
 /*
@@ -53,7 +51,7 @@ destructor
 ==========
 */
 Gui_Properties::~Gui_Properties() {
-    delete ui;
+    delete this->ui;
     delete this->m_model;
 }
 
@@ -77,16 +75,46 @@ void Gui_Properties::on_addPropertyAction_triggered() {
 
     if ( gui != NULL ) {
         if ( gui->curentTemplate != NULL ) {
-            Property::add( gui->curentTemplate->id(), "Boiling point", "110 degC" );
+            // TODO: handle through reject/accept?
+            Gui_AddProperty addDialog( gui->curentTemplate->id(), this );
+            addDialog.setWindowFlags( this->windowFlags());
 
-            // TODO: refresh model data
-            this->m_model->reset();
-            //this->ui->propertiesView->model()->beginResetModel();
-            //this->ui->propertiesView->setModel( this->m_model );
-            //this->ui->propertiesView->in
-            //this->ui->propertiesView->update()
-           // this->ui->propertiesView->model()->up
-            //this->ui->propertiesView->setModel( this->m_model );
+            switch ( addDialog.exec()) {
+            case Gui_AddProperty::Accepted:
+                this->m_model->reset();
+                break;
+            }
         }
     }
 }
+
+/*
+==========
+removePropertyAction->triggered
+
+FIXME: add confirmation dialog
+==========
+*/
+void Gui_Properties::on_removePropertyAction_triggered() {
+    Property *propPtr;
+    Template *templatePtr;
+    QSqlQuery query;
+
+    int row = this->ui->propertiesView->currentIndex().row();
+    if ( row < 0 || row >= this->ui->propertiesView->model()->rowCount())
+        return;
+
+    propPtr = Property::fromId( this->ui->propertiesView->model()->data( this->ui->propertiesView->currentIndex(), Qt::UserRole ).toInt());
+    if ( propPtr != NULL ) {
+        // remove from memory and database
+        db.propertyList.removeOne( propPtr );
+
+        templatePtr = Template::fromId( propPtr->reagentId());
+        if ( templatePtr != NULL )
+            templatePtr->propertyList.removeOne( propPtr );
+
+        query.exec( QString( "delete from properties where id=%1" ).arg( propPtr->id()));
+        this->m_model->reset();
+    }
+}
+

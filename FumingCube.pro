@@ -30,7 +30,9 @@ SOURCES += main.cpp\
     template.cpp \
     gui_addtemplate.cpp \
     gui_properties.cpp \
-    property.cpp
+    property.cpp \
+    propertiesmodel.cpp \
+    gui_addproperty.cpp
 
 HEADERS  += gui_main.h \
     database.h \
@@ -40,11 +42,13 @@ HEADERS  += gui_main.h \
     gui_addtemplate.h \
     gui_properties.h \
     propertiesmodel.h \
-    property.h
+    property.h \
+    gui_addproperty.h
 
 FORMS    += gui_main.ui \
     gui_addtemplate.ui \
-    gui_properties.ui
+    gui_properties.ui \
+    gui_addproperty.ui
 
 DISTFILES += \
     icon.ico \

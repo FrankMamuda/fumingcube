@@ -34,7 +34,7 @@ class Gui_AddTemplate;
 }
 
 //
-// class: AddTemplate (gui)
+// class: AddTemplate (ui)
 //
 class Gui_AddTemplate : public QDialog {
     Q_OBJECT
