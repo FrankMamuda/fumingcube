@@ -26,8 +26,8 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 #include <QLineEdit>
 #include <QMainWindow>
-#include "gui_addtemplate.h"
-#include "template.h"
+#include "gui_addreagent.h"
+#include "reagent.h"
 #include "ui_gui_main.h"
 #include "gui_properties.h"
 
@@ -38,12 +38,12 @@ namespace Ui {
 class Gui_Main;
 }
 
-//
-// class: Main (ui)
-//
+/**
+ * @brief The Gui_Main class
+ */
 class Gui_Main : public QMainWindow {
     Q_OBJECT
-    Q_PROPERTY( Template::State state READ state WRITE setState )
+    Q_PROPERTY( Reagent::State state READ state WRITE setState )
 
 public:
     explicit Gui_Main( QWidget *parent = 0 );
@@ -84,16 +84,16 @@ public:
 
     // variable lock state related
     bool locked() const { return this->m_lock; }
-    Template::State state() const { return m_state; }
+    Reagent::State state() const { return m_state; }
 
-    Template *curentTemplate;
+    Reagent *curentReagent;
 
 public slots:
-    void addTemplate( const QString &name );
+    void addReagent( const QString &name );
 
 private slots:
     // variable lock state related
-    void setState( const Template::State &state );
+    void setState( const Reagent::State &state );
     void unlock() { this->m_lock = false; }
     void lock() { this->m_lock = true; }
 
@@ -105,19 +105,19 @@ private slots:
     void on_volumeEdit_textChanged();
     void on_solidCheck_stateChanged( int );
     void on_massEdit_textChanged();
-    void on_templateCombo_currentIndexChanged( int index );
-    void on_addAction_triggered() { Gui_AddTemplate dialog( this ); dialog.exec(); }
+    void on_reagentCombo_currentIndexChanged( int index );
+    void on_addAction_triggered() { Gui_AddReagent dialog( this ); dialog.exec(); }
     void on_keepAboveAction_toggled( bool );
     void on_removeAction_triggered();
     void on_saveAction_triggered();
-    void on_closeAction_triggered();
-    void on_infoButton_clicked() { if ( this->curentTemplate != NULL ) this->m_propertiesDialog->setReagentId( this->curentTemplate->id()); this->m_propertiesDialog->show(); }
+    void on_closeAction_triggered() { m.shutdown(); }
+    void on_infoButton_clicked() { if ( this->curentReagent != NULL ) this->m_propertiesDialog->setReagentId( this->curentReagent->id()); this->m_propertiesDialog->show(); }
 
     // calculation related
     void recalculate();
     void calculateMass();
 
-    void fillTemplates( int forceId = -1 );
+    void fillReagents( int forceId = -1 );
     void setValue( QLineEdit *container, double value, int precision ) { container->setText( QString( "%1" ).arg( value, 0, 'f', precision, 0 )); }
     void setVolume( double value, int precision = 2 ) { this->setValue( this->ui->volumeEdit, value, precision ); }
     void setMol( double value, int precision = 3 ) { this->setValue( this->ui->molEdit, value, precision ); }
@@ -142,7 +142,7 @@ private:
 
     // variable lock state related
     bool m_lock;
-    Template::State m_state;
+    Reagent::State m_state;
 
     // units
     MassUnits m_massUnits;

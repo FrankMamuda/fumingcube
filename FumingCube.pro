@@ -27,26 +27,28 @@ win32:RC_FILE = icon.rc
 SOURCES += main.cpp\
         gui_main.cpp \
     database.cpp \
-    template.cpp \
-    gui_addtemplate.cpp \
+    gui_addreagent.cpp \
     gui_properties.cpp \
     property.cpp \
     propertiesmodel.cpp \
-    gui_addproperty.cpp
+    gui_addproperty.cpp \
+    reagent.cpp \
+    template.cpp
 
 HEADERS  += gui_main.h \
     database.h \
     entry.h \
-    template.h \
     main.h \
-    gui_addtemplate.h \
+    gui_addreagent.h \
     gui_properties.h \
     propertiesmodel.h \
     property.h \
-    gui_addproperty.h
+    gui_addproperty.h \
+    reagent.h \
+    template.h
 
 FORMS    += gui_main.ui \
-    gui_addtemplate.ui \
+    gui_addreagent.ui \
     gui_properties.ui \
     gui_addproperty.ui
 

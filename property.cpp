@@ -24,11 +24,11 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "property.h"
 #include "database.h"
 
-/*
-==========
-fromId
-==========
-*/
+/**
+ * @brief Property::fromId
+ * @param id
+ * @return
+ */
 Property *Property::fromId( int id ) {
     foreach ( Property *propPtr, db.propertyList ) {
         if ( propPtr->id() == id )
@@ -37,11 +37,12 @@ Property *Property::fromId( int id ) {
     return NULL;
 }
 
-/*
-==========
-add
-==========
-*/
+/**
+ * @brief Property::add
+ * @param reagentId
+ * @param property
+ * @param value
+ */
 void Property::add( const int reagentId, const QString &property, const QString &value ) {
     QSqlQuery query;
 
@@ -51,7 +52,7 @@ void Property::add( const int reagentId, const QString &property, const QString 
     query.bindValue( ":value", value );
 
     if ( !query.exec()) {
-        m.error( Main::SoftError, QString( "Property::add: could not add property, reason - '%1'\n" ).arg( query.lastError().text()));
+        Main::error( Main::SoftError, QObject::tr( "Property::add: could not add property, reason - '%1'\n" ).arg( query.lastError().text()));
         return;
     }
 
@@ -60,9 +61,9 @@ void Property::add( const int reagentId, const QString &property, const QString 
         Property *propPtr = new Property( query.record());
         db.propertyList << propPtr;
 
-        foreach ( Template *templatePtr, db.templateList ) {
-            if ( templatePtr->id() == reagentId )
-                templatePtr->propertyList << propPtr;
+        foreach ( Reagent *reagentPtr, db.reagentList ) {
+            if ( reagentPtr->id() == reagentId )
+                reagentPtr->propertyList << propPtr;
         }
 
         break;

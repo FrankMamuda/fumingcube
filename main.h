@@ -34,9 +34,9 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #endif
 
 
-//
-// singleton class: Main
-//
+/**
+ * @brief The Main class
+ */
 class Main {
 public:
     static Main &instance() { static Main *instance = new Main(); return *instance; }
@@ -52,9 +52,9 @@ private:
 
 public:
     void initialise();
-    void print( const QString & );
-    void error( ErrorTypes , const QString & );
-    void shutdown();
+    static void print( const QString & );
+    static void error( ErrorTypes , const QString & );
+    static void shutdown();
 };
 
 //

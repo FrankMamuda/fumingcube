@@ -26,6 +26,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 #include <QMainWindow>
 #include "propertiesmodel.h"
+#include "ui_gui_properties.h"
 
 //
 // namespace: Ui
@@ -34,15 +35,15 @@ namespace Ui {
 class Gui_Properties;
 }
 
-//
-// class: Properties (ui)
-//
+/**
+ * @brief The Gui_Properties class
+ */
 class Gui_Properties : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit Gui_Properties( QWidget *parent = 0 , const int templateId = -1 );
-    ~Gui_Properties();
+    explicit Gui_Properties( QWidget *parent = 0 , const int reagentId = -1 );
+    ~Gui_Properties() { delete this->ui; delete this->m_model; }
 
 private slots:
     void on_closeButton_clicked() { this->close(); }
@@ -50,7 +51,7 @@ private slots:
     void on_removePropertyAction_triggered();
 
 public slots:
-    void setReagentId( const int reagentId = -1 );
+    void setReagentId( const int reagentId = -1 ) { this->m_model->setReagentId( reagentId ); }
 
 private:
     Ui::Gui_Properties *ui;

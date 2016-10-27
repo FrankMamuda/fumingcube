@@ -28,9 +28,9 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "entry.h"
 #include "property.h"
 
-//
-// class: Template
-//
+/**
+ * @brief The Template class
+ */
 class Template : public Entry {
     Q_OBJECT
     Q_CLASSINFO( "description", "Template SQL Entry" )
@@ -48,7 +48,6 @@ public:
     double molarMass() const { return this->record().value( "molarMass" ).toDouble(); }
     State state() const { return static_cast<State>( this->record().value( "state" ).toInt()); }
     static Template *fromId( int id );
-
     QList<Property*> propertyList;
 
 public slots:

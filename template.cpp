@@ -23,11 +23,15 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include <QSqlError>
 #include "database.h"
 
-/*
-==========
-add
-==========
-*/
+/**
+ * @brief Template::add
+ * @param name
+ * @param amount
+ * @param density
+ * @param assay
+ * @param molarMass
+ * @param state
+ */
 void Template::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state ) {
     QSqlQuery query;
 
@@ -40,7 +44,7 @@ void Template::add( const QString &name, const double amount, const double densi
     query.bindValue( ":state", state );
 
     if ( !query.exec()) {
-        m.error( Main::SoftError, QString( "Template::add: could not add template, reason - '%1'\n" ).arg( query.lastError().text()));
+        Main::error( Main::SoftError, QString( "Template::add: could not add template, reason - '%1'\n" ).arg( query.lastError().text()));
         return;
     }
 
@@ -51,11 +55,11 @@ void Template::add( const QString &name, const double amount, const double densi
     }
 }
 
-/*
-==========
-fromId
-==========
-*/
+/**
+ * @brief Template::fromId
+ * @param id
+ * @return
+ */
 Template *Template::fromId( int id ) {
     foreach ( Template *templatePtr, db.templateList ) {
         if ( templatePtr->id() == id )

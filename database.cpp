@@ -33,21 +33,18 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 Database &db = Database::instance();
 
-/*
-==========
-makePath
-==========
-*/
+/**
+ * @brief Database::makePath
+ */
 void Database::makePath() {
     QString path;
 
     // default path?
 #ifdef Q_OS_UNIX
-    path = QString( QDir::homePath() + "/.chemtoolbox/" );
+    path = QString( QDir::homePath() + "/.fumingcube/" );
 #else
     path = QString( QDir::currentPath() + "/" );
 #endif
-    path.append( "/" );
     path.append( "data.db" );
 
     // make path id nonexistant
@@ -58,7 +55,7 @@ void Database::makePath() {
     if ( !dir.exists()) {
         dir.mkpath( db.absolutePath());
         if ( !dir.exists())
-            m.error( Main::FatalError, ClassFunc + QString( "could not create database path - '%1'\n" ).arg( path ));
+            Main::error( Main::FatalError, ClassFunc + QObject::tr( "could not create database path - '%1'\n" ).arg( path ));
     }
 
     // store path
@@ -66,11 +63,9 @@ void Database::makePath() {
     this->path.replace( "//", "/" );
 }
 
-/*
-==========
-touch
-==========
-*/
+/**
+ * @brief Database::create
+ */
 void Database::create() {
     // create query
     QSqlQuery query;
@@ -78,19 +73,17 @@ void Database::create() {
     // failafe
     QFile database( this->path );
     if ( !database.exists())
-        m.error( Main::FatalError, ClassFunc + QString( "unable to create database file\n" ));
+        Main::error( Main::FatalError, ClassFunc + QString( "unable to create database file\n" ));
 
     // create initial table structure (if non-existant)
-    if ( !query.exec( QString( "create table if not exists templates ( id integer primary key, name varchar( 128 ), amount float, density float, assay float, molarMass float, state integer )" )) ||
+    if ( !query.exec( QString( "create table if not exists reagents ( id integer primary key, name varchar( 128 ), amount float, density float, assay float, molarMass float, state integer )" )) ||
          !query.exec( QString( "create table if not exists properties ( id integer primary key, reagentId integer, property varchar( 64 ), value varchar( 128 ))" )))
-        m.error( Main::FatalError, ClassFunc + QString( "could not create internal database structure, reason - '%1'\n" ).arg( query.lastError().text()));
+        Main::error( Main::FatalError, ClassFunc + QString( "could not create internal database structure, reason - '%1'\n" ).arg( query.lastError().text()));
 }
 
-/*
-==========
-load
-==========
-*/
+/**
+ * @brief Database::load
+ */
 void Database::load() {
     // make path
     this->makePath();
@@ -101,11 +94,11 @@ void Database::load() {
     QSqlDatabase database = QSqlDatabase::database();
 
     // announce
-    m.print( ClassFunc + QString( "loading database '%1'\n" ).arg( this->path ));
+    Main::print( ClassFunc + QString( "loading database '%1'\n" ).arg( this->path ));
 
     // failsafe
     if ( !database.isDriverAvailable( "QSQLITE" ))
-        m.error( Main::FatalError, ClassFunc + QString( "sqlite not present on the system\n" ));
+        Main::error( Main::FatalError, ClassFunc + QString( "sqlite not present on the system\n" ));
 
     // set sqlite driver
     database = QSqlDatabase::addDatabase( "QSQLITE" );
@@ -116,33 +109,31 @@ void Database::load() {
     if ( !databaseFile.exists()) {
         databaseFile.open( QFile::WriteOnly );
         databaseFile.close();
-        m.print( ClassFunc + ClassFunc + QString( "creating non-existant database - '%1'\n" ).arg( databaseInfo.fileName()));
+        Main::print( ClassFunc + ClassFunc + QString( "creating non-existant database - '%1'\n" ).arg( databaseInfo.fileName()));
     }
 
     // set path and open
     if ( !database.open())
-        m.error( Main::FatalError, ClassFunc + QString( "could not load database - '%1'\n" ).arg( databaseInfo.fileName()));
+        Main::error( Main::FatalError, ClassFunc + QString( "could not load database - '%1'\n" ).arg( databaseInfo.fileName()));
 
     // create database
     this->create();
 
     /* delete orphaned entries */
-    /* load templates */
-    this->loadTemplates();
+    /* load reagents */
+    this->loadReagents();
     this->loadProperties();
 }
 
-/*
-==========
-unload
-==========
-*/
+/**
+ * @brief Database::unload
+ */
 void Database::unload() {
     QString connectionName;
     bool open = false;
 
     // announce
-    m.print( ClassFunc + QString( "unloading database\n" ));
+    Main::print( ClassFunc + QString( "unloading database\n" ));
 
     // close database if open and delete orphaned logs on shutdown
     // according to Qt5 documentation, this must be out of scope
@@ -162,35 +153,31 @@ void Database::unload() {
         QSqlDatabase::removeDatabase( connectionName );
 }
 
-/*
-==========
-loadTemplates
-==========
-*/
-void Database::loadTemplates() {
+/**
+ * @brief Database::loadReagents
+ */
+void Database::loadReagents() {
     QSqlQuery query;
 
     // announce
-    m.print( ClassFunc + "loading templates from database\n" );
+    Main::print( ClassFunc + "loading reagents from database\n" );
 
-    // read all template entries
-    query.exec( "select * from templates order by name asc;" );
+    // read all reagent entries
+    query.exec( "select * from reagents order by name asc;" );
 
     // store entries in memory
     while ( query.next())
-        this->templateList << new Template( query.record());
+        this->reagentList << new Reagent( query.record());
 }
 
-/*
-==========
-loadProperties
-==========
-*/
+/**
+ * @brief Database::loadProperties
+ */
 void Database::loadProperties() {
     QSqlQuery query;
 
     // announce
-    m.print( ClassFunc + "loading properties from database\n" );
+    Main::print( ClassFunc + "loading properties from database\n" );
 
     // read all property entries
     query.exec( "select * from properties order by property asc;" );
@@ -200,10 +187,10 @@ void Database::loadProperties() {
         Property *propPtr = new Property( query.record());
         this->propertyList << propPtr;
 
-        Template *templatePtr = Template::fromId( propPtr->reagentId());
+        Reagent *reagentPtr = Reagent::fromId( propPtr->reagentId());
 
         // TODO: delete orphan
-        if ( templatePtr != NULL )
-            templatePtr->propertyList << propPtr;
+        if ( reagentPtr != NULL )
+            reagentPtr->propertyList << propPtr;
     }
 }

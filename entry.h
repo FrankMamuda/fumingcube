@@ -31,9 +31,9 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include <QSqlError>
 #include "main.h"
 
-//
-// class: Entry
-//
+/**
+ * @brief The Entry class
+ */
 class Entry : public QObject {
     Q_OBJECT
     Q_PROPERTY( int id READ id )
@@ -80,7 +80,7 @@ public slots:
             query.bindValue( ":id", this->record().value( "id" ).toInt());
 
             if ( !query.exec())
-                m.error( Main::SoftError, ClassFunc + QString( "could not store value, reason - '%1'\n" ).arg( query.lastError().text()));
+                Main::error( Main::SoftError, ClassFunc + QString( "could not store value, reason - '%1'\n" ).arg( query.lastError().text()));
         }
     }
     void store() {

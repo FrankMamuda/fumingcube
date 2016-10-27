@@ -27,13 +27,13 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "database.h"
 #include "gui_addproperty.h"
 
-/*
-==========
-constructor
-==========
-*/
-Gui_Properties::Gui_Properties( QWidget *parent, const int templateId ) : QMainWindow( parent ), ui( new Ui::Gui_Properties ) {
-    Q_UNUSED( templateId )
+/**
+ * @brief Gui_Properties::Gui_Properties
+ * @param parent
+ * @param reagentId
+ */
+Gui_Properties::Gui_Properties( QWidget *parent, const int reagentId ) : QMainWindow( parent ), ui( new Ui::Gui_Properties ) {
+    Q_UNUSED( reagentId )
 
     this->ui->setupUi( this );
     this->m_model = new PropertiesModel( this->ui->propertiesView );
@@ -45,38 +45,16 @@ Gui_Properties::Gui_Properties( QWidget *parent, const int templateId ) : QMainW
     //
 }
 
-/*
-==========
-destructor
-==========
-*/
-Gui_Properties::~Gui_Properties() {
-    delete this->ui;
-    delete this->m_model;
-}
-
-/*
-==========
-setReagentId
-==========
-*/
-void Gui_Properties::setReagentId( const int reagentId ) {
-    this->m_model->setReagentId( reagentId );
-    //this->ui->propertiesView->reset();
-}
-
-/*
-==========
-addPropertyAction->triggered
-==========
-*/
+/**
+ * @brief Gui_Properties::on_addPropertyAction_triggered
+ */
 void Gui_Properties::on_addPropertyAction_triggered() {
     Gui_Main *gui = qobject_cast<Gui_Main*>( this->parent());
 
     if ( gui != NULL ) {
-        if ( gui->curentTemplate != NULL ) {
+        if ( gui->curentReagent != NULL ) {
             // TODO: handle through reject/accept?
-            Gui_AddProperty addDialog( gui->curentTemplate->id(), this );
+            Gui_AddProperty addDialog( gui->curentReagent->id(), this );
             addDialog.setWindowFlags( this->windowFlags());
 
             switch ( addDialog.exec()) {
@@ -88,16 +66,13 @@ void Gui_Properties::on_addPropertyAction_triggered() {
     }
 }
 
-/*
-==========
-removePropertyAction->triggered
-
-FIXME: add confirmation dialog
-==========
-*/
+/**
+ * @brief Gui_Properties::on_removePropertyAction_triggered
+ */
+// FIXME: add confirmation dialog
 void Gui_Properties::on_removePropertyAction_triggered() {
     Property *propPtr;
-    Template *templatePtr;
+    Reagent *reagentPtr;
     QSqlQuery query;
 
     int row = this->ui->propertiesView->currentIndex().row();
@@ -109,9 +84,9 @@ void Gui_Properties::on_removePropertyAction_triggered() {
         // remove from memory and database
         db.propertyList.removeOne( propPtr );
 
-        templatePtr = Template::fromId( propPtr->reagentId());
-        if ( templatePtr != NULL )
-            templatePtr->propertyList.removeOne( propPtr );
+        reagentPtr = Reagent::fromId( propPtr->reagentId());
+        if ( reagentPtr != NULL )
+            reagentPtr->propertyList.removeOne( propPtr );
 
         query.exec( QString( "delete from properties where id=%1" ).arg( propPtr->id()));
         this->m_model->reset();

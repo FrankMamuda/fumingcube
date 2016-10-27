@@ -27,9 +27,9 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include <QObject>
 #include "entry.h"
 
-//
-// class: Property
-//
+/**
+ * @brief The Property class
+ */
 class Property : public Entry {
     Q_OBJECT
     Q_CLASSINFO( "description", "Property SQL Entry" )

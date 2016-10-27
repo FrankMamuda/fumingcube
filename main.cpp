@@ -32,20 +32,17 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 Main &m = Main::instance();
 
-/*
-==========
-initialise
-==========
-*/
+/**
+ * @brief Main::initialise
+ */
 void Main::initialise() {
     db.load();
 }
 
-/*
-==========
-print
-==========
-*/
+/**
+ * @brief Main::print
+ * @param msg
+ */
 void Main::print( const QString &msg ) {
     QString out = msg;
 
@@ -55,11 +52,11 @@ void Main::print( const QString &msg ) {
     qDebug() << out;
 }
 
-/*
-==========
-error
-==========
-*/
+/**
+ * @brief Main::error
+ * @param type
+ * @param msg
+ */
 void Main::error( ErrorTypes type, const QString &msg ) {
     if ( type == FatalError ) {
         Main::print( QString( "FATAL ERROR: %1" ).arg( msg ));
@@ -69,21 +66,20 @@ void Main::error( ErrorTypes type, const QString &msg ) {
     }
 }
 
-/*
-==========
-shutdown
-==========
-*/
+/**
+ * @brief Main::shutdown
+ */
 void Main::shutdown() {
     db.unload();
     QApplication::quit();
 }
 
-/*
-==========
-entry point
-==========
-*/
+/**
+ * @brief qMain
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main( int argc, char *argv[] ) {
     QApplication a( argc, argv );
     Gui_Main w;

@@ -24,48 +24,35 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 #include "gui_addproperty.h"
 #include "ui_gui_addproperty.h"
 #include "property.h"
-#include "template.h"
+#include "reagent.h"
 #include <QMessageBox>
 
-/*
-==========
-constructor
-==========
-*/
+/**
+ * @brief Gui_AddProperty::Gui_AddProperty
+ * @param reagentId
+ * @param parent
+ */
 Gui_AddProperty::Gui_AddProperty( const int reagentId, QWidget *parent ) : QDialog( parent ), ui( new Ui::Gui_AddProperty ), m_reagentId( -1 ) {
     this->ui->setupUi( this );
     this->m_reagentId = reagentId;
 }
 
-/*
-==========
-destructor
-==========
-*/
-Gui_AddProperty::~Gui_AddProperty() {
-    delete this->ui;
-}
-
-/*
-==========
-buttonBox->accepted
-==========
-*/
+/**
+ * @brief Gui_AddProperty::on_buttonBox_accepted
+ */
 void Gui_AddProperty::on_buttonBox_accepted() {
     if ( this->m_reagentId == -1 )
         return;
-        //this->reject();
 
     if ( this->ui->propertyEdit->text().isEmpty() || this->ui->valueEdit->text().isEmpty()) {
         QMessageBox msgBox;
         msgBox.setWindowFlags( this->windowFlags());
         msgBox.setIcon( QMessageBox::Critical );
-        msgBox.setText( QString( "Empty property and/or value" ));
+        msgBox.setText( this->tr( "Empty property and/or value" ));
         msgBox.exec();
         return;
-        //this->reject();
     }
 
-    if ( Template::fromId( this->m_reagentId ) != NULL )
+    if ( Reagent::fromId( this->m_reagentId ) != NULL )
         Property::add( this->m_reagentId, this->ui->propertyEdit->text(), this->ui->valueEdit->text());
 }

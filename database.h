@@ -26,12 +26,13 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 #include <QString>
 #include <QList>
-#include "template.h"
+#include "reagent.h"
 #include "property.h"
+#include "template.h"
 
-//
-// class: Database
-//
+/**
+ * @brief The Database class
+ */
 class Database : public QObject {
     Q_OBJECT
 
@@ -40,14 +41,15 @@ public:
     void load();
     void unload();
     QString encrypt( const QString &input );
-    QList<Template*> templateList;
+    QList<Reagent*> reagentList;
     QList<Property*> propertyList;
+    QList<Template*> templateList;
 
 private:
     Database() { }
     void create();
     void makePath();
-    void loadTemplates();
+    void loadReagents();
     void loadProperties();
     QString path;
 };

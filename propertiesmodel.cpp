@@ -23,20 +23,22 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 //
 #include "propertiesmodel.h"
 
-/*
-==========
-headerData
-==========
-*/
+/**
+ * @brief PropertiesModel::headerData
+ * @param section
+ * @param orientation
+ * @param role
+ * @return
+ */
 QVariant PropertiesModel::headerData( int section, Qt::Orientation orientation, int role ) const {
     if ( role == Qt::DisplayRole ) {
         if ( orientation == Qt::Horizontal ) {
             switch ( section ) {
             case 0:
-                return QString( "Parameter" );
+                return QObject::tr( "Parameter" );
 
             case 1:
-                return QString( "Value" );
+                return QObject::tr( "Value" );
             }
         }
     }
@@ -44,20 +46,21 @@ QVariant PropertiesModel::headerData( int section, Qt::Orientation orientation, 
     return QVariant();
 }
 
-/*
-==========
-data
-==========
-*/
+/**
+ * @brief PropertiesModel::data
+ * @param index
+ * @param role
+ * @return
+ */
 QVariant PropertiesModel::data( const QModelIndex &index, int role ) const {
     if ( this->m_reagentId == -1 )
         return QVariant();
 
-    Template *templatePtr = Template::fromId( this->m_reagentId );
-    if ( templatePtr == NULL )
+    Reagent *reagentPtr = Reagent::fromId( this->m_reagentId );
+    if ( reagentPtr == NULL )
         return QVariant();
 
-    Property *propPtr = templatePtr->propertyList.at( index.row());
+    Property *propPtr = reagentPtr->propertyList.at( index.row());
     if ( propPtr == NULL )
         return QVariant();
 
@@ -74,18 +77,17 @@ QVariant PropertiesModel::data( const QModelIndex &index, int role ) const {
     return QVariant();
 }
 
-/*
-==========
-rowCount
-==========
-*/
+/**
+ * @brief PropertiesModel::rowCount
+ * @return
+ */
 int PropertiesModel::rowCount( const QModelIndex & ) const {
     if ( this->m_reagentId == -1 )
         return 0;
 
-    Template *templatePtr = Template::fromId( this->m_reagentId );
-    if ( templatePtr != NULL )
-        return templatePtr->propertyList.count();
+    Reagent *reagentPtr = Reagent::fromId( this->m_reagentId );
+    if ( reagentPtr != NULL )
+        return reagentPtr->propertyList.count();
 
     return 0;
 }

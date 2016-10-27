@@ -18,41 +18,38 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 ===========================================================================
 */
 
-#ifndef PROPERTIESMODEL
-#define PROPERTIESMODEL
+#ifndef GUI_ADDREAGENT_H
+#define GUI_ADDREAGENT_H
 
 //
 // includes
 //
-#include <QAbstractTableModel>
-#include "reagent.h"
+#include <QDialog>
+#include "ui_gui_addreagent.h"
+
+//
+// namespace: Ui
+//
+namespace Ui {
+class Gui_AddReagent;
+}
 
 /**
- * @brief The PropertiesModel class
+ * @brief The Gui_AddReagent class
  */
-class PropertiesModel : public QAbstractTableModel {
+class Gui_AddReagent : public QDialog {
     Q_OBJECT
 
 public:
-    PropertiesModel( QObject *parent ) : QAbstractTableModel( parent ), m_reagentId( -1 ) {}
-    int rowCount( const QModelIndex & = QModelIndex()) const;
-    int columnCount( const QModelIndex & = QModelIndex()) const { return 2; }
-    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-    QVariant headerData( int section, Qt::Orientation orientation, int role ) const;
+    explicit Gui_AddReagent( QWidget *parent = 0 ) : QDialog( parent ), ui( new Ui::Gui_AddReagent ) { this->ui->setupUi( this ); }
+    ~Gui_AddReagent() { delete this->ui; }
 
-public slots:
-    void setReagentId( const int reagentId = -1 ) {
-        this->m_reagentId = reagentId;
-        this->reset();
-    }
-    void reset() {
-        this->beginResetModel();
-        this->endResetModel();
-    }
+private slots:
+    void on_buttonBox_accepted();
+    void on_buttonBox_rejected() {}
 
 private:
-    int m_reagentId;
+    Ui::Gui_AddReagent *ui;
 };
 
-#endif // PROPERTIESMODEL
-
+#endif // GUI_ADDREAGENT_H

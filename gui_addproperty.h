@@ -25,6 +25,7 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 // includes
 //
 #include <QDialog>
+#include "ui_gui_addproperty.h"
 
 //
 // namespace: Ui
@@ -33,15 +34,15 @@ namespace Ui {
 class Gui_AddProperty;
 }
 
-//
-// class: AddProperty (ui)
-//
+/**
+ * @brief The Gui_AddProperty class
+ */
 class Gui_AddProperty : public QDialog {
     Q_OBJECT
 
 public:
     explicit Gui_AddProperty( const int reagentId, QWidget *parent = 0 );
-    ~Gui_AddProperty();
+    ~Gui_AddProperty() { delete this->ui; }
 
 private slots:
     void on_buttonBox_accepted();
