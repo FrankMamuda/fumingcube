@@ -1,77 +1,44 @@
 /*
-===========================================================================
-Copyright (C) 2016 Avotu Briezhaudzetava
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-===========================================================================
-*/
+ * Copyright (C) 2017 Factory #12
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/.
+ *
+ */
 
 //
 // includes
 //
-#include "main.h"
-#include "gui_main.h"
-#include <QApplication>
+#include "mainwindow.h"
 #include "database.h"
+#include <QApplication>
 #include <QDebug>
 
-//
-// singleton: Main
-//
-Main &m = Main::instance();
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
 
 /**
- * @brief Main::initialise
- */
-void Main::initialise() {
-    db.load();
-}
-
-/**
- * @brief Main::print
- * @param msg
- */
-void Main::print( const QString &msg ) {
-    QString out = msg;
-
-    if ( msg.endsWith( "\n" ))
-        out = msg.left( msg.length()-1 );
-
-    qDebug() << out;
-}
-
-/**
- * @brief Main::error
+ * @brief messageFilter
  * @param type
+ * @param context
  * @param msg
  */
-void Main::error( ErrorTypes type, const QString &msg ) {
-    if ( type == FatalError ) {
-        Main::print( QString( "FATAL ERROR: %1" ).arg( msg ));
-        Main::shutdown();
-    } else {
-        Main::print( QString( "ERROR: %1" ).arg( msg ));
-    }
-}
+void messageFilter( QtMsgType type, const QMessageLogContext &context, const QString &msg ) {
+    (*QT_DEFAULT_MESSAGE_HANDLER)( type, context, msg );
 
-/**
- * @brief Main::shutdown
- */
-void Main::shutdown() {
-    db.unload();
-    QApplication::quit();
+    if ( type == QtFatalMsg ) {
+        QApplication::quit();
+        exit( 0 );
+    }
 }
 
 /**
@@ -81,9 +48,21 @@ void Main::shutdown() {
  * @return
  */
 int main( int argc, char *argv[] ) {
+    // set console output pattern
+    qSetMessagePattern( "%{if-category}%{category}: %{endif}%{function}: %{message}" );
+
+    // log to file in non-qtcreator environment
+    qInstallMessageHandler( messageFilter );
+
     QApplication a( argc, argv );
-    Gui_Main w;
+    MainWindow w;
     w.show();
+
+    //QThread *thread = new QThread;
+    //Database::instance()->moveToThread( thread );
+    //thread->start();
+    //thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
+    Database::instance()->load();
 
     return a.exec();
 }

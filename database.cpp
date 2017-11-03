@@ -1,196 +1,226 @@
 /*
-===========================================================================
-Copyright (C) 2016 Avotu Briezhaudzetava
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-===========================================================================
-*/
+ * Copyright (C) 2017 Factory #12
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/.
+ *
+ */
 
 //
 // includes
 //
 #include "database.h"
-#include <QFileInfo>
+#include "template.h"
+#include <QDebug>
 #include <QDir>
-#include <QCryptographicHash>
 #include <QSqlQuery>
 #include <QSqlError>
 
-//
-// singleton: Database
-//
-Database &db = Database::instance();
-
 /**
- * @brief Database::makePath
+ * @brief Database::Database
+ * @param parent
  */
-void Database::makePath() {
-    QString path;
+Database::Database( QObject *parent ) : QObject( parent ) {
+    QDir directory;
+    QFile file;
+    QString filename;
+    QSqlDatabase database( QSqlDatabase::database());
 
-    // default path?
-#ifdef Q_OS_UNIX
-    path = QString( QDir::homePath() + "/.fumingcube/" );
+    // set default path
+#ifdef QT_DEBUG
+    this->setPath( QDir::home().absolutePath() + "/.fumingCubeDebug" );
 #else
-    path = QString( QDir::currentPath() + "/" );
+    this->setPath( QDir::home().absolutePath() + "/.fumingCube" );
 #endif
-    path.append( "data.db" );
+    directory.setPath( this->path());
 
-    // make path id nonexistant
-    QFileInfo db( path );
-    QDir dir;
-    dir.setPath( db.absolutePath());
+    // check if cache dir exists
+    if ( !directory.exists()) {
+        qInfo() << this->tr( "creating non-existant database dir" );
+        directory.mkpath( this->path());
 
-    if ( !dir.exists()) {
-        dir.mkpath( db.absolutePath());
-        if ( !dir.exists())
-            Main::error( Main::FatalError, ClassFunc + QObject::tr( "could not create database path - '%1'\n" ).arg( path ));
+        // additional failsafe
+        if ( !directory.exists()) {
+            qFatal( this->tr( "unable to create database dir" ).toUtf8().constData());
+        }
     }
 
-    // store path
-    this->path = path;
-    this->path.replace( "//", "/" );
+    // failafe
+    filename = QString( this->path() + "/database.db" );
+    file.setFileName( filename );
+    if ( !file.exists()) {
+        file.open( QFile::WriteOnly );
+        file.close();
+        qInfo() << this->tr( "creating non-existant database" );
+
+        if ( !file.exists())
+            qFatal( this->tr( "unable to create database file" ).toUtf8().constData());
+    }
+
+    // announce
+    qInfo() << this->tr( "loading database" );
+
+    // failsafe
+    if ( !database.isDriverAvailable( "QSQLITE" ))
+        qFatal( this->tr( "sqlite not present on the system" ).toUtf8().constData());
+
+    // set sqlite driver
+    database = QSqlDatabase::addDatabase( "QSQLITE" );
+    database.setHostName( "localhost" );
+    database.setDatabaseName( filename );
+
+    // set path and open
+    if ( !database.open())
+        qFatal( this->tr( "could not load database" ).toUtf8().constData());
+
+    // create initial table structure (if non-existant)
+    if ( !this->createStructure())
+        qFatal( this->tr( "could not create internal database structure" ).toUtf8().constData());
+
+    // load entries
+
+    qDebug() << "done";
 }
 
 /**
- * @brief Database::create
+ * @brief Database::createStructure
+ * @return
  */
-void Database::create() {
-    // create query
+bool Database::createStructure() {
+    unsigned int y, k;
     QSqlQuery query;
+    QSqlDatabase database( QSqlDatabase::database());
+    QStringList tables( database.tables());
+    bool mismatch = false;
 
-    // failafe
-    QFile database( this->path );
-    if ( !database.exists())
-        Main::error( Main::FatalError, ClassFunc + QString( "unable to create database file\n" ));
+    // announce
+    if ( !tables.count())
+        qInfo() << this->tr( "creating an empty database" );
+
+    // validate schema
+    for ( y = 0; y < API::numTables; y++ ) {
+        table_t table = API::tables[y];
+
+        foreach ( QString tableName, tables ) {
+            if ( !QString::compare( table.name, tableName, Qt::CaseInsensitive )) {
+                for ( k = 0; k < table.numFields; k++ ) {
+                    if ( !database.record( table.name ).contains( table.fields[k].name ))
+                        mismatch = true;
+                }
+            }
+        }
+    }
+
+    // failure
+    if ( mismatch ) {
+        qCritical( this->tr( "database API mismatch" ).toUtf8().constData());
+        return false;
+    }
 
     // create initial table structure (if non-existant)
-    if ( !query.exec( QString( "create table if not exists reagents ( id integer primary key, name varchar( 128 ), amount float, density float, assay float, molarMass float, state integer )" )) ||
-         !query.exec( QString( "create table if not exists properties ( id integer primary key, reagentId integer, property varchar( 64 ), value varchar( 128 ))" )))
-        Main::error( Main::FatalError, ClassFunc + QString( "could not create internal database structure, reason - '%1'\n" ).arg( query.lastError().text()));
+    return Database::createEmptyTable();
+}
+
+/**
+ * @brief Database::~Database
+ */
+Database::~Database() {
+    QString connectionName;
+    bool open = false;
+
+    // announce
+    qInfo() << this->tr( "unloading database" );
+
+    // close database if open and delete orphaned logs on shutdown
+    // according to Qt5 documentation, this must be out of scope
+    {
+        QSqlDatabase database( QSqlDatabase::database());
+        if ( database.isOpen()) {
+            open = true;
+            this->removeOrphanedEntries();
+            connectionName = database.connectionName();
+            database.close();
+        }
+    }
+
+    // only now we can sever the connection completely
+    if ( open )
+        QSqlDatabase::removeDatabase( connectionName );
 }
 
 /**
  * @brief Database::load
  */
 void Database::load() {
-    // make path
-    this->makePath();
-
-    // create database
-    QFile databaseFile( this->path );
-    QFileInfo databaseInfo( databaseFile );
-    QSqlDatabase database = QSqlDatabase::database();
-
-    // announce
-    Main::print( ClassFunc + QString( "loading database '%1'\n" ).arg( this->path ));
-
-    // failsafe
-    if ( !database.isDriverAvailable( "QSQLITE" ))
-        Main::error( Main::FatalError, ClassFunc + QString( "sqlite not present on the system\n" ));
-
-    // set sqlite driver
-    database = QSqlDatabase::addDatabase( "QSQLITE" );
-    database.setHostName( "localhost" );
-    database.setDatabaseName( this->path );
-
-    // touch file if empty
-    if ( !databaseFile.exists()) {
-        databaseFile.open( QFile::WriteOnly );
-        databaseFile.close();
-        Main::print( ClassFunc + ClassFunc + QString( "creating non-existant database - '%1'\n" ).arg( databaseInfo.fileName()));
-    }
-
-    // set path and open
-    if ( !database.open())
-        Main::error( Main::FatalError, ClassFunc + QString( "could not load database - '%1'\n" ).arg( databaseInfo.fileName()));
-
-    // create database
-    this->create();
-
-    /* delete orphaned entries */
-    /* load reagents */
-    this->loadReagents();
-    this->loadProperties();
+    Reagent::load();
+    Template::load();
+    emit this->changed();
 }
 
 /**
- * @brief Database::unload
+ * @brief Database::generateSchemas
+ * @return
  */
-void Database::unload() {
-    QString connectionName;
-    bool open = false;
+QStringList Database::generateSchemas() {
+    unsigned int y, k;
+    QStringList schemas;
 
-    // announce
-    Main::print( ClassFunc + QString( "unloading database\n" ));
+    for ( y = 0; y < API::numTables; y++ ) {
+        table_t api = API::tables[y];
+        QString schema = QString( "create table if not exists %1 ( " ).arg( api.name );
 
-    // close database if open and delete orphaned logs on shutdown
-    // according to Qt5 documentation, this must be out of scope
-    {
-        QSqlDatabase database = QSqlDatabase::database();
-        if ( database.isOpen()) {
-            open = true;
-            /* delete orphaned entries */
-            connectionName = database.connectionName();;
-            database.close();
+        for ( k = 0; k < api.numFields; k++ ) {
+            tableField_t apif = api.fields[k];
+            schema.append( QString( "%1 %2" ).arg( apif.name ).arg( apif.type ));
 
+            if ( k == api.numFields - 1 )
+                schema.append( " )" );
+            else
+                schema.append( " ," );
         }
+        schemas << schema;
     }
-
-    // only now we can remove the connection completely
-    if ( open )
-        QSqlDatabase::removeDatabase( connectionName );
+    return schemas;
 }
 
 /**
- * @brief Database::loadReagents
+ * @brief Database::createEmptyTable
+ * @return
  */
-void Database::loadReagents() {
+bool Database::createEmptyTable() {
     QSqlQuery query;
+    QStringList schemas;
 
-    // announce
-    Main::print( ClassFunc + "loading reagents from database\n" );
-
-    // read all reagent entries
-    query.exec( "select * from reagents order by name asc;" );
-
-    // store entries in memory
-    while ( query.next())
-        this->reagentList << new Reagent( query.record());
+    // get schemas
+    schemas = this->generateSchemas();
+    foreach ( QString schema, schemas ) {
+        if ( !query.exec( schema ))
+            qFatal( this->tr( "could not create internal database structure, reason - '%1'" ).arg( query.lastError().text()).toUtf8().constData());
+    }
+    return true;
 }
 
 /**
- * @brief Database::loadProperties
+ * @brief Database::removeOrphanedEntries
  */
-void Database::loadProperties() {
+void Database::removeOrphanedEntries() {
     QSqlQuery query;
 
     // announce
-    Main::print( ClassFunc + "loading properties from database\n" );
+    qInfo() << this->tr( "removing orphaned logs" );
 
-    // read all property entries
-    query.exec( "select * from properties order by property asc;" );
-
-    // store entries in memory
-    while ( query.next()) {
-        Property *propPtr = new Property( query.record());
-        this->propertyList << propPtr;
-
-        Reagent *reagentPtr = Reagent::fromId( propPtr->reagentId());
-
-        // TODO: delete orphan
-        if ( reagentPtr != NULL )
-            reagentPtr->propertyList << propPtr;
-    }
+    // remove orphaned logs (hard coded for now)
+    if ( !query.exec( "delete from templates where reagentId not in ( select id from reagents )" ) ||
+         !query.exec( "delete from properties where templateId not in ( select id from templates )" ))
+        qCritical() << this->tr( "could not delete orphaned logs, reason: '%1'" ).arg( query.lastError().text());
 }

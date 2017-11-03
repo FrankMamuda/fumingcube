@@ -1,34 +1,92 @@
 /*
-===========================================================================
-Copyright (C) 2016 Avotu Briezhaudzetava
+ * Copyright (C) 2017 Factory #12
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/.
+ *
+ */
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-===========================================================================
-*/
-
-#ifndef DATABASE_H
-#define DATABASE_H
+#pragma once
 
 //
 // includes
 //
-#include <QString>
-#include <QList>
 #include "reagent.h"
-#include "property.h"
+#include "singleton.h"
 #include "template.h"
+#include <QMap>
+
+//
+// classes
+//
+class Template;
+class Reagent;
+
+/**
+ * @brief The tableField struct
+ */
+typedef struct tableField_s {
+    const char *name;
+    const char *type;
+} tableField_t;
+
+/**
+ * @brief The table struct
+ */
+typedef struct table_s {
+    const char *name;
+    const tableField_t *fields;
+    const unsigned int numFields;
+} table_t;
+
+/**
+ * @brief The API namespace
+ */
+namespace API {
+// tasks
+const static tableField_t templateFields[] = {
+    { "id", "integer primary key" },
+    { "name", "varchar( 128 )" },
+    { "amount", "float" },
+    { "density", "float" },
+    { "assay", "float" },
+    { "molarMass", "float" },
+    { "state", "integer" },
+    { "reagentId", "integer" },
+};
+
+// properties
+const static tableField_t propertyFields[] = {
+    { "id", "integer primary key" },
+    { "name", "varchar( 128 )" },
+    { "value", "varchar( 128 )" },
+    { "templateId", "integer" }
+};
+
+// reagents
+const static tableField_t reagentFields[] = {
+    { "id", "integer primary key" },
+    { "name", "varchar( 128 )" },
+};
+
+// tables
+const static table_t tables[] = {
+    { "templates",   templateFields, sizeof( templateFields ) / sizeof( tableField_t ) },
+    { "properties",  propertyFields, sizeof( propertyFields ) / sizeof( tableField_t ) },
+    { "reagents",    reagentFields,  sizeof( reagentFields )  / sizeof( tableField_t ) },
+};
+const unsigned int numTables = sizeof( tables ) / sizeof( table_t );
+}
 
 /**
  * @brief The Database class
@@ -37,26 +95,28 @@ class Database : public QObject {
     Q_OBJECT
 
 public:
-    static Database &instance() { static Database *instance = new Database(); return *instance; }
+    static Database *instance() { return Singleton<Database>::instance( Database::createInstance ); }
+    ~Database();
+    QString path() const { return this->m_path; }
+    QMap<int, Reagent*> reagentMap;
+    QMap<int, Template*> templateMap;
+
+signals:
+    void changed();
+
+public slots:
+    void update() { emit this->changed(); }
     void load();
-    void unload();
-    QString encrypt( const QString &input );
-    QList<Reagent*> reagentList;
-    QList<Property*> propertyList;
-    QList<Template*> templateList;
+
+private slots:
+    void setPath( const QString &path ) { this->m_path = path; }
+    void removeOrphanedEntries();
 
 private:
-    Database() { }
-    void create();
-    void makePath();
-    void loadReagents();
-    void loadProperties();
-    QString path;
+    explicit Database( QObject *parent = nullptr );
+    static Database *createInstance() { return new Database(); }
+    QString m_path;
+    QStringList generateSchemas();
+    bool createEmptyTable();
+    bool createStructure();
 };
-
-//
-// externals
-//
-extern Database &db;
-
-#endif // DATABASE_H

@@ -21,28 +21,27 @@
 //
 // includes
 //
-#include "entry.h"
+#include <QMainWindow>
 
-//
-// classes
-//
-class Template;
+namespace Ui {
+class MainWindow;
+}
 
 /**
- * @brief The Reagent class
+ * @brief The MainWindow class
  */
-class Reagent : public Entry {
+class MainWindow : public QMainWindow {
     Q_OBJECT
-    Q_DISABLE_COPY( Reagent )
-    Q_CLASSINFO( "description", "Reagent SQL Entry" )
 
 public:
-    explicit Reagent( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "reagents" ); }
-    ~Reagent() {}
-    QList<Template*> templateList;
+    explicit MainWindow( QWidget *parent = nullptr );
+    ~MainWindow();
 
-    // static functions
-    static Reagent *fromId( int id );
-    static Reagent *add( const QString &name );
-    static void load();
+private slots:
+    void on_actionAdd_triggered();
+    void fillTemplates();
+    void calculate();
+
+private:
+    Ui::MainWindow *ui;
 };

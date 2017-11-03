@@ -21,28 +21,40 @@
 //
 // includes
 //
-#include "entry.h"
+#include <QDialog>
+#include <QToolButton>
+
+/**
+ * @brief The Ui namespace
+ */
+namespace Ui {
+class ReagentDialog;
+}
 
 //
 // classes
 //
-class Template;
+class TemplateWidget;
 
 /**
- * @brief The Reagent class
+ * @brief The ReagentDialog class
  */
-class Reagent : public Entry {
+class ReagentDialog : public QDialog {
     Q_OBJECT
-    Q_DISABLE_COPY( Reagent )
-    Q_CLASSINFO( "description", "Reagent SQL Entry" )
 
 public:
-    explicit Reagent( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "reagents" ); }
-    ~Reagent() {}
-    QList<Template*> templateList;
+    explicit ReagentDialog( QWidget *parent = nullptr );
+    ~ReagentDialog();
 
-    // static functions
-    static Reagent *fromId( int id );
-    static Reagent *add( const QString &name );
-    static void load();
+public slots:
+    void add();
+
+private slots:
+    void addNewTab();
+    void on_tabWidget_tabCloseRequested( int index );
+
+private:
+    Ui::ReagentDialog *ui;
+    QToolButton *newTab;
+    QList<TemplateWidget*> widgetList;
 };

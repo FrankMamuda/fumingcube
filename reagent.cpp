@@ -1,67 +1,29 @@
 /*
-===========================================================================
-Copyright (C) 2016 Avotu Briezhaudzetava
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-===========================================================================
-*/
-
-#include "reagent.h"
-#include <QSqlQuery>
-#include <QSqlError>
-#include "database.h"
-
-/**
- * @brief Reagent::add
- * @param name
- * @param amount
- * @param density
- * @param assay
- * @param molarMass
- * @param state
+ * Copyright (C) 2017 Factory #12
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/.
+ *
  */
-void Reagent::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state ) {
-    QSqlQuery query;
 
-    query.prepare( QString( "insert into reagents values ( null, :name, :amount, :density, :assay, :molarMass, :state )" ));
-    query.bindValue( ":name", name );
-    query.bindValue( ":amount", amount );
-    query.bindValue( ":density", density );
-    query.bindValue( ":assay", assay );
-    query.bindValue( ":molarMass", molarMass );
-    query.bindValue( ":state", state );
-
-    // TODO: eventually drop all properties in favour of templates
-    //
-    // reagent (NaOH)
-    //     -template (solid) - 40 g/mol, etc., etc. (named <default> on addition)
-    //     -template (20% solution)
-    //     -template (40% solution)
-    //
-
-    if ( !query.exec()) {
-        Main::error( Main::SoftError, QString( "Reagent::add: could not add reagent, reason - '%1'\n" ).arg( query.lastError().text()));
-        return;
-    }
-
-    query.exec( QString( "select * from reagents where id=%1" ).arg( query.lastInsertId().toInt()));
-    while ( query.next()) {
-        db.reagentList << new Reagent( query.record());
-        break;
-    }
-}
+//
+// includes
+//
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QDebug>
+#include "reagent.h"
+#include "database.h"
 
 /**
  * @brief Reagent::fromId
@@ -69,9 +31,58 @@ void Reagent::add( const QString &name, const double amount, const double densit
  * @return
  */
 Reagent *Reagent::fromId( int id ) {
-    foreach ( Reagent *reagentPtr, db.reagentList ) {
-        if ( reagentPtr->id() == id )
-            return reagentPtr;
+    if ( Database::instance()->reagentMap.contains( id ))
+        return Database::instance()->reagentMap[id];
+
+    return nullptr;
+}
+
+/**
+ * @brief Reagent::add
+ * @param name
+ */
+Reagent *Reagent::add( const QString &name ) {
+    QSqlQuery query;
+    Reagent *reagent = nullptr;
+
+    // prepare statement
+    query.prepare( QString( "insert into reagents values ( null, :name )" ));
+    query.bindValue( ":name", name );
+
+    // excecute statement
+    if ( !query.exec()) {
+        qCritical() << QObject::tr( "could not add reagent, reason - '%1'" ).arg( query.lastError().text());
+        return reagent;
     }
-    return NULL;
+
+    // select the newly created entry and store in memory
+    query.exec( QString( "select * from reagents where id=%1" ).arg( query.lastInsertId().toInt()));
+    if ( query.next()) {
+        reagent = new Reagent( query.record());
+        Database::instance()->reagentMap[reagent->id()] = reagent;
+    }
+
+    return reagent;
+}
+
+/**
+ * @brief Reagent::load
+ */
+void Reagent::load() {
+    QSqlQuery query;
+
+    // announce
+    qInfo() << QObject::tr( "loading reagents from database" );
+
+    // read all reagent entries
+    if ( !query.exec( "select * from reagents order by name asc;" ))
+        qCritical() << query.lastError().text();
+
+    // store entries in memory
+    while ( query.next()) {
+        Reagent *reagent;
+
+        reagent = new Reagent( query.record());
+        Database::instance()->reagentMap[reagent->id()] = reagent;
+    }
 }
