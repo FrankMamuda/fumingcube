@@ -20,6 +20,7 @@
 // includes
 //
 #include <QDebug>
+#include <QMessageBox>
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
 #include "templatewidget.h"
@@ -31,7 +32,7 @@
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )) {
+ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ) {
     // set up ui
     this->ui->setupUi(this);
 
@@ -40,6 +41,7 @@ ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui:
     this->newTab->setCursor( Qt::ArrowCursor );
     this->newTab->setAutoRaise( true );
     this->newTab->setToolTip( this->tr( "Add additional template" ));
+    this->newTab->setText( "+" );
     // this->newTab->setIcon( QIcon( "..." ));
     QObject::connect( this->newTab, &QToolButton::clicked, [this]() {
         this->addNewTab();
@@ -84,8 +86,20 @@ ReagentDialog::~ReagentDialog() {
 void ReagentDialog::add() {
     int y;
     Reagent *reagent;
+    QString name( this->ui->nameEdit->text());
 
-    reagent = Reagent::add( this->ui->nameEdit->text());
+    // TODO: catch these before close??
+    if ( name.isEmpty()) {
+        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "No reagent name specified" ));
+        return;
+    }
+
+    if ( Reagent::contains( name )) {
+        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "Reagent already exists in database" ));
+        return;
+    }
+
+    reagent = Reagent::add( name );
     if ( reagent == nullptr )
         return;
 
@@ -97,6 +111,23 @@ void ReagentDialog::add() {
     }
 
     Database::instance()->update();
+}
+
+/**
+ * @brief ReagentDialog::setReagent
+ * @param reagent
+ */
+void ReagentDialog::setReagent(Reagent *reagent) {
+    if ( reagent == nullptr )
+        return;
+
+    this->reagent = reagent;
+    this->setMode( Edit );
+
+    /*
+     LOAD DATA
+
+    */
 }
 
 /**

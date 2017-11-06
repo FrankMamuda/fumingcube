@@ -20,12 +20,14 @@
 // includes
 //
 #include <QDebug>
+#include <QApplication>
+#include <QClipboard>
 #include "lineedit.h"
 
 /**
  * @brief LineEdit::LineEdit
  */
-LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ) {
+LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_current{ "", "" }, m_default{ "", "" }, m_mode( NoMode ) {
     this->setAlignment( Qt::AlignHCenter );
 
     // as-you-type validation
@@ -51,9 +53,13 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ) {
 
             // all ok
             this->setStyleSheet( "QLineEdit {}" );
+
+            // display amount in default units
+            this->displayToolTips();
         } else {
             // paint background red to indicate an invalid input
             this->setStyleSheet( "QLineEdit { background-color: #ff9999; }" );
+            this->setToolTip( "could not parse input" );
         }
     } );
 
@@ -66,11 +72,50 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ) {
         if ( re.indexIn( this->text()) == -1 )
             return;
 
-        if ( this->units[Secondary].isEmpty())
-            this->setText( QString( "%1 %2" ).arg( QString::number( this->value())).arg( this->currentUnits()));
-        else
-            this->setText( QString( "%1 %2/%3" ).arg( QString::number( this->value())).arg( this->currentUnits()).arg( this->currentUnits( Secondary )));
+        this->displayValue();
     } );
+}
+
+/**
+ * @brief LineEdit::multiplier
+ * @return
+ */
+qreal LineEdit::multiplier() const {
+    bool primary = false, secondary = false;
+    qreal value = 0.0;
+
+    if ( this->units[Primary].contains( this->currentUnits( Primary )))
+        primary = true;
+
+    if ( this->units[Secondary].contains( this->currentUnits( Secondary )))
+        secondary = true;
+
+    if ( primary && !secondary )
+        value = this->units[Primary][this->currentUnits( Primary )];
+    else if ( primary && secondary )
+        value = this->units[Primary][this->currentUnits( Primary )] / this->units[Secondary][this->currentUnits( Secondary )];
+
+    return value;
+}
+
+/**
+ * @brief LineEdit::setValue
+ * @param value
+ */
+void LineEdit::setValue( qreal value ) {
+    if ( !qFuzzyCompare( this->value(), value )) {
+        this->m_value = value;
+        emit this->valueChanged();
+    }
+}
+
+/**
+ * @brief LineEdit::setScaledValue
+ * @param value
+ */
+void LineEdit::setScaledValue( qreal value ) {
+    this->setValue( value / this->multiplier());
+    this->displayValue();
 }
 
 /**
@@ -98,6 +143,7 @@ void LineEdit::setUnits( const QStringList &names, const QList<qreal> multiplier
 
     // set the first entry as current
     this->setCurrentUnits( names.first(), dest );
+    this->m_default[dest] = names.first();
 }
 
 /**
@@ -113,4 +159,84 @@ void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest ) {
     // match and set current units
     if ( this->units[dest].contains( name ))
         this->m_current[dest] = name;
+}
+
+/**
+ * @brief LineEdit::displayValue
+ */
+void LineEdit::displayValue( bool fullPrecision ) {
+    int digits = 2;
+
+    if ( !fullPrecision ) {
+        switch ( this->mode()) {
+        case Volume:
+        case Mass:
+            digits = 1;
+            break;
+
+        case Assay:
+        case Pure:
+        case Density:
+        case MolarMass:
+            digits = 2;
+            break;
+
+        case Mol:
+            digits = 3;
+            break;
+
+        case NoMode:
+            break;
+        }
+    }
+
+    if ( this->units[Secondary].isEmpty())
+        this->setText( QString( "%1 %2" ).arg( fullPrecision ? QString::number( this->value()) : QString::number( this->value(), 'f', digits )).arg( this->currentUnits()));
+    else
+        this->setText( QString( "%1 %2/%3" ).arg( fullPrecision ? QString::number( this->value()) : QString::number( this->value(), 'f', digits )).arg( this->currentUnits()).arg( this->currentUnits( Secondary )));
+
+    if ( this->mode() == Assay )
+        this->setText( this->text().remove( " " ));
+
+    this->displayToolTips();
+}
+
+/**
+ * @brief LineEdit::displayToolTips
+ */
+void LineEdit::displayToolTips() {
+    if ( this->units[Secondary].isEmpty())
+        this->setToolTip( QString( "%1 %2" ).arg( QString::number( this->scaledValue())).arg( this->defaultUnits( Primary )));
+    else
+        this->setToolTip( QString( "%1 %2/%3" ).arg( QString::number( this->scaledValue())).arg( this->defaultUnits( Primary )).arg( this->defaultUnits( Secondary )));
+}
+
+/**
+ * @brief LineEdit::enterEvent
+ * @param event
+ */
+void LineEdit::focusInEvent( QFocusEvent *event ) {
+    if ( !this->isReadOnly()) {
+        this->blockSignals( true );
+        this->displayValue( true );
+        this->blockSignals( false );
+    }
+
+    QLineEdit::focusInEvent( event );
+}
+
+/**
+ * @brief LineEdit::copy
+ */
+void LineEdit::copy() {
+    qApp->clipboard()->setText( QString::number( this->value()));
+}
+
+/**
+ * @brief LineEdit::cut
+ */
+void LineEdit::cut() {
+    this->copy();
+    this->setValue( 0.0 );
+    this->clear();
 }

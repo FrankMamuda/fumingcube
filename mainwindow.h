@@ -22,10 +22,19 @@
 // includes
 //
 #include <QMainWindow>
+#include <QSignalMapper>
 
+/**
+ * @brief The Ui namespace
+ */
 namespace Ui {
 class MainWindow;
 }
+
+//
+// classes
+//
+class LineEdit;
 
 /**
  * @brief The MainWindow class
@@ -40,8 +49,12 @@ public:
 private slots:
     void on_actionAdd_triggered();
     void fillTemplates();
-    void calculate();
+    void calculate( int mode );
+
+    void on_actionEdit_triggered();
 
 private:
     Ui::MainWindow *ui;
+    QList<LineEdit*> inputList;
+    QSignalMapper *signalMapper;
 };

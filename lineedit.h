@@ -27,15 +27,20 @@
 class LineEdit : public QLineEdit {
     Q_OBJECT
     Q_ENUMS( Modes )
-    // props!!!
+    Q_ENUMS( Units )
+    // TODO: props!!!
 
 public:
     enum Modes {
         NoMode = -1,
         Mass,
         MolarMass,
+        Mol,
         Density,
-        Assay
+        Assay,
+        Pure,
+        Volume,
+        Amount
     };
 
     enum Units {
@@ -47,17 +52,35 @@ public:
     explicit LineEdit( QWidget *parent = nullptr );
     QString pattern() const { return this->m_pattern; }
     qreal value() const { return this->m_value; }
+    qreal scaledValue() const { return this->value() * this->multiplier(); }
+    qreal multiplier() const;
     QString currentUnits( Units dest = Primary ) const { return this->m_current[dest]; }
+    QString defaultUnits( Units dest = Primary ) const { return this->m_default[dest]; }
+    Modes mode() const { return this->m_mode; }
+
+signals:
+    void valueChanged();
 
 public slots:
     void setPattern( const QString &pattern ) { this->m_pattern = pattern; }
-    void setValue( qreal value = 0.0 ) { this->m_value = value; }
+    void setValue( qreal value = 0.0 );
+    void setScaledValue( qreal value = 0.0 );
     void setUnits( const QStringList &names, const QList<qreal> multipliers, Units dest = Primary );
     void setCurrentUnits( const QString &name, Units dest = Primary );
+    void setMode( Modes mode ) { this->m_mode = mode; }
+    void displayValue( bool fullPrecision = false );
+    void displayToolTips();
+    void copy();
+    void cut();
+
+protected:
+    void focusInEvent( QFocusEvent *event );
 
 private:
     QString m_pattern;
     qreal m_value;
     QMap<QString, qreal> units[2];
     QString m_current[2];
+    QString m_default[2];
+    Modes m_mode;
 };

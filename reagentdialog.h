@@ -35,19 +35,29 @@ class ReagentDialog;
 // classes
 //
 class TemplateWidget;
+class Reagent;
 
 /**
  * @brief The ReagentDialog class
  */
 class ReagentDialog : public QDialog {
     Q_OBJECT
+    Q_ENUMS( Modes )
 
 public:
+    enum Modes {
+        NoMode = -1,
+        Add,
+        Edit
+    };
     explicit ReagentDialog( QWidget *parent = nullptr );
     ~ReagentDialog();
+    Modes mode() const { return this->m_mode; }
 
 public slots:
     void add();
+    void setMode( Modes mode ) { this->m_mode = mode; }
+    void setReagent( Reagent *reagent );
 
 private slots:
     void addNewTab();
@@ -57,4 +67,6 @@ private:
     Ui::ReagentDialog *ui;
     QToolButton *newTab;
     QList<TemplateWidget*> widgetList;
+    Modes m_mode;
+    Reagent *reagent;
 };

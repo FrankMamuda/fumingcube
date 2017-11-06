@@ -49,6 +49,32 @@ TemplateWidget::TemplateWidget( QWidget *parent ) : QWidget( parent ), ui( new U
     this->connect( this->ui->propsButton, &QPushButton::clicked, [ this ]() {
         qDebug() << "open props dialog";
     } );
+
+
+    //
+    // TODO: move these to LineEdit::setMode
+    //
+    this->ui->amountEdit->setMode( LineEdit::Amount );
+    this->ui->amountEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(g|mg|kg|ul|ml|l|cm3|m3|cm³|m³)?[\\s|\\n]*$" );
+    this->ui->amountEdit->setUnits( QString( "g,mg,kg,ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
+    this->ui->amountEdit->setScaledValue( 1.0 );
+
+    this->ui->densityEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm³|m³))?[\\s|\\n]*$" );
+    this->ui->densityEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+    this->ui->densityEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
+    this->ui->densityEdit->setMode( LineEdit::Density );
+    this->ui->densityEdit->setScaledValue( 1.0 );
+
+    this->ui->molarMassEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*[\\/|·]\\s*(mmol|mol|kmol|mol\\?1))?[\\s|\n]*$" );
+    this->ui->molarMassEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+    this->ui->molarMassEdit->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000, LineEdit::Secondary );
+    this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
+    this->ui->molarMassEdit->setScaledValue( 18.0 );
+
+    this->ui->assayEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(%)?[\\s|\\n]*$" );
+    this->ui->assayEdit->setUnits( QString( "%," ).split( "," ), QList<qreal>() << 0.01 << 1 );
+    this->ui->assayEdit->setMode( LineEdit::Assay );
+    this->ui->assayEdit->setScaledValue( 1.0 );
 }
 
 /**
@@ -64,10 +90,12 @@ TemplateWidget::~TemplateWidget() {
  */
 void TemplateWidget::changeState( int state ) {
     if ( state == static_cast<int>( Template::Solid )) {
-        this->ui->densitySpin->setDisabled( true );
-        this->ui->amountSpin->setSuffix( " g" );
+        this->ui->densityEdit->setDisabled( true );
+        this->ui->amountEdit->setCurrentUnits( "g" );
+        this->ui->amountEdit->displayValue();
     } else {
-        this->ui->densitySpin->setEnabled( true );
-        this->ui->amountSpin->setSuffix( " ml" );
+        this->ui->densityEdit->setEnabled( true );
+        this->ui->amountEdit->setCurrentUnits( "ml" );
+        this->ui->amountEdit->displayValue();
     }
 }

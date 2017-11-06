@@ -86,3 +86,16 @@ void Reagent::load() {
         Database::instance()->reagentMap[reagent->id()] = reagent;
     }
 }
+
+/**
+ * @brief Reagent::contains
+ * @param name
+ */
+bool Reagent::contains( const QString &name ) {
+    foreach ( Reagent *reagent, Database::instance()->reagentMap ) {
+        if ( !QString::compare( reagent->name(), name ))
+            return true;
+    }
+
+    return false;
+}

@@ -41,10 +41,10 @@ public:
     ~TemplateWidget();
     QString name() const { return this->ui->nameEdit->text(); }
     Template::State state() const { return static_cast<Template::State>( this->ui->stateCombo->currentIndex()); }
-    double amount() const { return this->ui->amountSpin->value(); }
-    double density() const { return this->ui->densitySpin->value(); }
-    double molarMass() const { return this->ui->molarMassSpin->value(); }
-    double assay() const { return this->ui->assaySpin->value(); }
+    double amount() const { return this->ui->amountEdit->scaledValue(); }
+    double density() const { return this->ui->densityEdit->scaledValue(); }
+    double molarMass() const { return this->ui->molarMassEdit->scaledValue(); }
+    double assay() const { return this->ui->assayEdit->scaledValue(); }
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }

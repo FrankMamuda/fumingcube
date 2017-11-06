@@ -45,4 +45,5 @@ public:
     static Reagent *fromId( int id );
     static Reagent *add( const QString &name );
     static void load();
+    static bool contains( const QString &name );
 };
