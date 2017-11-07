@@ -71,7 +71,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         this->ui->molarMassEdit->setScaledValue( entry->molarMass());
         this->ui->densityEdit->setScaledValue( entry->density());
-        this->ui->assayEdit->setScaledValue( entry->assay() / 100.0 );
+        this->ui->assayEdit->setScaledValue( entry->assay());
     } );
 
     // set up mass display
@@ -224,6 +224,7 @@ void MainWindow::calculate( int mode ) {
         this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
         break;
 
+    case LineEdit::Amount:
     case LineEdit::NoMode:
         return;
     }
@@ -252,22 +253,20 @@ void MainWindow::on_actionAdd_triggered() {
  * @brief MainWindow::on_actionEdit_triggered
  */
 void MainWindow::on_actionEdit_triggered() {
-    ReagentDialog dialog( this );
+    ReagentDialog dialog( this, ReagentDialog::Edit );
     Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
     if ( reagent == nullptr ) {
         QMessageBox::warning( this, this->tr( "Cannot open edit dialog" ), this->tr( "Reagent not selected" ));
         return;
     }
 
-    //dialog.setReagent()
-
-    //dialog.setReagent( )
-    /*switch ( dialog.exec()) {
+    dialog.setReagent( reagent );
+    switch ( dialog.exec()) {
     case QDialog::Accepted:
-        dialog.add();
+        dialog.edit();
         break;
 
     case QDialog::Rejected:
         break;
-    }*/
+    }
 }

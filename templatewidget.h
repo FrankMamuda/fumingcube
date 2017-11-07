@@ -37,7 +37,7 @@ class TemplateWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit TemplateWidget( QWidget *parent = nullptr );
+    explicit TemplateWidget( QWidget *parent = nullptr, Template *entry = nullptr );
     ~TemplateWidget();
     QString name() const { return this->ui->nameEdit->text(); }
     Template::State state() const { return static_cast<Template::State>( this->ui->stateCombo->currentIndex()); }
@@ -48,6 +48,8 @@ public:
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
+    void save( int id );
+    //void setName( const QString &name ) { this->ui->nameEdit->setText( name ); }
 
 signals:
     void nameChanged( const QString &name );
@@ -57,4 +59,5 @@ private slots:
 
 private:
     Ui::TemplateWidget *ui;
+    Template *entry;
 };

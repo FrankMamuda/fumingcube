@@ -36,6 +36,7 @@ class ReagentDialog;
 //
 class TemplateWidget;
 class Reagent;
+class Template;
 
 /**
  * @brief The ReagentDialog class
@@ -50,17 +51,18 @@ public:
         Add,
         Edit
     };
-    explicit ReagentDialog( QWidget *parent = nullptr );
+    explicit ReagentDialog( QWidget *parent = nullptr, Modes mode = Add );
     ~ReagentDialog();
     Modes mode() const { return this->m_mode; }
 
 public slots:
     void add();
-    void setMode( Modes mode ) { this->m_mode = mode; }
+    void edit();
+    void setMode( Modes mode );
     void setReagent( Reagent *reagent );
 
 private slots:
-    void addNewTab();
+    void addNewTab( Template *entry = nullptr );
     void on_tabWidget_tabCloseRequested( int index );
 
 private:

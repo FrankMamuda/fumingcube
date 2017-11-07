@@ -32,9 +32,9 @@
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ) {
+ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ) {
     // set up ui
-    this->ui->setupUi(this);
+    this->ui->setupUi( this );
 
     // set up newTab button
     this->ui->tabWidget->setCornerWidget( this->newTab, Qt::TopLeftCorner );
@@ -47,18 +47,18 @@ ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui:
         this->addNewTab();
     } );
 
-    this->addNewTab();
+    this->setMode( mode );
 }
 
 /**
  * @brief ReagentDialog::addNewTab
  */
-void ReagentDialog::addNewTab() {
+void ReagentDialog::addNewTab( Template *entry )  {
     TemplateWidget *widget;
     int tabIndex;
 
-    widget = new TemplateWidget( this );
-    tabIndex = this->ui->tabWidget->addTab( widget, "" );
+    widget = new TemplateWidget( this, entry );
+    tabIndex = this->ui->tabWidget->addTab( widget, entry == nullptr ? "" : entry->name());
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
 
@@ -70,6 +70,9 @@ void ReagentDialog::addNewTab() {
             this->ui->tabWidget->setTabText( tabIndex, name );
         } );
     }
+
+    if ( entry != nullptr )
+        this->ui->tabWidget->setCurrentIndex( 0 );
 }
 
 /**
@@ -114,6 +117,53 @@ void ReagentDialog::add() {
 }
 
 /**
+ * @brief ReagentDialog::edit
+ */
+void ReagentDialog::edit() {
+    int y;
+    QString name( this->ui->nameEdit->text());
+
+    // failsafe
+    if ( this->mode() != Edit || this->reagent == nullptr )
+        return;
+
+    // TODO: catch these before close??
+    if ( name.isEmpty()) {
+        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "No reagent name specified" ));
+        return;
+    }
+
+    /*
+    NOTE: this is a little tricky since we have to both add new templates and edit existing ones
+    one approach would be to delete all existing templates and add everythinh anew*/
+    for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
+        TemplateWidget *widget;
+        widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ));
+        widget->save( reagent->id());
+    }
+
+    Database::instance()->update();
+}
+
+/**
+ * @brief ReagentDialog::setMode
+ * @param mode
+ */
+void ReagentDialog::setMode(ReagentDialog::Modes mode) {
+    this->m_mode = mode;
+
+    switch ( this->mode()) {
+    case Add:
+        this->addNewTab();
+        break;
+
+    case Edit:
+    case NoMode:
+        break;
+    }
+}
+
+/**
  * @brief ReagentDialog::setReagent
  * @param reagent
  */
@@ -124,10 +174,10 @@ void ReagentDialog::setReagent(Reagent *reagent) {
     this->reagent = reagent;
     this->setMode( Edit );
 
-    /*
-     LOAD DATA
-
-    */
+    this->ui->nameEdit->setText( reagent->name());
+    foreach ( Template *entry, reagent->templateList ) {
+        this->addNewTab( entry );
+    }
 }
 
 /**

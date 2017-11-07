@@ -58,10 +58,10 @@ int main( int argc, char *argv[] ) {
     MainWindow w;
     w.show();
 
-    //QThread *thread = new QThread;
-    //Database::instance()->moveToThread( thread );
-    //thread->start();
-    //thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
+    QThread *thread = new QThread;
+    Database::instance()->moveToThread( thread );
+    thread->start();
+    thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
     Database::instance()->load();
 
     return a.exec();

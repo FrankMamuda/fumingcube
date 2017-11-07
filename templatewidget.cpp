@@ -30,7 +30,7 @@
  * @brief TemplateWidget::TemplateWidget
  * @param parent
  */
-TemplateWidget::TemplateWidget( QWidget *parent ) : QWidget( parent ), ui( new Ui::TemplateWidget ) {
+TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWidget( parent ), ui( new Ui::TemplateWidget ), entry( templateEntry ) {
     // set up ui
     this->ui->setupUi( this );
 
@@ -50,31 +50,33 @@ TemplateWidget::TemplateWidget( QWidget *parent ) : QWidget( parent ), ui( new U
         qDebug() << "open props dialog";
     } );
 
-
     //
     // TODO: move these to LineEdit::setMode
     //
     this->ui->amountEdit->setMode( LineEdit::Amount );
     this->ui->amountEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(g|mg|kg|ul|ml|l|cm3|m3|cm³|m³)?[\\s|\\n]*$" );
     this->ui->amountEdit->setUnits( QString( "g,mg,kg,ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
-    this->ui->amountEdit->setScaledValue( 1.0 );
 
     this->ui->densityEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm³|m³))?[\\s|\\n]*$" );
     this->ui->densityEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
     this->ui->densityEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
     this->ui->densityEdit->setMode( LineEdit::Density );
-    this->ui->densityEdit->setScaledValue( 1.0 );
 
     this->ui->molarMassEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*[\\/|·]\\s*(mmol|mol|kmol|mol\\?1))?[\\s|\n]*$" );
     this->ui->molarMassEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
     this->ui->molarMassEdit->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000, LineEdit::Secondary );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
-    this->ui->molarMassEdit->setScaledValue( 18.0 );
 
     this->ui->assayEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(%)?[\\s|\\n]*$" );
     this->ui->assayEdit->setUnits( QString( "%," ).split( "," ), QList<qreal>() << 0.01 << 1 );
     this->ui->assayEdit->setMode( LineEdit::Assay );
-    this->ui->assayEdit->setScaledValue( 1.0 );
+
+    this->ui->nameEdit->setText( entry == nullptr ? "" : entry->name());
+    this->ui->amountEdit->setScaledValue( entry == nullptr ? 1.0 : entry->amount());
+    this->ui->densityEdit->setScaledValue( entry == nullptr ? 1.0 : entry->density());
+    this->ui->molarMassEdit->setScaledValue( entry == nullptr ? 18.0 : entry->molarMass());
+    this->ui->assayEdit->setScaledValue( entry == nullptr ? 1.0 : entry->assay());
+    this->ui->stateCombo->setCurrentIndex( entry == nullptr ? static_cast<int>( Template::Solid ) : static_cast<int>( entry->state()));
 }
 
 /**
@@ -82,6 +84,24 @@ TemplateWidget::TemplateWidget( QWidget *parent ) : QWidget( parent ), ui( new U
  */
 TemplateWidget::~TemplateWidget() {
     delete this->ui;
+}
+
+/**
+ * @brief TemplateWidget::save
+ */
+void TemplateWidget::save( int id ) {
+    // TODO: delete closed tabs
+
+    if ( this->entry == nullptr ) {
+        Template::add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), id );
+    } else {
+        entry->setName( this->name());
+        entry->setAmount( this->amount());
+        entry->setDensity( this->density());
+        entry->setMolarMass( this->molarMass());
+        entry->setAssay( this->assay());
+        entry->setState( this->state());
+    }
 }
 
 /**

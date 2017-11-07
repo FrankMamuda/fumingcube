@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>277</width>
+    <width>317</width>
     <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>FumingCube</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -176,6 +176,9 @@
    </property>
   </action>
   <action name="actionProperties">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Properties</string>
    </property>

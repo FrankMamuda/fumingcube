@@ -56,36 +56,10 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QDoubleSpinBox" name="amountSpin">
-     <property name="maximum">
-      <double>9999999999.000000000000000</double>
-     </property>
-     <property name="value">
-      <double>1.000000000000000</double>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0">
     <widget class="QLabel" name="densityLabel">
      <property name="text">
       <string>Liquid density:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QDoubleSpinBox" name="densitySpin">
-     <property name="suffix">
-      <string> g/ml</string>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="singleStep">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="value">
-      <double>1.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -96,33 +70,10 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
-    <widget class="QDoubleSpinBox" name="molarMassSpin">
-     <property name="suffix">
-      <string> g/mol</string>
-     </property>
-     <property name="value">
-      <double>18.000000000000000</double>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0">
     <widget class="QLabel" name="assayLabel">
      <property name="text">
       <string>Assay:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QDoubleSpinBox" name="assaySpin">
-     <property name="suffix">
-      <string>%</string>
-     </property>
-     <property name="maximum">
-      <double>100.000000000000000</double>
-     </property>
-     <property name="value">
-      <double>100.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -133,8 +84,27 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="1">
+    <widget class="LineEdit" name="amountEdit"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="LineEdit" name="densityEdit"/>
+   </item>
+   <item row="4" column="1">
+    <widget class="LineEdit" name="molarMassEdit"/>
+   </item>
+   <item row="5" column="1">
+    <widget class="LineEdit" name="assayEdit"/>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>lineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
