@@ -54,12 +54,12 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     // TODO: move these to LineEdit::setMode
     //
     this->ui->amountEdit->setMode( LineEdit::Amount );
-    this->ui->amountEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(g|mg|kg|ul|ml|l|cm3|m3|cm³|m³)?[\\s|\\n]*$" );
-    this->ui->amountEdit->setUnits( QString( "g,mg,kg,ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
+    this->ui->amountEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(g|mg|kg|ul|ml|l|cm3|m3|cm\u00b9|m\u00b9)?[\\s|\\n]*$" );
+    this->ui->amountEdit->setUnits( QString( "g,mg,kg,ml,ul,l,cm3,m3,cm\u00b9,m\u00b9" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
 
-    this->ui->densityEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm³|m³))?[\\s|\\n]*$" );
+    this->ui->densityEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm\u00b9|m\u00b9))?[\\s|\\n]*$" );
     this->ui->densityEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
-    this->ui->densityEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
+    this->ui->densityEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm\u00b9,m\u00b9" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
     this->ui->densityEdit->setMode( LineEdit::Density );
 
     this->ui->molarMassEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*[\\/|·]\\s*(mmol|mol|kmol|mol\\?1))?[\\s|\n]*$" );

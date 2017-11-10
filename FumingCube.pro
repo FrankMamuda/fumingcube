@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,7 +33,8 @@ SOURCES += \
     reagentdialog.cpp \
     database.cpp \
     templatewidget.cpp \
-    lineedit.cpp
+    lineedit.cpp \
+    messagedock.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     singleton.h \
     database.h \
     templatewidget.h \
-    lineedit.h
+    lineedit.h \
+    messagedock.h
 
 FORMS += \
         mainwindow.ui \

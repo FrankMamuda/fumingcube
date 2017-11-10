@@ -21,44 +21,41 @@
 //
 // includes
 //
+#include <QGraphicsOpacityEffect>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMainWindow>
-#include <QSignalMapper>
+#include <QPushButton>
+#include <QTimer>
+#include <QDockWidget>
 
 /**
- * @brief The Ui namespace
+ * @brief The MessageDock class
  */
-namespace Ui {
-class MainWindow;
-}
-
-//
-// classes
-//
-class LineEdit;
-class MessageDock;
-
-/**
- * @brief The MainWindow class
- */
-class MainWindow : public QMainWindow {
+class MessageDock : public QMainWindow {
     Q_OBJECT
+    Q_ENUMS( Modes )
 
 public:
-    explicit MainWindow( QWidget *parent = nullptr );
-    ~MainWindow();
+    enum Modes {
+        NoMode = -1,
+        Plain,
+        Warning,
+        Error
+    };
+    explicit MessageDock( QWidget *parent = 0 );
+    ~MessageDock();
 
-private slots:
-    void on_actionAdd_triggered();
-    void fillTemplates();
-    void calculate( int mode );
-    void on_actionEdit_triggered();
-
-protected:
-    void resizeEvent( QResizeEvent *event );
+public slots:
+    void displayMessage( const QString &message, Modes mode = Error, int timeout = 2500, qreal opacity = 1.0 );
+    void hideMessage();
 
 private:
-    Ui::MainWindow *ui;
-    QList<LineEdit*> inputList;
-    QSignalMapper *signalMapper;
-    MessageDock *messageDock;
+    QDockWidget *dockWidget;
+    QWidget *titleBar;
+    QHBoxLayout *titleBarLayout;
+    QLabel *titleLabel;
+    QPushButton *closeButton;
+    QGraphicsOpacityEffect *opacityEffect;
+    QTimer timer;
 };

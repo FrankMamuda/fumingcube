@@ -28,6 +28,7 @@
  * @brief LineEdit::LineEdit
  */
 LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_current{ "", "" }, m_default{ "", "" }, m_mode( NoMode ) {
+    // set text alignment
     this->setAlignment( Qt::AlignHCenter );
 
     // as-you-type validation
@@ -38,8 +39,6 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_c
         re.setPattern( this->pattern());
         re.setCaseSensitivity( Qt::CaseInsensitive );
         if ( re.indexIn( this->text()) != -1 ) {
-            // get value from the pattern
-            this->setValue( re.cap( 1 ).replace( ',', '.' ).toDouble());
 
             // match units from the pattern and set as current if valid
             primaryUnits = re.cap( 2 ).toLower();
@@ -50,6 +49,9 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_c
             secondaryUnits = re.cap( 3 ).toLower();
             if ( this->units[Secondary].contains( secondaryUnits ))
                 this->setCurrentUnits( secondaryUnits, Secondary );
+
+            // get value from the pattern
+            this->setValue( re.cap( 1 ).replace( ',', '.' ).toDouble());
 
             // all ok
             this->setStyleSheet( "QLineEdit {}" );
@@ -84,12 +86,15 @@ qreal LineEdit::multiplier() const {
     bool primary = false, secondary = false;
     qreal value = 0.0;
 
+    // check for primary units
     if ( this->units[Primary].contains( this->currentUnits( Primary )))
         primary = true;
 
+    // check for secondary units
     if ( this->units[Secondary].contains( this->currentUnits( Secondary )))
         secondary = true;
 
+    // calculate multiplier
     if ( primary && !secondary )
         value = this->units[Primary][this->currentUnits( Primary )];
     else if ( primary && secondary )
@@ -103,6 +108,7 @@ qreal LineEdit::multiplier() const {
  * @param value
  */
 void LineEdit::setValue( qreal value ) {
+    // check if the value has changed
     if ( !qFuzzyCompare( this->value(), value )) {
         this->m_value = value;
         emit this->valueChanged();
@@ -114,7 +120,10 @@ void LineEdit::setValue( qreal value ) {
  * @param value
  */
 void LineEdit::setScaledValue( qreal value ) {
+    // scale value by unit multiplier
     this->setValue( value / this->multiplier());
+
+    // display the new value
     this->displayValue();
 }
 
@@ -167,6 +176,11 @@ void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest ) {
 void LineEdit::displayValue( bool fullPrecision ) {
     int digits = 2;
 
+    // we don't want any updates when simply displaying value0
+    this->blockSignals( true );
+
+    // currently hard-coded significant digit count
+    // in future, make this configurable in settings
     if ( !fullPrecision ) {
         switch ( this->mode()) {
         case Volume:
@@ -185,11 +199,13 @@ void LineEdit::displayValue( bool fullPrecision ) {
             digits = 3;
             break;
 
+        case Amount:
         case NoMode:
             break;
         }
     }
 
+    // display rounded up value with the corresponding units
     if ( this->units[Secondary].isEmpty())
         this->setText( QString( "%1 %2" ).arg( fullPrecision ? QString::number( this->value()) : QString::number( this->value(), 'f', digits )).arg( this->currentUnits()));
     else
@@ -198,13 +214,18 @@ void LineEdit::displayValue( bool fullPrecision ) {
     if ( this->mode() == Assay )
         this->setText( this->text().remove( " " ));
 
+    // update tooltips
     this->displayToolTips();
+
+    // we're ready for updates again
+    this->blockSignals( false );
 }
 
 /**
  * @brief LineEdit::displayToolTips
  */
 void LineEdit::displayToolTips() {
+    // display full precision in toolTips
     if ( this->units[Secondary].isEmpty())
         this->setToolTip( QString( "%1 %2" ).arg( QString::number( this->scaledValue())).arg( this->defaultUnits( Primary )));
     else
@@ -216,11 +237,9 @@ void LineEdit::displayToolTips() {
  * @param event
  */
 void LineEdit::focusInEvent( QFocusEvent *event ) {
-    if ( !this->isReadOnly()) {
-        this->blockSignals( true );
+    // upon entering lineEdit, display value in full precision
+    if ( !this->isReadOnly())
         this->displayValue( true );
-        this->blockSignals( false );
-    }
 
     QLineEdit::focusInEvent( event );
 }
@@ -229,6 +248,12 @@ void LineEdit::focusInEvent( QFocusEvent *event ) {
  * @brief LineEdit::copy
  */
 void LineEdit::copy() {
+    // copy non-scaled value
+    // TODO: add custom context menu:
+    //      copy -> with units    -> scaled
+    //                            -> non-scaled
+    //           -> without units -> scaled
+    //                            -> non-scaled
     qApp->clipboard()->setText( QString::number( this->value()));
 }
 

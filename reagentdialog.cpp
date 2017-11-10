@@ -27,12 +27,13 @@
 #include "reagent.h"
 #include "template.h"
 #include "database.h"
+#include "messagedock.h"
 
 /**
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ) {
+ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ), messageDock( new MessageDock( this )) {
     // set up ui
     this->ui->setupUi( this );
 
@@ -86,25 +87,19 @@ ReagentDialog::~ReagentDialog() {
 /**
  * @brief ReagentDialog::add
  */
-void ReagentDialog::add() {
+bool ReagentDialog::add() {
     int y;
     Reagent *reagent;
     QString name( this->ui->nameEdit->text());
 
-    // TODO: catch these before close??
-    if ( name.isEmpty()) {
-        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "No reagent name specified" ));
-        return;
-    }
-
     if ( Reagent::contains( name )) {
-        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "Reagent already exists in database" ));
-        return;
+        this->messageDock->displayMessage( this->tr( "Reagent already exists in database" ), MessageDock::Error, 3000 );
+        return false;
     }
 
     reagent = Reagent::add( name );
     if ( reagent == nullptr )
-        return;
+        return false;
 
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         TemplateWidget *widget;
@@ -114,28 +109,23 @@ void ReagentDialog::add() {
     }
 
     Database::instance()->update();
+    return true;
 }
 
 /**
  * @brief ReagentDialog::edit
  */
-void ReagentDialog::edit() {
+bool ReagentDialog::edit() {
     int y;
     QString name( this->ui->nameEdit->text());
 
     // failsafe
     if ( this->mode() != Edit || this->reagent == nullptr )
-        return;
-
-    // TODO: catch these before close??
-    if ( name.isEmpty()) {
-        QMessageBox::warning( this, this->tr( "Cannot add reagent" ), this->tr( "No reagent name specified" ));
-        return;
-    }
+        return false;
 
     /*
     NOTE: this is a little tricky since we have to both add new templates and edit existing ones
-    one approach would be to delete all existing templates and add everythinh anew*/
+    one approach would be to delete all existing templates and add everything anew*/
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         TemplateWidget *widget;
         widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ));
@@ -143,6 +133,7 @@ void ReagentDialog::edit() {
     }
 
     Database::instance()->update();
+    return true;
 }
 
 /**
@@ -167,7 +158,7 @@ void ReagentDialog::setMode(ReagentDialog::Modes mode) {
  * @brief ReagentDialog::setReagent
  * @param reagent
  */
-void ReagentDialog::setReagent(Reagent *reagent) {
+void ReagentDialog::setReagent( Reagent *reagent ) {
     if ( reagent == nullptr )
         return;
 
@@ -178,6 +169,36 @@ void ReagentDialog::setReagent(Reagent *reagent) {
     foreach ( Template *entry, reagent->templateList ) {
         this->addNewTab( entry );
     }
+}
+
+/**
+ * @brief ReagentDialog::accept
+ */
+void ReagentDialog::accept() {
+    bool success = false;
+    QString name( this->ui->nameEdit->text());
+
+    // TODO: catch these before close??
+    if ( name.isEmpty()) {
+        this->messageDock->displayMessage( this->tr( "Reagent name not specified" ), MessageDock::Warning, 3000 );
+        return;
+    }
+
+    switch ( this->mode()) {
+    case Add:
+        success = this->add();
+        break;
+
+    case Edit:
+        success = this->edit();
+        break;
+
+    case NoMode:
+        break;
+    }
+
+    if ( success )
+        QDialog::accept();
 }
 
 /**
@@ -195,3 +216,13 @@ void ReagentDialog::on_tabWidget_tabCloseRequested( int index ) {
     this->widgetList.removeOne( widget );
     this->ui->tabWidget->removeTab( index );
 }
+
+/**
+ * @brief ReagentDialog::resizeEvent
+ * @param event
+ */
+void ReagentDialog::resizeEvent( QResizeEvent *event ) {
+    QDialog::resizeEvent( event );
+    this->messageDock->resize( this->width(), this->messageDock->height());
+}
+

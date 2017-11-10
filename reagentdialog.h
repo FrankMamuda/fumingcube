@@ -37,6 +37,7 @@ class ReagentDialog;
 class TemplateWidget;
 class Reagent;
 class Template;
+class MessageDock;
 
 /**
  * @brief The ReagentDialog class
@@ -56,14 +57,18 @@ public:
     Modes mode() const { return this->m_mode; }
 
 public slots:
-    void add();
-    void edit();
+    bool add();
+    bool edit();
     void setMode( Modes mode );
     void setReagent( Reagent *reagent );
+    void accept();
 
 private slots:
     void addNewTab( Template *entry = nullptr );
     void on_tabWidget_tabCloseRequested( int index );
+
+protected:
+    void resizeEvent( QResizeEvent *event );
 
 private:
     Ui::ReagentDialog *ui;
@@ -71,4 +76,5 @@ private:
     QList<TemplateWidget*> widgetList;
     Modes m_mode;
     Reagent *reagent;
+    MessageDock *messageDock;
 };

@@ -25,12 +25,13 @@
 #include "ui_mainwindow.h"
 #include "reagentdialog.h"
 #include "database.h"
+#include "messagedock.h"
 
 /**
  * @brief MainWindow::MainWindow
  * @param parent
  */
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ), signalMapper( new QSignalMapper( this )) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ), signalMapper( new QSignalMapper( this )), messageDock( new MessageDock( this )) {
     // set up ui
     this->ui->setupUi( this );
 
@@ -196,13 +197,17 @@ void MainWindow::calculate( int mode ) {
         break;
 
     case LineEdit::Mol:
-        this->ui->massEdit->setScaledValue( this->ui->molEdit->scaledValue() * this->ui->molarMassEdit->scaledValue());
+        qDebug() << "mol changed" << this->ui->molEdit->scaledValue();
+        this->ui->massEdit->setScaledValue( this->ui->molEdit->scaledValue() * this->ui->molarMassEdit->scaledValue() / this->ui->assayEdit->scaledValue());
+        qDebug() << "  mass=" << this->ui->massEdit->scaledValue();
         this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
+        qDebug() << "  pureEdit=" << this->ui->pureEdit->scaledValue();
         this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue());
         break;
 
     case LineEdit::Density:
         this->ui->massEdit->setScaledValue( this->ui->volumeEdit->scaledValue() * this->ui->densityEdit->scaledValue());
+        qDebug() << this->ui->volumeEdit->scaledValue() << this->ui->densityEdit->scaledValue();
         this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
         this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
         break;
@@ -239,14 +244,7 @@ void MainWindow::calculate( int mode ) {
  */
 void MainWindow::on_actionAdd_triggered() {
     ReagentDialog dialog( this );
-    switch ( dialog.exec()) {
-    case QDialog::Accepted:
-        dialog.add();
-        break;
-
-    case QDialog::Rejected:
-        break;
-    }
+    dialog.exec();
 }
 
 /**
@@ -256,17 +254,20 @@ void MainWindow::on_actionEdit_triggered() {
     ReagentDialog dialog( this, ReagentDialog::Edit );
     Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
     if ( reagent == nullptr ) {
-        QMessageBox::warning( this, this->tr( "Cannot open edit dialog" ), this->tr( "Reagent not selected" ));
+        this->messageDock->displayMessage( this->tr( "Cannot open edit dialog: reagent not selected" ), MessageDock::Warning, 3000 );
+        //QMessageBox::warning( this, this->tr( "Cannot open edit dialog" ), this->tr( "Reagent not selected" ));
         return;
     }
 
     dialog.setReagent( reagent );
-    switch ( dialog.exec()) {
-    case QDialog::Accepted:
-        dialog.edit();
-        break;
+    dialog.exec();
+}
 
-    case QDialog::Rejected:
-        break;
-    }
+/**
+ * @brief MainWindow::resizeEvent
+ * @param event
+ */
+void MainWindow::resizeEvent( QResizeEvent *event ) {
+    QMainWindow::resizeEvent( event );
+    this->messageDock->resize( this->width(), this->messageDock->height());
 }
