@@ -171,6 +171,61 @@ void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest ) {
 }
 
 /**
+ * @brief LineEdit::setMode
+ * @param mode
+ */
+void LineEdit::setMode( LineEdit::Modes mode ) {
+    this->m_mode = mode;
+
+    switch ( this->mode()) {
+    case Mass:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mg|g|kg)?[\\s|\\n]*$" );
+        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        break;
+
+    case MolarMass:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*[\\/|·]\\s*(mmol|mol|kmol|mol\\−1))?[\\s|\n]*$" );
+        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        this->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000, LineEdit::Secondary );
+        break;
+
+    case Mol:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mol|mmol|kmol)?[\\s|\\n]*$" );
+        this->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        break;
+
+    case Density:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm³|m³))?[\\s|\\n]*$" );
+        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        this->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
+        break;
+
+    case Assay:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(%)?[\\s|\\n]*$" );
+        this->setUnits( QString( "%," ).split( "," ), QList<qreal>() << 0.01 << 1 );
+        break;
+
+    case Pure:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mg|g|kg)?[\\s|\\n]*$" );
+        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        break;
+
+    case Volume:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(ul|ml|l|cm3|m3|cm³|m³)?[\\s|\\n]*$" );
+        this->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
+        break;
+
+    case Amount:
+        this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(g|mg|kg|ul|ml|l|cm3|m3|cm\u00b9|m\u00b9)?[\\s|\\n]*$" );
+        this->setUnits( QString( "g,mg,kg,ml,ul,l,cm3,m3,cm\u00b9,m\u00b9" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
+        break;
+
+    case NoMode:
+        break;
+    }
+}
+
+/**
  * @brief LineEdit::displayValue
  */
 void LineEdit::displayValue( bool fullPrecision ) {

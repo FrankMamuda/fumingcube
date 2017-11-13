@@ -20,6 +20,8 @@
 // includes
 //
 #include <QDebug>
+#include <QSqlQuery>
+#include <QSqlError>
 #include <QMessageBox>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -37,8 +39,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // refill reagents and templates on database changes
     this->connect( Database::instance(), &Database::changed, [ this ]() {
-        qDebug() << "fill";
-
         // clear reagent list
         this->ui->reagentCombo->clear();
 
@@ -52,7 +52,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     } );
 
     // fill templates on reagent change
-    this->connect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, [ this ]() {        
+    this->connect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, [ this ]() {
         bool enable;
         this->ui->reagentCombo->currentData( Qt::UserRole ).toInt() == -1 ? enable = false : enable = true;
         this->ui->templateCombo->setEnabled( enable );
@@ -70,52 +70,37 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         if ( entry == nullptr )
             return;
 
+        entry->state() == Template::Solid ? this->ui->massEdit->setScaledValue( entry->amount()) : this->ui->volumeEdit->setScaledValue( entry->amount());
         this->ui->molarMassEdit->setScaledValue( entry->molarMass());
         this->ui->densityEdit->setScaledValue( entry->density());
         this->ui->assayEdit->setScaledValue( entry->assay());
     } );
 
     // set up mass display
-    this->ui->massEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mg|g|kg)?[\\s|\\n]*$" );
-    this->ui->massEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
     this->ui->massEdit->setMode( LineEdit::Mass );
     this->inputList << this->ui->massEdit;
 
     // set up molar mass display
-    this->ui->molarMassEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*[\\/|·]\\s*(mmol|mol|kmol|mol\\−1))?[\\s|\n]*$" );
-    this->ui->molarMassEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
-    this->ui->molarMassEdit->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000, LineEdit::Secondary );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
     this->inputList << this->ui->molarMassEdit;
 
     // set up mol display
-    this->ui->molEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mol|mmol|kmol)?[\\s|\\n]*$" );
-    this->ui->molEdit->setUnits( QString( "mol,mmol,kmol" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
     this->ui->molEdit->setMode( LineEdit::Mol );
     this->inputList << this->ui->molEdit;
 
     // set up density display
-    this->ui->densityEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(?:(mg|g|kg)\\s*\\/\\s*(ul|ml|l|cm3|m3|cm³|m³))?[\\s|\\n]*$" );
-    this->ui->densityEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
-    this->ui->densityEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000, LineEdit::Secondary );
     this->ui->densityEdit->setMode( LineEdit::Density );
     this->inputList << this->ui->densityEdit;
 
     // set up assay display
-    this->ui->assayEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(%)?[\\s|\\n]*$" );
-    this->ui->assayEdit->setUnits( QString( "%," ).split( "," ), QList<qreal>() << 0.01 << 1 );
     this->ui->assayEdit->setMode( LineEdit::Assay );
     this->inputList << this->ui->assayEdit;
 
     // set up 100% display
-    this->ui->pureEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mg|g|kg)?[\\s|\\n]*$" );
-    this->ui->pureEdit->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
     this->ui->pureEdit->setMode( LineEdit::Pure );
     this->inputList << this->ui->pureEdit;
 
     // set up volume display
-    this->ui->volumeEdit->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(ul|ml|l|cm3|m3|cm³|m³)?[\\s|\\n]*$" );
-    this->ui->volumeEdit->setUnits( QString( "ml,ul,l,cm3,m3,cm³,m³" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 << 1 << 1000000 << 1 << 1000000 );
     this->ui->volumeEdit->setMode( LineEdit::Volume );
     this->inputList << this->ui->volumeEdit;
 
@@ -172,7 +157,7 @@ void MainWindow::fillTemplates() {
         return;
 
     // add templates
-    foreach ( Template *entry, reagent->templateList )
+    foreach ( Template *entry, reagent->templateMap )
         this->ui->templateCombo->addItem( entry->name(), entry->id());
 }
 
@@ -184,49 +169,52 @@ void MainWindow::calculate( int mode ) {
     foreach ( LineEdit *lineEdit, this->inputList )
         lineEdit->blockSignals( true );
 
-    // NOTE: ugly code, but works fine
+    // rather ugly code, but works fine
+    auto pureFromMassAndAssay = [ this ]() { this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue()); };
+    auto molFromPureAndMolarMass = [ this ]() { this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue()); };
+    auto volumeFromMassAndDensity = [ this ]() { this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue()); };
+    auto massFromMolAndMolarMassAndAssay = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->molEdit->scaledValue() * this->ui->molarMassEdit->scaledValue() / this->ui->assayEdit->scaledValue()); };
+    auto massFromVolumeAndDensity = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->volumeEdit->scaledValue() * this->ui->densityEdit->scaledValue()); };
+    auto massFromPureAndAssay = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->assayEdit->scaledValue()); };
+
     switch ( static_cast<LineEdit::Modes>( mode )) {
     case LineEdit::Mass:
-        this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
-        this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue());
+        pureFromMassAndAssay();
+        molFromPureAndMolarMass();
+        volumeFromMassAndDensity();
         break;
 
     case LineEdit::MolarMass:
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
+        molFromPureAndMolarMass();
         break;
 
     case LineEdit::Mol:
-        qDebug() << "mol changed" << this->ui->molEdit->scaledValue();
-        this->ui->massEdit->setScaledValue( this->ui->molEdit->scaledValue() * this->ui->molarMassEdit->scaledValue() / this->ui->assayEdit->scaledValue());
-        qDebug() << "  mass=" << this->ui->massEdit->scaledValue();
-        this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
-        qDebug() << "  pureEdit=" << this->ui->pureEdit->scaledValue();
-        this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue());
+        massFromMolAndMolarMassAndAssay();
+        pureFromMassAndAssay();
+        volumeFromMassAndDensity();
         break;
 
     case LineEdit::Density:
-        this->ui->massEdit->setScaledValue( this->ui->volumeEdit->scaledValue() * this->ui->densityEdit->scaledValue());
-        qDebug() << this->ui->volumeEdit->scaledValue() << this->ui->densityEdit->scaledValue();
-        this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
+        massFromVolumeAndDensity();
+        pureFromMassAndAssay();
+        molFromPureAndMolarMass();
         break;
 
     case LineEdit::Assay:
-        this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
+        pureFromMassAndAssay();
+        molFromPureAndMolarMass();
         break;
 
     case LineEdit::Pure:
-        this->ui->massEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->assayEdit->scaledValue());
-        this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue());
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
+        massFromPureAndAssay();
+        volumeFromMassAndDensity();
+        molFromPureAndMolarMass();
         break;
 
     case LineEdit::Volume:
-        this->ui->massEdit->setScaledValue( this->ui->volumeEdit->scaledValue() * this->ui->densityEdit->scaledValue());
-        this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue());
-        this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue());
+        massFromVolumeAndDensity();
+        pureFromMassAndAssay();
+        molFromPureAndMolarMass();
         break;
 
     case LineEdit::Amount:
@@ -236,7 +224,7 @@ void MainWindow::calculate( int mode ) {
 
     // connect for updates
     foreach ( LineEdit *lineEdit, this->inputList )
-       lineEdit->blockSignals( false );
+        lineEdit->blockSignals( false );
 }
 
 /**
@@ -255,7 +243,6 @@ void MainWindow::on_actionEdit_triggered() {
     Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
     if ( reagent == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot open edit dialog: reagent not selected" ), MessageDock::Warning, 3000 );
-        //QMessageBox::warning( this, this->tr( "Cannot open edit dialog" ), this->tr( "Reagent not selected" ));
         return;
     }
 
@@ -270,4 +257,32 @@ void MainWindow::on_actionEdit_triggered() {
 void MainWindow::resizeEvent( QResizeEvent *event ) {
     QMainWindow::resizeEvent( event );
     this->messageDock->resize( this->width(), this->messageDock->height());
+}
+
+/**
+ * @brief MainWindow::on_actionRemove_triggered
+ */
+void MainWindow::on_actionRemove_triggered() {
+    QSqlQuery query;
+
+    // fetch current reagent
+    Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
+    if ( reagent == nullptr ) {
+        this->messageDock->displayMessage( this->tr( "Cannot remove: reagent not selected" ), MessageDock::Warning, 3000 );
+        return;
+    }
+
+    // request confirmation
+    if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove reagent '%1'" ).arg( reagent->name()), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
+        return;
+
+    // remove reagent and its templates
+    Database::instance()->reagentMap.remove( reagent->id());
+    if ( !query.exec( QString( "delete from reagents where id=%1" ).arg( reagent->id())) || !query.exec( QString( "delete from templates where reagentId=%1" ).arg( reagent->id())))
+        qCritical() << this->tr( "could not delete reagent, reason: '%1'" ).arg( query.lastError().text());
+
+    delete reagent;
+
+    // update view
+    Database::instance()->update();
 }

@@ -39,7 +39,7 @@ class Reagent : public Entry {
 public:
     explicit Reagent( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "reagents" ); }
     ~Reagent() {}
-    QList<Template*> templateList;
+    QMap<int, Template*> templateMap;
 
     // static functions
     static Reagent *fromId( int id );

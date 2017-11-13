@@ -33,8 +33,7 @@ MessageDock::MessageDock( QWidget *parent ) :
     closeButton( new QPushButton( this )),
     opacityEffect( new QGraphicsOpacityEffect( this ))
 {
-    // set up ui
-    //this->ui->setupUi( this );
+    // set dock widget
     this->dockWidget->setAllowedAreas( Qt::TopDockWidgetArea );
     this->dockWidget->setFloating( false );
     this->dockWidget->setFeatures( QDockWidget::NoDockWidgetFeatures );

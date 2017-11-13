@@ -24,7 +24,8 @@
 #include <QApplication>
 #include <QDebug>
 
-static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
+// default message handler
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( 0 );
 
 /**
  * @brief messageFilter
@@ -54,10 +55,12 @@ int main( int argc, char *argv[] ) {
     // log to file in non-qtcreator environment
     qInstallMessageHandler( messageFilter );
 
+    // show main window
     QApplication a( argc, argv );
     MainWindow w;
     w.show();
 
+    // load database on separate thread
     QThread *thread = new QThread;
     Database::instance()->moveToThread( thread );
     thread->start();

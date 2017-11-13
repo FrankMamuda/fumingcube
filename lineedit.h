@@ -28,7 +28,10 @@ class LineEdit : public QLineEdit {
     Q_OBJECT
     Q_ENUMS( Modes )
     Q_ENUMS( Units )
-    // TODO: props!!!
+    Q_PROPERTY( qreal value READ value WRITE setValue NOTIFY valueChanged )
+    Q_PROPERTY( QString pattern READ pattern WRITE setPattern )
+    Q_PROPERTY( qreal scaledValue READ scaledValue WRITE setScaledValue )
+    Q_PROPERTY( Modes mode READ mode WRITE setMode )
 
 public:
     enum Modes {
@@ -67,7 +70,7 @@ public slots:
     void setScaledValue( qreal value = 0.0 );
     void setUnits( const QStringList &names, const QList<qreal> multipliers, Units dest = Primary );
     void setCurrentUnits( const QString &name, Units dest = Primary );
-    void setMode( Modes mode ) { this->m_mode = mode; }
+    void setMode( Modes mode );
     void displayValue( bool fullPrecision = false );
     void displayToolTips();
     void copy();

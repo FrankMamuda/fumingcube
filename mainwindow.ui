@@ -169,6 +169,7 @@
    </attribute>
    <addaction name="actionAdd"/>
    <addaction name="actionEdit"/>
+   <addaction name="actionRemove"/>
    <addaction name="actionProperties"/>
   </widget>
   <action name="actionAdd">
@@ -190,6 +191,11 @@
    </property>
    <property name="text">
     <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove reagent</string>
    </property>
   </action>
  </widget>

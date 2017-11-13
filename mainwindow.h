@@ -53,6 +53,8 @@ private slots:
     void calculate( int mode );
     void on_actionEdit_triggered();
 
+    void on_actionRemove_triggered();
+
 protected:
     void resizeEvent( QResizeEvent *event );
 

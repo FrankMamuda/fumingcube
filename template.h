@@ -59,9 +59,9 @@ public:
 
     // static functions
     static Template *fromId( int id );
-    static void add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const int reagentId );
+    static Template *add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const int reagentId );
     static void load();
-    static void store( const QSqlQuery &query );
+    static Template *store( const QSqlQuery &query );
 
 public slots:
     void setAmount( const double amount ) { this->setValue( "amount", amount ); }

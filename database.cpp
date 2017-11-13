@@ -86,10 +86,6 @@ Database::Database( QObject *parent ) : QObject( parent ) {
     // create initial table structure (if non-existant)
     if ( !this->createStructure())
         qFatal( this->tr( "could not create internal database structure" ).toUtf8().constData());
-
-    // load entries
-
-    qDebug() << "done";
 }
 
 /**
@@ -141,6 +137,12 @@ Database::~Database() {
     // announce
     qInfo() << this->tr( "unloading database" );
 
+    // remove reagents and templates
+    qDeleteAll( this->templateMap );
+    this->templateMap.clear();
+    qDeleteAll( this->reagentMap );
+    this->reagentMap.clear();
+
     // close database if open and delete orphaned logs on shutdown
     // according to Qt5 documentation, this must be out of scope
     {
@@ -162,8 +164,11 @@ Database::~Database() {
  * @brief Database::load
  */
 void Database::load() {
+    // load reagents and templates
     Reagent::load();
     Template::load();
+
+    // update gui
     emit this->changed();
 }
 

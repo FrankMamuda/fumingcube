@@ -20,7 +20,8 @@
 // includes
 //
 #include <QDebug>
-#include <QMessageBox>
+#include <QSqlQuery>
+#include <QSqlError>
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
 #include "templatewidget.h"
@@ -64,7 +65,7 @@ void ReagentDialog::addNewTab( Template *entry )  {
     this->widgetList << widget;
 
     if ( this->widgetList.indexOf( widget ) == 0 ) {
-        this->ui->tabWidget->setTabText( tabIndex, "Default template" );
+        this->ui->tabWidget->setTabText( tabIndex, this->tr( "Default template" ));
         widget->setDefault();
     } else {
         this->connect( widget, &TemplateWidget::nameChanged, [ this, tabIndex ]( const QString &name ) {
@@ -118,18 +119,29 @@ bool ReagentDialog::add() {
 bool ReagentDialog::edit() {
     int y;
     QString name( this->ui->nameEdit->text());
+    QSqlQuery query;
+    QList<int> idList;
 
     // failsafe
     if ( this->mode() != Edit || this->reagent == nullptr )
         return false;
 
-    /*
-    NOTE: this is a little tricky since we have to both add new templates and edit existing ones
-    one approach would be to delete all existing templates and add everything anew*/
+    // get modified and newly added template ids from template widget
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         TemplateWidget *widget;
         widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ));
-        widget->save( reagent->id());
+        idList << widget->save( reagent->id());
+    }
+
+    // clean up - remove deleted template entries
+    foreach ( const int key, reagent->templateMap.keys()) {
+        if ( idList.indexOf( key ) != -1 )
+            continue;
+
+        if ( !query.exec( QString( "delete from templates where id=%1" ).arg( key )))
+             qCritical() << this->tr( "could not delete removed templates, reason: '%1'" ).arg( query.lastError().text());
+
+        this->reagent->templateMap.remove( key );
     }
 
     Database::instance()->update();
@@ -140,7 +152,7 @@ bool ReagentDialog::edit() {
  * @brief ReagentDialog::setMode
  * @param mode
  */
-void ReagentDialog::setMode(ReagentDialog::Modes mode) {
+void ReagentDialog::setMode( ReagentDialog::Modes mode ) {
     this->m_mode = mode;
 
     switch ( this->mode()) {
@@ -166,9 +178,8 @@ void ReagentDialog::setReagent( Reagent *reagent ) {
     this->setMode( Edit );
 
     this->ui->nameEdit->setText( reagent->name());
-    foreach ( Template *entry, reagent->templateList ) {
+    foreach ( Template *entry, reagent->templateMap )
         this->addNewTab( entry );
-    }
 }
 
 /**
@@ -178,7 +189,7 @@ void ReagentDialog::accept() {
     bool success = false;
     QString name( this->ui->nameEdit->text());
 
-    // TODO: catch these before close??
+    // disallow empty names
     if ( name.isEmpty()) {
         this->messageDock->displayMessage( this->tr( "Reagent name not specified" ), MessageDock::Warning, 3000 );
         return;

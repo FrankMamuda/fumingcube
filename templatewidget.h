@@ -35,27 +35,33 @@ class TemplateWidget;
  */
 class TemplateWidget : public QWidget {
     Q_OBJECT
+    Q_PROPERTY( QString name READ name NOTIFY nameChanged )
+    Q_PROPERTY( qreal assay READ assay )
+    Q_PROPERTY( qreal amount READ amount )
+    Q_PROPERTY( qreal density READ density )
+    Q_PROPERTY( qreal molarMass READ molarMass )
+    Q_PROPERTY( qreal assay READ assay )
+    Q_PROPERTY( Template::State state READ state WRITE setState )
 
 public:
     explicit TemplateWidget( QWidget *parent = nullptr, Template *entry = nullptr );
     ~TemplateWidget();
     QString name() const { return this->ui->nameEdit->text(); }
     Template::State state() const { return static_cast<Template::State>( this->ui->stateCombo->currentIndex()); }
-    double amount() const { return this->ui->amountEdit->scaledValue(); }
-    double density() const { return this->ui->densityEdit->scaledValue(); }
-    double molarMass() const { return this->ui->molarMassEdit->scaledValue(); }
-    double assay() const { return this->ui->assayEdit->scaledValue(); }
+    qreal amount() const { return this->ui->amountEdit->scaledValue(); }
+    qreal density() const { return this->ui->densityEdit->scaledValue(); }
+    qreal molarMass() const { return this->ui->molarMassEdit->scaledValue(); }
+    qreal assay() const { return this->ui->assayEdit->scaledValue(); }
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
-    void save( int id );
-    //void setName( const QString &name ) { this->ui->nameEdit->setText( name ); }
+    int save( int id );
 
 signals:
     void nameChanged( const QString &name );
 
 private slots:
-    void changeState( int state );
+    void setState( Template::State state );
 
 private:
     Ui::TemplateWidget *ui;
