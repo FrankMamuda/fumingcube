@@ -70,7 +70,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         if ( entry == nullptr )
             return;
 
-        entry->state() == Template::Solid ? this->ui->massEdit->setScaledValue( entry->amount()) : this->ui->volumeEdit->setScaledValue( entry->amount());
+        if ( entry->state() == Template::Solid ) {
+            this->ui->massEdit->setScaledValue( entry->amount());
+            this->ui->densityEdit->setDisabled( true );
+            this->ui->volumeEdit->setDisabled( true );
+        } else if ( entry->state() == Template::Liquid ) {
+            this->ui->volumeEdit->setScaledValue( entry->amount());
+            this->ui->densityEdit->setEnabled( true );
+            this->ui->volumeEdit->setEnabled( true );
+        } else {
+            return;
+        }
+
         this->ui->molarMassEdit->setScaledValue( entry->molarMass());
         this->ui->densityEdit->setScaledValue( entry->density());
         this->ui->assayEdit->setScaledValue( entry->assay());
@@ -172,7 +183,7 @@ void MainWindow::calculate( int mode ) {
     // rather ugly code, but works fine
     auto pureFromMassAndAssay = [ this ]() { this->ui->pureEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->assayEdit->scaledValue()); };
     auto molFromPureAndMolarMass = [ this ]() { this->ui->molEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->molarMassEdit->scaledValue()); };
-    auto volumeFromMassAndDensity = [ this ]() { this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() * this->ui->densityEdit->scaledValue()); };
+    auto volumeFromMassAndDensity = [ this ]() { this->ui->volumeEdit->setScaledValue( this->ui->massEdit->scaledValue() / this->ui->densityEdit->scaledValue()); };
     auto massFromMolAndMolarMassAndAssay = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->molEdit->scaledValue() * this->ui->molarMassEdit->scaledValue() / this->ui->assayEdit->scaledValue()); };
     auto massFromVolumeAndDensity = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->volumeEdit->scaledValue() * this->ui->densityEdit->scaledValue()); };
     auto massFromPureAndAssay = [ this ]() { this->ui->massEdit->setScaledValue( this->ui->pureEdit->scaledValue() / this->ui->assayEdit->scaledValue()); };

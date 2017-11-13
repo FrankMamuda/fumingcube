@@ -43,12 +43,12 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_c
             // match units from the pattern and set as current if valid
             primaryUnits = re.cap( 2 ).toLower();
             if ( this->units[Primary].contains( primaryUnits ))
-                this->setCurrentUnits( primaryUnits, Primary );
+                this->setCurrentUnits( primaryUnits, Primary, true );
 
             // match units from the pattern and set as current if valid
             secondaryUnits = re.cap( 3 ).toLower();
             if ( this->units[Secondary].contains( secondaryUnits ))
-                this->setCurrentUnits( secondaryUnits, Secondary );
+                this->setCurrentUnits( secondaryUnits, Secondary, true );
 
             // get value from the pattern
             this->setValue( re.cap( 1 ).replace( ',', '.' ).toDouble());
@@ -160,14 +160,20 @@ void LineEdit::setUnits( const QStringList &names, const QList<qreal> multiplier
  * @param name
  * @param dest
  */
-void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest ) {
+void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest, bool update ) {
     // abort if no units have been mapped
     if ( this->units[dest].isEmpty())
         return;
 
     // match and set current units
-    if ( this->units[dest].contains( name ))
+    if ( this->units[dest].contains( name ) && ( QString::compare( this->currentUnits( dest ), name ))) {
         this->m_current[dest] = name;
+
+        if ( update ) {
+            emit this->valueChanged();
+            qDebug() << "units changed";
+        }
+    }
 }
 
 /**

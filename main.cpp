@@ -17,6 +17,18 @@
  */
 
 //
+// TODO:
+//   properties
+//   icons for actions
+//   restore last id on open, reagent deletion, etc.
+//   calculator widget
+//   fix templateWidget init lag
+//   built-in database
+//   disable toolTips and volume/density values for Solid states
+//   copy data from default template, upon opening new tab
+//   remember last input values on open
+
+//
 // includes
 //
 #include "mainwindow.h"

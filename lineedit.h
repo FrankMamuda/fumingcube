@@ -69,7 +69,7 @@ public slots:
     void setValue( qreal value = 0.0 );
     void setScaledValue( qreal value = 0.0 );
     void setUnits( const QStringList &names, const QList<qreal> multipliers, Units dest = Primary );
-    void setCurrentUnits( const QString &name, Units dest = Primary );
+    void setCurrentUnits( const QString &name, Units dest = Primary, bool update = false );
     void setMode( Modes mode );
     void displayValue( bool fullPrecision = false );
     void displayToolTips();
