@@ -31,6 +31,7 @@
 //
 class Template;
 class Reagent;
+class Property;
 
 /**
  * @brief The tableField struct
@@ -56,7 +57,7 @@ namespace API {
 // tasks
 const static tableField_t templateFields[] = {
     { "id", "integer primary key" },
-    { "name", "varchar( 128 )" },
+    { "name", "text" },
     { "amount", "float" },
     { "density", "float" },
     { "assay", "float" },
@@ -68,15 +69,15 @@ const static tableField_t templateFields[] = {
 // properties
 const static tableField_t propertyFields[] = {
     { "id", "integer primary key" },
-    { "name", "varchar( 128 )" },
-    { "value", "varchar( 128 )" },
+    { "name", "text" },
+    { "textValue", "text" },
     { "templateId", "integer" }
 };
 
 // reagents
 const static tableField_t reagentFields[] = {
     { "id", "integer primary key" },
-    { "name", "varchar( 128 )" },
+    { "name", "text" },
 };
 
 // tables
@@ -100,6 +101,7 @@ public:
     QString path() const { return this->m_path; }
     QMap<int, Reagent*> reagentMap;
     QMap<int, Template*> templateMap;
+    QMap<int, Property*> propertyMap;
 
 signals:
     void changed();

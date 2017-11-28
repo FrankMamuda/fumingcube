@@ -23,6 +23,7 @@
 #include "templatewidget.h"
 #include "ui_templatewidget.h"
 #include "template.h"
+#include "propertydialog.h"
 
 /**
  * @brief TemplateWidget::TemplateWidget
@@ -46,6 +47,8 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     // properties button
     this->connect( this->ui->propsButton, &QPushButton::clicked, [ this ]() {
         qDebug() << "open props dialog";
+        PropertyDialog *props = new PropertyDialog( this );
+        props->show();
     } );
 
     // set up inputs

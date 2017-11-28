@@ -27,6 +27,7 @@
 //   disable toolTips and volume/density values for Solid states
 //   copy data from default template, upon opening new tab
 //   remember last input values on open
+//   fix messageBar timeOut
 
 //
 // includes

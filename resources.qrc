@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="reagent_add">icons/reagent_add.png</file>
+        <file alias="reagent_edit">icons/reagent_edit.png</file>
+        <file alias="reagent_remove">icons/reagent_remove.png</file>
+    </qresource>
+</RCC>

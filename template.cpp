@@ -84,7 +84,8 @@ void Template::load() {
     qInfo() << QObject::tr( "loading templates from database" );
 
     // read all template entries
-    query.exec( "select * from templates order by name asc;" );
+    if ( !query.exec( "select * from templates order by name asc;" ))
+        qCritical() << query.lastError().text();
 
     // store entries in memory
     while ( query.next())

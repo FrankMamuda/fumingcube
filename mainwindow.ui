@@ -6,151 +6,167 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
-    <height>200</height>
+    <width>290</width>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>FumingCube</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="reagentLabel">
-      <property name="text">
-       <string>Reagent:</string>
-      </property>
-     </widget>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="reagentLabel">
+        <property name="text">
+         <string>Reagent:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="reagentCombo"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="templateLabel">
+        <property name="text">
+         <string>Template:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="templateCombo"/>
+      </item>
+     </layout>
     </item>
-    <item row="2" column="0" colspan="3">
+    <item>
      <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-    <item row="5" column="3">
-     <widget class="LineEdit" name="densityEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QLabel" name="molarMassLabel">
-      <property name="text">
-       <string>Molar mass:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="massLabel">
-      <property name="text">
-       <string>Mass:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="LineEdit" name="massEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="LineEdit" name="volumeEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1">
-     <widget class="LineEdit" name="pureEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="2">
-     <widget class="QLabel" name="assayLabel">
-      <property name="text">
-       <string>Assay:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QLabel" name="molTemplate">
-      <property name="text">
-       <string>Mol:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="pureLabel">
-      <property name="text">
-       <string>100%:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="volumeLabel">
-      <property name="text">
-       <string>Volume:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="3">
-     <widget class="LineEdit" name="assayEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="3">
-     <widget class="LineEdit" name="molarMassEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="1">
-     <widget class="LineEdit" name="molEdit">
-      <property name="text">
-       <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="2">
-     <widget class="QLabel" name="densityLabel">
-      <property name="text">
-       <string>Density:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="templateLabel">
-      <property name="text">
-       <string>Template:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="3">
-     <widget class="QComboBox" name="templateCombo"/>
-    </item>
-    <item row="0" column="1" colspan="3">
-     <widget class="QComboBox" name="reagentCombo"/>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="massLabel">
+          <property name="text">
+           <string>Mass:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="LineEdit" name="massEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="pureLabel">
+          <property name="text">
+           <string>100%:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="LineEdit" name="pureEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="volumeLabel">
+          <property name="text">
+           <string>Volume:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="LineEdit" name="volumeEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="molTemplate">
+          <property name="text">
+           <string>Mol:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="LineEdit" name="molEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="molarMassLabel">
+          <property name="text">
+           <string>Molar mass:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="LineEdit" name="molarMassEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="assayLabel">
+          <property name="text">
+           <string>Assay:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="LineEdit" name="assayEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="densityLabel">
+          <property name="text">
+           <string>Density:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="LineEdit" name="densityEdit">
+          <property name="text">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -160,6 +176,9 @@
    </property>
    <property name="allowedAreas">
     <set>Qt::TopToolBarArea</set>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -173,13 +192,21 @@
    <addaction name="actionProperties"/>
   </widget>
   <action name="actionAdd">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/reagent_add</normaloff>:/icons/reagent_add</iconset>
+   </property>
    <property name="text">
-    <string>Add reagent</string>
+    <string>Add</string>
    </property>
   </action>
   <action name="actionEdit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/reagent_edit</normaloff>:/icons/reagent_edit</iconset>
+   </property>
    <property name="text">
-    <string>Edit reagent</string>
+    <string>Edit</string>
    </property>
    <property name="toolTip">
     <string>Edit reagent</string>
@@ -194,8 +221,12 @@
    </property>
   </action>
   <action name="actionRemove">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/reagent_remove</normaloff>:/icons/reagent_remove</iconset>
+   </property>
    <property name="text">
-    <string>Remove reagent</string>
+    <string>Remove</string>
    </property>
   </action>
  </widget>
@@ -207,6 +238,8 @@
    <header>lineedit.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -40,7 +40,6 @@ class TemplateWidget : public QWidget {
     Q_PROPERTY( qreal amount READ amount )
     Q_PROPERTY( qreal density READ density )
     Q_PROPERTY( qreal molarMass READ molarMass )
-    Q_PROPERTY( qreal assay READ assay )
     Q_PROPERTY( Template::State state READ state WRITE setState )
 
 public:

@@ -34,7 +34,12 @@ SOURCES += \
     database.cpp \
     templatewidget.cpp \
     lineedit.cpp \
-    messagedock.cpp
+    messagedock.cpp \
+    property.cpp \
+    charactermap.cpp \
+    propertyeditor.cpp \
+    textedit.cpp \
+    propertydialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,9 +52,18 @@ HEADERS += \
     database.h \
     templatewidget.h \
     lineedit.h \
-    messagedock.h
+    messagedock.h \
+    property.h \
+    charactermap.h \
+    propertyeditor.h \
+    textedit.h \
+    propertydialog.h
 
 FORMS += \
         mainwindow.ui \
     reagentdialog.ui \
-    templatewidget.ui
+    templatewidget.ui \
+    propertydialog.ui
+
+RESOURCES += \
+    resources.qrc

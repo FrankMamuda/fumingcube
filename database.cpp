@@ -20,6 +20,7 @@
 // includes
 //
 #include "database.h"
+#include "property.h"
 #include "template.h"
 #include <QDebug>
 #include <QDir>
@@ -164,9 +165,10 @@ Database::~Database() {
  * @brief Database::load
  */
 void Database::load() {
-    // load reagents and templates
+    // load reagents, templates and properties
     Reagent::load();
     Template::load();
+    Property::load();
 
     // update gui
     emit this->changed();

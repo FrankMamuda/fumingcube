@@ -27,6 +27,7 @@
 // classes
 //
 class QSqlQuery;
+class Property;
 
 /**
  * @brief The Template class
@@ -50,6 +51,8 @@ public:
     };
     explicit Template( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "templates" ); }
     ~Template() {}
+    QMap<int, Property*> propertyMap;
+
     double amount() const { return this->record().value( "amount" ).toDouble(); }
     double density() const { return this->record().value( "density" ).toDouble(); }
     double assay() const { return this->record().value( "assay" ).toDouble(); }
