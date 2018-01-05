@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,14 +61,14 @@ public slots:
     bool edit();
     void setMode( Modes mode );
     void setReagent( Reagent *reagent );
-    void accept();
+    void accept() override;
 
 private slots:
     void addNewTab( Template *entry = nullptr );
     void on_tabWidget_tabCloseRequested( int index );
 
 protected:
-    void resizeEvent( QResizeEvent *event );
+    void resizeEvent( QResizeEvent *event ) override;
 
 private:
     Ui::ReagentDialog *ui;

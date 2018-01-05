@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ public:
     ~CharacterMap() { this->characters.clear(); }
 
 protected:
-    void paintEvent( QPaintEvent *event );
-    void mouseReleaseEvent( QMouseEvent *event );
+    void paintEvent( QPaintEvent *event ) override;
+    void mouseReleaseEvent( QMouseEvent *event ) override;
 
 signals:
     void characterSelected( const QString &character );

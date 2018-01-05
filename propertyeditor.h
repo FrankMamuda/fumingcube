@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,54 +21,61 @@
 //
 // includes
 //
-#include "charactermap.h"
-#include <QFontComboBox>
 #include <QMainWindow>
 #include <QTextCharFormat>
 
 //
-// class
+// classes
 //
 class TextEdit;
+
+/**
+ * @brief The Ui namespace
+ */
+namespace Ui {
+class PropertyEditor;
+}
 
 /**
  * @brief The PropertyEditor class
  */
 class PropertyEditor : public QMainWindow {
     Q_OBJECT
-    Q_ENUMS( Actions )
+    Q_ENUMS( Editors )
+    Q_ENUMS( Modes )
+    Q_DISABLE_COPY( PropertyEditor )
 
 public:
-    enum Actions {
-        Bold = 0,
-        UnderLine,
-        Italic,
-        SubScript,
-        SuperScript,
-        Colour,
-        CharMap,
-        Image
+    enum Editors {
+        NoEditor = -1,
+        Title,
+        Value
     };
-    PropertyEditor( QWidget *parent = 0 );
-    ~PropertyEditor() { delete this->characterMap; }
-    void setText( const QString &text );
+
+    enum Modes {
+        NoMode = -1,
+        Add,
+        Edit
+    };
+
+    explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = NoMode );
+    ~PropertyEditor();
+
+public slots:
+    void open( Modes mode, const QString &title = QString::null, const QString &value = QString::null );
+
+signals:
+    void accepted( Modes mode, const QString &title, const QString &value );
+    void rejected();
 
 private slots:
-    void setupToolBarActions();
     void mergeFormat( const QTextCharFormat &format );
     void fontChanged( const QFont &font );
     void colourChanged( const QColor &colour );
-    void alignmentChanged( QTextCharFormat::VerticalAlignment alignment );
-
-protected:
-    void dropEvent( QDropEvent *event ) { event->accept(); }
+    void setText( Editors editor, const QString &text );
 
 private:
-    QMap<Actions, QAction*> actions;
-    QFontComboBox *comboFont;
-    QComboBox *comboSize;
-    TextEdit *textEdit;
-    QToolBar *toolBar;
-    QFont textFont;
-    CharacterMap *characterMap;
+    Ui::PropertyEditor *ui;
+    TextEdit *activeEditor;
+    Modes mode;
 };

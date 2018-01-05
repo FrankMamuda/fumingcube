@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,16 +40,18 @@ class Entry : public QObject {
 public:
     explicit Entry() {}
     ~Entry() { this->m_table.clear(); this->m_record.clear(); }
-    QString name() const { return this->record().value( "name" ).toString(); }
-    int id () const { return this->record().value( "id" ).toInt(); }
-    QSqlRecord record() const { return this->m_record; }
-    QString table() const { return this->m_table; }
+    virtual QString name() const { return this->record().value( "name" ).toString(); }
+    virtual int id () const { return this->record().value( "id" ).toInt(); }
+    virtual QSqlRecord record() const { return this->m_record; }
+    virtual QString table() const { return this->m_table; }
 
 public slots:
-    void setName( const QString &name ) { this->setValue( "name", name ); }
-    void setTable( const QString &tableName ) { this->m_table = tableName; }
-    void setRecord( const QSqlRecord &record ) { this->m_record = record; }
-    void setValue( const QString &valueName, const QVariant &value );
+    virtual void setName( const QString &name ) { this->setValue( "name", name ); }
+
+protected slots:
+    virtual void setTable( const QString &tableName ) { this->m_table = tableName; }
+    virtual void setRecord( const QSqlRecord &record ) { this->m_record = record; }
+    virtual void setValue( const QString &valueName, const QVariant &value );
 
 private:
     QString m_table;

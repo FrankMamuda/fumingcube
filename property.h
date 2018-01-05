@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public:
 
     // static functions
     static Property *fromId( int id );
-    static Property *add( const QString &name , const QString &value, int templateId );
+    static Property *add( const QString &name, const QString &value, int templateId );
     static Property *store( const QSqlQuery &query );
     static void load();
     static bool contains( const QString &name );

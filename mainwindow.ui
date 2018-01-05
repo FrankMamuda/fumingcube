@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>290</width>
-    <height>234</height>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,8 +213,9 @@
    </property>
   </action>
   <action name="actionProperties">
-   <property name="enabled">
-    <bool>false</bool>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/reagent_properties</normaloff>:/icons/reagent_properties</iconset>
    </property>
    <property name="text">
     <string>Properties</string>

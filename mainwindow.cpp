@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include "reagentdialog.h"
 #include "database.h"
 #include "messagedock.h"
+#include "propertyeditor.h"
+#include "propertydialog.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -296,4 +298,23 @@ void MainWindow::on_actionRemove_triggered() {
 
     // update view
     Database::instance()->update();
+}
+
+/**
+ * @brief MainWindow::on_actionProperties_triggered
+ */
+void MainWindow::on_actionProperties_triggered() {
+    PropertyDialog *pd;
+
+    // get current template
+    Template *entry = Template::fromId( this->ui->templateCombo->currentData( Qt::UserRole ).toInt());
+    if ( entry == nullptr ) {
+        this->messageDock->displayMessage( this->tr( "Cannot display properties: template not selected" ), MessageDock::Warning, 3000 );
+        return;
+    }
+
+    // display property dialog
+    pd = new PropertyDialog( this, entry );
+    pd->setAttribute( Qt::WA_DeleteOnClose, true );
+    pd->show();
 }

@@ -21,29 +21,14 @@
 //
 // includes
 //
-#include "entry.h"
-
-//
-// classes
-//
-class Template;
+#include <QStyledItemDelegate>
 
 /**
- * @brief The Reagent class
+ * @brief The PropertyDelegate class
  */
-class Reagent : public Entry {
-    Q_OBJECT
-    Q_DISABLE_COPY( Reagent )
-    Q_CLASSINFO( "description", "Reagent SQL Entry" )
-
+class PropertyDelegate : public QStyledItemDelegate {
 public:
-    explicit Reagent( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "reagents" ); }
-    ~Reagent() {}
-    QMap<int, Template*> templateMap;
-
-    // static functions
-    static Reagent *fromId( int id );
-    static Reagent *add( const QString &name );
-    static void load();
-    static bool contains( const QString &name );
+    PropertyDelegate( QObject *parent = nullptr );
+    void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 };

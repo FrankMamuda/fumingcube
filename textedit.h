@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,12 @@ public:
     template<class T>
     void insertImage( const T &image );
 
+signals:
+    void entered();
+
 protected:
-    bool canInsertFromMimeData( const QMimeData *source ) const;
-    void insertFromMimeData( const QMimeData *source );
-    void dropEvent( QDropEvent *event );
+    bool canInsertFromMimeData( const QMimeData *source ) const override;
+    void insertFromMimeData( const QMimeData *source ) override;
+    void dropEvent( QDropEvent *event ) override;
+    void focusInEvent( QFocusEvent *event ) override { emit this->entered(); QTextEdit::focusInEvent( event ); }
 };

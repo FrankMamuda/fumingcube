@@ -3,5 +3,8 @@
         <file alias="reagent_add">icons/reagent_add.png</file>
         <file alias="reagent_edit">icons/reagent_edit.png</file>
         <file alias="reagent_remove">icons/reagent_remove.png</file>
+        <file alias="image">icons/image.png</file>
+        <file alias="colour">icons/colour.png</file>
+        <file alias="reagent_properties">icons/reagent_properties.png</file>
     </qresource>
 </RCC>

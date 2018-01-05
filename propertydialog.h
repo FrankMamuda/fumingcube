@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,15 @@
 //
 // includes
 //
+#include "propertyeditor.h"
+
 #include <QMainWindow>
+
+//
+// classes
+//
+class Property;
+class Template;
 
 /**
  * @brief The Ui namespace
@@ -37,12 +45,12 @@ class PropertyDialog : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit PropertyDialog( QWidget *parent = 0 );
+    explicit PropertyDialog( QWidget *parent = 0, Template *t = nullptr );
     ~PropertyDialog();
-
-private slots:
-    void on_actionAdd_triggered();
+    Property *current();
 
 private:
     Ui::PropertyDialog *ui;
+    Template *entry;
+    PropertyEditor *editor;
 };

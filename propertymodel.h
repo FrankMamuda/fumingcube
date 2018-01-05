@@ -21,41 +21,32 @@
 //
 // includes
 //
-#include <QGraphicsOpacityEffect>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QMainWindow>
-#include <QPushButton>
-#include <QTimer>
-#include <QDockWidget>
+#include <QAbstractTableModel>
+
+//
+// classes
+//
+class Template;
 
 /**
- * @brief The MessageDock class
+ * @brief The PropertyModel class
  */
-class MessageDock : public QMainWindow {
+class PropertyModel : public QAbstractTableModel {
     Q_OBJECT
-    Q_ENUMS( Modes )
+    Q_ENUMS( Columns )
 
 public:
-    enum Modes {
-        NoMode = -1,
-        Plain,
-        Warning,
-        Error
+    enum Columns {
+        NoColumn = -1,
+        Title,
+        Value
     };
-    explicit MessageDock( QWidget *parent = 0 );
-    ~MessageDock();
 
-public slots:
-    void displayMessage( const QString &message, Modes mode = Error, int timeout = 2500, qreal opacity = 1.0 );
-    void hideMessage();
+    explicit PropertyModel( QObject *parent = nullptr, Template *t = nullptr ) : QAbstractTableModel( parent ), entry( t ) {}
+    int rowCount( const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount( const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole ) const override;
 
 private:
-    QDockWidget *dockWidget;
-    QWidget *titleBar;
-    QHBoxLayout *titleBarLayout;
-    QLabel *titleLabel;
-    QPushButton *closeButton;
-    QGraphicsOpacityEffect *opacityEffect;
-    QTimer timer;
+    Template *entry;
 };

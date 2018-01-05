@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,11 +52,11 @@ private slots:
     void fillTemplates();
     void calculate( int mode );
     void on_actionEdit_triggered();
-
     void on_actionRemove_triggered();
+    void on_actionProperties_triggered();
 
 protected:
-    void resizeEvent( QResizeEvent *event );
+    void resizeEvent( QResizeEvent *event ) override;
 
 private:
     Ui::MainWindow *ui;

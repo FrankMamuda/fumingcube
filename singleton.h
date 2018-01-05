@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class Singleton {
     Q_DISABLE_COPY( Singleton )
 
 private:
-    typedef T* ( *CreateInstance )();
+    typedef T* ( *Instance )();
 
     Singleton();
     ~Singleton();
@@ -46,7 +46,7 @@ private:
     bool hasInitialized;
 
 public:
-    static T* instance( CreateInstance create );
+    static T* instance( Instance create );
 };
 
 /**
@@ -55,10 +55,10 @@ public:
  * @return
  */
 template <class T>
-T* Singleton<T>::instance( CreateInstance create ) {
+T* Singleton<T>::instance( Instance create ) {
     Singleton::create.store( reinterpret_cast<void*>( create ));
     qCallOnce( Singleton<T>::init, Singleton<T>::flag );
-    return (T*)Singleton<T>::singletonPtr.load();
+    return reinterpret_cast<T*>( Singleton<T>::singletonPtr.load());
 }
 
 /**
@@ -69,7 +69,7 @@ void Singleton<T>::init() {
     static Singleton singleton;
 
     if ( singleton.hasInitialized )
-        Singleton<T>::singletonPtr.store((( CreateInstance)Singleton<T>::create.load())());
+        Singleton<T>::singletonPtr.store( reinterpret_cast<Instance>( Singleton<T>::create.load())());
 }
 
 /**
@@ -88,7 +88,7 @@ Singleton<T>::~Singleton() {
     if ( !this->hasInitialized )
         return;
 
-    createdPtr = (T*)Singleton<T>::singletonPtr.fetchAndStoreOrdered( nullptr );
+    createdPtr = reinterpret_cast<T*>( Singleton<T>::singletonPtr.fetchAndStoreOrdered( nullptr ));
     if ( createdPtr != nullptr ) {
         this->hasInitialized = false;
         delete createdPtr;
