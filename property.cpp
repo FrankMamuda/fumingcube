@@ -41,27 +41,37 @@ Property *Property::fromId( int id ) {
  * @brief Property::add
  * @param name
  */
-Property *Property::add( const QString &name, const QString &value, int templateId ) {
+Property *Property::add( const QString &title, const QString &value, int templateId ) {
     QSqlQuery query;
     Property *property = nullptr;
+    Template *entry;
 
     // prepare statement
-    query.prepare( QString( "insert into properties values ( null, :name, :value, :templateId )" ));
-    query.bindValue( ":name", name );
+    query.prepare( QString( "insert into properties values ( null, :name, :value, :templateId, :parent )" ));
+    query.bindValue( ":name", title );
     query.bindValue( ":value", value );
     query.bindValue( ":templateId", templateId );
+    query.bindValue( ":parent", -1 );
 
     // excecute statement
     if ( !query.exec()) {
-        qCritical() << QObject::tr( "could not add template, reason - '%1'" ).arg( query.lastError().text());
+        qCritical() << QObject::tr( "could not add property, reason - '%1'" ).arg( query.lastError().text());
         return property;
     }
 
     // select the newly created entry and store in memory
-    query.exec( QString( "select * from temmplates where id=%1" ).arg( query.lastInsertId().toInt()));
+    query.exec( QString( "select * from properties where id=%1" ).arg( query.lastInsertId().toInt()));
     if ( query.next()) {
         property = new Property( query.record());
         Database::instance()->propertyMap[property->id()] = property;
+
+        // retrieve template from templateId
+        entry = Template::fromId( property->templateId());
+        if ( entry == nullptr )
+            return property;
+
+        // add property to template's propertyMap
+        entry->propertyMap[property->id()] = property;
     }
 
     return property;
@@ -83,13 +93,6 @@ void Property::load() {
     // store entries in memory
     while ( query.next())
         Property::store( query );
-
-    /*{
-        Property *property;
-
-        property = new Property( query.record());
-        Database::instance()->propertyMap[property->id()] = property;
-    }*/
 }
 
 /**
@@ -118,9 +121,9 @@ Property *Property::store( const QSqlQuery &query ) {
  * @brief Property::contains
  * @param name
  */
-bool Property::contains( const QString &name ) {
+bool Property::contains( const QString &title ) {
     foreach ( Property *property, Database::instance()->propertyMap ) {
-        if ( !QString::compare( property->name(), name ))
+        if ( !QString::compare( property->title(), title ))
             return true;
     }
 

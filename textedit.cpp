@@ -85,6 +85,12 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     QMimeDatabase db;
     bool found = false;
 
+    // insert as plain text if required
+    if ( this->pastePlainText()) {
+        this->insertPlainText( source->text());
+        return;
+    }
+
     // check clipboard for image
     if ( source->hasImage()) {
         this->insertImage( qvariant_cast<QImage>( source->imageData()));

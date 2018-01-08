@@ -36,24 +36,30 @@ class Property : public Entry {
     Q_OBJECT
     Q_DISABLE_COPY( Property )
     Q_CLASSINFO( "description", "Property SQL Entry" )
-    Q_PROPERTY( QString textValue READ textValue WRITE setTextValue )
+    Q_PROPERTY( QString title READ title WRITE setTitle )
+    Q_PROPERTY( QString html READ html WRITE setHtml )
     Q_PROPERTY( int templateId READ templateId WRITE setTemplateId )
+    Q_PROPERTY( int order READ order WRITE setOrder )
 
 public:
     explicit Property( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "properties" ); }
     ~Property() {}
 
-    QString textValue() const { return this->record().value( "textValue" ).toString(); }
+    QString title() const { return this->name(); }
+    QString html() const { return this->record().value( "html" ).toString(); }
     int templateId() const { return this->record().value( "templateId" ).toInt(); }
+    int order() const { return this->record().value( "parent" ).toInt(); }
 
     // static functions
     static Property *fromId( int id );
-    static Property *add( const QString &name, const QString &value, int templateId );
+    static Property *add( const QString &title, const QString &html, int templateId );
     static Property *store( const QSqlQuery &query );
     static void load();
-    static bool contains( const QString &name );
+    static bool contains( const QString &title );
 
 public slots:
-    void setTextValue( const QString &textValue ) { this->setValue( "textValue", textValue ); }
+    void setTitle( const QString &title ) { this->setName( title ); }
+    void setHtml( const QString &html ) { this->setValue( "html", html ); }
     void setTemplateId( const int templateId ) { this->setValue( "templateId", templateId ); }
+    void setOrder( const int order ) { this->setValue( "parent", order ); }
 };

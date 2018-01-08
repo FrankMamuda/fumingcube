@@ -22,6 +22,7 @@
 // includes
 //
 #include <QStyledItemDelegate>
+#include <QTextDocument>
 
 /**
  * @brief The PropertyDelegate class
@@ -31,4 +32,10 @@ public:
     PropertyDelegate( QObject *parent = nullptr );
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+
+private slots:
+    void setupDocument( const QModelIndex &index ) const;
+
+private:
+    mutable QTextDocument document;
 };

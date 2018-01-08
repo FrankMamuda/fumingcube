@@ -28,11 +28,13 @@
  */
 class TextEdit : public QTextEdit {
     Q_OBJECT
+    Q_PROPERTY( bool pastePlainText READ pastePlainText WRITE setPastePlainText )
 
 public:
-    TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ) {}
+    TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_pastePlain( false ) {}
     template<class T>
     void insertImage( const T &image );
+    bool pastePlainText() const { return this->m_pastePlain; }
 
 signals:
     void entered();
@@ -42,4 +44,10 @@ protected:
     void insertFromMimeData( const QMimeData *source ) override;
     void dropEvent( QDropEvent *event ) override;
     void focusInEvent( QFocusEvent *event ) override { emit this->entered(); QTextEdit::focusInEvent( event ); }
+
+public slots:
+    void setPastePlainText( bool enable ) { this->m_pastePlain = enable; }
+
+private:
+    bool m_pastePlain;
 };

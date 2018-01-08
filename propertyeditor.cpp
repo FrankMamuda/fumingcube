@@ -204,6 +204,9 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     // connect button box
     this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() { this->close(); emit this->accepted( this->mode, this->ui->title->toHtml(), this->ui->value->toHtml()); } );
     this->connect( this->ui->buttonBox, &QDialogButtonBox::rejected, [ this ]() { this->close(); emit this->rejected(); } );
+
+    // make sure title editor gets plainText from clipboard
+    this->ui->title->setPastePlainText( true );
 }
 
 /**
@@ -243,16 +246,22 @@ void PropertyEditor::setText( Editors editor, const QString &text ) {
 void PropertyEditor::open( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
     this->mode = mode;
 
-    if ( mode == Edit ) {
+    if ( mode == Add ) {
+        this->setText( Title, "" );
+        this->setText( Value, "" );
+
+        this->ui->comboCommon->setDisabled( false );
+        this->ui->title->setDisabled( false );
+    } else if ( mode == Edit ) {
         this->ui->comboCommon->setDisabled( true );
         this->ui->title->setDisabled( true );
+
+        if ( !title.isEmpty())
+            this->setText( Title, title );
+
+        if ( !value.isEmpty())
+            this->setText( Value, value );
     }
-
-    if ( !title.isEmpty())
-        this->setText( Title, title );
-
-    if ( !value.isEmpty())
-        this->setText( Value, value );
 
     this->show();
 }

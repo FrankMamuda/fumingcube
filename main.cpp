@@ -19,8 +19,12 @@
 //
 // TODO:
 //   properties
+//      check for duplicates
+//      image scaling
+//      common properties
+//      order
 //   icons for actions
-//   restore last id on open, reagent deletion, etc.
+//   restore last id on open, etc.
 //   calculator widget
 //   fix templateWidget init lag
 //   built-in database

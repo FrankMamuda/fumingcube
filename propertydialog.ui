@@ -29,11 +29,8 @@
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
-      <property name="showGrid">
+      <property name="wordWrap">
        <bool>false</bool>
-      </property>
-      <property name="gridStyle">
-       <enum>Qt::SolidLine</enum>
       </property>
       <property name="cornerButtonEnabled">
        <bool>false</bool>

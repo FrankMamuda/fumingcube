@@ -47,6 +47,9 @@ public:
     int columnCount( const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole ) const override;
 
+public slots:
+    void reset() { this->beginResetModel(); this->endResetModel(); }
+
 private:
     Template *entry;
 };

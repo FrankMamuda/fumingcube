@@ -109,7 +109,7 @@ Template *Template::store( const QSqlQuery &query ) {
     if ( reagent == nullptr )
         return entry;
 
-    // add template to reagents
+    // add template to reagent's templateMap
     reagent->templateMap[entry->id()] = entry;
     return entry;
 }

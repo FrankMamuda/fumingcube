@@ -31,7 +31,16 @@
  * @brief PropertyDelegate::PropertyDelegate
  * @param parent
  */
-PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( parent ) {
+PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( parent ) {}
+
+/**
+ * @brief PropertyDelegate::setupDocument
+ * @param index
+ */
+void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
+     this->document.setHtml( index.data( Qt::DisplayRole ).toString());
+     this->document.setTextWidth( QWIDGETSIZE_MAX );
+     this->document.setTextWidth( this->document.idealWidth());
 }
 
 /**
@@ -41,36 +50,20 @@ PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( pa
  * @param index
  */
 void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    QStyleOptionViewItem customOptions( option );
-    QTextDocument document;
-
-    // init style options from index
-    this->initStyleOption( &customOptions, index );
-
-    // save painter state due to translation manipulations
-    painter->save();
-
-    // set html from property
-    document.setHtml( customOptions.text );
+    // setup html document
+    this->setupDocument( index );
 
     // draw custom selection hilight
     if ( option.state & QStyle::State_Selected ) {
         QColor hilight( qApp->palette().highlight().color());
         hilight.setAlpha( 128 );
-
         painter->fillRect( option.rect, QBrush( hilight ) );
     }
 
-    // align text in the middle
-    //painter->translate( customOptions.rect.left() + customOptions.rect.width() / 2 - document.idealWidth() / 2,
-    //                    customOptions.rect.top() + customOptions.rect.height() / 2 - document.size().height() / 2 );
-    painter->translate( customOptions.rect.left(), customOptions.rect.top());
-    QRect rect( 0, 0, customOptions.rect.width(), customOptions.rect.height());
-
-    // paint html
-    document.drawContents( painter, rect );
-
-    // restore painter state
+    // draw html
+    painter->save();
+    painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
+    document.drawContents(painter);
     painter->restore();
 }
 
@@ -80,19 +73,10 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @param index
  * @return
  */
-QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    QStyleOptionViewItem customOptions( option );
-    QTextDocument document;
+QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &, const QModelIndex &index ) const {
+    // setup html document
+    this->setupDocument( index );
 
-    // init style options from index
-    this->initStyleOption( &customOptions, index );
-
-    // set html from property
-    document.setHtml( customOptions.text );
-    document.setTextWidth( customOptions.rect.width());
-    document.setDocumentMargin(0);
-
-    // return ideal size
-    qDebug() << customOptions.text << QSizeF( document.idealWidth(), document.size().height()).toSize();
-    return document.documentLayout()->documentSize().toSize();//QSizeF( document.idealWidth(), document.size().height()).toSize();
+    // return document size
+    return document.size().toSize();
 }

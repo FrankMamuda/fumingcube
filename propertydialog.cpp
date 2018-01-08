@@ -25,7 +25,9 @@
 #include "propertymodel.h"
 #include "template.h"
 #include "property.h"
+#include "database.h"
 #include <QDebug>
+#include <QSqlError>
 
 /**
  * @brief PropertyDialog::PropertyDialog
@@ -43,28 +45,26 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     // set up property table
     this->ui->propertyView->setModel( new PropertyModel( this, this->entry ));
     this->ui->propertyView->setItemDelegate( new PropertyDelegate( this ));
-
-    //this->connect( this->ui->propertyView, )
-    //this->ui->propertyView->resizeColumnsToContents();
-    //this->ui->propertyView->resizeRowsToContents();
-
-    // TODO:
-    // 1) subclass QTableView
-    // 2) setup header columns as Title and Value
-    // 3) upon resize, scale Title column to 25-30% of whole tableView size
-    //   (Value column is scaled automatically to fill rest of the view)
-    // 4) pass column widths to delegate
-    // 4) call resizeRowsToContents()
-    // 5) delegate's sizeHint() is called where we can scale document
-    //    accordingly and report proper height
+    this->ui->propertyView->resizeColumnsToContents();
+    this->ui->propertyView->resizeRowsToContents();
 
     // set up close button lambda
     this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() {
         this->close();
     } );
 
+    // reset view lambda
+    auto resetView = [ this ]() {
+        qobject_cast<PropertyModel*>( this->ui->propertyView->model())->reset();
+        this->ui->propertyView->resizeRowsToContents();
+        this->ui->propertyView->resizeColumnsToContents();
+    };
+
     // connect property editor
-    this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
+    this->connect( this->editor, &PropertyEditor::accepted, [ this, resetView ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
+        Property *property;
+
+        // return if invalid template
         if ( this->entry == nullptr )
             return;
 
@@ -74,34 +74,15 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
         switch ( mode ) {
         case PropertyEditor::Add:
-            qDebug() << "add" << title << value;
-
-        {
-            int y;
-            Property *property;
-
-            /*
-            TODO: must check against Template not the whole database
-            if ( Property::contains( name )) {
-                //this->messageDock->displayMessage( this->tr( "Property already exists in database" ), MessageDock::Error, 3000 );
-                return false;
-            }*/
-
+            // TODO: check of duplicates (is it really necessary at all?)
             property = Property::add( title, value, this->entry->id());
             if ( property == nullptr )
                 return;
 
-            /* TODO: update model */
-            this->ui->propertyView->update();
-            this->ui->propertyView->resizeRowsToContents();
-            //this->ui->propertyView->resizeColumnsToContents();
-        }
+            resetView();
             break;
 
         case PropertyEditor::Edit:
-        {
-            Property *property;
-
             property = this->current();
 
             // TODO: nothing selected warning
@@ -109,14 +90,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
                 return;
 
             property->setName( title );
-            qDebug() << "update" << value;
-            property->setTextValue( value );
-
-            /* TODO: update model */
-            this->ui->propertyView->update();
-            this->ui->propertyView->resizeRowsToContents();
-            //this->ui->propertyView->resizeColumnsToContents();
-        }
+            property->setHtml( value );
+            resetView();
             break;
 
         case PropertyEditor::NoMode:
@@ -137,12 +112,34 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         if ( property == nullptr )
             return;
 
-        this->editor->open( PropertyEditor::Edit, property->name(), property->textValue());
+        this->editor->open( PropertyEditor::Edit, property->title(), property->html());
     } );
 
     // connect remove action
-    this->connect( this->ui->actionRemove, &QAction::triggered, [ this ]() {
-        qDebug() << "remove not implemented yet";
+    this->connect( this->ui->actionRemove, &QAction::triggered, [ this, resetView ]() {
+        Property *property;
+        QSqlQuery query;
+        Template *entry;
+
+        property = this->current();
+        if ( property == nullptr )
+            return;
+
+        // remove property from database
+        Database::instance()->propertyMap.remove( property->id());
+        if ( !query.exec( QString( "delete from properties where id=%1" ).arg( property->id())))
+            qCritical() << this->tr( "could not delete property, reason: '%1'" ).arg( query.lastError().text());
+
+        // retrieve template from templateId
+        entry = Template::fromId( property->templateId());
+        if ( entry == nullptr )
+            return;
+
+        // remove property from template's propertyMap
+        entry->propertyMap.remove( property->id());
+
+        // update table
+        resetView();
     } );
 
     // connect up action

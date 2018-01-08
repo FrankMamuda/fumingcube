@@ -70,8 +70,9 @@ const static tableField_t templateFields[] = {
 const static tableField_t propertyFields[] = {
     { "id", "integer primary key" },
     { "name", "text" },
-    { "textValue", "text" },
-    { "templateId", "integer" }
+    { "html", "text" },
+    { "templateId", "integer" },
+    { "parent", "integer" }
 };
 
 // reagents

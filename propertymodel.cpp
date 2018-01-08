@@ -65,10 +65,10 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
     if ( role == Qt::DisplayRole ) {
         switch ( static_cast<Columns>( index.column())) {
         case Title:
-            return property->name();
+            return property->title();
 
         case Value:
-            return property->textValue();
+            return property->html();
 
         case NoColumn:
             break;
