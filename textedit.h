@@ -32,8 +32,7 @@ class TextEdit : public QTextEdit {
 
 public:
     TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_pastePlain( false ) {}
-    template<class T>
-    void insertImage( const T &image );
+    void insertPixmap( const QPixmap &image );
     bool pastePlainText() const { return this->m_pastePlain; }
 
 signals:

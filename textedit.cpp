@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,27 +19,36 @@
 //
 // includes
 //
+#include "imageutils.h"
 #include "textedit.h"
 #include <QBuffer>
 #include <QMimeDatabase>
 #include <QMimeData>
 #include <QDropEvent>
+#include <QDebug>
 
 /**
- * @brief TextEdit::insertImage
+ * @brief TextEdit::insertPixmap
  * @param pixmap
  */
-template<class T>
-void TextEdit::insertImage( const T &image ) {
-    QByteArray bytes;
-    QBuffer buffer( &bytes );
+void TextEdit::insertPixmap( const QPixmap &pixmap ) {
+    ImageUtils iu( this, pixmap );
 
-    // convert image to png internally
-    buffer.open( QIODevice::WriteOnly );
-    image.save( &buffer, "PNG" );
+    if ( iu.exec() == QDialog::Accepted ) {
+        QByteArray bytes;
+        QBuffer buffer( &bytes );
 
-    // insert in textEdit
-    this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( image.width()).arg( image.height()).arg( bytes.toBase64().constData()));
+        // abort on invalid pixmap
+        if ( iu.pixmap.isNull())
+            return;
+
+        // convert image to png internally
+        buffer.open( QIODevice::WriteOnly );
+        iu.pixmap.save( &buffer, "PNG" );
+
+        // insert in textEdit
+        this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( iu.pixmap.width()).arg( iu.pixmap.height()).arg( bytes.toBase64().constData()));
+    }
 }
 
 /**
@@ -93,7 +102,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // check clipboard for image
     if ( source->hasImage()) {
-        this->insertImage( qvariant_cast<QImage>( source->imageData()));
+        this->insertPixmap( QPixmap::fromImage( qvariant_cast<QImage>( source->imageData())));
         return;
     }
 
@@ -105,7 +114,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             pixmap.load( url.toLocalFile());
 
             if ( !pixmap.isNull())
-                this->insertImage( pixmap );
+                this->insertPixmap( pixmap );
 
             found = true;
         }

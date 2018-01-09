@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -188,7 +188,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
         // load image
         if ( pixmap.load( fileName ))
-            this->activeEditor->insertImage( pixmap );
+            this->activeEditor->insertPixmap( pixmap );
     } );
 
     // disable title editor lambda

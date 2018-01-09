@@ -41,7 +41,8 @@ SOURCES += \
     propertydialog.cpp \
     propertyeditor.cpp \
     propertydelegate.cpp \
-    propertymodel.cpp
+    propertymodel.cpp \
+    imageutils.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -61,14 +62,16 @@ HEADERS += \
     propertydialog.h \
     propertyeditor.h \
     propertydelegate.h \
-    propertymodel.h
+    propertymodel.h \
+    imageutils.h
 
 FORMS += \
         mainwindow.ui \
     reagentdialog.ui \
     templatewidget.ui \
     propertydialog.ui \
-    propertyeditor.ui
+    propertyeditor.ui \
+    imageutils.ui
 
 RESOURCES += \
     resources.qrc

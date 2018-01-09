@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 // TODO:
 //   properties
 //      check for duplicates
-//      image scaling
 //      common properties
 //      order
+//      search
 //   icons for actions
 //   restore last id on open, etc.
 //   calculator widget
