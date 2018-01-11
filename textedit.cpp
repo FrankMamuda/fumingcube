@@ -26,6 +26,10 @@
 #include <QMimeData>
 #include <QDropEvent>
 #include <QDebug>
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <QtWin>
+#endif
 
 /**
  * @brief TextEdit::insertPixmap
@@ -102,9 +106,102 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // check clipboard for image
     if ( source->hasImage()) {
-        this->insertPixmap( QPixmap::fromImage( qvariant_cast<QImage>( source->imageData())));
+        QImage image;
+
+        // NOTE: application/x-qt-image has problems with transparency
+        //       therefore prioritize loading image from an actual file
+        if ( !source->urls().isEmpty()) {
+            foreach ( QUrl url, source->urls()) {
+                if ( !url.isLocalFile())
+                    continue;
+
+                image.load( url.toLocalFile());
+                if ( !image.isNull())
+                    break;
+            }
+        }
+
+        if ( image.isNull())
+            image = qvariant_cast<QImage>( source->imageData());
+
+        this->insertPixmap( QPixmap::fromImage( image ));
         return;
     }
+
+#ifdef Q_OS_WIN
+    // open clipBoard to retrieve metaFiles (formulas from ChemDraw, Accelrys Draw, etc.)
+    OpenClipboard( nullptr );
+
+    // check clipBoard for metaFiles
+    if ( IsClipboardFormatAvailable( CF_ENHMETAFILE )) {
+        HENHMETAFILE metaFile;
+        ENHMETAHEADER header;
+
+        // get metaFile from clipBoard
+        metaFile = reinterpret_cast<HENHMETAFILE>( GetClipboardData( CF_ENHMETAFILE ));
+        memset( &header, 0, sizeof( ENHMETAHEADER ));
+
+        // get metaFile header
+        if ( GetEnhMetaFileHeader( metaFile, sizeof( ENHMETAHEADER ), &header ) != 0 ) {
+            HDC deviceContext, memDC;
+            RECT rect;
+            HBITMAP bitmap;
+            HBRUSH brush;
+            int width, height;
+            qreal aspect;
+            const int MaxPixmapWidth = 1024;
+
+            // get metaFile dimensions
+            width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ));
+            height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ));
+            aspect = static_cast<qreal>( width ) / static_cast<qreal>( height );
+            width = qMin( MaxPixmapWidth, width );
+            height = static_cast<int>( width / aspect );
+
+            // construct rectangle
+            memset( &rect, 0, sizeof( RECT ));
+            rect.right = width;
+            rect.bottom = height;
+
+            // proceed with valid sizes
+            if ( width > 0 && height > 0 ) {
+                QPixmap pixmap;
+
+                // get device context
+                deviceContext = GetDC( nullptr );
+                memDC = CreateCompatibleDC( deviceContext );
+
+                // create bitmap
+                bitmap = CreateCompatibleBitmap( memDC, width, height );
+                SelectObject( memDC, bitmap );
+
+                // fill white background
+                brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
+                FillRect( memDC, &rect, brush );
+                DeleteObject( brush );
+
+                // render metaFile to bitmap
+                PlayEnhMetaFile( memDC, metaFile, &rect );
+                BitBlt( deviceContext, 0, 0, width, 0, memDC, 0, 0, static_cast<DWORD>( 0x00CC0020 ));
+
+                // convert to pixmap
+                pixmap = QtWin::fromHBITMAP( bitmap );
+                if ( !pixmap.isNull()) {
+                    this->insertPixmap( pixmap );
+                    return;
+                }
+
+                // clean up
+                DeleteObject( bitmap );
+                DeleteDC( memDC );
+                ReleaseDC( nullptr, deviceContext );
+            }
+        }
+    }
+
+    // close clipBoard
+    CloseClipboard();
+#endif
 
     // check droped items for images
     foreach ( QUrl url, source->urls()) {

@@ -30,6 +30,8 @@
 #include "messagedock.h"
 #include "propertyeditor.h"
 #include "propertydialog.h"
+#include "xmltools.h"
+#include "variable.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -51,6 +53,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // add templates
         this->fillTemplates();
+
+        // load indexes
+        this->restoreIndexes();
     } );
 
     // fill templates on reagent change
@@ -138,6 +143,22 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // focus on mass input by default
     this->ui->massEdit->setFocus();
+}
+
+/**
+ * @brief restoreIndexes
+ */
+void MainWindow::restoreIndexes() {
+    int reagentIndex, templateIndex;
+
+    // load previous indexes
+    reagentIndex = Variable::instance()->integer( "ui_lastReagentIndex" );
+    if ( reagentIndex >= 0 && reagentIndex < this->ui->reagentCombo->count())
+        this->ui->reagentCombo->setCurrentIndex( reagentIndex );
+
+    templateIndex =Variable::instance()->integer( "ui_lastTemplateIndex" );
+    if ( templateIndex >= 0 && templateIndex < this->ui->templateCombo->count())
+        this->ui->templateCombo->setCurrentIndex( templateIndex );
 }
 
 /**
@@ -270,6 +291,20 @@ void MainWindow::on_actionEdit_triggered() {
 void MainWindow::resizeEvent( QResizeEvent *event ) {
     QMainWindow::resizeEvent( event );
     this->messageDock->resize( this->width(), this->messageDock->height());
+}
+
+/**
+ * @brief MainWindow::closeEvent
+ * @param event
+ */
+void MainWindow::closeEvent( QCloseEvent *event ) {
+    // save settings
+    Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
+    Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
+    XMLTools::instance()->write();
+
+    // proceed
+    QMainWindow::closeEvent( event );
 }
 
 /**

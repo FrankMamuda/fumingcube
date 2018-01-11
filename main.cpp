@@ -23,8 +23,9 @@
 //      common properties
 //      order
 //      search
+//      word wrap
+//      remove links from html
 //   icons for actions
-//   restore last id on open, etc.
 //   calculator widget
 //   fix templateWidget init lag
 //   built-in database
@@ -38,6 +39,8 @@
 //
 #include "mainwindow.h"
 #include "database.h"
+#include "xmltools.h"
+#include "variable.h"
 #include <QApplication>
 #include <QDebug>
 
@@ -71,6 +74,11 @@ int main( int argc, char *argv[] ) {
 
     // log to file in non-qtcreator environment
     qInstallMessageHandler( messageFilter );
+
+    // load settings
+    Variable::instance()->add( "ui_lastReagentIndex", -1 );
+    Variable::instance()->add( "ui_lastTemplateIndex", -1 );
+    XMLTools::instance()->read();
 
     // show main window
     QApplication a( argc, argv );

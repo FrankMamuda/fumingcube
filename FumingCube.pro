@@ -4,12 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql qml
+QT       += core gui sql qml xml winextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = FumingCube
 TEMPLATE = app
+
+win32:LIBS += -lgdi32
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -42,7 +44,9 @@ SOURCES += \
     propertyeditor.cpp \
     propertydelegate.cpp \
     propertymodel.cpp \
-    imageutils.cpp
+    imageutils.cpp \
+    variable.cpp \
+    xmltools.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -63,7 +67,9 @@ HEADERS += \
     propertyeditor.h \
     propertydelegate.h \
     propertymodel.h \
-    imageutils.h
+    imageutils.h \
+    variable.h \
+    xmltools.h
 
 FORMS += \
         mainwindow.ui \

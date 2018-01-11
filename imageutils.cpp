@@ -93,7 +93,8 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( pare
     } );
 
     // limit frame size
-    this->ui->frame->setFixedSize( this->ui->pixmapLabel->size().width() + 8, this->ui->pixmapLabel->size().height() + 8 );
+    this->ui->frame->setFixedSize( qMin( this->ui->pixmapLabel->size().width() * 2 + 8, Ui::MaxImageSize + 8 ),
+                                   qMin( this->ui->pixmapLabel->size().height() * 2 + 8, Ui::MaxImageSize + 8 ));
 }
 
 /**

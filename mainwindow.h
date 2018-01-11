@@ -47,6 +47,9 @@ public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow();
 
+public slots:
+    void restoreIndexes();
+
 private slots:
     void on_actionAdd_triggered();
     void fillTemplates();
@@ -57,6 +60,7 @@ private slots:
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;
+    void closeEvent( QCloseEvent *event ) override;
 
 private:
     Ui::MainWindow *ui;
