@@ -37,7 +37,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     // set up ui
     this->ui->setupUi( this );
 
-    // set font toolbar below othher buttons
+    // set font toolbar below other buttons
     this->insertToolBarBreak( this->ui->fontToolBar );
 
     /**
@@ -204,6 +204,12 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     // connect button box
     this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() { this->close(); emit this->accepted( this->mode, this->ui->title->toHtml(), this->ui->value->toHtml()); } );
     this->connect( this->ui->buttonBox, &QDialogButtonBox::rejected, [ this ]() { this->close(); emit this->rejected(); } );
+
+    // connect actionCleanHTML
+    this->connect( this->ui->actionCleanHTML, &QAction::toggled, [ this ]( bool enable ) {
+        this->ui->value->setCleanHTML( enable );
+    } );
+    this->ui->actionCleanHTML->setChecked( true );
 
     // make sure title editor gets plainText from clipboard
     this->ui->title->setPastePlainText( true );

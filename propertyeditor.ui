@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>324</width>
+    <width>362</width>
     <height>375</height>
    </rect>
   </property>
@@ -148,6 +148,7 @@ p, li { white-space: pre-wrap; }
    <addaction name="actionCharacterMap"/>
    <addaction name="actionColour"/>
    <addaction name="actionImage"/>
+   <addaction name="actionCleanHTML"/>
   </widget>
   <widget class="QToolBar" name="fontToolBar">
    <property name="windowTitle">
@@ -270,6 +271,14 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Insert image</string>
+   </property>
+  </action>
+  <action name="actionCleanHTML">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Clean HTML</string>
    </property>
   </action>
  </widget>

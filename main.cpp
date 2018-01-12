@@ -24,7 +24,8 @@
 //      order
 //      search
 //      word wrap
-//      remove links from html
+//      remove links from html (toggle)
+//      remove tables from html (toggle)
 //   icons for actions
 //   calculator widget
 //   fix templateWidget init lag
