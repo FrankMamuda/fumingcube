@@ -46,7 +46,9 @@ SOURCES += \
     propertymodel.cpp \
     imageutils.cpp \
     variable.cpp \
-    xmltools.cpp
+    xmltools.cpp \
+    networkmanager.cpp \
+    extractiondialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -69,7 +71,10 @@ HEADERS += \
     propertymodel.h \
     imageutils.h \
     variable.h \
-    xmltools.h
+    xmltools.h \
+    networkmanager.h \
+    extractiondialog.h \
+    extractionmodel.h
 
 FORMS += \
         mainwindow.ui \
@@ -77,7 +82,8 @@ FORMS += \
     templatewidget.ui \
     propertydialog.ui \
     propertyeditor.ui \
-    imageutils.ui
+    imageutils.ui \
+    extractiondialog.ui
 
 RESOURCES += \
     resources.qrc

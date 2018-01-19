@@ -22,6 +22,7 @@
 // includes
 //
 #include <QAbstractTableModel>
+#include <QTableView>
 
 //
 // classes
@@ -34,6 +35,7 @@ class Template;
 class PropertyModel : public QAbstractTableModel {
     Q_OBJECT
     Q_ENUMS( Columns )
+    Q_ENUMS( Roles )
 
 public:
     enum Columns {
@@ -42,14 +44,21 @@ public:
         Value
     };
 
-    explicit PropertyModel( QObject *parent = nullptr, Template *t = nullptr ) : QAbstractTableModel( parent ), entry( t ) {}
+    enum Roles {
+        PropertyIdRole = Qt::UserRole,
+        ColumnWidthRole
+    };
+
+    explicit PropertyModel( QObject *parent = nullptr, Template *t = nullptr ) : QAbstractTableModel( parent ), entry( t ), view( nullptr ) {}
     int rowCount( const QModelIndex &parent = QModelIndex()) const override;
     int columnCount( const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole ) const override;
 
 public slots:
     void reset() { this->beginResetModel(); this->endResetModel(); }
+    void setView( QTableView *table ) { this->view = table; }
 
 private:
     Template *entry;
+    QTableView *view;
 };

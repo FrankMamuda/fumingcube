@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>362</width>
-    <height>375</height>
+    <height>382</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -276,6 +276,10 @@ p, li { white-space: pre-wrap; }
   <action name="actionCleanHTML">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/clean_html</normaloff>:/icons/clean_html</iconset>
    </property>
    <property name="text">
     <string>Clean HTML</string>

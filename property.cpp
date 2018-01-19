@@ -38,6 +38,27 @@ Property *Property::fromId( int id ) {
 }
 
 /**
+ * @brief Property::fromTitle
+ * @param title
+ * @param templateId
+ * @return
+ */
+Property *Property::fromTitle( const QString &title, int templateId ) {
+    Template *entry;
+
+    entry = Template::fromId( templateId );
+    if ( entry == nullptr )
+        return nullptr;
+
+    foreach ( Property *property, entry->propertyMap ) {
+        if ( !QString::compare( property->title(), title ))
+            return property;
+    }
+
+    return nullptr;
+}
+
+/**
  * @brief Property::add
  * @param name
  */
@@ -45,6 +66,13 @@ Property *Property::add( const QString &title, const QString &value, int templat
     QSqlQuery query;
     Property *property = nullptr;
     Template *entry;
+
+    // check for duplicates
+    property = Property::fromTitle( title, templateId );
+    if ( property != nullptr ) {
+        qWarning() << QObject::tr( "duplicate property \"%1\" ignored" ).arg( title );
+        return property;
+    }
 
     // prepare statement
     query.prepare( QString( "insert into properties values ( null, :name, :value, :templateId, :parent )" ));

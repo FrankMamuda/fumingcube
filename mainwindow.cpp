@@ -352,4 +352,7 @@ void MainWindow::on_actionProperties_triggered() {
     pd = new PropertyDialog( this, entry );
     pd->setAttribute( Qt::WA_DeleteOnClose, true );
     pd->show();
+
+    // HACK: this works for now (dirty rescaling html document)
+    pd->resize( 640, 480 );
 }

@@ -56,6 +56,7 @@ public:
     static Property *store( const QSqlQuery &query );
     static void load();
     static bool contains( const QString &title );
+    static Property *fromTitle( const QString &title, int templateId );
 
 public slots:
     void setTitle( const QString &title ) { this->setName( title ); }

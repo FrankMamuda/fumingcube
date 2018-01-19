@@ -20,6 +20,7 @@
 // includes
 //
 #include "propertydelegate.h"
+#include "propertymodel.h"
 #include <QPainter>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
@@ -38,9 +39,10 @@ PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( pa
  * @param index
  */
 void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
-     this->document.setHtml( index.data( Qt::DisplayRole ).toString());
-     this->document.setTextWidth( QWIDGETSIZE_MAX );
-     this->document.setTextWidth( this->document.idealWidth());
+    this->document.setHtml( index.data( Qt::DisplayRole ).toString());
+    this->document.setTextWidth( QWIDGETSIZE_MAX );
+    this->document.setTextWidth( index.data( PropertyModel::ColumnWidthRole ).toInt());
+    this->document.setTextWidth( this->document.idealWidth());
 }
 
 /**

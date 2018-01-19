@@ -224,10 +224,10 @@ void Database::removeOrphanedEntries() {
     QSqlQuery query;
 
     // announce
-    qInfo() << this->tr( "removing orphaned logs" );
+    qInfo() << this->tr( "removing orphaned entries" );
 
     // remove orphaned logs (hard coded for now)
     if ( !query.exec( "delete from templates where reagentId not in ( select id from reagents )" ) ||
          !query.exec( "delete from properties where templateId not in ( select id from templates )" ))
-        qCritical() << this->tr( "could not delete orphaned logs, reason: '%1'" ).arg( query.lastError().text());
+        qCritical() << this->tr( "could not delete orphaned entries, reason: '%1'" ).arg( query.lastError().text());
 }

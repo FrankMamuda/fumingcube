@@ -45,11 +45,12 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     this->setState( static_cast<Template::State>( this->ui->stateCombo->currentIndex()));
 
     // properties button
-    this->connect( this->ui->propsButton, &QPushButton::clicked, [ this ]() {
+    /*this->connect( this->ui->propsButton, &QPushButton::clicked, [ this ]() {
         qDebug() << "open props dialog";
         PropertyDialog *props = new PropertyDialog( this );
         props->show();
-    } );
+    } );*/
+    this->ui->propsButton->hide();
 
     // set up inputs
     this->ui->amountEdit->setMode( LineEdit::Amount );

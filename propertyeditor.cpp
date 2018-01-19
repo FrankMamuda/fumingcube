@@ -26,13 +26,14 @@
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QBitmap>
+#include "charactermap.h"
 
 /**
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
-PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( m ) {
-    QFont font( "Times New Roman", 12 );
+PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( m ), characterMap( new CharacterMap( this )) {
+    QFont font( "Times New Roman", 11 );
 
     // set up ui
     this->ui->setupUi( this );
@@ -175,7 +176,12 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     // add character map action
     this->ui->actionCharacterMap->setText( "\u212b" );
     this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
-        //this->characterMap->show();
+        this->characterMap->show();
+    } );
+
+    // add character map action
+    this->connect( this->characterMap, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
+        this->activeEditor->insertPlainText( character );
     } );
 
     // set up image selector action
@@ -211,8 +217,11 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
     this->ui->actionCleanHTML->setChecked( true );
 
-    // make sure title editor gets plainText from clipboard
-    this->ui->title->setPastePlainText( true );
+    // make sure title editor gets plain HTML from clipboard
+    this->ui->title->setCleanHTML( true );
+
+    // for now
+    this->ui->comboCommon->hide();
 }
 
 /**
@@ -220,7 +229,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
  */
 PropertyEditor::~PropertyEditor() {
     // disconnects
-    delete ui;
+    delete this->characterMap;
+    delete this->ui;
 }
 
 /**

@@ -26,6 +26,7 @@
 #include "template.h"
 #include "property.h"
 #include "database.h"
+#include "extractiondialog.h"
 #include <QDebug>
 #include <QSqlError>
 
@@ -43,25 +44,21 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     this->ui->setupUi( this );
 
     // set up property table
-    this->ui->propertyView->setModel( new PropertyModel( this, this->entry ));
+    PropertyModel *model = new PropertyModel( this, this->entry );
+    model->setView( this->ui->propertyView );
+    this->ui->propertyView->setModel( model );
     this->ui->propertyView->setItemDelegate( new PropertyDelegate( this ));
     this->ui->propertyView->resizeColumnsToContents();
     this->ui->propertyView->resizeRowsToContents();
+    this->ui->propertyView->setTextElideMode( Qt::ElideRight );
 
     // set up close button lambda
     this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() {
         this->close();
     } );
 
-    // reset view lambda
-    auto resetView = [ this ]() {
-        qobject_cast<PropertyModel*>( this->ui->propertyView->model())->reset();
-        this->ui->propertyView->resizeRowsToContents();
-        this->ui->propertyView->resizeColumnsToContents();
-    };
-
     // connect property editor
-    this->connect( this->editor, &PropertyEditor::accepted, [ this, resetView ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
+    this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
         Property *property;
 
         // return if invalid template
@@ -72,6 +69,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         if ( title.isEmpty() || value.isEmpty())
             return;
 
+        qDebug() << title << value;
+
         switch ( mode ) {
         case PropertyEditor::Add:
             // TODO: check of duplicates (is it really necessary at all?)
@@ -79,7 +78,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
             if ( property == nullptr )
                 return;
 
-            resetView();
+            this->resetView();
             break;
 
         case PropertyEditor::Edit:
@@ -91,7 +90,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
             property->setName( title );
             property->setHtml( value );
-            resetView();
+            this->resetView();
             break;
 
         case PropertyEditor::NoMode:
@@ -116,7 +115,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     } );
 
     // connect remove action
-    this->connect( this->ui->actionRemove, &QAction::triggered, [ this, resetView ]() {
+    this->connect( this->ui->actionRemove, &QAction::triggered, [ this ]() {
         Property *property;
         QSqlQuery query;
         Template *entry;
@@ -139,17 +138,27 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         entry->propertyMap.remove( property->id());
 
         // update table
-        resetView();
+        this->resetView();
     } );
 
     // connect up action
-    this->connect( this->ui->actionUp, &QAction::triggered, [ this ]() {
+    this->connect( this->ui->actionUp, &QAction::triggered, []() {
         qDebug() << "move up not implemented yet";
     } );
 
     // connect down action
-    this->connect( this->ui->actionDown, &QAction::triggered, [ this ]() {
+    this->connect( this->ui->actionDown, &QAction::triggered, []() {
         qDebug() << "move down not implemented yet";
+    } );
+
+
+    // connect wiki extraction action
+    this->connect( this->ui->actionWiki, &QAction::triggered, [ this ]() {
+        ExtractionDialog ed;
+        ed.setTemplateId( this->entry->id());
+        ed.exec();
+
+        this->resetView();
     } );
 }
 
@@ -177,5 +186,23 @@ Property *PropertyDialog::current() {
         return nullptr;
 
     // get property id from model and return the corresponding property
-    return Property::fromId( qobject_cast<PropertyModel*>( this->ui->propertyView->model())->data( index, Qt::UserRole ).toInt());
+    return Property::fromId( qobject_cast<PropertyModel*>( this->ui->propertyView->model())->data( index, PropertyModel::PropertyIdRole ).toInt());
+}
+
+/**
+ * @brief PropertyDialog::resizeEvent
+ * @param event
+ */
+void PropertyDialog::resizeEvent( QResizeEvent *event ) {
+    this->resetView();
+    QMainWindow::resizeEvent( event );
+}
+
+/**
+ * @brief PropertyDialog::resetView
+ */
+void PropertyDialog::resetView() {
+    qobject_cast<PropertyModel*>( this->ui->propertyView->model())->reset();
+    this->ui->propertyView->resizeRowsToContents();
+    this->ui->propertyView->resizeColumnsToContents();
 }

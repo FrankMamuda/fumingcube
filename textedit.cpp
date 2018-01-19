@@ -104,10 +104,10 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     QMimeDatabase db;
 
     // insert as plain text if required
-    if ( this->pastePlainText()) {
+    /*if ( this->pastePlainText()) {
         this->insertPlainText( source->text());
         return;
-    }
+    }*/
 
     // check clipboard for image
     if ( source->hasImage()) {
@@ -240,29 +240,8 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( source->hasHtml()) {
         QString html( source->html());
 
-        if ( this->cleanHTML()) {
-            // NOTE: this is highly inefficient, but I just can't get QRefExp
-            //       to work properly with QString::remove
-            QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody).*?[>])|(?:<!--\\w+-->))" );
-            QRegularExpressionMatchIterator i = re.globalMatch( html );
-            QStringList words;
-
-            // capture all unnecessary html tags
-            while ( i.hasNext()) {
-                QRegularExpressionMatch match = i.next();
-                QString word = match.captured( 1 );
-
-                if ( !words.contains( word ))
-                    words << word;
-            }
-
-            // remove tags one by one
-            foreach ( const QString word, words )
-                html = html.remove( word );
-
-            // replace newline with space
-            html.replace( "\n", " " );
-        }
+        if ( this->cleanHTML())
+            html = TextEdit::stripHTML( html );
 
         // insert clean html
         this->insertHtml( html );
@@ -271,4 +250,40 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // nothing valid found
     QTextEdit::insertFromMimeData( source );
+}
+
+/**
+ * @brief TextEdit::stripHTML
+ * @return
+ */
+QString TextEdit::stripHTML( const QString &input ) {
+    QString html( input );
+
+    // TODO: also remove references
+
+    //
+    // NOTE: this is highly inefficient, but I just can't get QRefExp
+    //       to work properly with QString::remove
+    QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul).*?[>])|(?:<!--\\w+-->))" );
+    QRegularExpressionMatchIterator i = re.globalMatch( html );
+    QStringList words;
+
+    // capture all unnecessary html tags
+    while ( i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        QString word = match.captured( 1 );
+
+        if ( !words.contains( word ))
+            words << word;
+    }
+
+    // remove tags one by one
+    foreach ( const QString word, words )
+        html = html.remove( word );
+
+    // replace newline with space
+    html = html.replace( "\n", " " );
+
+    // return stripped down HTML
+    return html;
 }

@@ -28,6 +28,7 @@
 // classes
 //
 class TextEdit;
+class CharacterMap;
 
 /**
  * @brief The Ui namespace
@@ -78,4 +79,5 @@ private:
     Ui::PropertyEditor *ui;
     TextEdit *activeEditor;
     Modes mode;
+    CharacterMap *characterMap;
 };

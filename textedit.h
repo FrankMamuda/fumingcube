@@ -28,14 +28,13 @@
  */
 class TextEdit : public QTextEdit {
     Q_OBJECT
-    Q_PROPERTY( bool pastePlainText READ pastePlainText WRITE setPastePlainText )
     Q_PROPERTY( bool cleanHTML READ cleanHTML WRITE setCleanHTML )
 
 public:
-    TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_pastePlain( false ), m_cleanHTML( true ) {}
+    TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_cleanHTML( true ) {}
     void insertPixmap( const QPixmap &image );
-    bool pastePlainText() const { return this->m_pastePlain; }
     bool cleanHTML() const { return this->m_cleanHTML; }
+    static QString stripHTML( const QString &input );
 
 signals:
     void entered();
@@ -47,10 +46,8 @@ protected:
     void focusInEvent( QFocusEvent *event ) override { emit this->entered(); QTextEdit::focusInEvent( event ); }
 
 public slots:
-    void setPastePlainText( bool enable ) { this->m_pastePlain = enable; }
     void setCleanHTML( bool enable ) { this->m_cleanHTML = enable; }
 
 private:
-    bool m_pastePlain;
     bool m_cleanHTML;
 };

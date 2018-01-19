@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
+    <width>377</width>
     <height>291</height>
    </rect>
   </property>
@@ -88,33 +88,61 @@
    <addaction name="actionRemove"/>
    <addaction name="actionUp"/>
    <addaction name="actionDown"/>
+   <addaction name="actionWiki"/>
   </widget>
   <action name="actionAdd">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/property_add</normaloff>:/icons/property_add</iconset>
+   </property>
    <property name="text">
     <string>Add</string>
    </property>
   </action>
   <action name="actionEdit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/property_edit</normaloff>:/icons/property_edit</iconset>
+   </property>
    <property name="text">
     <string>Edit</string>
    </property>
   </action>
   <action name="actionRemove">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/property_remove</normaloff>:/icons/property_remove</iconset>
+   </property>
    <property name="text">
     <string>Remove</string>
    </property>
   </action>
   <action name="actionUp">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/property_moveup</normaloff>:/icons/property_moveup</iconset>
+   </property>
    <property name="text">
     <string>Move up</string>
    </property>
   </action>
   <action name="actionDown">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/property_movedown</normaloff>:/icons/property_movedown</iconset>
+   </property>
    <property name="text">
     <string>Move down</string>
    </property>
   </action>
+  <action name="actionWiki">
+   <property name="text">
+    <string>Extract from Wikipedia</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

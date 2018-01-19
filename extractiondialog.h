@@ -21,41 +21,40 @@
 //
 // includes
 //
-#include "propertyeditor.h"
-#include <QMainWindow>
+#include <QDialog>
 
 //
 // classes
 //
-class Property;
-class Template;
+class ExtractionModel;
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-class PropertyDialog;
+class ExtractionDialog;
+static const QString PatternWiki( "<tr>\n?<td>\n?(?:(?:<.+?(?=>)>)(?:<.+?(?=>)>)?)?(.*?(?=<\\/(?:a|td|span)))(?:(?:<\\/.+?(?=>)>)?(?:<\\/.+?(?=>)>)?)?\n?<\\/td>\n?<td>(.+)<\\/td>\n?<\\/tr>" );
 }
 
 /**
- * @brief The PropertyDialog class
+ * @brief The ExtractionDialog class
  */
-class PropertyDialog : public QMainWindow {
+class ExtractionDialog : public QDialog {
     Q_OBJECT
+    Q_PROPERTY( int templateId READ templateId WRITE setTemplateId )
 
 public:
-    explicit PropertyDialog( QWidget *parent = 0, Template *t = nullptr );
-    ~PropertyDialog();
-    Property *current();
+    explicit ExtractionDialog( QWidget *parent = nullptr );
+    ~ExtractionDialog();
+    int templateId() const { return this->m_templateId; }
 
-protected:
-    void resizeEvent( QResizeEvent *event ) override;
-
-private slots:
-    void resetView();
+public slots:
+    void setTemplateId( int id = -1 ) { this->m_templateId = id; }
 
 private:
-    Ui::PropertyDialog *ui;
-    Template *entry;
-    PropertyEditor *editor;
+    Ui::ExtractionDialog *ui;
+    ExtractionModel *model;
+    QStringList properties;
+    QStringList values;
+    int m_templateId;
 };

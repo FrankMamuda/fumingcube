@@ -22,6 +22,7 @@
 #include "propertymodel.h"
 #include "template.h"
 #include "property.h"
+#include <QDebug>
 
 /**
  * @brief PropertyModel::rowCount
@@ -53,14 +54,19 @@ int PropertyModel::columnCount( const QModelIndex & ) const {
  */
 QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
     Property *property;
+    int width;
 
     // failsafe
-    if ( this->entry == nullptr )
+    if ( this->entry == nullptr || !index.isValid() || this->view == nullptr ) {
+        qDebug() << "fail";
         return QVariant();
+    }
 
     property = this->entry->propertyMap[this->entry->propertyMap.keys().at( index.row())];
     if ( property == nullptr )
         return QVariant();
+
+    width = this->view->viewport()->width();
 
     if ( role == Qt::DisplayRole ) {
         switch ( static_cast<Columns>( index.column())) {
@@ -73,8 +79,19 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
         case NoColumn:
             break;
         }
-    } else if ( role == Qt::UserRole ) {
+    } else if ( role == PropertyIdRole ) {
         return property->id();
+    } else if ( role == ColumnWidthRole ) {
+        switch ( static_cast<Columns>( index.column())) {
+        case Title:
+            return static_cast<int>( width * 0.33 );
+
+        case Value:
+            return static_cast<int>( width * 0.66 );
+
+        case NoColumn:
+            return 0;
+        }
     }
 
     return QVariant();

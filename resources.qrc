@@ -6,5 +6,11 @@
         <file alias="image">icons/image.png</file>
         <file alias="colour">icons/colour.png</file>
         <file alias="reagent_properties">icons/reagent_properties.png</file>
+        <file alias="property_add">icons/property_add.png</file>
+        <file alias="property_edit">icons/property_edit.png</file>
+        <file alias="property_remove">icons/property_remove.png</file>
+        <file alias="property_movedown">icons/property_movedown.png</file>
+        <file alias="property_moveup">icons/property_moveup.png</file>
+        <file alias="clean_html">icons/clean_html.png</file>
     </qresource>
 </RCC>
