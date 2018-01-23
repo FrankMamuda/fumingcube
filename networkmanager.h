@@ -44,7 +44,8 @@ class NetworkManager : public QObject {
 public:
     enum Type {
         NoType = -1,
-        HTML
+        BasicProperties,
+        Properties
     };
 
     static NetworkManager *instance() { return Singleton<NetworkManager>::instance( NetworkManager::createInstance ); }
@@ -56,8 +57,8 @@ signals:
     void stopped();
 
 public slots:
-    void add( const QString &url, Type type = HTML, const QVariant &userData = QVariant(), bool priority = false );
-    void execute( const QString &url, Type type = HTML, const QVariant &userData = QVariant(), bool priority = false ) { this->add( url, type, userData, priority ); this->run(); }
+    void add( const QString &url, Type type = Properties, const QVariant &userData = QVariant(), bool priority = false );
+    void execute( const QString &url, Type type = Properties, const QVariant &userData = QVariant(), bool priority = false ) { this->add( url, type, userData, priority ); this->run(); }
     void run();
     void stop() { this->m_running  = false; }
     void clear();

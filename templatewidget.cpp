@@ -20,16 +20,22 @@
 // includes
 //
 #include <QDebug>
+#include <QInputDialog>
 #include "templatewidget.h"
 #include "ui_templatewidget.h"
 #include "template.h"
 #include "propertydialog.h"
+#include "reagentdialog.h"
+#include "networkmanager.h"
+#include "textedit.h"
 
 /**
  * @brief TemplateWidget::TemplateWidget
  * @param parent
  */
 TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWidget( parent ), ui( new Ui::TemplateWidget ), entry( templateEntry ) {
+    QWidget *dialogParent = parent;
+
     // set up ui
     this->ui->setupUi( this );
 
@@ -44,13 +50,89 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     } );
     this->setState( static_cast<Template::State>( this->ui->stateCombo->currentIndex()));
 
-    // properties button
-    /*this->connect( this->ui->propsButton, &QPushButton::clicked, [ this ]() {
-        qDebug() << "open props dialog";
-        PropertyDialog *props = new PropertyDialog( this );
-        props->show();
-    } );*/
-    this->ui->propsButton->hide();
+    // connect density and molar mass extraction buttons
+    auto extractProperty = [ this, dialogParent ]( Properties property ) {
+        bool ok;
+        QString url;
+        ReagentDialog *dialog;
+
+        dialog = qobject_cast<ReagentDialog*>( dialogParent );
+        if ( dialog == nullptr )
+            return;
+
+        url = QInputDialog::getText( this, this->tr( "Extract from Wikipedia" ), this->tr( "URL:" ), QLineEdit::Normal, QString( "https://en.wikipedia.org/wiki/%1" ).arg( dialog->name().replace( " ", "_" )), &ok );
+        if ( ok && !url.isEmpty()) {
+            NetworkManager::instance()->execute( url, NetworkManager::BasicProperties, property );
+        }
+    };
+    this->connect( this->ui->densityButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( Density ); } );
+    this->connect( this->ui->molarMassButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( MolarMass ); } );
+
+    // connect network manager
+    this->connect( NetworkManager::instance(), &NetworkManager::finished, [ this ]( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
+        Q_UNUSED( url )
+        Q_UNUSED( userData )
+
+        if ( error ) {
+            qCritical() << this->tr( "error processing network request" );
+            return;
+        }
+
+        switch ( type ) {
+        case NetworkManager::BasicProperties:
+        {
+            QRegularExpression re;
+
+            switch ( static_cast<Properties>( userData.toInt())) {
+            case Density:
+                re.setPattern( "<td.*?(?=Density).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+                break;
+
+            case MolarMass:
+                re.setPattern( "<td.*?(?=Molar mass).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+                break;
+
+            default:
+                return;
+            }
+
+            // we currently support only wikipedia
+            re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
+            QRegularExpressionMatch match = re.match( data );
+
+            // capture all unnecessary html tags
+            if ( match.hasMatch()) {
+                QString value;
+
+                value = TextEdit::stripHTML( match.captured( 1 )).simplified().remove( QRegExp( "<[^>]*>" ));
+                if ( value.isEmpty())
+                    return;
+
+                switch ( static_cast<Properties>( userData.toInt())) {
+                case Density:
+                    this->ui->densityEdit->setText( value );
+                    break;
+
+                case MolarMass:
+                    this->ui->molarMassEdit->setText( value );
+                    break;
+
+                default:
+                    return;
+                }
+            }
+        }
+            break;
+
+        case NetworkManager::Properties:
+            break;
+
+        case NetworkManager::NoType:
+            qCritical() << this->tr( "unknown network request type" );
+            return;
+        }
+    } );
+    //this->ui->propsButton->hide();
 
     // set up inputs
     this->ui->amountEdit->setMode( LineEdit::Amount );

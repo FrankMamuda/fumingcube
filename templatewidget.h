@@ -41,6 +41,7 @@ class TemplateWidget : public QWidget {
     Q_PROPERTY( qreal density READ density )
     Q_PROPERTY( qreal molarMass READ molarMass )
     Q_PROPERTY( Template::State state READ state WRITE setState )
+    Q_ENUMS( Properties )
 
 public:
     explicit TemplateWidget( QWidget *parent = nullptr, Template *entry = nullptr );
@@ -51,6 +52,11 @@ public:
     qreal density() const { return this->ui->densityEdit->scaledValue(); }
     qreal molarMass() const { return this->ui->molarMassEdit->scaledValue(); }
     qreal assay() const { return this->ui->assayEdit->scaledValue(); }
+
+    enum Properties {
+        Density = 0,
+        MolarMass
+    };
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }

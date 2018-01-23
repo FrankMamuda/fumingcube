@@ -6,36 +6,56 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>228</width>
-    <height>197</height>
+    <width>222</width>
+    <height>186</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="nameLabel">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="8" column="2" rowspan="2">
+    <widget class="LineEdit" name="assayEdit"/>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <widget class="QLabel" name="assayLabel">
      <property name="text">
-      <string>Name:</string>
+      <string>Assay:</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
+   <item row="2" column="2">
+    <widget class="LineEdit" name="amountEdit"/>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLabel" name="amountLabel">
+     <property name="text">
+      <string>Default amount:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
     <widget class="QLineEdit" name="nameEdit">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <widget class="QLabel" name="stateLabel">
      <property name="text">
       <string>State:</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="nameLabel">
+     <property name="text">
+      <string>Name:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
     <widget class="QComboBox" name="stateCombo">
      <item>
       <property name="text">
@@ -49,52 +69,61 @@
      </item>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="amountLabel">
-     <property name="text">
-      <string>Default amount:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="densityLabel">
-     <property name="text">
-      <string>Liquid density:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="molarMassLabel">
      <property name="text">
       <string>Molar mass:</string>
      </property>
     </widget>
    </item>
+   <item row="6" column="2">
+    <layout class="QHBoxLayout" name="molarMassLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="LineEdit" name="molarMassEdit"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="molarMassButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/cog</normaloff>:/icons/cog</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="5" column="0">
-    <widget class="QLabel" name="assayLabel">
+    <widget class="QLabel" name="densityLabel">
      <property name="text">
-      <string>Assay:</string>
+      <string>Liquid density:</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QPushButton" name="propsButton">
-     <property name="text">
-      <string>Edit properties</string>
+   <item row="5" column="2">
+    <layout class="QHBoxLayout" name="densityLayout">
+     <property name="spacing">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="LineEdit" name="amountEdit"/>
-   </item>
-   <item row="3" column="1">
-    <widget class="LineEdit" name="densityEdit"/>
-   </item>
-   <item row="4" column="1">
-    <widget class="LineEdit" name="molarMassEdit"/>
-   </item>
-   <item row="5" column="1">
-    <widget class="LineEdit" name="assayEdit"/>
+     <item>
+      <widget class="LineEdit" name="densityEdit"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="densityButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/cog</normaloff>:/icons/cog</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -105,6 +134,8 @@
    <header>lineedit.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

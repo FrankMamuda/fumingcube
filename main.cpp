@@ -19,15 +19,11 @@
 //
 // TODO:
 //   properties
-//      check for duplicates
 //      common properties
 //      order
 //      search
-//      extract basic properties from wikipedia
-//          (add reagent dialog - density, molar mass)
 //   proper warnings
 //   default fonts
-//   functional 'edit properties' dialog in 'add reagent'
 //   icons for actions
 //   calculator widget
 //   fix templateWidget init lag
@@ -37,9 +33,7 @@
 //   remember last input values on open
 //   fix messageBar timeOut
 //   fix networkManager active request issue
-//   fix property extraction (check ethanol page)
 //   after reagent addition, select the newly added
-//   auto wikipedia link
 
 //
 // includes

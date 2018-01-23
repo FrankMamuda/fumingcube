@@ -86,6 +86,14 @@ ReagentDialog::~ReagentDialog() {
 }
 
 /**
+ * @brief ReagentDialog::name
+ * @return
+ */
+QString ReagentDialog::name() const {
+    return this->ui->nameEdit->text();
+}
+
+/**
  * @brief ReagentDialog::add
  */
 bool ReagentDialog::add() {

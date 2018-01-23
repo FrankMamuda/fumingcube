@@ -264,7 +264,7 @@ QString TextEdit::stripHTML( const QString &input ) {
     //
     // NOTE: this is highly inefficient, but I just can't get QRefExp
     //       to work properly with QString::remove
-    QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul).*?[>])|(?:<!--\\w+-->))" );
+    QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
     QRegularExpressionMatchIterator i = re.globalMatch( html );
     QStringList words;
 

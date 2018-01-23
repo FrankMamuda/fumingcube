@@ -40,9 +40,9 @@ PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( pa
  */
 void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
     this->document.setHtml( index.data( Qt::DisplayRole ).toString());
-    this->document.setTextWidth( QWIDGETSIZE_MAX );
+    this->document.setDocumentMargin( 2 );
     this->document.setTextWidth( index.data( PropertyModel::ColumnWidthRole ).toInt());
-    this->document.setTextWidth( this->document.idealWidth());
+   // this->document.setTextWidth( this->document.idealWidth());
 }
 
 /**
@@ -64,7 +64,8 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
 
     // draw html
     painter->save();
-    painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
+    painter->translate( option.rect.left(),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
+    //painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
     document.drawContents(painter);
     painter->restore();
 }

@@ -55,6 +55,7 @@ public:
     explicit ReagentDialog( QWidget *parent = nullptr, Modes mode = Add );
     ~ReagentDialog();
     Modes mode() const { return this->m_mode; }
+    QString name() const;
 
 public slots:
     bool add();

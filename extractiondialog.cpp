@@ -23,6 +23,8 @@
 #include "extractionmodel.h"
 #include "networkmanager.h"
 #include "property.h"
+#include "reagent.h"
+#include "template.h"
 #include "textedit.h"
 #include "ui_extractiondialog.h"
 
@@ -42,7 +44,6 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
     this->connect( NetworkManager::instance(), &NetworkManager::finished, [ this ]( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
         Q_UNUSED( url )
         Q_UNUSED( userData )
-        Q_UNUSED( data )
 
         if ( error ) {
             qCritical() << this->tr( "error processing network request" );
@@ -50,15 +51,16 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
         }
 
         switch ( type ) {
-        case NetworkManager::HTML:
+        case NetworkManager::Properties:
             qDebug() << "received html";
 
         {
             // we currently support only wikipedia
             QRegularExpression re( Ui::PatternWiki );
+            re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
             QRegularExpressionMatchIterator i = re.globalMatch( data );
             QStringList words;
-            QStringList cleanProps;
+            QStringList plainList;
 
             // clear previous entries
             this->properties.clear();
@@ -67,12 +69,25 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             // capture all unnecessary html tags
             while ( i.hasNext()) {
                 QRegularExpressionMatch match = i.next();
-                this->properties << match.captured( 1 );
-                cleanProps << match.captured( 1 ).remove( QRegExp("<[^>]*>" ));
-                this->values << match.captured( 2 );
+                QString property, value, plain, plainValue;
+
+                property = TextEdit::stripHTML( match.captured( 1 )).simplified();
+                value = TextEdit::stripHTML( match.captured( 2 )).simplified();
+                plain = property.remove( QRegExp( "<[^>]*>" ));
+                plainValue = property.remove( QRegExp( "<[^>]*>" ));
+
+                if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
+                    continue;
+
+                this->properties << property;
+                this->values << value;
+                plainList << plain;
             }
-            this->model->reset( cleanProps );
+            this->model->reset( plainList );
         }
+            break;
+
+        case NetworkManager::BasicProperties:
             break;
 
         case NetworkManager::NoType:
@@ -82,7 +97,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
     } );
 
     // connect wiki extraction action
-    this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {
+    this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {        
         //
         // FIXME: finished requests ARE NOT REMOVED PROPERLY
         //
@@ -129,4 +144,27 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
 ExtractionDialog::~ExtractionDialog() {
     delete this->ui;
     delete this->model;
+}
+
+/**
+ * @brief ExtractionDialog::setTemplateId
+ * @param id
+ */
+void ExtractionDialog::setTemplateId( int id ) {
+    Reagent *reagent;
+    Template *entry;
+    QString url;
+
+    // set id
+    this->m_templateId = id;
+
+    // set reagent url
+    if ( this->templateId() >= 0 ) {
+        entry = Template::fromId( this->templateId());
+        if ( entry != nullptr ) {
+            reagent = Reagent::fromId( entry->reagentId());
+            if ( reagent != nullptr )
+                 this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( reagent->name()).replace( " ", "_" ));
+        }
+    }
 }

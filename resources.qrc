@@ -12,5 +12,7 @@
         <file alias="property_movedown">icons/property_movedown.png</file>
         <file alias="property_moveup">icons/property_moveup.png</file>
         <file alias="clean_html">icons/clean_html.png</file>
+        <file alias="extract_properties">icons/extract_properties.png</file>
+        <file alias="cog">icons/cog.png</file>
     </qresource>
 </RCC>

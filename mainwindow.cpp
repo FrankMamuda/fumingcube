@@ -354,5 +354,5 @@ void MainWindow::on_actionProperties_triggered() {
     pd->show();
 
     // HACK: this works for now (dirty rescaling html document)
-    pd->resize( 640, 480 );
+    pd->resize( 400, 400 );
 }
