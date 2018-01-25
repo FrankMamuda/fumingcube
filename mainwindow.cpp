@@ -156,7 +156,7 @@ void MainWindow::restoreIndexes() {
     if ( reagentIndex >= 0 && reagentIndex < this->ui->reagentCombo->count())
         this->ui->reagentCombo->setCurrentIndex( reagentIndex );
 
-    templateIndex =Variable::instance()->integer( "ui_lastTemplateIndex" );
+    templateIndex = Variable::instance()->integer( "ui_lastTemplateIndex" );
     if ( templateIndex >= 0 && templateIndex < this->ui->templateCombo->count())
         this->ui->templateCombo->setCurrentIndex( templateIndex );
 }
@@ -165,6 +165,9 @@ void MainWindow::restoreIndexes() {
  * @brief MainWindow::~MainWindow
  */
 MainWindow::~MainWindow() {
+    this->disconnect( Database::instance(), &Database::changed, this, nullptr );
+    this->disconnect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, this, nullptr );
+    this->disconnect<void( QComboBox::* )( int )>( this->ui->templateCombo, &QComboBox::currentIndexChanged, this, nullptr );
     this->disconnect( this->signalMapper, SIGNAL( mapped( int )));
     delete this->signalMapper;
 
@@ -266,7 +269,15 @@ void MainWindow::calculate( int mode ) {
  */
 void MainWindow::on_actionAdd_triggered() {
     ReagentDialog dialog( this );
-    dialog.exec();
+
+    // save state
+    Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
+    Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
+
+    if ( dialog.exec() == QDialog::Accepted ) {
+        if ( dialog.reagentId() != -1 )
+            this->ui->reagentCombo->setCurrentIndex( dialog.reagentId());
+    }
 }
 
 /**
@@ -274,6 +285,11 @@ void MainWindow::on_actionAdd_triggered() {
  */
 void MainWindow::on_actionEdit_triggered() {
     ReagentDialog dialog( this, ReagentDialog::Edit );
+
+    // save state
+    Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
+    Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
+
     Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
     if ( reagent == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot open edit dialog: reagent not selected" ), MessageDock::Warning, 3000 );

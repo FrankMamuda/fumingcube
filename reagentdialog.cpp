@@ -68,8 +68,10 @@ void ReagentDialog::addNewTab( Template *entry )  {
         this->ui->tabWidget->setTabText( tabIndex, this->tr( "Default template" ));
         widget->setDefault();
     } else {
-        this->connect( widget, &TemplateWidget::nameChanged, [ this, tabIndex ]( const QString &name ) {
+        QObject *object( new QObject( this ));
+        this->connect( widget, &TemplateWidget::nameChanged, object, [ this, tabIndex, object ]( const QString &name ) {
             this->ui->tabWidget->setTabText( tabIndex, name );
+            object->deleteLater();
         } );
     }
 
@@ -91,6 +93,17 @@ ReagentDialog::~ReagentDialog() {
  */
 QString ReagentDialog::name() const {
     return this->ui->nameEdit->text();
+}
+
+/**
+ * @brief ReagentDialog::reagentId
+ * @return
+ */
+int ReagentDialog::reagentId() const {
+    if ( this->reagent == nullptr )
+        return -1;
+
+    return this->reagent->id();
 }
 
 /**
@@ -117,6 +130,7 @@ bool ReagentDialog::add() {
         Template::add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), reagent->id());
     }
 
+    this->reagent = reagent;
     Database::instance()->update();
     return true;
 }
@@ -227,7 +241,6 @@ void ReagentDialog::accept() {
 void ReagentDialog::on_tabWidget_tabCloseRequested( int index ) {
     TemplateWidget *widget;
 
-    qDebug() << index;
     if ( index == 0 )
         return;
 

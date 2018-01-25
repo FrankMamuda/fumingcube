@@ -42,7 +42,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
     this->document.setHtml( index.data( Qt::DisplayRole ).toString());
     this->document.setDocumentMargin( 2 );
     this->document.setTextWidth( index.data( PropertyModel::ColumnWidthRole ).toInt());
-   // this->document.setTextWidth( this->document.idealWidth());
+    this->document.setTextWidth( this->document.idealWidth());
 }
 
 /**

@@ -43,10 +43,8 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( pare
     // set up ui
     this->ui->setupUi( this );
 
-    if ( scaledPixmap.isNull()) {
-        qDebug() << "bad pixmap";
+    if ( scaledPixmap.isNull())
         return;
-    }
 
     // set pixmap to label
     this->ui->pixmapLabel->setPixmap( scaledPixmap );
@@ -101,5 +99,7 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( pare
  * @brief ImageUtils::~ImageUtils
  */
 ImageUtils::~ImageUtils() {
+    this->disconnect( this->ui->sizeSlider, &QSlider::valueChanged, this, nullptr );
+    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
     delete this->ui;
 }

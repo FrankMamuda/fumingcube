@@ -27,9 +27,14 @@
 /**
  * @brief LineEdit::LineEdit
  */
-LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_current{ "", "" }, m_default{ "", "" }, m_mode( NoMode ) {
+LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_mode( NoMode ) {
     // set text alignment
     this->setAlignment( Qt::AlignHCenter );
+
+    // initialize units to avoid segfaults
+    this->m_current = QVector<QString>( Secondary + 1, "" );
+    this->m_default = QVector<QString>( Secondary + 1, "" );
+    this->units = QVector<QMap<QString, qreal>>( Secondary + 1 );
 
     // as-you-type validation
     this->connect( this, &QLineEdit::textChanged, [ this ]() {
@@ -76,6 +81,14 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_c
 
         this->displayValue();
     } );
+}
+
+/**
+ * @brief LineEdit::~LineEdit
+ */
+LineEdit::~LineEdit() {
+    this->disconnect( this, &QLineEdit::textChanged, this, nullptr );
+    this->disconnect( this, &QLineEdit::editingFinished, this, nullptr );
 }
 
 /**
@@ -169,10 +182,8 @@ void LineEdit::setCurrentUnits( const QString &name, LineEdit::Units dest, bool 
     if ( this->units[dest].contains( name ) && ( QString::compare( this->currentUnits( dest ), name ))) {
         this->m_current[dest] = name;
 
-        if ( update ) {
+        if ( update )
             emit this->valueChanged();
-            qDebug() << "units changed";
-        }
     }
 }
 
@@ -186,7 +197,7 @@ void LineEdit::setMode( LineEdit::Modes mode ) {
     switch ( this->mode()) {
     case Mass:
         this->setPattern( "\\s*(\\d+[\\.|,]?\\s*\\d*)\\s*(mg|g|kg)?[\\s|\\n]*$" );
-        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );
+        this->setUnits( QString( "g,mg,kg" ).split( "," ), QList<qreal>() << 1 << 0.001 << 1000 );        
         break;
 
     case MolarMass:

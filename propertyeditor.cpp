@@ -229,6 +229,26 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
  */
 PropertyEditor::~PropertyEditor() {
     // disconnects
+    this->disconnect( this->ui->title, &TextEdit::currentCharFormatChanged, this, nullptr );
+    this->disconnect( this->ui->value, &TextEdit::currentCharFormatChanged, this, nullptr );
+    this->disconnect( this->ui->title, &TextEdit::entered, this, nullptr );
+    this->disconnect( this->ui->value, &TextEdit::entered, this, nullptr );
+    this->disconnect( this->ui->actionBold, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionItalic, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionUnderlined, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionSubScript, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionSuperScript, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionColour, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->comboFont, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->comboSize, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->actionCharacterMap, &QAction::triggered, this, nullptr );
+    this->disconnect( this->characterMap, &CharacterMap::characterSelected, this, nullptr );
+    this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->comboCommon, static_cast< void( QComboBox::* )( int )>( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
+    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::rejected, this, nullptr );
+    this->disconnect( this->ui->actionCleanHTML, &QAction::toggled, this, nullptr );
+
     delete this->characterMap;
     delete this->ui;
 }

@@ -56,6 +56,7 @@ public:
     ~ReagentDialog();
     Modes mode() const { return this->m_mode; }
     QString name() const;
+    int reagentId() const;
 
 public slots:
     bool add();

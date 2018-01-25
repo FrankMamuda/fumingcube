@@ -22,6 +22,7 @@
 // includes
 //
 #include <QDialog>
+#include "networkmanager.h"
 
 //
 // classes
@@ -33,11 +34,7 @@ class ExtractionModel;
  */
 namespace Ui {
 class ExtractionDialog;
-//<tr>(?:.|\n)*?(?=<td>)<td>((?:.|\n)*?(?=<\/td>))(?:.|\n)*?(?=<td>)<td>((?:.|\n)*?(?=<\/td>))
-//static const QString PatternWiki( "<tr>(?:.|\n)*?(?=<td>)<td>((?:.|\n)*?(?=<\\/td>))(?:.|\n)*?(?=<td>)<td>((?:.|\n)*?(?=<\\/td>))" );
-//static const QString PatternWikiAlt2( "(?:<tr>)(?:.|\n)+?(?=<td>)(?:<td>)((?:.|\n)+?(?=<\\/td>))(?:.|\n)+?(?=<td>)(?:<td>)((?:.|\n)+?(?=<\\/td>))" );
 static const QString PatternWiki( "<tr>.*?(?=<td>)<td>(.*?(?=<\\/td>)).*?(?=<td>)<td>(.*?(?=<\\/td>))" );
-//static const QString PatternWikiAlt3( "<tr>\n?<td>\n?(?:(?:<.+?(?=>)>)(?:<.+?(?=>)>)?)?(.*?(?=<\\/(?:a|td|span)))(?:(?:<\\/.+?(?=>)>)?(?:<\\/.+?(?=>)>)?)?\n?<\\/td>\n?<td>(.+)<\\/td>\n?<\\/tr>" );
 }
 
 /**
@@ -54,6 +51,7 @@ public:
 
 public slots:
     void setTemplateId( int id = -1 );
+    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
 
 private:
     Ui::ExtractionDialog *ui;

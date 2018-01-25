@@ -58,7 +58,7 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
 
     // failsafe
     if ( this->entry == nullptr || !index.isValid() || this->view == nullptr ) {
-        qDebug() << "fail";
+        qDebug() << this->tr( "invlaid model data" );
         return QVariant();
     }
 

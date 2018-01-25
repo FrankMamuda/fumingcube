@@ -21,7 +21,6 @@
 //
 #include "extractiondialog.h"
 #include "extractionmodel.h"
-#include "networkmanager.h"
 #include "property.h"
 #include "reagent.h"
 #include "template.h"
@@ -41,60 +40,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
     this->ui->setupUi( this );
 
     // connect network manager
-    this->connect( NetworkManager::instance(), &NetworkManager::finished, [ this ]( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
-        Q_UNUSED( url )
-        Q_UNUSED( userData )
-
-        if ( error ) {
-            qCritical() << this->tr( "error processing network request" );
-            return;
-        }
-
-        switch ( type ) {
-        case NetworkManager::Properties:
-            qDebug() << "received html";
-
-        {
-            // we currently support only wikipedia
-            QRegularExpression re( Ui::PatternWiki );
-            re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
-            QRegularExpressionMatchIterator i = re.globalMatch( data );
-            QStringList words;
-            QStringList plainList;
-
-            // clear previous entries
-            this->properties.clear();
-            this->values.clear();
-
-            // capture all unnecessary html tags
-            while ( i.hasNext()) {
-                QRegularExpressionMatch match = i.next();
-                QString property, value, plain, plainValue;
-
-                property = TextEdit::stripHTML( match.captured( 1 )).simplified();
-                value = TextEdit::stripHTML( match.captured( 2 )).simplified();
-                plain = property.remove( QRegExp( "<[^>]*>" ));
-                plainValue = property.remove( QRegExp( "<[^>]*>" ));
-
-                if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
-                    continue;
-
-                this->properties << property;
-                this->values << value;
-                plainList << plain;
-            }
-            this->model->reset( plainList );
-        }
-            break;
-
-        case NetworkManager::BasicProperties:
-            break;
-
-        case NetworkManager::NoType:
-            qCritical() << this->tr( "unknown network request type" );
-            return;
-        }
-    } );
+    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
 
     // connect wiki extraction action
     this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {        
@@ -142,6 +88,9 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
+    this->disconnect( this->ui->extractButton, &QPushButton::clicked, this, nullptr );
+    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
     delete this->ui;
     delete this->model;
 }
@@ -166,5 +115,66 @@ void ExtractionDialog::setTemplateId( int id ) {
             if ( reagent != nullptr )
                  this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( reagent->name()).replace( " ", "_" ));
         }
+    }
+}
+
+/**
+ * @brief ExtractionDialog::requestFinished
+ * @param url
+ * @param type
+ * @param userData
+ * @param data
+ * @param error
+ */
+void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
+    Q_UNUSED( url )
+    Q_UNUSED( userData )
+
+    if ( error ) {
+        qCritical() << this->tr( "error processing network request" );
+        return;
+    }
+
+    switch ( type ) {
+    case NetworkManager::Properties:
+    {
+        // we currently support only wikipedia
+        QRegularExpression re( Ui::PatternWiki );
+        re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
+        QRegularExpressionMatchIterator i = re.globalMatch( data );
+        QStringList words;
+        QStringList plainList;
+
+        // clear previous entries
+        this->properties.clear();
+        this->values.clear();
+
+        // capture all unnecessary html tags
+        while ( i.hasNext()) {
+            QRegularExpressionMatch match = i.next();
+            QString property, value, plain, plainValue;
+
+            property = TextEdit::stripHTML( match.captured( 1 )).simplified();
+            value = TextEdit::stripHTML( match.captured( 2 )).simplified();
+            plain = property.remove( QRegExp( "<[^>]*>" ));
+            plainValue = property.remove( QRegExp( "<[^>]*>" ));
+
+            if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
+                continue;
+
+            this->properties << property;
+            this->values << value;
+            plainList << plain;
+        }
+        this->model->reset( plainList );
+    }
+        break;
+
+    case NetworkManager::BasicProperties:
+        break;
+
+    case NetworkManager::NoType:
+        qCritical() << this->tr( "unknown network request type" );
+        return;
     }
 }

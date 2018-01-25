@@ -22,6 +22,7 @@
 #include <QWidget>
 #include "ui_templatewidget.h"
 #include "template.h"
+#include "networkmanager.h"
 
 /**
  * @brief The Ui namespace
@@ -54,13 +55,15 @@ public:
     qreal assay() const { return this->ui->assayEdit->scaledValue(); }
 
     enum Properties {
-        Density = 0,
+        NoProperty = -1,
+        Density,
         MolarMass
     };
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
     int save( int id );
+    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
 
 signals:
     void nameChanged( const QString &name );

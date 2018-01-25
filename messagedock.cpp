@@ -141,6 +141,7 @@ void MessageDock::hideMessage() {
  * @brief MessageDock::~MessageDock
  */
 MessageDock::~MessageDock() {
+    this->disconnect( this->closeButton, &QPushButton::clicked, this, nullptr );
     delete this->dockWidget;
     delete this->opacityEffect;
 }

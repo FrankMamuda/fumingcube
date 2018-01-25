@@ -21,6 +21,7 @@
 //
 #include <QDebug>
 #include <QInputDialog>
+#include <ui_templatewidget.h>
 #include "templatewidget.h"
 #include "ui_templatewidget.h"
 #include "template.h"
@@ -63,76 +64,13 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
         url = QInputDialog::getText( this, this->tr( "Extract from Wikipedia" ), this->tr( "URL:" ), QLineEdit::Normal, QString( "https://en.wikipedia.org/wiki/%1" ).arg( dialog->name().replace( " ", "_" )), &ok );
         if ( ok && !url.isEmpty()) {
             NetworkManager::instance()->execute( url, NetworkManager::BasicProperties, property );
-        }
+        }        
     };
     this->connect( this->ui->densityButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( Density ); } );
     this->connect( this->ui->molarMassButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( MolarMass ); } );
 
     // connect network manager
-    this->connect( NetworkManager::instance(), &NetworkManager::finished, [ this ]( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
-        Q_UNUSED( url )
-        Q_UNUSED( userData )
-
-        if ( error ) {
-            qCritical() << this->tr( "error processing network request" );
-            return;
-        }
-
-        switch ( type ) {
-        case NetworkManager::BasicProperties:
-        {
-            QRegularExpression re;
-
-            switch ( static_cast<Properties>( userData.toInt())) {
-            case Density:
-                re.setPattern( "<td.*?(?=Density).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
-                break;
-
-            case MolarMass:
-                re.setPattern( "<td.*?(?=Molar mass).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
-                break;
-
-            default:
-                return;
-            }
-
-            // we currently support only wikipedia
-            re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
-            QRegularExpressionMatch match = re.match( data );
-
-            // capture all unnecessary html tags
-            if ( match.hasMatch()) {
-                QString value;
-
-                value = TextEdit::stripHTML( match.captured( 1 )).simplified().remove( QRegExp( "<[^>]*>" ));
-                if ( value.isEmpty())
-                    return;
-
-                switch ( static_cast<Properties>( userData.toInt())) {
-                case Density:
-                    this->ui->densityEdit->setText( value );
-                    break;
-
-                case MolarMass:
-                    this->ui->molarMassEdit->setText( value );
-                    break;
-
-                default:
-                    return;
-                }
-            }
-        }
-            break;
-
-        case NetworkManager::Properties:
-            break;
-
-        case NetworkManager::NoType:
-            qCritical() << this->tr( "unknown network request type" );
-            return;
-        }
-    } );
-    //this->ui->propsButton->hide();
+    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
 
     // set up inputs
     this->ui->amountEdit->setMode( LineEdit::Amount );
@@ -151,7 +89,85 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
  * @brief TemplateWidget::~TemplateWidget
  */
 TemplateWidget::~TemplateWidget() {
+    this->disconnect( this->ui->nameEdit, &QLineEdit::textChanged, this, nullptr );
+    this->disconnect<void( QComboBox::* )( int )>( this->ui->stateCombo, &QComboBox::currentIndexChanged, this, nullptr );
+    this->disconnect( this->ui->densityButton, &QToolButton::clicked, this, nullptr );
+    this->disconnect( this->ui->molarMassButton, &QToolButton::clicked, this, nullptr );
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
     delete this->ui;
+}
+
+/**
+ * @brief TemplateWidget::requestFinished
+ * @param url
+ * @param type
+ * @param userData
+ * @param data
+ * @param error
+ */
+void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error  ) {
+    Q_UNUSED( url )
+    Q_UNUSED( userData )
+
+    if ( error ) {
+        qCritical() << this->tr( "error processing network request" );
+        return;
+    }
+
+    switch ( type ) {
+    case NetworkManager::BasicProperties:
+    {
+        QRegularExpression re;
+
+        switch ( static_cast<Properties>( userData.toInt())) {
+        case Density:
+            re.setPattern( "<td.*?(?=Density).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+            break;
+
+        case MolarMass:
+            re.setPattern( "<td.*?(?=Molar mass).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+            break;
+
+        case NoProperty:
+            return;
+        }
+
+        // we currently support only wikipedia
+        re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
+        QRegularExpressionMatch match = re.match( data );
+
+        // capture all unnecessary html tags
+        if ( match.hasMatch()) {
+            qreal value;
+            bool ok;
+
+            value = TextEdit::stripHTML( match.captured( 1 )).simplified().remove( QRegExp( "<[^>]*>" )).toDouble( &ok );
+            if ( !ok )
+                return;
+
+            switch ( static_cast<Properties>( userData.toInt())) {
+            case Density:
+                this->ui->densityEdit->setScaledValue( value );
+                break;
+
+            case MolarMass:
+                this->ui->molarMassEdit->setScaledValue( value );
+                break;
+
+            case NoProperty:
+                return;
+            }
+        }
+    }
+        break;
+
+    case NetworkManager::Properties:
+        break;
+
+    case NetworkManager::NoType:
+        qCritical() << this->tr( "unknown network request type" );
+        return;
+    }
 }
 
 /**
@@ -181,9 +197,11 @@ void TemplateWidget::setState( Template::State state ) {
         this->ui->densityEdit->setDisabled( true );
         this->ui->amountEdit->setCurrentUnits( "g" );
         this->ui->amountEdit->displayValue();
+        this->ui->densityButton->setDisabled( true );
     } else {
         this->ui->densityEdit->setEnabled( true );
         this->ui->amountEdit->setCurrentUnits( "ml" );
         this->ui->amountEdit->displayValue();
+        this->ui->densityButton->setEnabled( true );
     }
 }

@@ -164,8 +164,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
                 qreal aspect;
                 const int MaxPixmapWidth = 1024;
 
-                qDebug() << "header" << header.nSize;
-
                 // get metaFile dimensions
                 width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ));
                 height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ));

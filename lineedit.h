@@ -53,6 +53,7 @@ public:
     };
 
     explicit LineEdit( QWidget *parent = nullptr );
+    ~LineEdit();
     QString pattern() const { return this->m_pattern; }
     qreal value() const { return this->m_value; }
     qreal scaledValue() const { return this->value() * this->multiplier(); }
@@ -82,8 +83,8 @@ protected:
 private:
     QString m_pattern;
     qreal m_value;
-    QMap<QString, qreal> units[2];
-    QString m_current[2];
-    QString m_default[2];
+    QVector<QMap<QString, qreal>> units;
+    QVector<QString> m_current;
+    QVector<QString> m_default;
     Modes m_mode;
 };

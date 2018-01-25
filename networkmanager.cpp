@@ -55,7 +55,7 @@ void NetworkManager::clear() {
  * @brief NetworkManager::add
  * @param request
  */
-void NetworkManager::add( const QString &url, Type type, const QVariant &userData, bool priority ) {
+void NetworkManager::add( const QString &url, NetworkManager::Type type, const QVariant &userData, bool priority ) {
     QNetworkRequest request;
 
     // create request with requested url, store request type and user data

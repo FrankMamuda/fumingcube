@@ -69,8 +69,6 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         if ( title.isEmpty() || value.isEmpty())
             return;
 
-        qDebug() << title << value;
-
         switch ( mode ) {
         case PropertyEditor::Add:
             // TODO: check of duplicates (is it really necessary at all?)
@@ -166,6 +164,15 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
  * @brief PropertyDialog::~PropertyDialog
  */
 PropertyDialog::~PropertyDialog() {
+    this->disconnect( this->ui->closeButton, &QPushButton::clicked, this, nullptr );
+    this->disconnect( this->editor, &PropertyEditor::accepted, this, nullptr );
+    this->disconnect( this->ui->actionAdd, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionEdit, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionRemove, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionUp, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionDown, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionWiki, &QAction::triggered, this, nullptr );
+
     delete this->ui;
     delete this->editor;
 }

@@ -53,7 +53,7 @@ public:
     bool isRunning() const { return this->m_running; }
 
 signals:
-    void finished( const QString &url, Type type, const QVariant &userData, QByteArray data, bool error );
+    void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
     void stopped();
 
 public slots:
