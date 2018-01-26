@@ -113,6 +113,8 @@ void NetworkManager::replyReceived( QNetworkReply *networkReply ) {
     QVariant userData;
     bool error = false, redirect = false;
 
+    qDebug() << "reply received" << this->activeRequests.count() << this->requestList.count();
+
     // handle errors externally
     if ( networkReply->error() != QNetworkReply::NoError ) {
         qCritical() << networkReply->error();

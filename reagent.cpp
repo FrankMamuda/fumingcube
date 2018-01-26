@@ -38,6 +38,20 @@ Reagent *Reagent::fromId( int id ) {
 }
 
 /**
+ * @brief Reagent::fromName
+ * @param name
+ * @return
+ */
+Reagent *Reagent::fromName( const QString &name ) {
+    foreach ( Reagent *reagent, Database::instance()->reagentMap ) {
+        if ( !QString::compare( name, reagent->name() ))
+            return reagent;
+    }
+
+    return nullptr;
+}
+
+/**
  * @brief Reagent::add
  * @param name
  */

@@ -23,6 +23,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QStringListModel>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "reagentdialog.h"
@@ -32,25 +33,61 @@
 #include "propertydialog.h"
 #include "xmltools.h"
 #include "variable.h"
+#include "reagentmodel.h"
+#include "templatemodel.h"
 
 /**
  * @brief MainWindow::MainWindow
  * @param parent
  */
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ), signalMapper( new QSignalMapper( this )), messageDock( new MessageDock( this )) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ),
+    signalMapper( new QSignalMapper( this )),
+    messageDock( new MessageDock( this )),
+    reagentModel( new ReagentModel( this )),
+    templateModel( new TemplateModel( this )),
+    reagentCompleter( new QCompleter( this->reagentModel ))
+{
     // set up ui
     this->ui->setupUi( this );
 
+    // set up models and completers
+    this->ui->reagentCombo->setModel( this->reagentModel );
+    this->ui->templateCombo->setModel( this->templateModel );
+    this->reagentCompleter->setCaseSensitivity( Qt::CaseInsensitive );
+    this->reagentCompleter->setCompletionMode( QCompleter::PopupCompletion );
+    this->ui->findEdit->setCompleter( this->reagentCompleter );
+
+
+    auto setReagent = [ this ]( const QString &name ) {
+        Reagent *reagent;
+
+        reagent = Reagent::fromName( name );
+        if ( reagent != nullptr )
+            this->ui->reagentCombo->setCurrentIndex( reagent->id());
+
+        this->ui->stackedWidget->setCurrentIndex( 0 );
+    };
+    this->connect<void( QCompleter::* )( const QString & )>( this->reagentCompleter, &QCompleter::activated, [ setReagent ]( const QString &name ) {
+        setReagent( name );
+    } );
+
+    this->connect( this->ui->findEdit, &QLineEdit::returnPressed, [ this, setReagent ]  {
+        setReagent( this->ui->findEdit->text());
+    } );
+
+    this->connect( this->ui->findButton, &QPushButton::clicked, [ this ]  {
+        this->ui->stackedWidget->setCurrentIndex( 1 );
+
+        if ( this->currentReagent() != nullptr ) {
+            this->ui->findEdit->setText( this->currentReagent()->name());
+            this->ui->findEdit->selectAll();
+        }
+
+        this->ui->findEdit->setFocus();
+    } );
+
     // refill reagents and templates on database changes
     this->connect( Database::instance(), &Database::changed, [ this ]() {
-        // clear reagent list
-        this->ui->reagentCombo->clear();
-
-        // add reagents
-        this->ui->reagentCombo->addItem( "<None>", -1 );
-        foreach ( Reagent *reagent, Database::instance()->reagentMap )
-            this->ui->reagentCombo->addItem( reagent->name(), reagent->id());
-
         // add templates
         this->fillTemplates();
 
@@ -169,7 +206,13 @@ MainWindow::~MainWindow() {
     this->disconnect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, this, nullptr );
     this->disconnect<void( QComboBox::* )( int )>( this->ui->templateCombo, &QComboBox::currentIndexChanged, this, nullptr );
     this->disconnect( this->signalMapper, SIGNAL( mapped( int )));
+    this->disconnect( this->ui->findEdit, &QLineEdit::returnPressed, this, nullptr );
+    this->disconnect( this->ui->findButton, &QPushButton::clicked, this, nullptr );
+    //this->disconnect( this->ui->clearButton, &QPushButton::clicked, this, nullptr );
+
     delete this->signalMapper;
+    delete this->reagentModel;
+    delete this->reagentCompleter;
 
     // connect for updates
     foreach ( LineEdit *lineEdit, this->inputList )
@@ -179,23 +222,28 @@ MainWindow::~MainWindow() {
 }
 
 /**
+ * @brief MainWindow::currentReagent
+ * @return
+ */
+Reagent *MainWindow::currentReagent() {
+    if ( this->ui->reagentCombo->currentIndex() == -1 )
+        return nullptr;
+
+    return Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
+}
+
+/**
  * @brief MainWindow::fillTemplates
  * @param reagentId
  */
 void MainWindow::fillTemplates() {
-    Reagent *reagent;
-
-    // clear template list
-    this->ui->templateCombo->clear();
-
     // get current reagent
-    reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
-    if ( reagent == nullptr )
+    if ( this->currentReagent() == nullptr )
         return;
 
-    // add templates
-    foreach ( Template *entry, reagent->templateMap )
-        this->ui->templateCombo->addItem( entry->name(), entry->id());
+    this->templateModel->reset( this->currentReagent());
+    if ( this->ui->templateCombo->count())
+        this->ui->templateCombo->setCurrentIndex( 0 );
 }
 
 /**
@@ -290,13 +338,12 @@ void MainWindow::on_actionEdit_triggered() {
     Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
 
-    Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
-    if ( reagent == nullptr ) {
+    if ( this->currentReagent() == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot open edit dialog: reagent not selected" ), MessageDock::Warning, 3000 );
         return;
     }
 
-    dialog.setReagent( reagent );
+    dialog.setReagent( this->currentReagent());
     dialog.exec();
 }
 
@@ -330,22 +377,21 @@ void MainWindow::on_actionRemove_triggered() {
     QSqlQuery query;
 
     // fetch current reagent
-    Reagent *reagent = Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
-    if ( reagent == nullptr ) {
+    if ( this->currentReagent() == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot remove: reagent not selected" ), MessageDock::Warning, 3000 );
         return;
     }
 
     // request confirmation
-    if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove reagent '%1'" ).arg( reagent->name()), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
+    if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove reagent '%1'" ).arg( this->currentReagent()->name()), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
         return;
 
     // remove reagent and its templates
-    Database::instance()->reagentMap.remove( reagent->id());
-    if ( !query.exec( QString( "delete from reagents where id=%1" ).arg( reagent->id())) || !query.exec( QString( "delete from templates where reagentId=%1" ).arg( reagent->id())))
+    Database::instance()->reagentMap.remove( this->currentReagent()->id());
+    if ( !query.exec( QString( "delete from reagents where id=%1" ).arg( this->currentReagent()->id())) || !query.exec( QString( "delete from templates where reagentId=%1" ).arg( this->currentReagent()->id())))
         qCritical() << this->tr( "could not delete reagent, reason: '%1'" ).arg( query.lastError().text());
 
-    delete reagent;
+    delete this->currentReagent();
 
     // update view
     Database::instance()->update();

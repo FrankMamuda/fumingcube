@@ -21,6 +21,7 @@
 //
 // includes
 //
+#include <QCompleter>
 #include <QMainWindow>
 #include <QSignalMapper>
 
@@ -36,6 +37,9 @@ class MainWindow;
 //
 class LineEdit;
 class MessageDock;
+class ReagentModel;
+class TemplateModel;
+class Reagent;
 
 /**
  * @brief The MainWindow class
@@ -46,6 +50,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow();
+    Reagent *currentReagent();
 
 public slots:
     void restoreIndexes();
@@ -67,4 +72,7 @@ private:
     QList<LineEdit*> inputList;
     QSignalMapper *signalMapper;
     MessageDock *messageDock;
+    ReagentModel *reagentModel;
+    TemplateModel *templateModel;
+    QCompleter *reagentCompleter;
 };

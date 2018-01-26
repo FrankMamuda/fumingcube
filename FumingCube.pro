@@ -74,7 +74,9 @@ HEADERS += \
     xmltools.h \
     networkmanager.h \
     extractiondialog.h \
-    extractionmodel.h
+    extractionmodel.h \
+    reagentmodel.h \
+    templatemodel.h
 
 FORMS += \
         mainwindow.ui \
