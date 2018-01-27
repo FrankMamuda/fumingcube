@@ -63,7 +63,7 @@ public:
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
     int save( int id );
-    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
+    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 signals:
     void nameChanged( const QString &name );

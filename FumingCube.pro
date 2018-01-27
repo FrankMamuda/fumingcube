@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql qml xml winextras
+QT       += core gui sql qml xml winextras network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,6 +12,7 @@ TARGET = FumingCube
 TEMPLATE = app
 
 win32:LIBS += -lgdi32
+win32:CONFIG += openssl-linked
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -47,7 +48,6 @@ SOURCES += \
     imageutils.cpp \
     variable.cpp \
     xmltools.cpp \
-    networkmanager.cpp \
     extractiondialog.cpp
 
 HEADERS += \

@@ -44,6 +44,7 @@
 #include "variable.h"
 #include <QApplication>
 #include <QDebug>
+#include <QNetworkProxyFactory>
 
 // default message handler
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( 0 );
@@ -70,6 +71,8 @@ void messageFilter( QtMsgType type, const QMessageLogContext &context, const QSt
  * @return
  */
 int main( int argc, char *argv[] ) {
+    QNetworkProxyFactory::setUseSystemConfiguration( true );
+
     // set console output pattern
     qSetMessagePattern( "%{if-category}%{category}: %{endif}%{function}: %{message}" );
 

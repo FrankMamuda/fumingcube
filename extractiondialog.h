@@ -51,7 +51,7 @@ public:
 
 public slots:
     void setTemplateId( int id = -1 );
-    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
+    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 private:
     Ui::ExtractionDialog *ui;

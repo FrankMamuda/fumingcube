@@ -40,7 +40,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
     this->ui->setupUi( this );
 
     // connect network manager
-    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
+    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
 
     // connect wiki extraction action
     this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {        
@@ -52,7 +52,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             return;
         }
 
-        NetworkManager::instance()->execute( this->ui->urlEdit->text());
+        NetworkManager::instance()->execute( this->ui->urlEdit->text(), NetworkManager::Properties );
     } );
 
     // connect buttonBox
@@ -90,7 +90,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
 ExtractionDialog::~ExtractionDialog() {
     this->disconnect( this->ui->extractButton, &QPushButton::clicked, this, nullptr );
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
-    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
     delete this->ui;
     delete this->model;
 }
@@ -126,14 +126,14 @@ void ExtractionDialog::setTemplateId( int id ) {
  * @param data
  * @param error
  */
-void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error ) {
+void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data ) {
     Q_UNUSED( url )
     Q_UNUSED( userData )
 
-    if ( error ) {
+    /*if ( error ) {
         qCritical() << this->tr( "error processing network request" );
         return;
-    }
+    }*/
 
     switch ( type ) {
     case NetworkManager::Properties:

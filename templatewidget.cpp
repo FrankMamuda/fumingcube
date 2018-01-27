@@ -70,7 +70,7 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     this->connect( this->ui->molarMassButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( MolarMass ); } );
 
     // connect network manager
-    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
+    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
 
     // set up inputs
     this->ui->amountEdit->setMode( LineEdit::Amount );
@@ -93,7 +93,7 @@ TemplateWidget::~TemplateWidget() {
     this->disconnect<void( QComboBox::* )( int )>( this->ui->stateCombo, &QComboBox::currentIndexChanged, this, nullptr );
     this->disconnect( this->ui->densityButton, &QToolButton::clicked, this, nullptr );
     this->disconnect( this->ui->molarMassButton, &QToolButton::clicked, this, nullptr );
-    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray, bool )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray, bool )));
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
     delete this->ui;
 }
 
@@ -105,14 +105,14 @@ TemplateWidget::~TemplateWidget() {
  * @param data
  * @param error
  */
-void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error  ) {
+void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data ) {
     Q_UNUSED( url )
     Q_UNUSED( userData )
 
-    if ( error ) {
+    /*if ( error ) {
         qCritical() << this->tr( "error processing network request" );
         return;
-    }
+    }*/
 
     switch ( type ) {
     case NetworkManager::BasicProperties:

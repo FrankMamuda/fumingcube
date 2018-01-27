@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Zvaigznu Planetarijs
+ * Copyright (C) 2017-2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,14 @@
 // includes
 //
 #include "singleton.h"
-#include <QObject>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-//
-// namespace Network
-//
-namespace Network {
-static const int MaxRequests = 10;
-}
-
 /**
  * @brief The NetworkManager class
  */
-class NetworkManager : public QObject {
+class NetworkManager: public QObject {
     Q_OBJECT
     Q_ENUMS( Type )
 
@@ -48,29 +40,77 @@ public:
         Properties
     };
 
+    /**
+     * @brief instance
+     * @return
+     */
     static NetworkManager *instance() { return Singleton<NetworkManager>::instance( NetworkManager::createInstance ); }
-    ~NetworkManager();
-    bool isRunning() const { return this->m_running; }
 
 signals:
-    void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, QByteArray data, bool error );
-    void stopped();
+    /**
+     * @brief finished
+     * @param url
+     * @param data
+     */
+    void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 public slots:
-    void add( const QString &url, Type type = Properties, const QVariant &userData = QVariant(), bool priority = false );
-    void execute( const QString &url, Type type = Properties, const QVariant &userData = QVariant(), bool priority = false ) { this->add( url, type, userData, priority ); this->run(); }
-    void run();
-    void stop() { this->m_running  = false; }
-    void clear();
+    /**
+     * @brief execute
+     * @param url
+     * @param type
+     */
+    void execute( const QString &url, Type type, const QVariant &userData = QVariant()) {
+        QNetworkRequest request;
 
-private slots:
-    void replyReceived( QNetworkReply *reply );
+        request.setUrl( QUrl::fromEncoded( url.toLocal8Bit()));
+        request.setAttribute( QNetworkRequest::User, static_cast<int>( type ));
+        request.setAttribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ), userData );
+
+        this->activeRequests << this->manager.get( request );;
+    }
+
+    /**
+     * @brief requestCompleted
+     * @param reply
+     */
+    void requestCompleted( QNetworkReply *reply ) {
+        int status;
+        Type type;
+        QVariant userData;
+        QUrl url( reply->url());
+
+        if ( reply->error()) {
+            qCritical() << this->tr( "request \"%1\" failed: %2" ).arg( url.toEncoded().constData()).arg( reply->errorString());
+        } else {
+            status = reply->attribute( QNetworkRequest::HttpStatusCodeAttribute ).toInt();
+            type = static_cast<Type>( reply->request().attribute( QNetworkRequest::User ).toInt());
+            userData = reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ));
+
+            if ( status == 301 || status == 302 || status == 303 || status == 305 || status == 307 || status == 308 ) {
+                qWarning()  << this->tr( "request \"%1\" redirected" );
+                QString redirectURL( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toString());
+                this->execute( redirectURL, type, userData );
+            } else
+                emit this->finished( url.toString(), type, userData, reply->readAll());
+        }
+
+        this->activeRequests.removeAll( reply );
+        reply->deleteLater();
+    }
 
 private:
-    explicit NetworkManager( QObject *parent = nullptr );
+    /**
+     * @brief NetworkManager
+     */
+    NetworkManager() { this->connect( &this->manager, SIGNAL( finished( QNetworkReply* )), SLOT( requestCompleted( QNetworkReply* ))); }
+
+    /**
+     * @brief createInstance
+     * @return
+     */
     static NetworkManager *createInstance() { return new NetworkManager(); }
-    QNetworkAccessManager *accessManager;
-    bool m_running;
-    QList<QNetworkRequest> activeRequests;
-    QList<QNetworkRequest> requestList;
+
+    QNetworkAccessManager manager;
+    QList<QNetworkReply* > activeRequests;
 };

@@ -63,7 +63,7 @@ public:
     ~PropertyEditor();
 
 public slots:
-    void open( Modes mode, const QString &title = QString::null, const QString &value = QString::null );
+    void open( Modes mode, const QString &title = QString(), const QString &value = QString());
 
 signals:
     void accepted( Modes mode, const QString &title, const QString &value );
