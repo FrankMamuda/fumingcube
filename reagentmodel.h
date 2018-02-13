@@ -49,7 +49,7 @@ public:
      * @brief rowCount
      * @return
      */
-    int rowCount( const QModelIndex & = QModelIndex()) const override { return Database::instance()->reagentMap.count(); }
+    int rowCount( const QModelIndex & = QModelIndex()) const override { return Database::instance()->reagentMap.count() + 1; }
 
     /**
      * @brief data
@@ -63,13 +63,21 @@ public:
         if ( !index.isValid())
             return QVariant();
 
-        reagent = Database::instance()->reagentMap.values().at( index.row());
-        if ( reagent != nullptr ) {
+        if ( index.row() < Database::instance()->reagentMap.count()) {
+            reagent = Database::instance()->reagentMap.values().at( index.row());
+            if ( reagent != nullptr ) {
+                if ( role == Qt::DisplayRole || role == Qt::EditRole )
+                    return reagent->name();
+
+                if ( role == Qt::UserRole )
+                    return reagent->id();
+            }
+        } else {
             if ( role == Qt::DisplayRole || role == Qt::EditRole )
-                return reagent->name();
+                return this->tr( "<none>" );
 
             if ( role == Qt::UserRole )
-                return reagent->id();
+                return -1;
         }
 
         return QVariant();

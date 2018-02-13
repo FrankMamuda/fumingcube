@@ -30,10 +30,10 @@
 //   built-in database
 //   disable toolTips and volume/density values for Solid states
 //   copy data from default template, upon opening new tab
-//   remember last input values on open
 //   fix messageBar timeOut
-//   fix networkManager active request issue
 //   after reagent addition, select the newly added
+//   lock icon for molarMass/density if reagent!=None (view delegate for LineEdit?)
+//
 
 //
 // includes
@@ -44,7 +44,6 @@
 #include "variable.h"
 #include <QApplication>
 #include <QDebug>
-#include <QNetworkProxyFactory>
 
 // default message handler
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( 0 );
@@ -71,8 +70,6 @@ void messageFilter( QtMsgType type, const QMessageLogContext &context, const QSt
  * @return
  */
 int main( int argc, char *argv[] ) {
-    QNetworkProxyFactory::setUseSystemConfiguration( true );
-
     // set console output pattern
     qSetMessagePattern( "%{if-category}%{category}: %{endif}%{function}: %{message}" );
 
@@ -82,6 +79,7 @@ int main( int argc, char *argv[] ) {
     // load settings
     Variable::instance()->add( "ui_lastReagentIndex", -1 );
     Variable::instance()->add( "ui_lastTemplateIndex", -1 );
+    Variable::instance()->add( "ui_lastValue", 1.0 );
     XMLTools::instance()->read();
 
     // show main window

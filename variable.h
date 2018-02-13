@@ -58,6 +58,7 @@ public:
     template<typename T>
     T value( const QString &key, bool defaultValue = false ) { if ( defaultValue ) return qvariant_cast<T>( this->list[key].defaultValue()); return qvariant_cast<T>( this->list[key].value()); }
     int integer( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<int>( key, defaultValue ); }
+    qreal decimalValue( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<qreal>( key, defaultValue ); }
     bool isEnabled( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<bool>( key, defaultValue ); }
     bool isDisabled( const QString &key, bool defaultValue = false ) { return !Variable::instance()->isEnabled( key, defaultValue ); }
     QString string( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<QString>( key, defaultValue ); }
@@ -93,7 +94,9 @@ public:
             }
         }
     }
+
     void setInteger( const QString &key, int value ) { Variable::instance()->setValue<int>( key, value ); }
+    void setDecimalValue( const QString &key, qreal value ) { Variable::instance()->setValue<qreal>( key, value ); }
     void enable( const QString &key ) { Variable::instance()->setValue<bool>( key, true ); }
     void disable( const QString &key ) { Variable::instance()->setValue<bool>( key, false ); }
     void setString( const QString &key, const QString &string ) { Variable::instance()->setValue<QString>( key, string ); }

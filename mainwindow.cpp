@@ -57,24 +57,26 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->reagentCompleter->setCompletionMode( QCompleter::PopupCompletion );
     this->ui->findEdit->setCompleter( this->reagentCompleter );
 
-
+    // set up reagent completer
     auto setReagent = [ this ]( const QString &name ) {
         Reagent *reagent;
 
         reagent = Reagent::fromName( name );
-        if ( reagent != nullptr )
-            this->ui->reagentCombo->setCurrentIndex( reagent->id());
+        if ( reagent != nullptr ) {
+            int y;
+
+            for ( y = 0; y < this->ui->reagentCombo->count(); y++ ) {
+                if ( this->ui->reagentCombo->itemData( y, Qt::UserRole ).toInt() == reagent->id())
+                    this->ui->reagentCombo->setCurrentIndex( y );
+            }
+        }
 
         this->ui->stackedWidget->setCurrentIndex( 0 );
     };
-    this->connect<void( QCompleter::* )( const QString & )>( this->reagentCompleter, &QCompleter::activated, [ setReagent ]( const QString &name ) {
-        setReagent( name );
-    } );
+    this->connect<void( QCompleter::* )( const QString & )>( this->reagentCompleter, &QCompleter::activated, [ setReagent ]( const QString &name ) { setReagent( name ); } );
+    this->connect( this->ui->findEdit, &QLineEdit::returnPressed, [ this, setReagent ] { setReagent( this->ui->findEdit->text()); } );
 
-    this->connect( this->ui->findEdit, &QLineEdit::returnPressed, [ this, setReagent ]  {
-        setReagent( this->ui->findEdit->text());
-    } );
-
+    // set up reagent find button
     this->connect( this->ui->findButton, &QPushButton::clicked, [ this ]  {
         this->ui->stackedWidget->setCurrentIndex( 1 );
 
@@ -84,6 +86,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         }
 
         this->ui->findEdit->setFocus();
+    } );
+
+    // set up clear button
+    this->connect( this->ui->clearButton, &QPushButton::clicked, [ this ]  {
+        this->ui->reagentCombo->setCurrentIndex( this->ui->reagentCombo->count() - 1 );
     } );
 
     // refill reagents and templates on database changes
@@ -98,11 +105,17 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     // fill templates on reagent change
     this->connect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, [ this ]() {
         bool enable;
+
         this->ui->reagentCombo->currentData( Qt::UserRole ).toInt() == -1 ? enable = false : enable = true;
         this->ui->templateCombo->setEnabled( enable );
         this->ui->molarMassEdit->setReadOnly( enable );
         this->ui->densityEdit->setReadOnly( enable );
         this->ui->assayEdit->setReadOnly( enable );
+        this->ui->volumeEdit->setDisabled( enable );
+        this->ui->densityEdit->setDisabled( enable );
+        this->ui->actionEdit->setEnabled( enable );
+        this->ui->actionRemove->setEnabled( enable );
+        this->ui->actionProperties->setEnabled( enable );
 
         // refill templates
         this->fillTemplates();
@@ -187,6 +200,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
  */
 void MainWindow::restoreIndexes() {
     int reagentIndex, templateIndex;
+    qreal lastValue;
 
     // load previous indexes
     reagentIndex = Variable::instance()->integer( "ui_lastReagentIndex" );
@@ -196,6 +210,14 @@ void MainWindow::restoreIndexes() {
     templateIndex = Variable::instance()->integer( "ui_lastTemplateIndex" );
     if ( templateIndex >= 0 && templateIndex < this->ui->templateCombo->count())
         this->ui->templateCombo->setCurrentIndex( templateIndex );
+
+    // NOTE: bad template state detection (liquid/solid)
+    lastValue = Variable::instance()->decimalValue( "ui_lastValue" );
+    if ( this->ui->densityEdit->isEnabled()) {
+        this->ui->volumeEdit->setScaledValue( lastValue );
+    } else {
+        this->ui->massEdit->setScaledValue( lastValue );
+    }
 }
 
 /**
@@ -226,10 +248,16 @@ MainWindow::~MainWindow() {
  * @return
  */
 Reagent *MainWindow::currentReagent() {
+    int id;
+
     if ( this->ui->reagentCombo->currentIndex() == -1 )
         return nullptr;
 
-    return Reagent::fromId( this->ui->reagentCombo->currentData( Qt::UserRole ).toInt());
+    id = this->ui->reagentCombo->currentData( Qt::UserRole ).toInt();
+    if ( id != -1 )
+        return Reagent::fromId( id );
+
+    return nullptr;
 }
 
 /**
@@ -364,6 +392,14 @@ void MainWindow::closeEvent( QCloseEvent *event ) {
     // save settings
     Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
+
+    // NOTE: bad template state detection (liquid/solid)
+    if ( this->ui->densityEdit->isEnabled()) {
+        Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->volumeEdit->scaledValue());
+    } else {
+        Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->massEdit->scaledValue());
+    }
+
     XMLTools::instance()->write();
 
     // proceed

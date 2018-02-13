@@ -15,5 +15,6 @@
         <file alias="extract_properties">icons/extract_properties.png</file>
         <file alias="cog">icons/cog.png</file>
         <file alias="find">icons/find.png</file>
+        <file alias="clear">icons/clear.png</file>
     </qresource>
 </RCC>
