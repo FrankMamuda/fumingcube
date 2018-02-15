@@ -298,9 +298,14 @@ void LineEdit::displayValue( bool fullPrecision ) {
  */
 void LineEdit::displayToolTips() {
     // display full precision in toolTips
-    if ( this->units[Secondary].isEmpty())
-        this->setToolTip( QString( "%1 %2" ).arg( QString::number( this->scaledValue())).arg( this->defaultUnits( Primary )));
-    else
+    if ( this->units[Secondary].isEmpty()) {
+        qreal value = this->scaledValue();
+
+        if ( this->mode() == Assay )
+            value = static_cast<qreal>( value * 100 );
+
+        this->setToolTip( QString( "%1 %2" ).arg( QString::number( value )).arg( this->defaultUnits( Primary )));
+    } else
         this->setToolTip( QString( "%1 %2/%3" ).arg( QString::number( this->scaledValue())).arg( this->defaultUnits( Primary )).arg( this->defaultUnits( Secondary )));
 }
 

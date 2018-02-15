@@ -61,18 +61,18 @@ public:
      * @return
      */
     QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override {
-        Template *entry;
+        Template *templ;
 
         if ( !index.isValid() || reagent == nullptr )
             return QVariant();
 
-        entry = this->reagent->templateMap.values().at( index.row());
-        if ( entry != nullptr ) {
+        templ = this->reagent->templateMap.values().at( index.row());
+        if ( templ != nullptr ) {
             if ( role == Qt::DisplayRole)
-                return entry->name();
+                return templ->name();
 
             if ( role == Qt::UserRole )
-                return entry->id();
+                return templ->id();
         }
 
         return QVariant();

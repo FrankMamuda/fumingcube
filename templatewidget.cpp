@@ -34,7 +34,7 @@
  * @brief TemplateWidget::TemplateWidget
  * @param parent
  */
-TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWidget( parent ), ui( new Ui::TemplateWidget ), entry( templateEntry ) {
+TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent ), ui( new Ui::TemplateWidget ), templ( t ) {
     QWidget *dialogParent = parent;
 
     // set up ui
@@ -77,12 +77,12 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *templateEntry ) : QWi
     this->ui->densityEdit->setMode( LineEdit::Density );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
     this->ui->assayEdit->setMode( LineEdit::Assay );
-    this->ui->nameEdit->setText( entry == nullptr ? "" : entry->name());
-    this->ui->amountEdit->setScaledValue( entry == nullptr ? 1.0 : entry->amount());
-    this->ui->densityEdit->setScaledValue( entry == nullptr ? 1.0 : entry->density());
-    this->ui->molarMassEdit->setScaledValue( entry == nullptr ? 18.0 : entry->molarMass());
-    this->ui->assayEdit->setScaledValue( entry == nullptr ? 1.0 : entry->assay());
-    this->ui->stateCombo->setCurrentIndex( entry == nullptr ? static_cast<int>( Template::Solid ) : static_cast<int>( entry->state()));
+    this->ui->nameEdit->setText( templ == nullptr ? "" : templ->name());
+    this->ui->amountEdit->setScaledValue( templ == nullptr ? 1.0 : templ->amount());
+    this->ui->densityEdit->setScaledValue( templ == nullptr ? 1.0 : templ->density());
+    this->ui->molarMassEdit->setScaledValue( templ == nullptr ? 18.0 : templ->molarMass());
+    this->ui->assayEdit->setScaledValue( templ == nullptr ? 1.0 : templ->assay());
+    this->ui->stateCombo->setCurrentIndex( templ == nullptr ? static_cast<int>( Template::Solid ) : static_cast<int>( templ->state()));
 }
 
 /**
@@ -174,18 +174,18 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
  * @brief TemplateWidget::save
  */
 int TemplateWidget::save( int id ) {
-    if ( this->entry == nullptr ) {
-        this->entry = Template::add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), id );
+    if ( this->templ == nullptr ) {
+        this->templ = Template::add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), id );
     } else {
-        entry->setName( this->name());
-        entry->setAmount( this->amount());
-        entry->setDensity( this->density());
-        entry->setMolarMass( this->molarMass());
-        entry->setAssay( this->assay());
-        entry->setState( this->state());
+        templ->setName( this->name());
+        templ->setAmount( this->amount());
+        templ->setDensity( this->density());
+        templ->setMolarMass( this->molarMass());
+        templ->setAssay( this->assay());
+        templ->setState( this->state());
     }
 
-    return ( entry == nullptr ? -1 : entry->id());
+    return ( templ == nullptr ? -1 : templ->id());
 }
 
 /**

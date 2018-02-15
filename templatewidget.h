@@ -45,7 +45,7 @@ class TemplateWidget : public QWidget {
     Q_ENUMS( Properties )
 
 public:
-    explicit TemplateWidget( QWidget *parent = nullptr, Template *entry = nullptr );
+    explicit TemplateWidget( QWidget *parent = nullptr, Template *t = nullptr );
     ~TemplateWidget();
     QString name() const { return this->ui->nameEdit->text(); }
     Template::State state() const { return static_cast<Template::State>( this->ui->stateCombo->currentIndex()); }
@@ -73,5 +73,5 @@ private slots:
 
 private:
     Ui::TemplateWidget *ui;
-    Template *entry;
+    Template *templ;
 };

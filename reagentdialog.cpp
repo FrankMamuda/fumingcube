@@ -55,12 +55,12 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
 /**
  * @brief ReagentDialog::addNewTab
  */
-void ReagentDialog::addNewTab( Template *entry )  {
+void ReagentDialog::addNewTab( Template *templ )  {
     TemplateWidget *widget;
     int tabIndex;
 
-    widget = new TemplateWidget( this, entry );
-    tabIndex = this->ui->tabWidget->addTab( widget, entry == nullptr ? "" : entry->name());
+    widget = new TemplateWidget( this, templ );
+    tabIndex = this->ui->tabWidget->addTab( widget, templ == nullptr ? "" : templ->name());
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
 
@@ -75,7 +75,7 @@ void ReagentDialog::addNewTab( Template *entry )  {
         } );
     }
 
-    if ( entry != nullptr )
+    if ( templ != nullptr )
         this->ui->tabWidget->setCurrentIndex( 0 );
 }
 
@@ -200,8 +200,8 @@ void ReagentDialog::setReagent( Reagent *reagent ) {
     this->setMode( Edit );
 
     this->ui->nameEdit->setText( reagent->name());
-    foreach ( Template *entry, reagent->templateMap )
-        this->addNewTab( entry );
+    foreach ( Template *templ, reagent->templateMap )
+        this->addNewTab( templ );
 }
 
 /**

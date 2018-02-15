@@ -40,6 +40,7 @@ class MessageDock;
 class ReagentModel;
 class TemplateModel;
 class Reagent;
+class Template;
 
 /**
  * @brief The MainWindow class
@@ -50,7 +51,8 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow();
-    Reagent *currentReagent();
+    Reagent *currentReagent() const;
+    Template *currentTemplate() const;
 
 public slots:
     void restoreIndexes();

@@ -101,7 +101,7 @@ ExtractionDialog::~ExtractionDialog() {
  */
 void ExtractionDialog::setTemplateId( int id ) {
     Reagent *reagent;
-    Template *entry;
+    Template *templ;
     QString url;
 
     // set id
@@ -109,9 +109,9 @@ void ExtractionDialog::setTemplateId( int id ) {
 
     // set reagent url
     if ( this->templateId() >= 0 ) {
-        entry = Template::fromId( this->templateId());
-        if ( entry != nullptr ) {
-            reagent = Reagent::fromId( entry->reagentId());
+        templ = Template::fromId( this->templateId());
+        if ( templ != nullptr ) {
+            reagent = Reagent::fromId( templ->reagentId());
             if ( reagent != nullptr )
                  this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( reagent->name()).replace( " ", "_" ));
         }

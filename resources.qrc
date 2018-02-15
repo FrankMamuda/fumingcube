@@ -16,5 +16,6 @@
         <file alias="cog">icons/cog.png</file>
         <file alias="find">icons/find.png</file>
         <file alias="clear">icons/clear.png</file>
+        <file alias="lock">icons/lock.png</file>
     </qresource>
 </RCC>

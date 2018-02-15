@@ -66,7 +66,7 @@ public slots:
     void accept() override;
 
 private slots:
-    void addNewTab( Template *entry = nullptr );
+    void addNewTab( Template *templ = nullptr );
     void on_tabWidget_tabCloseRequested( int index );
 
 protected:

@@ -48,7 +48,7 @@ Template *Template::fromId( int id ) {
  */
 Template *Template::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const int reagentId ) {
     QSqlQuery query;
-    Template *entry = nullptr;
+    Template *templ = nullptr;
 
     // prepare statement
     query.prepare( QString( "insert into templates values ( null, :name, :amount, :density, :assay, :molarMass, :state, :reagentId )" ));
@@ -63,15 +63,15 @@ Template *Template::add( const QString &name, const double amount, const double 
     // excecute statement
     if ( !query.exec()) {
         qCritical() << QObject::tr( "could not add template, reason - '%1'" ).arg( query.lastError().text());
-        return entry;
+        return templ;
     }
 
     // select the newly created entry and store in memory
     query.exec( QString( "select * from templates where id=%1" ).arg( query.lastInsertId().toInt()));
     if ( query.next())
-        entry = Template::store( query );
+        templ = Template::store( query );
 
-    return entry;
+    return templ;
 }
 
 /**
@@ -98,18 +98,18 @@ void Template::load() {
  */
 Template *Template::store( const QSqlQuery &query ) {
     Reagent *reagent;
-    Template *entry = nullptr;
+    Template *templ = nullptr;
 
     // construct a template entry from sql recort and store in memory
-    entry = new Template( query.record());
-    Database::instance()->templateMap[entry->id()] = entry;
+    templ = new Template( query.record());
+    Database::instance()->templateMap[templ->id()] = templ;
 
     // retrieve reagent from reagentId
-    reagent = Reagent::fromId( entry->reagentId());
+    reagent = Reagent::fromId( templ->reagentId());
     if ( reagent == nullptr )
-        return entry;
+        return templ;
 
     // add template to reagent's templateMap
-    reagent->templateMap[entry->id()] = entry;
-    return entry;
+    reagent->templateMap[templ->id()] = templ;
+    return templ;
 }

@@ -105,6 +105,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     // fill templates on reagent change
     this->connect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, [ this ]() {
         bool enable;
+        QPixmap pixmap;
 
         this->ui->reagentCombo->currentData( Qt::UserRole ).toInt() == -1 ? enable = false : enable = true;
         this->ui->templateCombo->setEnabled( enable );
@@ -117,31 +118,40 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         this->ui->actionRemove->setEnabled( enable );
         this->ui->actionProperties->setEnabled( enable );
 
+        if ( enable )
+            pixmap = QPixmap( ":/icons/lock" );
+
+        this->ui->molarMassLock->setPixmap( pixmap );
+        this->ui->densityLock->setPixmap( pixmap );
+        this->ui->assayLock->setPixmap( pixmap );
+
         // refill templates
         this->fillTemplates();
     } );
 
     // fill data on template change
     this->connect<void( QComboBox::* )( int )>( this->ui->templateCombo, &QComboBox::currentIndexChanged, [ this ]() {
-        Template *entry = Template::fromId( this->ui->templateCombo->currentData( Qt::UserRole ).toInt());
-        if ( entry == nullptr )
+        Template *templ;
+
+        templ = this->currentTemplate();
+        if ( templ == nullptr )
             return;
 
-        if ( entry->state() == Template::Solid ) {
-            this->ui->massEdit->setScaledValue( entry->amount());
+        if ( templ->state() == Template::Solid ) {
+            this->ui->massEdit->setScaledValue( templ->amount());
             this->ui->densityEdit->setDisabled( true );
             this->ui->volumeEdit->setDisabled( true );
-        } else if ( entry->state() == Template::Liquid ) {
-            this->ui->volumeEdit->setScaledValue( entry->amount());
+        } else if ( templ->state() == Template::Liquid ) {
+            this->ui->volumeEdit->setScaledValue( templ->amount());
             this->ui->densityEdit->setEnabled( true );
             this->ui->volumeEdit->setEnabled( true );
         } else {
             return;
         }
 
-        this->ui->molarMassEdit->setScaledValue( entry->molarMass());
-        this->ui->densityEdit->setScaledValue( entry->density());
-        this->ui->assayEdit->setScaledValue( entry->assay());
+        this->ui->molarMassEdit->setScaledValue( templ->molarMass());
+        this->ui->densityEdit->setScaledValue( templ->density());
+        this->ui->assayEdit->setScaledValue( templ->assay());
     } );
 
     // set up mass display
@@ -201,6 +211,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 void MainWindow::restoreIndexes() {
     int reagentIndex, templateIndex;
     qreal lastValue;
+    Template *templ;
 
     // load previous indexes
     reagentIndex = Variable::instance()->integer( "ui_lastReagentIndex" );
@@ -211,11 +222,16 @@ void MainWindow::restoreIndexes() {
     if ( templateIndex >= 0 && templateIndex < this->ui->templateCombo->count())
         this->ui->templateCombo->setCurrentIndex( templateIndex );
 
-    // NOTE: bad template state detection (liquid/solid)
+    // get template
+    templ = this->currentTemplate();
+    if ( templ == nullptr )
+        return;
+
+    // restore previous value to either volume or mass field
     lastValue = Variable::instance()->decimalValue( "ui_lastValue" );
-    if ( this->ui->densityEdit->isEnabled()) {
+    if ( templ->state() == Template::Liquid ) {
         this->ui->volumeEdit->setScaledValue( lastValue );
-    } else {
+    } else if ( templ->state() == Template::Solid ) {
         this->ui->massEdit->setScaledValue( lastValue );
     }
 }
@@ -230,7 +246,7 @@ MainWindow::~MainWindow() {
     this->disconnect( this->signalMapper, SIGNAL( mapped( int )));
     this->disconnect( this->ui->findEdit, &QLineEdit::returnPressed, this, nullptr );
     this->disconnect( this->ui->findButton, &QPushButton::clicked, this, nullptr );
-    //this->disconnect( this->ui->clearButton, &QPushButton::clicked, this, nullptr );
+    this->disconnect( this->ui->clearButton, &QPushButton::clicked, this, nullptr );
 
     delete this->signalMapper;
     delete this->reagentModel;
@@ -247,7 +263,7 @@ MainWindow::~MainWindow() {
  * @brief MainWindow::currentReagent
  * @return
  */
-Reagent *MainWindow::currentReagent() {
+Reagent *MainWindow::currentReagent() const {
     int id;
 
     if ( this->ui->reagentCombo->currentIndex() == -1 )
@@ -258,6 +274,17 @@ Reagent *MainWindow::currentReagent() {
         return Reagent::fromId( id );
 
     return nullptr;
+}
+
+/**
+ * @brief MainWindow::currentTemplate
+ * @return
+ */
+Template *MainWindow::currentTemplate() const {
+    if ( this->currentReagent() == nullptr )
+        return nullptr;
+
+    return Template::fromId( this->ui->templateCombo->currentData( Qt::UserRole ).toInt());
 }
 
 /**
@@ -389,17 +416,24 @@ void MainWindow::resizeEvent( QResizeEvent *event ) {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
+    Template *templ;
+
     // save settings
     Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
 
-    // NOTE: bad template state detection (liquid/solid)
-    if ( this->ui->densityEdit->isEnabled()) {
-        Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->volumeEdit->scaledValue());
-    } else {
-        Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->massEdit->scaledValue());
+    // get template
+    templ = this->currentTemplate();
+    if ( templ != nullptr ) {
+        // store current value (volume or mass) as variable
+        if ( templ->state() == Template::Liquid ) {
+            Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->volumeEdit->scaledValue());
+        } else if ( templ->state() == Template::Solid ) {
+            Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->massEdit->scaledValue());
+        }
     }
 
+    // write ot configuration
     XMLTools::instance()->write();
 
     // proceed
@@ -438,16 +472,17 @@ void MainWindow::on_actionRemove_triggered() {
  */
 void MainWindow::on_actionProperties_triggered() {
     PropertyDialog *pd;
+    Template *templ;
 
     // get current template
-    Template *entry = Template::fromId( this->ui->templateCombo->currentData( Qt::UserRole ).toInt());
-    if ( entry == nullptr ) {
+    templ = this->currentTemplate();
+    if ( templ == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot display properties: template not selected" ), MessageDock::Warning, 3000 );
         return;
     }
 
     // display property dialog
-    pd = new PropertyDialog( this, entry );
+    pd = new PropertyDialog( this, templ );
     pd->setAttribute( Qt::WA_DeleteOnClose, true );
     pd->show();
 

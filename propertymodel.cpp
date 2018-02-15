@@ -25,16 +25,21 @@
 #include <QDebug>
 
 /**
+ * @brief PropertyModel::PropertyModel
+ * @param parent
+ * @param t
+ */
+PropertyModel::PropertyModel( QObject *parent, Template *t ) : QAbstractTableModel( parent ), templ( t ), view( nullptr ) {
+    this->reset();
+}
+
+/**
  * @brief PropertyModel::rowCount
  * @param parent
  * @return
  */
 int PropertyModel::rowCount( const QModelIndex & ) const {
-    // failsafe
-    if ( this->entry == nullptr )
-        return 0;
-
-    return this->entry->propertyMap.count();
+    return this->list.count();
 }
 
 /**
@@ -57,12 +62,12 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
     int width;
 
     // failsafe
-    if ( this->entry == nullptr || !index.isValid() || this->view == nullptr ) {
-        qDebug() << this->tr( "invlaid model data" );
+    if ( this->templ == nullptr || !index.isValid() || this->view == nullptr ) {
+        qDebug() << this->tr( "invalid model data" );
         return QVariant();
     }
 
-    property = this->entry->propertyMap[this->entry->propertyMap.keys().at( index.row())];
+    property = list.at( index.row());
     if ( property == nullptr )
         return QVariant();
 
@@ -71,6 +76,7 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
     if ( role == Qt::DisplayRole ) {
         switch ( static_cast<Columns>( index.column())) {
         case Title:
+            //qDebug() << property->title() << property->order();
             return property->title();
 
         case Value:
@@ -96,3 +102,59 @@ QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
 
     return QVariant();
 }
+
+/**
+ * @brief PropertyModel::reset
+ */
+void PropertyModel::reset() {
+    // begin reset
+    this->beginResetModel();
+
+    if ( this->templ == nullptr )
+        return;
+
+    // checks whether reindexing of property list is required (lambda)
+    auto requiresReindexing = []( const QList<Property*> &propertyList ) {
+        QList<int> indices;
+        bool reindex = false;
+
+        foreach ( const Property *property, propertyList ) {
+            int order = property->order();
+
+            if ( indices.contains( order ) || order == -1 || order >= propertyList.count())
+                reindex = true;
+
+            indices << order;
+        }
+
+        if ( reindex )
+            qDebug() << "reindexing required" << indices;
+        else
+            qDebug() << "reindexing NOT required" << indices;
+
+        return reindex;
+    };
+
+    // reindex list if necessary
+    QList<Property*> propertyList( this->templ->propertyMap.values());
+    std::sort( propertyList.begin(), propertyList.end(), []( const Property *p0, const Property *p1 ) { return p0->order() < p1->order(); } );
+
+    if ( requiresReindexing( propertyList )) {
+        int y = 0;
+
+        foreach ( Property *property, propertyList )
+            property->setOrder( y++ );
+
+        /*QList<int> indices;
+        foreach ( const Property *property, propertyList )
+            indices << property->order();
+        qDebug() << "reindexed list" << indices;*/
+    }
+
+    // store list
+    this->list = propertyList;
+
+    // end reset
+    this->endResetModel();
+}
+

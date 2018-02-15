@@ -37,14 +37,14 @@
 PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     QMainWindow( parent ),
     ui( new Ui::PropertyDialog ),
-    entry( t ),
+    templ( t ),
     editor( new PropertyEditor( this )) {
 
     // set up ui
     this->ui->setupUi( this );
 
     // set up property table
-    PropertyModel *model = new PropertyModel( this, this->entry );
+    PropertyModel *model = new PropertyModel( this, this->templ );
     model->setView( this->ui->propertyView );
     this->ui->propertyView->setModel( model );
     this->ui->propertyView->setItemDelegate( new PropertyDelegate( this ));
@@ -62,7 +62,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         Property *property;
 
         // return if invalid template
-        if ( this->entry == nullptr )
+        if ( this->templ == nullptr )
             return;
 
         // TODO: display error is message bar
@@ -72,7 +72,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         switch ( mode ) {
         case PropertyEditor::Add:
             // TODO: check of duplicates (is it really necessary at all?)
-            property = Property::add( title, value, this->entry->id());
+            property = Property::add( title, value, this->templ->id());
             if ( property == nullptr )
                 return;
 
@@ -116,7 +116,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     this->connect( this->ui->actionRemove, &QAction::triggered, [ this ]() {
         Property *property;
         QSqlQuery query;
-        Template *entry;
+        Template *templ;
 
         property = this->current();
         if ( property == nullptr )
@@ -128,36 +128,94 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
             qCritical() << this->tr( "could not delete property, reason: '%1'" ).arg( query.lastError().text());
 
         // retrieve template from templateId
-        entry = Template::fromId( property->templateId());
-        if ( entry == nullptr )
+        templ = Template::fromId( property->templateId());
+        if ( templ == nullptr )
             return;
 
         // remove property from template's propertyMap
-        entry->propertyMap.remove( property->id());
+        templ->propertyMap.remove( property->id());
 
         // update table
         this->resetView();
     } );
 
     // connect up action
-    this->connect( this->ui->actionUp, &QAction::triggered, []() {
-        qDebug() << "move up not implemented yet";
+    this->connect( this->ui->actionUp, &QAction::triggered, [ this ]() {
+        //qDebug() << "move up not implemented yet";
+        this->move( Up );
     } );
 
     // connect down action
-    this->connect( this->ui->actionDown, &QAction::triggered, []() {
-        qDebug() << "move down not implemented yet";
+    this->connect( this->ui->actionDown, &QAction::triggered, [ this ]() {
+        this->move( Down );
     } );
 
 
     // connect wiki extraction action
     this->connect( this->ui->actionWiki, &QAction::triggered, [ this ]() {
         ExtractionDialog ed;
-        ed.setTemplateId( this->entry->id());
+        ed.setTemplateId( this->templ->id());
         ed.exec();
 
         this->resetView();
     } );
+
+    // up/down button enabler/disabler
+    auto upDownCheck = [ this ] {
+        const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
+        this->ui->actionUp->setEnabled( currentIndex.row() != -1 && currentIndex.row() != 0 );
+        this->ui->actionDown->setEnabled( currentIndex.row() != -1 && currentIndex.row() != this->ui->propertyView->model()->rowCount() - 1 );
+    };
+    this->connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentRowChanged, [ upDownCheck ]() { upDownCheck(); } );
+    upDownCheck();
+}
+
+/**
+ * @brief PropertyDialog::move
+ * @param direction
+ */
+void PropertyDialog::move( Directions direction ) {
+    Property *p0, *p1;
+    PropertyModel *model;
+    const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
+
+    model = qobject_cast<PropertyModel*>( this->ui->propertyView->model());
+    if ( model == nullptr )
+        return;
+
+    p0 = Property::fromId( model->data( currentIndex, Qt::UserRole ).toInt());
+    if ( p0 == nullptr )
+        return;
+
+    if ( direction == Up ) {
+        p1 = Property::fromId( model->data( model->index( currentIndex.row() - 1, currentIndex.column()), Qt::UserRole ).toInt());
+        if ( p1 == nullptr )
+            return;
+    } else {
+        p1 = Property::fromId( model->data( model->index( currentIndex.row() + 1, currentIndex.column()), Qt::UserRole ).toInt());
+        if ( p1 == nullptr )
+            return;
+    }
+
+    // do the actual reordering
+    const int o0 = p0->order();
+    const int o1 = p1->order();
+    p0->setOrder( o1 );
+    p1->setOrder( o0 );
+
+    // reselect value
+    /*index = this->listModelPtr->index( k, 0 );
+    this->ui->taskList->setCurrentIndex( index );
+    this->setCurrentMatch( k );
+
+    // check the buttons!
+    this->changeUpDownState( this->ui->taskList->currentIndex());*/
+
+    // reset model
+    model->reset();
+
+    // reselect value
+    //this->ui->propertyView->selectionModel()->setCurrentIndex( model->index( ));
 }
 
 /**
@@ -185,11 +243,11 @@ Property *PropertyDialog::current() {
     QModelIndex index( this->ui->propertyView->currentIndex());
 
     // make sure template entry is valid
-    if ( this->entry == nullptr )
+    if ( this->templ == nullptr )
         return nullptr;
 
     // check bounds
-    if ( index.row() < 0 || index.row() >= entry->propertyMap.count())
+    if ( index.row() < 0 || index.row() >= templ->propertyMap.count())
         return nullptr;
 
     // get property id from model and return the corresponding property

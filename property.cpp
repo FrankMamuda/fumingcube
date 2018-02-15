@@ -44,13 +44,13 @@ Property *Property::fromId( int id ) {
  * @return
  */
 Property *Property::fromTitle( const QString &title, int templateId ) {
-    Template *entry;
+    Template *templ;
 
-    entry = Template::fromId( templateId );
-    if ( entry == nullptr )
+    templ = Template::fromId( templateId );
+    if ( templ == nullptr )
         return nullptr;
 
-    foreach ( Property *property, entry->propertyMap ) {
+    foreach ( Property *property, templ->propertyMap ) {
         if ( !QString::compare( property->title(), title ))
             return property;
     }
@@ -65,7 +65,7 @@ Property *Property::fromTitle( const QString &title, int templateId ) {
 Property *Property::add( const QString &title, const QString &value, int templateId ) {
     QSqlQuery query;
     Property *property = nullptr;
-    Template *entry;
+    Template *templ;
 
     // check for duplicates
     property = Property::fromTitle( title, templateId );
@@ -94,12 +94,12 @@ Property *Property::add( const QString &title, const QString &value, int templat
         Database::instance()->propertyMap[property->id()] = property;
 
         // retrieve template from templateId
-        entry = Template::fromId( property->templateId());
-        if ( entry == nullptr )
+        templ = Template::fromId( property->templateId());
+        if ( templ == nullptr )
             return property;
 
         // add property to template's propertyMap
-        entry->propertyMap[property->id()] = property;
+        templ->propertyMap[property->id()] = property;
     }
 
     return property;
@@ -128,7 +128,7 @@ void Property::load() {
  * @param query
  */
 Property *Property::store( const QSqlQuery &query ) {
-    Template *entry;
+    Template *templ;
     Property *property = nullptr;
 
     // construct a property entry from sql recort and store in memory
@@ -136,12 +136,12 @@ Property *Property::store( const QSqlQuery &query ) {
     Database::instance()->propertyMap[property->id()] = property;
 
     // retrieve template from templateId
-    entry = Template::fromId( property->templateId());
-    if ( entry == nullptr )
+    templ = Template::fromId( property->templateId());
+    if ( templ == nullptr )
         return property;
 
     // add property to templates
-    entry->propertyMap[property->id()] = property;
+    templ->propertyMap[property->id()] = property;
     return property;
 }
 

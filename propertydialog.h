@@ -42,8 +42,15 @@ class PropertyDialog;
  */
 class PropertyDialog : public QMainWindow {
     Q_OBJECT
+    Q_ENUMS( Directions )
 
 public:
+    enum Directions {
+        NoDirection = -1,
+        Up,
+        Down
+    };
+
     explicit PropertyDialog( QWidget *parent = 0, Template *t = nullptr );
     ~PropertyDialog();
     Property *current();
@@ -53,9 +60,10 @@ protected:
 
 private slots:
     void resetView();
+    void move( Directions direction );
 
 private:
     Ui::PropertyDialog *ui;
-    Template *entry;
+    Template *templ;
     PropertyEditor *editor;
 };
