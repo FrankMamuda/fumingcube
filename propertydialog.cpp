@@ -178,6 +178,7 @@ void PropertyDialog::move( Directions direction ) {
     Property *p0, *p1;
     PropertyModel *model;
     const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
+    QModelIndex swap;
 
     model = qobject_cast<PropertyModel*>( this->ui->propertyView->model());
     if ( model == nullptr )
@@ -187,15 +188,14 @@ void PropertyDialog::move( Directions direction ) {
     if ( p0 == nullptr )
         return;
 
-    if ( direction == Up ) {
-        p1 = Property::fromId( model->data( model->index( currentIndex.row() - 1, currentIndex.column()), Qt::UserRole ).toInt());
-        if ( p1 == nullptr )
-            return;
-    } else {
-        p1 = Property::fromId( model->data( model->index( currentIndex.row() + 1, currentIndex.column()), Qt::UserRole ).toInt());
-        if ( p1 == nullptr )
-            return;
-    }
+    if ( direction == Up )
+        swap = model->index( currentIndex.row() - 1, currentIndex.column());
+    else
+        swap = model->index( currentIndex.row() + 1, currentIndex.column());
+
+    p1 = Property::fromId( model->data( swap, Qt::UserRole ).toInt());
+    if ( p1 == nullptr )
+        return;
 
     // do the actual reordering
     const int o0 = p0->order();
@@ -203,19 +203,11 @@ void PropertyDialog::move( Directions direction ) {
     p0->setOrder( o1 );
     p1->setOrder( o0 );
 
-    // reselect value
-    /*index = this->listModelPtr->index( k, 0 );
-    this->ui->taskList->setCurrentIndex( index );
-    this->setCurrentMatch( k );
-
-    // check the buttons!
-    this->changeUpDownState( this->ui->taskList->currentIndex());*/
-
     // reset model
-    model->reset();
+    this->resetView();
 
     // reselect value
-    //this->ui->propertyView->selectionModel()->setCurrentIndex( model->index( ));
+    this->ui->propertyView->setCurrentIndex( swap );
 }
 
 /**
