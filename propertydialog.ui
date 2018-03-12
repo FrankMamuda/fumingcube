@@ -71,6 +71,12 @@
    <property name="allowedAreas">
     <set>Qt::TopToolBarArea</set>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
@@ -93,7 +99,7 @@
   <action name="actionAdd">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/property_add</normaloff>:/icons/property_add</iconset>
+     <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -102,7 +108,7 @@
   <action name="actionEdit">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/property_edit</normaloff>:/icons/property_edit</iconset>
+     <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
    </property>
    <property name="text">
     <string>Edit</string>
@@ -111,7 +117,7 @@
   <action name="actionRemove">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/property_remove</normaloff>:/icons/property_remove</iconset>
+     <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
    </property>
    <property name="text">
     <string>Remove</string>
@@ -120,7 +126,7 @@
   <action name="actionUp">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/property_moveup</normaloff>:/icons/property_moveup</iconset>
+     <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
    </property>
    <property name="text">
     <string>Move up</string>
@@ -129,7 +135,7 @@
   <action name="actionDown">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/property_movedown</normaloff>:/icons/property_movedown</iconset>
+     <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
    </property>
    <property name="text">
     <string>Move down</string>
@@ -138,7 +144,7 @@
   <action name="actionWiki">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/extract_properties</normaloff>:/icons/extract_properties</iconset>
+     <normaloff>:/icons/extract</normaloff>:/icons/extract</iconset>
    </property>
    <property name="text">
     <string>Extract</string>

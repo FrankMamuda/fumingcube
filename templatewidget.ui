@@ -91,7 +91,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/icons/cog</normaloff>:/icons/cog</iconset>
+         <normaloff>:/icons/extract</normaloff>:/icons/extract</iconset>
        </property>
       </widget>
      </item>
@@ -119,7 +119,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/icons/cog</normaloff>:/icons/cog</iconset>
+         <normaloff>:/icons/extract</normaloff>:/icons/extract</iconset>
        </property>
       </widget>
      </item>

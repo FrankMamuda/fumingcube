@@ -23,6 +23,7 @@
 //      order
 //      search
 //   proper warnings
+//   property sorting combo (custom, alphabetically, etc.)
 //   default fonts
 //   icons for actions
 //   calculator widget
@@ -32,7 +33,6 @@
 //   copy data from default template, upon opening new tab
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
-//   lock icon for molarMass/density if reagent!=None (view delegate for LineEdit?)
 //
 
 //

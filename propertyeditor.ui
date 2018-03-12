@@ -279,7 +279,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/clean_html</normaloff>:/icons/clean_html</iconset>
+     <normaloff>:/icons/clean</normaloff>:/icons/clean</iconset>
    </property>
    <property name="text">
     <string>Clean HTML</string>
