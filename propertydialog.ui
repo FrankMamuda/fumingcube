@@ -99,7 +99,7 @@
   <action name="actionAdd">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
+     <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
    </property>
    <property name="text">
     <string>Add</string>
