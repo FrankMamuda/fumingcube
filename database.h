@@ -22,7 +22,6 @@
 // includes
 //
 #include "reagent.h"
-#include "singleton.h"
 #include "template.h"
 #include <QMap>
 
@@ -97,7 +96,7 @@ class Database : public QObject {
     Q_OBJECT
 
 public:
-    static Database *instance() { return Singleton<Database>::instance( Database::createInstance ); }
+    static Database *instance() { Database *instance( new Database()); return instance; }
     ~Database();
     QString path() const { return this->m_path; }
     QMap<int, Reagent*> reagentMap;

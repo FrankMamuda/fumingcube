@@ -56,8 +56,6 @@ HEADERS += \
     reagent.h \
     template.h \
     reagentdialog.h \
-    callonce.h \
-    singleton.h \
     database.h \
     templatewidget.h \
     lineedit.h \

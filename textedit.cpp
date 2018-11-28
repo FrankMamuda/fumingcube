@@ -70,7 +70,7 @@ bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
     //
 
     // check if dropped item is an image
-    foreach ( const QUrl url, source->urls()) {
+    foreach ( const QUrl &url, source->urls()) {
         if ( db.mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
             return true;
     }
@@ -116,7 +116,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         // NOTE: application/x-qt-image has problems with transparency
         //       therefore prioritize loading image from an actual file
         if ( !source->urls().isEmpty()) {
-            foreach ( QUrl url, source->urls()) {
+            foreach ( const QUrl &url, source->urls()) {
                 if ( !url.isLocalFile())
                     continue;
 
@@ -222,7 +222,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 #endif
 
     // check droped items for images
-    foreach ( QUrl url, source->urls()) {
+    foreach ( const QUrl &url, source->urls()) {
         if ( db.mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
             QPixmap pixmap;
 
@@ -260,10 +260,10 @@ QString TextEdit::stripHTML( const QString &input ) {
     // TODO: also remove references
 
     //
-    // NOTE: this is highly inefficient, but I just can't get QRefExp
+    // NOTE: this is highly inefficient, but I just can't get QRegExp
     //       to work properly with QString::remove
-    QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
-    QRegularExpressionMatchIterator i = re.globalMatch( html );
+    const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
+    QRegularExpressionMatchIterator i( re.globalMatch( html ));
     QStringList words;
 
     // capture all unnecessary html tags
@@ -276,7 +276,7 @@ QString TextEdit::stripHTML( const QString &input ) {
     }
 
     // remove tags one by one
-    foreach ( const QString word, words )
+    foreach ( const QString &word, words )
         html = html.remove( word );
 
     // replace newline with space

@@ -44,7 +44,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
     this->ui->setupUi( this );
 
     // set up property table
-    PropertyModel *model = new PropertyModel( this, this->templ );
+    PropertyModel *model( new PropertyModel( this, this->templ ));
     model->setView( this->ui->propertyView );
     this->ui->propertyView->setModel( model );
     this->ui->propertyView->setItemDelegate( new PropertyDelegate( this ));
@@ -59,8 +59,6 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
     // connect property editor
     this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
-        Property *property;
-
         // return if invalid template
         if ( this->templ == nullptr )
             return;
@@ -71,16 +69,19 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
         switch ( mode ) {
         case PropertyEditor::Add:
+        {
             // TODO: check of duplicates (is it really necessary at all?)
-            property = Property::add( title, value, this->templ->id());
+            const Property *property( Property::add( title, value, this->templ->id()));
             if ( property == nullptr )
                 return;
 
             this->resetView();
+        }
             break;
 
         case PropertyEditor::Edit:
-            property = this->current();
+        {
+            Property *property( this->current());
 
             // TODO: nothing selected warning
             if ( this->current() == nullptr )
@@ -89,6 +90,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
             property->setName( title );
             property->setHtml( value );
             this->resetView();
+        }
             break;
 
         case PropertyEditor::NoMode:
@@ -103,9 +105,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
     // connect edit action
     this->connect( this->ui->actionEdit, &QAction::triggered, [ this ]() {
-        Property *property;
-
-        property = this->current();
+        const Property *property( this->current());
         if ( property == nullptr )
             return;
 
@@ -114,11 +114,9 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
     // connect remove action
     this->connect( this->ui->actionRemove, &QAction::triggered, [ this ]() {
-        Property *property;
         QSqlQuery query;
-        Template *templ;
 
-        property = this->current();
+        const Property *property( this->current());
         if ( property == nullptr )
             return;
 
@@ -128,7 +126,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
             qCritical() << this->tr( "could not delete property, reason: '%1'" ).arg( query.lastError().text());
 
         // retrieve template from templateId
-        templ = Template::fromId( property->templateId());
+        Template *templ( Template::fromId( property->templateId()));
         if ( templ == nullptr )
             return;
 
@@ -176,11 +174,10 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
  */
 void PropertyDialog::move( Directions direction ) {
     Property *p0, *p1;
-    PropertyModel *model;
-    const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
-    QModelIndex swap;
 
-    model = qobject_cast<PropertyModel*>( this->ui->propertyView->model());
+    const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
+
+    const PropertyModel *model( qobject_cast<PropertyModel*>( this->ui->propertyView->model()));
     if ( model == nullptr )
         return;
 
@@ -188,10 +185,9 @@ void PropertyDialog::move( Directions direction ) {
     if ( p0 == nullptr )
         return;
 
-    if ( direction == Up )
-        swap = model->index( currentIndex.row() - 1, currentIndex.column());
-    else
-        swap = model->index( currentIndex.row() + 1, currentIndex.column());
+    const QModelIndex swap( direction == Up ?
+                                model->index( currentIndex.row() - 1, currentIndex.column()) :
+                                model->index( currentIndex.row() + 1, currentIndex.column()));
 
     p1 = Property::fromId( model->data( swap, Qt::UserRole ).toInt());
     if ( p1 == nullptr )
@@ -232,7 +228,7 @@ PropertyDialog::~PropertyDialog() {
  * @return
  */
 Property *PropertyDialog::current() {
-    QModelIndex index( this->ui->propertyView->currentIndex());
+    const QModelIndex index( this->ui->propertyView->currentIndex());
 
     // make sure template entry is valid
     if ( this->templ == nullptr )

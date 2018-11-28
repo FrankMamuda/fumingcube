@@ -56,7 +56,7 @@ void XMLTools::write() {
     stream.writeAttribute( "version", "3" );
 
     // switch mode
-    foreach ( VariableEntry var, Variable::instance()->list ) {
+    foreach ( const VariableEntry &var, Variable::instance()->list ) {
         stream.writeEmptyElement( "variable" );
         stream.writeAttribute( "key", var.key());
 

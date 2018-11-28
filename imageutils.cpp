@@ -54,7 +54,7 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( pare
     // setup scaling slider as lambda
     auto scalePixmap = [ this, scaledPixmap ]( int value ) {
         qreal scale = static_cast<qreal>( value ) / 100.0;
-        qreal aspect = static_cast<qreal>( scaledPixmap.width()) / static_cast<qreal>( scaledPixmap.height());
+        const qreal aspect = static_cast<qreal>( scaledPixmap.width()) / static_cast<qreal>( scaledPixmap.height());
         qreal width = scaledPixmap.width() * scale;
         qreal height = scaledPixmap.height() * scale;
 

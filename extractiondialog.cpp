@@ -63,18 +63,15 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
         }
 
         foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedIndexes()) {
-            int row;
-            QString title, value;
-
-            row = index.row();
+            const int row = index.row();
             if ( row < 0 || row >= this->properties.count())
                 continue;
 
             // NOTE: ugly, but works
             const QString header( "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head></head><body style=\"font-family:'Times New Roman'; font-size:11pt; font-weight:400; font-style:normal;\">\n<p>" );
             const QString footer( "</p></body></html>" );
-            title = TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer ));
-            value = TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer ));
+            const QString title( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
+            const QString value( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
 
             Property::add( title, value, this->templateId());
         }
@@ -100,18 +97,14 @@ ExtractionDialog::~ExtractionDialog() {
  * @param id
  */
 void ExtractionDialog::setTemplateId( int id ) {
-    Reagent *reagent;
-    Template *templ;
-    QString url;
-
     // set id
     this->m_templateId = id;
 
     // set reagent url
     if ( this->templateId() >= 0 ) {
-        templ = Template::fromId( this->templateId());
+        const Template *templ( Template::fromId( this->templateId()));
         if ( templ != nullptr ) {
-            reagent = Reagent::fromId( templ->reagentId());
+            const Reagent *reagent( Reagent::fromId( templ->reagentId()));
             if ( reagent != nullptr )
                  this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( reagent->name()).replace( " ", "_" ));
         }
@@ -139,9 +132,8 @@ void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type
     case NetworkManager::Properties:
     {
         // we currently support only wikipedia
-        QRegularExpression re( Ui::PatternWiki );
-        re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
-        QRegularExpressionMatchIterator i = re.globalMatch( data );
+        const QRegularExpression re( Ui::PatternWiki, QRegularExpression::DotMatchesEverythingOption );
+        QRegularExpressionMatchIterator i( re.globalMatch( data ));
         QStringList words;
         QStringList plainList;
 
@@ -151,13 +143,12 @@ void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type
 
         // capture all unnecessary html tags
         while ( i.hasNext()) {
-            QRegularExpressionMatch match = i.next();
-            QString property, value, plain, plainValue;
+            const QRegularExpressionMatch match( i.next());
 
-            property = TextEdit::stripHTML( match.captured( 1 )).simplified();
-            value = TextEdit::stripHTML( match.captured( 2 )).simplified();
-            plain = property.remove( QRegExp( "<[^>]*>" ));
-            plainValue = property.remove( QRegExp( "<[^>]*>" ));
+            const QString property( TextEdit::stripHTML( match.captured( 1 )).simplified());
+            const QString value( TextEdit::stripHTML( match.captured( 2 )).simplified());
+            const QString plain( QString( property ).remove( QRegExp( "<[^>]*>" )));
+            const QString plainValue( QString( property ).remove( QRegExp( "<[^>]*>" )));
 
             if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
                 continue;

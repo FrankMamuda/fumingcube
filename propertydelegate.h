@@ -29,7 +29,7 @@
  */
 class PropertyDelegate : public QStyledItemDelegate {
 public:
-    PropertyDelegate( QObject *parent = nullptr );
+    PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 

@@ -21,7 +21,6 @@
 //
 // includes
 //
-#include "singleton.h"
 #include <QDir>
 #include <QMap>
 
@@ -41,7 +40,7 @@ class XMLTools : public QObject {
 
 public:
     ~XMLTools() {}
-    static XMLTools *instance() { return Singleton<XMLTools>::instance( XMLTools::createInstance ); }
+    static XMLTools *instance() { XMLTools *instance( new XMLTools()); return instance; }
     void write();
     void read();
 

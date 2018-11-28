@@ -33,7 +33,7 @@
  * @param parent
  */
 PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( m ), characterMap( new CharacterMap( this )) {
-    QFont font( "Times New Roman", 11 );
+    const QFont font( "Times New Roman", 11 );
 
     // set up ui
     this->ui->setupUi( this );
@@ -186,14 +186,14 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
     // set up image selector action
     this->connect( this->ui->actionImage, &QAction::triggered, [ this ]() {
-        QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
-        QPixmap pixmap( fileName );
+        const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
 
         if ( fileName.isEmpty())
             return;
 
         // load image
-        if ( pixmap.load( fileName ))
+        const QPixmap pixmap( fileName );
+        if ( !pixmap.isNull())
             this->activeEditor->insertPixmap( pixmap );
     } );
 

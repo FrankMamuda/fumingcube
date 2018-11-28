@@ -108,7 +108,7 @@ bool Database::createStructure() {
     for ( y = 0; y < API::numTables; y++ ) {
         table_t table = API::tables[y];
 
-        foreach ( QString tableName, tables ) {
+        foreach ( const QString &tableName, tables ) {
             if ( !QString::compare( table.name, tableName, Qt::CaseInsensitive )) {
                 for ( k = 0; k < table.numFields; k++ ) {
                     if ( !database.record( table.name ).contains( table.fields[k].name ))
@@ -210,7 +210,7 @@ bool Database::createEmptyTable() {
 
     // get schemas
     schemas = this->generateSchemas();
-    foreach ( QString schema, schemas ) {
+    foreach ( const QString &schema, schemas ) {
         if ( !query.exec( schema ))
             qFatal( this->tr( "could not create internal database structure, reason - '%1'" ).arg( query.lastError().text()).toUtf8().constData());
     }

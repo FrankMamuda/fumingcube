@@ -38,20 +38,16 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_m
 
     // as-you-type validation
     this->connect( this, &QLineEdit::textChanged, [ this ]() {
-        QRegExp re;
-        QString primaryUnits, secondaryUnits;
+        const QRegExp re( this->pattern(), Qt::CaseInsensitive );
 
-        re.setPattern( this->pattern());
-        re.setCaseSensitivity( Qt::CaseInsensitive );
         if ( re.indexIn( this->text()) != -1 ) {
-
             // match units from the pattern and set as current if valid
-            primaryUnits = re.cap( 2 ).toLower();
+            const QString primaryUnits( re.cap( 2 ).toLower());
             if ( this->units[Primary].contains( primaryUnits ))
                 this->setCurrentUnits( primaryUnits, Primary, true );
 
             // match units from the pattern and set as current if valid
-            secondaryUnits = re.cap( 3 ).toLower();
+            const QString secondaryUnits( re.cap( 3 ).toLower());
             if ( this->units[Secondary].contains( secondaryUnits ))
                 this->setCurrentUnits( secondaryUnits, Secondary, true );
 
@@ -72,10 +68,8 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_m
 
     // as-you-leave captured value and unit display
     this->connect( this, &QLineEdit::editingFinished, [ this ]() {
-        QRegExp re;
+        const QRegExp re( this->pattern(), Qt::CaseInsensitive );
 
-        re.setPattern( this->pattern());
-        re.setCaseSensitivity( Qt::CaseInsensitive );
         if ( re.indexIn( this->text()) == -1 )
             return;
 

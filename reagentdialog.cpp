@@ -57,10 +57,9 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
  */
 void ReagentDialog::addNewTab( Template *templ )  {
     TemplateWidget *widget;
-    int tabIndex;
 
     widget = new TemplateWidget( this, templ );
-    tabIndex = this->ui->tabWidget->addTab( widget, templ == nullptr ? "" : templ->name());
+    const int tabIndex = this->ui->tabWidget->addTab( widget, templ == nullptr ? "" : templ->name());
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
 
@@ -111,22 +110,19 @@ int ReagentDialog::reagentId() const {
  */
 bool ReagentDialog::add() {
     int y;
-    Reagent *reagent;
-    QString name( this->ui->nameEdit->text());
+    const QString name( this->ui->nameEdit->text());
 
     if ( Reagent::contains( name )) {
         this->messageDock->displayMessage( this->tr( "Reagent already exists in database" ), MessageDock::Error, 3000 );
         return false;
     }
 
-    reagent = Reagent::add( name );
+    Reagent *reagent( Reagent::add( name ));
     if ( reagent == nullptr )
         return false;
 
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
-        TemplateWidget *widget;
-
-        widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ));
+        TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
         Template::add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), reagent->id());
     }
 
@@ -140,7 +136,6 @@ bool ReagentDialog::add() {
  */
 bool ReagentDialog::edit() {
     int y;
-    QString name( this->ui->nameEdit->text());
     QSqlQuery query;
     QList<int> idList;
 
@@ -150,8 +145,7 @@ bool ReagentDialog::edit() {
 
     // get modified and newly added template ids from template widget
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
-        TemplateWidget *widget;
-        widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ));
+        TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
         idList << widget->save( reagent->id());
     }
 
@@ -209,7 +203,7 @@ void ReagentDialog::setReagent( Reagent *reagent ) {
  */
 void ReagentDialog::accept() {
     bool success = false;
-    QString name( this->ui->nameEdit->text());
+    const QString name( this->ui->nameEdit->text());
 
     // disallow empty names
     if ( name.isEmpty()) {
@@ -239,12 +233,10 @@ void ReagentDialog::accept() {
  * @param index
  */
 void ReagentDialog::on_tabWidget_tabCloseRequested( int index ) {
-    TemplateWidget *widget;
-
     if ( index == 0 )
         return;
 
-    widget = qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( index ));
+    TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( index )));
     this->widgetList.removeOne( widget );
     this->ui->tabWidget->removeTab( index );
 }

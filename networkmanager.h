@@ -21,7 +21,6 @@
 //
 // includes
 //
-#include "singleton.h"
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -45,7 +44,7 @@ public:
      * @brief instance
      * @return
      */
-    static NetworkManager *instance() { return Singleton<NetworkManager>::instance( NetworkManager::createInstance ); }
+    static NetworkManager *instance() { NetworkManager *instance( new NetworkManager()); return instance; }
 
 signals:
     /**

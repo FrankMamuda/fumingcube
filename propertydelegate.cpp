@@ -29,12 +29,6 @@
 #include <QPalette>
 
 /**
- * @brief PropertyDelegate::PropertyDelegate
- * @param parent
- */
-PropertyDelegate::PropertyDelegate( QObject *parent ) :  QStyledItemDelegate( parent ) {}
-
-/**
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
@@ -59,7 +53,7 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     if ( option.state & QStyle::State_Selected ) {
         QColor hilight( qApp->palette().highlight().color());
         hilight.setAlpha( 128 );
-        painter->fillRect( option.rect, QBrush( hilight ) );
+        painter->fillRect( option.rect, QBrush( hilight ));
     }
 
     // draw html

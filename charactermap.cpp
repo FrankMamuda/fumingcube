@@ -43,13 +43,13 @@ CharacterMap::CharacterMap( QWidget *parent ) : QWidget( parent ), blockId( QPai
  */
 void CharacterMap::paintEvent( QPaintEvent *event ) {
     if ( !this->characters.isEmpty()) {
-        int blocks, y;
+        int y;
         QPainter painter( this );
-        QFont font;
+        QFont font( this->font());
         font.setPixelSize( static_cast<int>( CharacterNamespace::GridSize * 0.8 ));
 
         // get minimum block size to display all characters
-        blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
+        const int blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
         this->setFixedSize( CharacterNamespace::GridSize * blocks + 1, CharacterNamespace::GridSize * blocks + 1 );
 
         // paint gray lines
@@ -63,14 +63,12 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
         painter.setFont( font );
         painter.setPen( qApp->palette().color( QPalette::Text ));
         for ( y = 0; y < this->characters.count(); y++ ) {
-            int hBlock, vBlock;
-
             // get block coordinates
-            hBlock = y % blocks;
-            vBlock = qFloor( y / blocks );
+            const int hBlock = y % blocks;
+            const int vBlock = qFloor( y / blocks );
 
             // draw hilight rect
-            QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize );
+            const QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize );
             if ( this->blockId == QPair<int,int>( hBlock, vBlock ))
                 painter.fillRect( rect, QColor::fromRgb( 255, 0, 0, 128 ));
 
@@ -87,7 +85,7 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
  * @param event
  */
 void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
-    int blocks, y;
+    int y;
 
     // reset block id
     this->blockId = QPair<int,int>( -1, -1 );
@@ -95,15 +93,13 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
     // insert char on mouse press
     if ( event->button() == Qt::LeftButton ) {
         // get block size
-        blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
+        const int blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
 
         // find block under mouse cursor
         for ( y = 0; y < this->characters.count(); y++ ) {
-            int hBlock, vBlock;
-
             // get block coordinates
-            hBlock = y % blocks;
-            vBlock = qFloor( y / blocks );
+            const int hBlock = y % blocks;
+            const int vBlock = qFloor( y / blocks );
 
             if ( QRect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize ).contains( event->pos())) {
 

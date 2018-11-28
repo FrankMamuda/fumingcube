@@ -54,17 +54,15 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent
     // connect density and molar mass extraction buttons
     auto extractProperty = [ this, dialogParent ]( Properties property ) {
         bool ok;
-        QString url;
         ReagentDialog *dialog;
 
         dialog = qobject_cast<ReagentDialog*>( dialogParent );
         if ( dialog == nullptr )
             return;
 
-        url = QInputDialog::getText( this, this->tr( "Extract from Wikipedia" ), this->tr( "URL:" ), QLineEdit::Normal, QString( "https://en.wikipedia.org/wiki/%1" ).arg( dialog->name().replace( " ", "_" )), &ok );
-        if ( ok && !url.isEmpty()) {
-            NetworkManager::instance()->execute( url, NetworkManager::BasicProperties, property );
-        }        
+        const QString url( QInputDialog::getText( this, this->tr( "Extract from Wikipedia" ), this->tr( "URL:" ), QLineEdit::Normal, QString( "https://en.wikipedia.org/wiki/%1" ).arg( dialog->name().replace( " ", "_" )), &ok ));
+        if ( ok && !url.isEmpty())
+            NetworkManager::instance()->execute( url, NetworkManager::BasicProperties, property );       
     };
     this->connect( this->ui->densityButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( Density ); } );
     this->connect( this->ui->molarMassButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( MolarMass ); } );
@@ -134,7 +132,7 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
 
         // we currently support only wikipedia
         re.setPatternOptions( QRegularExpression::DotMatchesEverythingOption );
-        QRegularExpressionMatch match = re.match( data );
+        const QRegularExpressionMatch match( re.match( data ));
 
         // capture all unnecessary html tags
         if ( match.hasMatch()) {

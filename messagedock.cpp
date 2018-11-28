@@ -46,7 +46,7 @@ MessageDock::MessageDock( QWidget *parent ) :
     auto convertIcon = []( const QIcon &icon ) {
         QIcon out;
 
-        foreach( QSize size, icon.availableSizes()) {
+        foreach( const QSize &size, icon.availableSizes()) {
             QImage tmp( icon.pixmap( size ).toImage());
             tmp.invertPixels();
             out.addPixmap( QPixmap::fromImage( tmp ));

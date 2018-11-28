@@ -44,9 +44,7 @@ Property *Property::fromId( int id ) {
  * @return
  */
 Property *Property::fromTitle( const QString &title, int templateId ) {
-    Template *templ;
-
-    templ = Template::fromId( templateId );
+    const Template *templ( Template::fromId( templateId ));
     if ( templ == nullptr )
         return nullptr;
 
@@ -64,11 +62,9 @@ Property *Property::fromTitle( const QString &title, int templateId ) {
  */
 Property *Property::add( const QString &title, const QString &value, int templateId ) {
     QSqlQuery query;
-    Property *property = nullptr;
-    Template *templ;
 
     // check for duplicates
-    property = Property::fromTitle( title, templateId );
+    Property *property( Property::fromTitle( title, templateId ));
     if ( property != nullptr ) {
         qWarning() << QObject::tr( "duplicate property \"%1\" ignored" ).arg( title );
         return property;
@@ -94,7 +90,7 @@ Property *Property::add( const QString &title, const QString &value, int templat
         Database::instance()->propertyMap[property->id()] = property;
 
         // retrieve template from templateId
-        templ = Template::fromId( property->templateId());
+        Template *templ( Template::fromId( property->templateId()));
         if ( templ == nullptr )
             return property;
 
@@ -128,15 +124,12 @@ void Property::load() {
  * @param query
  */
 Property *Property::store( const QSqlQuery &query ) {
-    Template *templ;
-    Property *property = nullptr;
-
     // construct a property entry from sql recort and store in memory
-    property = new Property( query.record());
+    Property *property( new Property( query.record()));
     Database::instance()->propertyMap[property->id()] = property;
 
     // retrieve template from templateId
-    templ = Template::fromId( property->templateId());
+    Template *templ( Template::fromId( property->templateId()));
     if ( templ == nullptr )
         return property;
 
@@ -150,7 +143,7 @@ Property *Property::store( const QSqlQuery &query ) {
  * @param name
  */
 bool Property::contains( const QString &title ) {
-    foreach ( Property *property, Database::instance()->propertyMap ) {
+    foreach ( const Property *property, Database::instance()->propertyMap ) {
         if ( !QString::compare( property->title(), title ))
             return true;
     }

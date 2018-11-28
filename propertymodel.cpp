@@ -58,20 +58,17 @@ int PropertyModel::columnCount( const QModelIndex & ) const {
  * @return
  */
 QVariant PropertyModel::data( const QModelIndex &index, int role ) const {
-    Property *property;
-    int width;
-
     // failsafe
     if ( this->templ == nullptr || !index.isValid() || this->view == nullptr ) {
         qDebug() << this->tr( "invalid model data" );
         return QVariant();
     }
 
-    property = list.at( index.row());
+    const Property *property( list.at( index.row()));
     if ( property == nullptr )
         return QVariant();
 
-    width = this->view->viewport()->width();
+    const int width = this->view->viewport()->width();
 
     if ( role == Qt::DisplayRole ) {
         switch ( static_cast<Columns>( index.column())) {
@@ -127,10 +124,7 @@ void PropertyModel::reset() {
             indices << order;
         }
 
-        if ( reindex )
-            qDebug() << "reindexing required" << indices;
-        else
-            qDebug() << "reindexing NOT required" << indices;
+        qDebug() << ( reindex ? "reindexing required" : "reindexing NOT required" ) << indices;
 
         return reindex;
     };

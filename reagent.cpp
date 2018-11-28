@@ -57,7 +57,6 @@ Reagent *Reagent::fromName( const QString &name ) {
  */
 Reagent *Reagent::add( const QString &name ) {
     QSqlQuery query;
-    Reagent *reagent = nullptr;
 
     // prepare statement
     query.prepare( QString( "insert into reagents values ( null, :name )" ));
@@ -66,17 +65,18 @@ Reagent *Reagent::add( const QString &name ) {
     // excecute statement
     if ( !query.exec()) {
         qCritical() << QObject::tr( "could not add reagent, reason - '%1'" ).arg( query.lastError().text());
-        return reagent;
+        return nullptr;
     }
 
     // select the newly created entry and store in memory
     query.exec( QString( "select * from reagents where id=%1" ).arg( query.lastInsertId().toInt()));
     if ( query.next()) {
-        reagent = new Reagent( query.record());
+        Reagent *reagent( new Reagent( query.record()));
         Database::instance()->reagentMap[reagent->id()] = reagent;
+        return reagent;
     }
 
-    return reagent;
+    return nullptr;
 }
 
 /**
@@ -94,9 +94,7 @@ void Reagent::load() {
 
     // store entries in memory
     while ( query.next()) {
-        Reagent *reagent;
-
-        reagent = new Reagent( query.record());
+        Reagent *reagent( new Reagent( query.record()));
         Database::instance()->reagentMap[reagent->id()] = reagent;
     }
 }
@@ -106,7 +104,7 @@ void Reagent::load() {
  * @param name
  */
 bool Reagent::contains( const QString &name ) {
-    foreach ( Reagent *reagent, Database::instance()->reagentMap ) {
+    foreach ( const Reagent *reagent, Database::instance()->reagentMap ) {
         if ( !QString::compare( reagent->name(), name ))
             return true;
     }

@@ -59,9 +59,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // set up reagent completer
     auto setReagent = [ this ]( const QString &name ) {
-        Reagent *reagent;
-
-        reagent = Reagent::fromName( name );
+        const Reagent *reagent( Reagent::fromName( name ));
         if ( reagent != nullptr ) {
             int y;
 
@@ -209,26 +207,22 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
  * @brief restoreIndexes
  */
 void MainWindow::restoreIndexes() {
-    int reagentIndex, templateIndex;
-    qreal lastValue;
-    Template *templ;
-
     // load previous indexes
-    reagentIndex = Variable::instance()->integer( "ui_lastReagentIndex" );
+    const int reagentIndex = Variable::instance()->integer( "ui_lastReagentIndex" );
     if ( reagentIndex >= 0 && reagentIndex < this->ui->reagentCombo->count())
         this->ui->reagentCombo->setCurrentIndex( reagentIndex );
 
-    templateIndex = Variable::instance()->integer( "ui_lastTemplateIndex" );
+    const int templateIndex = Variable::instance()->integer( "ui_lastTemplateIndex" );
     if ( templateIndex >= 0 && templateIndex < this->ui->templateCombo->count())
         this->ui->templateCombo->setCurrentIndex( templateIndex );
 
     // get template
-    templ = this->currentTemplate();
+    const Template *templ( this->currentTemplate());
     if ( templ == nullptr )
         return;
 
     // restore previous value to either volume or mass field
-    lastValue = Variable::instance()->decimalValue( "ui_lastValue" );
+    const qreal lastValue = Variable::instance()->decimalValue( "ui_lastValue" );
     if ( templ->state() == Template::Liquid ) {
         this->ui->volumeEdit->setScaledValue( lastValue );
     } else if ( templ->state() == Template::Solid ) {
@@ -264,12 +258,10 @@ MainWindow::~MainWindow() {
  * @return
  */
 Reagent *MainWindow::currentReagent() const {
-    int id;
-
     if ( this->ui->reagentCombo->currentIndex() == -1 )
         return nullptr;
 
-    id = this->ui->reagentCombo->currentData( Qt::UserRole ).toInt();
+    const int id = this->ui->reagentCombo->currentData( Qt::UserRole ).toInt();
     if ( id != -1 )
         return Reagent::fromId( id );
 
@@ -416,14 +408,12 @@ void MainWindow::resizeEvent( QResizeEvent *event ) {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
-    Template *templ;
-
     // save settings
     Variable::instance()->setInteger( "ui_lastReagentIndex", this->ui->reagentCombo->currentIndex());
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
 
     // get template
-    templ = this->currentTemplate();
+    const Template *templ( this->currentTemplate());
     if ( templ != nullptr ) {
         // store current value (volume or mass) as variable
         if ( templ->state() == Template::Liquid ) {
@@ -472,10 +462,9 @@ void MainWindow::on_actionRemove_triggered() {
  */
 void MainWindow::on_actionProperties_triggered() {
     PropertyDialog *pd;
-    Template *templ;
 
     // get current template
-    templ = this->currentTemplate();
+    Template *templ( this->currentTemplate());
     if ( templ == nullptr ) {
         this->messageDock->displayMessage( this->tr( "Cannot display properties: template not selected" ), MessageDock::Warning, 3000 );
         return;

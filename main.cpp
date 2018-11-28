@@ -34,6 +34,13 @@
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
 //
+// OTHER:
+//   fix constants, etc.
+//   backport variables
+//   backport settings
+//   remove signal mapper
+//   backport database from ketoevent
+//
 
 //
 // includes
@@ -44,6 +51,7 @@
 #include "variable.h"
 #include <QApplication>
 #include <QDebug>
+#include <QThread>
 
 // default message handler
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( 0 );
@@ -88,10 +96,10 @@ int main( int argc, char *argv[] ) {
     w.show();
 
     // load database on separate thread
-    QThread *thread = new QThread;
-    Database::instance()->moveToThread( thread );
-    thread->start();
-    thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
+    //QThread *thread( new QThread );
+    //Database::instance()->moveToThread( thread );
+    //thread->start();
+    //thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
     Database::instance()->load();
 
     return a.exec();
