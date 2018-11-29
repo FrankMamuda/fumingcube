@@ -49,7 +49,9 @@ public:
     enum Units {
         NoUnits = -1,
         Primary,
-        Secondary
+        Secondary,
+
+        Count
     };
 
     explicit LineEdit( QWidget *parent = nullptr );

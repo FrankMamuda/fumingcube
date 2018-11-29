@@ -28,6 +28,16 @@
 #include <QDomDocument>
 #include <QFile>
 #include <QXmlStreamWriter>
+#include "main.h"
+
+/**
+ * @brief XMLTools::XMLTools
+ * @param parent
+ */
+XMLTools::XMLTools( QObject *parent ) : QObject( parent ) {
+    // add to garbage collector
+    GarbageMan::instance()->add( this );
+}
 
 /**
  * @brief XMLTools::write
@@ -56,23 +66,26 @@ void XMLTools::write() {
     stream.writeAttribute( "version", "3" );
 
     // switch mode
-    foreach ( const VariableEntry &var, Variable::instance()->list ) {
-        stream.writeEmptyElement( "variable" );
-        stream.writeAttribute( "key", var.key());
+    foreach ( const QSharedPointer<Var> &var, Variable::instance()->list ) {
+        if ( var->key().isEmpty() || var->flags() & Var::Flag::NoSave )
+            continue;
 
-        if ( !var.value().canConvert<QString>()) {
+        stream.writeEmptyElement( "variable" );
+        stream.writeAttribute( "key", var->key());
+
+        if ( !var->value().canConvert<QString>()) {
             QByteArray array;
             QBuffer buffer(&array);
 
             buffer.open( QIODevice::WriteOnly );
             QDataStream out( &buffer );
 
-            out << var.value();
+            out << var->value();
             buffer.close();
 
             stream.writeAttribute( "binary", QString( array.toBase64()));
         } else {
-            stream.writeAttribute( "value", var.value().toString());
+            stream.writeAttribute( "value", var->value().toString());
         }
     }
 
@@ -104,6 +117,7 @@ void XMLTools::write() {
             qCritical() << "could not open configuration file" << path;
             return;
         }
+
         xmlFile.write( newData.toUtf8().replace( "\r", "" ));
     }
 

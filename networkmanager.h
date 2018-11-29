@@ -25,6 +25,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QLoggingCategory>
+#include "main.h"
 
 /**
  * @brief The NetworkManager class
@@ -44,7 +45,7 @@ public:
      * @brief instance
      * @return
      */
-    static NetworkManager *instance() { NetworkManager *instance( new NetworkManager()); return instance; }
+    static NetworkManager *instance() { static NetworkManager *instance( new NetworkManager()); return instance; }
 
 signals:
     /**
@@ -103,11 +104,14 @@ private:
     /**
      * @brief NetworkManager
      */
-    NetworkManager() {
+    explicit NetworkManager() {
         this->connect( &this->manager, SIGNAL( finished( QNetworkReply* )), SLOT( requestCompleted( QNetworkReply* )));
 
         // disable ssl warnings
         QLoggingCategory::setFilterRules( "qt.network.ssl.warning=false" );
+
+        // add to garbage collector
+        GarbageMan::instance()->add( this );
     }
 
     /**

@@ -34,17 +34,20 @@
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
 //
+// BUGS:
+//   segfault after adding a new reagent (QVector<T>::at: "index out of range")
+//     and using reagent selection combobox
+//   segfault during reagent removal (MainWindow::on_actionRemove_triggered)
+//
 // OTHER:
 //   fix constants, etc.
-//   backport variables
-//   backport settings
-//   remove signal mapper
 //   backport database from ketoevent
 //
 
 //
 // includes
 //
+#include "main.h"
 #include "mainwindow.h"
 #include "database.h"
 #include "xmltools.h"
@@ -101,6 +104,17 @@ int main( int argc, char *argv[] ) {
     //thread->start();
     //thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
     Database::instance()->load();
+
+    // clean up on exit
+    qApp->connect( qApp, &QApplication::aboutToQuit, []() {
+        //Database::instance()->deleteLater();
+
+        GarbageMan::instance()->clear();
+        delete GarbageMan::instance();
+
+        // fixes segfault on newer qt versions
+        Variable::instance()->deleteLater();
+    } );
 
     return a.exec();
 }

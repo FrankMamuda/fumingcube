@@ -22,6 +22,7 @@
 #include "database.h"
 #include "property.h"
 #include "template.h"
+#include "main.h"
 #include <QDebug>
 #include <QDir>
 #include <QSqlQuery>
@@ -87,6 +88,9 @@ Database::Database( QObject *parent ) : QObject( parent ) {
     // create initial table structure (if non-existant)
     if ( !this->createStructure())
         qFatal( this->tr( "could not create internal database structure" ).toUtf8().constData());
+
+    // add to garbage collector
+    //GarbageMan::instance()->add( this );
 }
 
 /**

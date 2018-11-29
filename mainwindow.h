@@ -23,7 +23,6 @@
 //
 #include <QCompleter>
 #include <QMainWindow>
-#include <QSignalMapper>
 
 /**
  * @brief The Ui namespace
@@ -72,7 +71,6 @@ protected:
 private:
     Ui::MainWindow *ui;
     QList<LineEdit*> inputList;
-    QSignalMapper *signalMapper;
     MessageDock *messageDock;
     ReagentModel *reagentModel;
     TemplateModel *templateModel;

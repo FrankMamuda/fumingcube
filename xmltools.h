@@ -40,11 +40,11 @@ class XMLTools : public QObject {
 
 public:
     ~XMLTools() {}
-    static XMLTools *instance() { XMLTools *instance( new XMLTools()); return instance; }
+    static XMLTools *instance() { static XMLTools *instance( new XMLTools()); return instance; }
     void write();
     void read();
 
 private:
-    XMLTools( QObject *parent = nullptr ) : QObject( parent ) {}
+    XMLTools( QObject *parent = nullptr );
     static XMLTools *createInstance() { return new XMLTools(); }
 };

@@ -41,7 +41,6 @@
  * @param parent
  */
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ),
-    signalMapper( new QSignalMapper( this )),
     messageDock( new MessageDock( this )),
     reagentModel( new ReagentModel( this )),
     templateModel( new TemplateModel( this )),
@@ -189,10 +188,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         this->ui->assayEdit->setScaledValue( 1.0 );
 
     // connect for updates
-    this->connect( this->signalMapper, SIGNAL( mapped( int )), this, SLOT( calculate( int )));
     foreach ( LineEdit *lineEdit, this->inputList ) {
-        this->signalMapper->setMapping( lineEdit, static_cast<int>( lineEdit->mode()) );
-        this->connect( lineEdit, SIGNAL( valueChanged()), this->signalMapper, SLOT( map()));
+        this->connect( lineEdit, &LineEdit::valueChanged, [ this, lineEdit ]() {
+           this->calculate( static_cast<int>( lineEdit->mode()));
+        } );
     }
 
     // fill mass field to trigger updates
@@ -237,12 +236,14 @@ MainWindow::~MainWindow() {
     this->disconnect( Database::instance(), &Database::changed, this, nullptr );
     this->disconnect<void( QComboBox::* )( int )>( this->ui->reagentCombo, &QComboBox::currentIndexChanged, this, nullptr );
     this->disconnect<void( QComboBox::* )( int )>( this->ui->templateCombo, &QComboBox::currentIndexChanged, this, nullptr );
-    this->disconnect( this->signalMapper, SIGNAL( mapped( int )));
+
+    foreach ( LineEdit *lineEdit, this->inputList )
+        this->disconnect( lineEdit, SIGNAL( valueChanged()));
+
     this->disconnect( this->ui->findEdit, &QLineEdit::returnPressed, this, nullptr );
     this->disconnect( this->ui->findButton, &QPushButton::clicked, this, nullptr );
     this->disconnect( this->ui->clearButton, &QPushButton::clicked, this, nullptr );
 
-    delete this->signalMapper;
     delete this->reagentModel;
     delete this->reagentCompleter;
 
@@ -448,7 +449,8 @@ void MainWindow::on_actionRemove_triggered() {
 
     // remove reagent and its templates
     Database::instance()->reagentMap.remove( this->currentReagent()->id());
-    if ( !query.exec( QString( "delete from reagents where id=%1" ).arg( this->currentReagent()->id())) || !query.exec( QString( "delete from templates where reagentId=%1" ).arg( this->currentReagent()->id())))
+    const int id = this->currentReagent()->id();
+    if ( !query.exec( QString( "delete from reagents where id=%1" ).arg( id )) || !query.exec( QString( "delete from templates where reagentId=%1" ).arg( id )))
         qCritical() << this->tr( "could not delete reagent, reason: '%1'" ).arg( query.lastError().text());
 
     delete this->currentReagent();

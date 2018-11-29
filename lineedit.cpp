@@ -32,8 +32,8 @@ LineEdit::LineEdit( QWidget *parent ) : QLineEdit( parent ), m_value( 0.0 ), m_m
     this->setAlignment( Qt::AlignHCenter );
 
     // initialize units to avoid segfaults
-    this->m_current = QVector<QString>( Secondary + 1, "" );
-    this->m_default = QVector<QString>( Secondary + 1, "" );
+    this->m_current = QVector<QString>( Count, "" );
+    this->m_default = QVector<QString>( Count, "" );
     this->units = QVector<QMap<QString, qreal>>( Secondary + 1 );
 
     // as-you-type validation

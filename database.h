@@ -96,7 +96,7 @@ class Database : public QObject {
     Q_OBJECT
 
 public:
-    static Database *instance() { Database *instance( new Database()); return instance; }
+    static Database *instance() { static Database *instance( new Database()); return instance; }
     ~Database();
     QString path() const { return this->m_path; }
     QMap<int, Reagent*> reagentMap;

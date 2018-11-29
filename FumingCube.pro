@@ -74,7 +74,10 @@ HEADERS += \
     extractiondialog.h \
     extractionmodel.h \
     reagentmodel.h \
-    templatemodel.h
+    templatemodel.h \
+    variableentry.h \
+    widget.h \
+    main.h
 
 FORMS += \
         mainwindow.ui \
