@@ -33,11 +33,10 @@ const static QString Name( "properties" );
 /**
  * @brief The Property class
  */
-class Property_N final : public Table {
+class Property final : public Table {
     Q_OBJECT
     Q_ENUMS( Fields )
-    Q_DISABLE_COPY( Property_N )
-    //friend class Template_N;
+    Q_DISABLE_COPY( Property )
 
 public:
     enum Fields {
@@ -62,8 +61,8 @@ public:
      * @brief instance
      * @return
      */
-    static Property_N *instance() { static Property_N *instance = new Property_N(); return instance; }
-    virtual ~Property_N() {}
+    static Property *instance() { static Property *instance = new Property(); return instance; }
+    virtual ~Property() {}
 
     Row add( const QString &name, const QString &html, const Id &templateId );
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
@@ -75,8 +74,8 @@ public slots:
     void setHTML( const Row &row, const QString &html ) { this->setValue( row, HTML, html ); }
 
 private:
-    explicit Property_N();
+    explicit Property();
 };
 
 // declare enums
-Q_DECLARE_METATYPE( Property_N::Fields )
+Q_DECLARE_METATYPE( Property::Fields )

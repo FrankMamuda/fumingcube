@@ -48,14 +48,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->ui->setupUi( this );
 
     // set up models
-    this->ui->reagentCombo->setModel( Reagent_N::instance());
-    this->ui->reagentCombo->setModelColumn( Reagent_N::Name );
-    this->ui->templateCombo->setModel( Template_N::instance());
-    this->ui->templateCombo->setModelColumn( Template_N::Name );
+    this->ui->reagentCombo->setModel( Reagent::instance());
+    this->ui->reagentCombo->setModelColumn( Reagent::Name );
+    this->ui->templateCombo->setModel( Template::instance());
+    this->ui->templateCombo->setModelColumn( Template::Name );
 
     // set up completer
-    this->reagentCompleter = new QCompleter( Reagent_N::instance());
-    this->reagentCompleter->setCompletionColumn( Reagent_N::Name );
+    this->reagentCompleter = new QCompleter( Reagent::instance());
+    this->reagentCompleter->setCompletionColumn( Reagent::Name );
     this->reagentCompleter->setCaseSensitivity( Qt::CaseInsensitive );
     this->reagentCompleter->setCompletionMode( QCompleter::PopupCompletion );
     this->ui->findEdit->setCompleter( this->reagentCompleter );
@@ -86,19 +86,19 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     // template change lambda
     auto templateChanged = [ this, uiLocker ]( const int index ) {
         // failsafe
-        const Row row = Template_N::instance()->row( index );
+        const Row row = Template::instance()->row( index );
         if ( row == Row::Invalid ) {
-            Property_N::instance()->setFilter( "templateId=-1" );
+            Property::instance()->setFilter( "templateId=-1" );
             uiLocker( true );
             return;
         }
 
-        if ( Template_N::instance()->state( row ) == Template_N::Solid ) {
-            this->ui->massEdit->setScaledValue( Template_N::instance()->amount( row ));
+        if ( Template::instance()->state( row ) == Template::Solid ) {
+            this->ui->massEdit->setScaledValue( Template::instance()->amount( row ));
             this->ui->densityEdit->setDisabled( true );
             this->ui->volumeEdit->setDisabled( true );
-        } else if ( Template_N::instance()->state( row ) == Template_N::Liquid ) {
-            this->ui->volumeEdit->setScaledValue( Template_N::instance()->amount( row ));
+        } else if ( Template::instance()->state( row ) == Template::Liquid ) {
+            this->ui->volumeEdit->setScaledValue( Template::instance()->amount( row ));
             this->ui->densityEdit->setEnabled( true );
             this->ui->volumeEdit->setEnabled( true );
         } else {
@@ -106,29 +106,29 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         }
 
         // filter properties
-        Property_N::instance()->setFilter( QString( "templateId=%1" ).arg( static_cast<int>( Template_N::instance()->id( row ))));
+        Property::instance()->setFilter( QString( "templateId=%1" ).arg( static_cast<int>( Template::instance()->id( row ))));
 
-        this->ui->molarMassEdit->setScaledValue( Template_N::instance()->molarMass( row ));
-        this->ui->densityEdit->setScaledValue( Template_N::instance()->density( row ));
-        this->ui->assayEdit->setScaledValue( Template_N::instance()->assay( row ));
+        this->ui->molarMassEdit->setScaledValue( Template::instance()->molarMass( row ));
+        this->ui->densityEdit->setScaledValue( Template::instance()->density( row ));
+        this->ui->assayEdit->setScaledValue( Template::instance()->assay( row ));
     };
     this->connect( this->ui->templateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), templateChanged );
 
     // reagent change lambda
     auto reagentChanged = [ this, uiLocker ]( const int index ) {
         // failsafe
-        const Row row = Reagent_N::instance()->row( index );
+        const Row row = Reagent::instance()->row( index );
         if ( row == Row::Invalid ) {
-            Template_N::instance()->setFilter( "reagentId=-1" );
+            Template::instance()->setFilter( "reagentId=-1" );
             uiLocker( true );
             return;
         }
 
         // filter templates
-        Template_N::instance()->setFilter( QString( "reagentId=%1" ).arg( static_cast<int>( Reagent_N::instance()->id( row ))));
+        Template::instance()->setFilter( QString( "reagentId=%1" ).arg( static_cast<int>( Reagent::instance()->id( row ))));
 
         // TODO: remember last?
-        if ( Template_N::instance()->count())
+        if ( Template::instance()->count())
             this->ui->templateCombo->setCurrentIndex( 0 );
     };
     this->connect( this->ui->reagentCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), reagentChanged );
@@ -138,8 +138,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         /*const QModelIndexList list( Reagent_N::instance()->match( Reagent_N::instance()->index( 0, 0 ), Reagent_N::Name, name, 1, Qt::MatchExactly ));*/
         int y;
 
-        for ( y = 0; y < Reagent_N::instance()->count(); y++ ) {
-            if ( !QString::compare( name, Reagent_N::instance()->name( Reagent_N::instance()->row( y )), Qt::CaseInsensitive )) {
+        for ( y = 0; y < Reagent::instance()->count(); y++ ) {
+            if ( !QString::compare( name, Reagent::instance()->name( Reagent::instance()->row( y )), Qt::CaseInsensitive )) {
                 this->ui->reagentCombo->setCurrentIndex( y );
                 break;
             }
@@ -155,13 +155,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->connect( this->ui->findButton, &QPushButton::clicked, [ this ]  {
         this->ui->stackedWidget->setCurrentIndex( 1 );
 
-        const Row row = Reagent_N::instance()->row( this->ui->reagentCombo->currentIndex());
+        const Row row = Reagent::instance()->row( this->ui->reagentCombo->currentIndex());
         if ( row == Row::Invalid ) {
             this->ui->stackedWidget->setCurrentIndex( 0 );
             return;
         }
 
-        this->ui->findEdit->setText( Reagent_N::instance()->name( row ));
+        this->ui->findEdit->setText( Reagent::instance()->name( row ));
         this->ui->findEdit->selectAll();
         this->ui->findEdit->setFocus();
     } );
@@ -240,15 +240,15 @@ void MainWindow::restoreIndexes() {
         this->ui->templateCombo->setCurrentIndex( templateIndex );
 
     // get template
-    const Row row = Template_N::instance()->row( this->ui->templateCombo->currentIndex());
+    const Row row = Template::instance()->row( this->ui->templateCombo->currentIndex());
     if ( row == Row::Invalid )
         return;
 
     // restore previous value to either volume or mass field
     const qreal lastValue = Variable::instance()->decimalValue( "ui_lastValue" );
-    if ( Template_N::instance()->state( row ) == Template_N::Liquid ) {
+    if ( Template::instance()->state( row ) == Template::Liquid ) {
         this->ui->volumeEdit->setScaledValue( lastValue );
-    } else if ( Template_N::instance()->state( row ) == Template_N::Solid ) {
+    } else if ( Template::instance()->state( row ) == Template::Solid ) {
         this->ui->massEdit->setScaledValue( lastValue );
     }
 }
@@ -257,6 +257,10 @@ void MainWindow::restoreIndexes() {
  * @brief MainWindow::~MainWindow
  */
 MainWindow::~MainWindow() {
+    // unset models
+    this->ui->templateCombo->setModel( nullptr );
+    this->ui->reagentCombo->setModel( nullptr );
+
     this->disconnect( this->ui->reagentCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
     this->disconnect( this->ui->templateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
 
@@ -369,13 +373,13 @@ void MainWindow::on_actionEdit_triggered() {
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
 
     // get reagent
-    const Row row = Reagent_N::instance()->row( this->ui->reagentCombo->currentIndex());
+    const Row row = Reagent::instance()->row( this->ui->reagentCombo->currentIndex());
     if ( row == Row::Invalid ) {
         this->messageDock->displayMessage( this->tr( "Cannot open edit dialog: reagent not selected" ), MessageDock::Warning, 3000 );
         return;
     }
 
-    dialog.setReagentRow( Reagent_N::instance()->row( this->ui->reagentCombo->currentIndex()));
+    dialog.setReagentRow( Reagent::instance()->row( this->ui->reagentCombo->currentIndex()));
     dialog.exec();
 }
 
@@ -398,14 +402,14 @@ void MainWindow::closeEvent( QCloseEvent *event ) {
     Variable::instance()->setInteger( "ui_lastTemplateIndex", this->ui->templateCombo->currentIndex());
 
     // get template
-    const Row row = Template_N::instance()->row( this->ui->templateCombo->currentIndex());
+    const Row row = Template::instance()->row( this->ui->templateCombo->currentIndex());
     if ( row == Row::Invalid )
         return;
 
     // store current value (volume or mass) as variable
-    if ( Template_N::instance()->state( row ) == Template_N::Liquid ) {
+    if ( Template::instance()->state( row ) == Template::Liquid ) {
         Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->volumeEdit->scaledValue());
-    } else if ( Template_N::instance()->state( row ) == Template_N::Solid ) {
+    } else if ( Template::instance()->state( row ) == Template::Solid ) {
         Variable::instance()->setDecimalValue( "ui_lastValue", this->ui->massEdit->scaledValue());
     }
 
@@ -424,18 +428,18 @@ void MainWindow::on_actionRemove_triggered() {
 
     // fetch current reagent
     // get reagent
-    const Row row = Reagent_N::instance()->row( this->ui->reagentCombo->currentIndex());
+    const Row row = Reagent::instance()->row( this->ui->reagentCombo->currentIndex());
     if ( row == Row::Invalid ) {
         this->messageDock->displayMessage( this->tr( "Cannot remove: reagent not selected" ), MessageDock::Warning, 3000 );
         return;
     }
 
     // request confirmation
-    if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove reagent '%1'" ).arg( Reagent_N::instance()->name( row )), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
+    if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove reagent '%1'" ).arg( Reagent::instance()->name( row )), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
         return;
 
     // remove reagent and its templates
-    Reagent_N::instance()->remove( row );
+    Reagent::instance()->remove( row );
     // FIXME: also remove templates (or handle those in removeOrphans)
 }
 
@@ -446,7 +450,7 @@ void MainWindow::on_actionProperties_triggered() {
     PropertyDialog *pd;
 
     // get template
-    const Row row = Template_N::instance()->row( this->ui->templateCombo->currentIndex());
+    const Row row = Template::instance()->row( this->ui->templateCombo->currentIndex());
     if ( row == Row::Invalid ) {
         this->messageDock->displayMessage( this->tr( "Cannot display properties: template not selected" ), MessageDock::Warning, 3000 );
         return;

@@ -33,11 +33,10 @@ const static QString Name( "reagents" );
 /**
  * @brief The Reagent class
  */
-class Reagent_N final : public Table {
+class Reagent final : public Table {
     Q_OBJECT
     Q_ENUMS( Fields )
-    Q_DISABLE_COPY( Reagent_N )
-    //friend class Template_N;
+    Q_DISABLE_COPY( Reagent )
 
 public:
     enum Fields {
@@ -53,8 +52,8 @@ public:
      * @brief instance
      * @return
      */
-    static Reagent_N *instance() { static Reagent_N *instance = new Reagent_N(); return instance; }
-    virtual ~Reagent_N() {}
+    static Reagent *instance() { static Reagent *instance = new Reagent(); return instance; }
+    virtual ~Reagent() = default;
 
     Row add( const QString &name );
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
@@ -64,8 +63,8 @@ public slots:
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
 
 private:
-    explicit Reagent_N();
+    explicit Reagent();
 };
 
 // declare enums
-Q_DECLARE_METATYPE( Reagent_N::Fields )
+Q_DECLARE_METATYPE( Reagent::Fields )

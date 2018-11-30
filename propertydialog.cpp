@@ -44,11 +44,11 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     this->ui->setupUi( this );
 
     // set up property table
-    this->ui->propertyView->setModel( Property_N::instance());
+    this->ui->propertyView->setModel( Property::instance());
 
     // hide unwanted columns
-    for ( y = 0; y < Property_N::instance()->columnCount(); y++ ) {
-        if ( y != Property_N::Name && y != Property_N::HTML )
+    for ( y = 0; y < Property::instance()->columnCount(); y++ ) {
+        if ( y != Property::Name && y != Property::HTML )
             this->ui->propertyView->hideColumn( y );
     }
 
@@ -70,7 +70,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
         if ( this->templateRow == Row::Invalid )
             return;
 
-        const Id id = Template_N::instance()->id( this->templateRow );
+        const Id id = Template::instance()->id( this->templateRow );
         if ( id == Id::Invalid )
             return;
 
@@ -80,13 +80,10 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
 
         switch ( mode ) {
         case PropertyEditor::Add:
-        {
-            // TODO: check of duplicates (is it really necessary at all?)
-            if ( Property_N::instance()->add( name, html, id ) == Row::Invalid )
+            if ( Property::instance()->add( name, html, id ) == Row::Invalid )
                 return;
 
             this->resetView();
-        }
             break;
 
         case PropertyEditor::Edit:
@@ -95,8 +92,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
             if ( row == Row::Invalid )
                 return;
 
-            Property_N::instance()->setName( row, name );
-            Property_N::instance()->setHTML( row, html );
+            Property::instance()->setName( row, name );
+            Property::instance()->setHTML( row, html );
 
             this->resetView();
         }
@@ -119,7 +116,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
         if ( row == Row::Invalid )
             return;
 
-        this->editor->open( PropertyEditor::Edit, Property_N::instance()->name( row ), Property_N::instance()->html( row ));
+        this->editor->open( PropertyEditor::Edit, Property::instance()->name( row ), Property::instance()->html( row ));
     } );
 
     // connect remove action
@@ -129,10 +126,9 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
             return;
 
         // remove property from database
-        Property_N::instance()->remove( row );
+        Property::instance()->remove( row );
 
         // update table
-        // TODO/FIXME: do we need this?
         this->resetView();
     } );
 
@@ -237,7 +233,7 @@ Row PropertyDialog::current() {
         return Row::Invalid;
 
     // return property
-    return Property_N::instance()->row( index );
+    return Property::instance()->row( index );
 }
 
 /**

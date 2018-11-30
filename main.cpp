@@ -34,14 +34,8 @@
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
 //
-// BUGS:
-//   segfault after adding a new reagent (QVector<T>::at: "index out of range")
-//     and using reagent selection combobox
-//   segfault during reagent removal (MainWindow::on_actionRemove_triggered)
-//
 // OTHER:
 //   fix constants, etc.
-//   backport database from ketoevent
 //
 
 //
@@ -100,22 +94,19 @@ int main( int argc, char *argv[] ) {
     QApplication a( argc, argv );
 
     // load database on separate thread
-    Database_N::instance();
-    Database_N::instance()->add( Reagent_N::instance());
-    Database_N::instance()->add( Template_N::instance());
-    Database_N::instance()->add( Property_N::instance());
+    Database::instance();
+    Database::instance()->add( Reagent::instance());
+    Database::instance()->add( Template::instance());
+    Database::instance()->add( Property::instance());
 
     MainWindow w;
     w.show();
 
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
-        // FIXME: this fails
-        //delete Database_N::instance();
-        qDebug() << "clear garbage";
-
         GarbageMan::instance()->clear();
         delete GarbageMan::instance();
+        delete Database::instance();
 
         // fixes segfault on newer qt versions
         Variable::instance()->deleteLater();

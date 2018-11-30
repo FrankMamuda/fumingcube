@@ -46,17 +46,17 @@ const static  __attribute__((unused)) unsigned int null = 0;
 /**
  * @brief The Database class
  */
-class Database_N final : public QObject {
+class Database final : public QObject {
     Q_OBJECT
-    Q_DISABLE_COPY( Database_N )
+    Q_DISABLE_COPY( Database )
 
 public:
     /**
      * @brief instance
      * @return
      */
-    static Database_N *instance() { static Database_N *instance( new Database_N()); return instance; }
-    ~Database_N();
+    static Database *instance() { static Database *instance( new Database()); return instance; }
+    ~Database();
     void add( Table *table );
     bool hasInitialised() const { return this->m_initialised; }
 
@@ -64,7 +64,7 @@ public slots:
     void removeOrphanedEntries();
 
 private:
-    explicit Database_N( QObject *parent = nullptr );
+    explicit Database( QObject *parent = nullptr );
     void setInitialised( bool initialised = true ) { this->m_initialised = initialised; }
 
     /**

@@ -31,7 +31,7 @@
  * @return
  */
 int Table::count() const {
-    return Database_N::instance()->hasInitialised() ? this->rowCount() : 0;
+    return Database::instance()->hasInitialised() ? this->rowCount() : 0;
 }
 
 /**
@@ -87,7 +87,7 @@ Row Table::row( const Id &id ) const {
  * @return
  */
 QVariant Table::data( const QModelIndex &index, int role ) const {
-    if ( !Database_N::instance()->hasInitialised())
+    if ( !Database::instance()->hasInitialised())
         return QVariant();
 
     if ( role == IDRole || role == Qt::UserRole ) {

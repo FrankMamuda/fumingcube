@@ -63,15 +63,13 @@ void TextEdit::insertPixmap( const QPixmap &pixmap ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
-    QMimeDatabase db;
-
     //
     // TODO: HERE!!!
     //
 
     // check if dropped item is an image
     foreach ( const QUrl &url, source->urls()) {
-        if ( db.mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
+        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
             return true;
     }
 
@@ -129,7 +127,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         if ( image.isNull())
             image = qvariant_cast<QImage>( source->imageData());
 
-        this->insertPixmap( QPixmap::fromImage( image ));
+        this->insertPixmap( QPixmap::fromImage( qAsConst( image )));
         return;
     }
 

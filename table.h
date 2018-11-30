@@ -61,7 +61,7 @@ class Table : public QSqlTableModel {
     Q_OBJECT
     Q_ENUMS( Roles )
     Q_DISABLE_COPY( Table )
-    friend class Database_N;
+    friend class Database;
 
 public:
     enum Roles {

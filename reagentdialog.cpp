@@ -60,7 +60,7 @@ void ReagentDialog::addNewTab( const Row &templateRow )  {
 
     // check template
    // const Id templateId = Template_N::instance()->id( templateRow );
-    const int tabIndex = this->ui->tabWidget->addTab( widget, templateRow == Row::Invalid ? "" : Template_N::instance()->name( templateRow ));
+    const int tabIndex = this->ui->tabWidget->addTab( widget, templateRow == Row::Invalid ? "" : Template::instance()->name( templateRow ));
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
 
@@ -102,22 +102,22 @@ bool ReagentDialog::add() {
     int y;
     const QString name( this->ui->nameEdit->text());
 
-    if ( Reagent_N::instance()->contains( Reagent_N::Name, name )) {
+    if ( Reagent::instance()->contains( Reagent::Name, name )) {
         this->messageDock->displayMessage( this->tr( "Reagent already exists in database" ), MessageDock::Error, 3000 );
         return false;
     }
 
-    Row row = Reagent_N::instance()->add( name );
+    Row row = Reagent::instance()->add( name );
     if ( row == Row::Invalid )
         return false;
 
-    Id id = Reagent_N::instance()->id( row );
+    Id id = Reagent::instance()->id( row );
     if ( id == Id::Invalid )
         return false;
 
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         const TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
-        Template_N::instance()->add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), id );
+        Template::instance()->add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), id );
     }
 
     this->m_reagentRow = row;
@@ -190,10 +190,10 @@ void ReagentDialog::setReagentRow( const Row &row ) {
         return;
 
     this->setMode( Edit );
-    this->ui->nameEdit->setText( Reagent_N::instance()->name( this->reagentRow()));
+    this->ui->nameEdit->setText( Reagent::instance()->name( this->reagentRow()));
 
-    for ( int y = 0; y < Template_N::instance()->count(); y++ )
-        this->addNewTab( Template_N::instance()->row( y ));
+    for ( int y = 0; y < Template::instance()->count(); y++ )
+        this->addNewTab( Template::instance()->row( y ));
 }
 
 /**

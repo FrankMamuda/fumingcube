@@ -27,7 +27,7 @@
  * @brief Reagent::Reagent
  * @param parent
  */
-Reagent_N::Reagent_N() : Table( ReagentTable::Name ) {
+Reagent::Reagent() : Table( ReagentTable::Name ) {
     this->addField( ID,   "id",   QVariant::UInt,   "integer primary key", true, true );
     this->addField( Name, "name", QVariant::String, "text",                true );
 }
@@ -36,6 +36,6 @@ Reagent_N::Reagent_N() : Table( ReagentTable::Name ) {
  * @brief Reagent::add
  * @param name
  */
-Row Reagent_N::add( const QString &name ) {
+Row Reagent::add( const QString &name ) {
     return Table::add( QVariantList() << Database_::null << name );
 }

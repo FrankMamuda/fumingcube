@@ -33,11 +33,10 @@ const static QString Name( "templates" );
 /**
  * @brief The Template class
  */
-class Template_N final : public Table {
+class Template final : public Table {
     Q_OBJECT
     Q_ENUMS( Fields )
-    Q_DISABLE_COPY( Template_N )
-    //friend class Reagent_N;
+    Q_DISABLE_COPY( Template )
 
 public:
     enum Fields {
@@ -55,7 +54,7 @@ public:
         Count
     };
 
-    enum State_N {
+    enum State {
         Solid = 0,
         Liquid
     };
@@ -64,17 +63,17 @@ public:
      * @brief instance
      * @return
      */
-    static Template_N *instance() { static Template_N *instance = new Template_N(); return instance; }
-    virtual ~Template_N() {}
+    static Template *instance() { static Template *instance = new Template(); return instance; }
+    virtual ~Template() {}
 
-    Row add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State_N state, const Id &reagentId );
+    Row add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const Id &reagentId );
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
     qreal amount( const Row &row ) const { return this->value( row, Amount ).toDouble(); }
     qreal density( const Row &row ) const { return this->value( row, Density ).toDouble(); }
     qreal assay( const Row &row ) const { return this->value( row, Assay ).toDouble(); }
     qreal molarMass( const Row &row ) const { return this->value( row, MolarMass ).toDouble(); }
-    State_N state( const Row &row ) const { return static_cast<State_N>( this->value( row, State ).toInt()); }
+    State state( const Row &row ) const { return static_cast<State>( this->value( row, State ).toInt()); }
     Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
 
 public slots:
@@ -83,11 +82,11 @@ public slots:
     void setDensity( const Row &row, const qreal &density ) { this->setValue( row, Density, density ); }
     void setAssay( const Row &row, const qreal &assay ) { this->setValue( row, Assay, assay ); }
     void setMolarMass( const Row &row, const qreal &molarMass ) { this->setValue( row, MolarMass, molarMass ); }
-    void setState( const Row &row, const State_N &state ) { this->setValue( row, State, state ); }
+    void setState( const Row &row, const State &state ) { this->setValue( row, State, state ); }
 
 private:
-    explicit Template_N();
+    explicit Template();
 };
 
 // declare enums
-Q_DECLARE_METATYPE( Template_N::Fields )
+Q_DECLARE_METATYPE( Template::Fields )

@@ -36,10 +36,10 @@
 void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
     const QTableView *view( qobject_cast<QTableView*>( this->parent()));
     const int width = view != nullptr ?
-                ( static_cast<int>( view->viewport()->width() * ( index.column() == Property_N::HTML ? 0.66 : 0.33 ))) :
+                ( static_cast<int>( view->viewport()->width() * ( index.column() == Property::HTML ? 0.66 : 0.33 ))) :
                 64;
 
-        this->document.setHtml( index.data( Property_N::HTML ).toString());
+        this->document.setHtml( index.data( Property::HTML ).toString());
     this->document.setDocumentMargin( 2 );
     this->document.setTextWidth( width );
     this->document.setTextWidth( this->document.idealWidth());

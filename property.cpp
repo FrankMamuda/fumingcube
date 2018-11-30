@@ -27,9 +27,9 @@
  * @brief Property::Property
  * @param parent
  */
-Property_N::Property_N() : Table( PropertyTable::Name ) {
+Property::Property() : Table( PropertyTable::Name ) {
     this->addField( ID,       "id",         QVariant::UInt,   "integer primary key", true, true );
-    this->addField( Name,     "name",       QVariant::String, "text" ); // NOTE: not unique
+    this->addField( Name,     "name",       QVariant::String, "text" );
     this->addField( HTML,     "html",       QVariant::String, "text" );
     this->addField( Template, "templateId", QVariant::Int,    "integer" );
     this->addField( Order,    "parent",     QVariant::Int,    "integer" );
@@ -39,6 +39,6 @@ Property_N::Property_N() : Table( PropertyTable::Name ) {
  * @brief Property::add
  * @param name
  */
-Row Property_N::add( const QString &name, const QString &html, const Id &templateId ) {
+Row Property::add( const QString &name, const QString &html, const Id &templateId ) {
     return Table::add( QVariantList() << Database_::null << name << html << static_cast<int>( templateId ) << 0 );
 }

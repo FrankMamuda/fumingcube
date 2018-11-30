@@ -35,7 +35,7 @@
  * @brief Database::Database
  * @param parent
  */
-Database_N::Database_N( QObject *parent ) : QObject( parent ), m_initialised( false ) {
+Database::Database( QObject *parent ) : QObject( parent ), m_initialised( false ) {
     QDir path( QDir::homePath() + "/" + Main::Path );
     QFile file( path.absolutePath() + "/" + "database.db" );
     QSqlDatabase database( QSqlDatabase::database());
@@ -80,13 +80,13 @@ Database_N::Database_N( QObject *parent ) : QObject( parent ), m_initialised( fa
     this->setInitialised();
 
     // add to garbage collector
-    GarbageMan::instance()->add( this );
+    //GarbageMan::instance()->add( this );
 }
 
 /**
  * @brief Database::removeOrphanedEntries
  */
-void Database_N::removeOrphanedEntries() {
+void Database::removeOrphanedEntries() {
     QSqlQuery query;
 
     // remove orphans
@@ -96,7 +96,10 @@ void Database_N::removeOrphanedEntries() {
 /**
  * @brief Database::~Database
  */
-Database_N::~Database_N() {
+#include "property.h"
+#include "template.h"
+#include "reagent.h"
+Database::~Database() {
     QString connectionName;
     bool open = false;
 
@@ -111,7 +114,10 @@ Database_N::~Database_N() {
     //Variable::instance()->unbind( "reagentId" );
     //Variable::instance()->unbind( "templateId" );
     qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
-    // FIXME: segfault  qDeleteAll( this->tables );
+    foreach ( Table *table, this->tables )
+        table->clear();
+
+    qDeleteAll( this->tables );
 
     // according to Qt5 documentation, this must be out of scope
     {
@@ -119,20 +125,26 @@ Database_N::~Database_N() {
         if ( database.isOpen()) {
             open = true;
             connectionName = database.connectionName();
+
+            qCInfo( Database_::Debug ) << this->tr( "closing database" );
             database.close();
         }
     }
 
+    qCInfo( Database_::Debug ) << this->tr( "removing database" );
+
     // only now we can sever the connection completely
     if ( open )
         QSqlDatabase::removeDatabase( connectionName );
+
+    qCInfo( Database_::Debug ) << this->tr( "done" );
 }
 
 /**
  * @brief Database::add
  * @param table
  */
-void Database_N::add( Table *table ) {
+void Database::add( Table *table ) {
     QSqlDatabase database( QSqlDatabase::database());
     const QStringList tables( database.tables());
     QString statement;

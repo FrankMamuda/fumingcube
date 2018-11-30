@@ -43,14 +43,14 @@ class TemplateWidget : public QWidget {
     Q_PROPERTY( qreal amount READ amount )
     Q_PROPERTY( qreal density READ density )
     Q_PROPERTY( qreal molarMass READ molarMass )
-    Q_PROPERTY( Template_N::State_N state READ state WRITE setState )
+    Q_PROPERTY( Template::State state READ state WRITE setState )
     Q_ENUMS( Properties )
 
 public:
     explicit TemplateWidget( QWidget *parent = nullptr, const Row &row = Row::Invalid );
     ~TemplateWidget();
     QString name() const { return this->ui->nameEdit->text(); }
-    Template_N::State_N state() const { return static_cast<Template_N::State_N>( this->ui->stateCombo->currentIndex()); }
+    Template::State state() const { return static_cast<Template::State>( this->ui->stateCombo->currentIndex()); }
     qreal amount() const { return this->ui->amountEdit->scaledValue(); }
     qreal density() const { return this->ui->densityEdit->scaledValue(); }
     qreal molarMass() const { return this->ui->molarMassEdit->scaledValue(); }
@@ -71,7 +71,7 @@ signals:
     void nameChanged( const QString &name );
 
 private slots:
-    void setState( Template_N::State_N state );
+    void setState( Template::State state );
 
 private:
     Ui::TemplateWidget *ui;

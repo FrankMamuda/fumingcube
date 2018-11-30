@@ -62,7 +62,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             return;
         }
 
-        const Id id = Template_N::instance()->id( this->templateRow());
+        const Id id = Template::instance()->id( this->templateRow());
         if ( id == Id::Invalid ) {
             qCritical() << this->tr( "invalid template" );
             return;
@@ -79,7 +79,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             const QString name( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
             const QString html( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
 
-            Property_N::instance()->add( name, html, id );
+            Property::instance()->add( name, html, id );
         }
     } );
 
@@ -108,15 +108,15 @@ void ExtractionDialog::setTemplateRow( const Row &row ) {
 
     // set reagent url
     if ( row != Row::Invalid ) {
-        const Id reagentId = Template_N::instance()->reagentId( row );
+        const Id reagentId = Template::instance()->reagentId( row );
         if ( reagentId == Id::Invalid )
             return;
 
-        const Row reagentRow = Reagent_N::instance()->row( reagentId );
+        const Row reagentRow = Reagent::instance()->row( reagentId );
         if ( reagentRow == Row::Invalid )
             return;
 
-        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent_N::instance()->name( reagentRow )).replace( " ", "_" ));
+        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent::instance()->name( reagentRow )).replace( " ", "_" ));
     }
 }
 

@@ -48,9 +48,9 @@ TemplateWidget::TemplateWidget( QWidget *parent, const Row &row ) : QWidget( par
 
     // toggle density input  
     this->connect( this->ui->stateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), [ this ]( int index ) {
-        this->setState( static_cast<Template_N::State_N>( index ));
+        this->setState( static_cast<Template::State>( index ));
     } );
-    this->setState( static_cast<Template_N::State_N>( this->ui->stateCombo->currentIndex()));
+    this->setState( static_cast<Template::State>( this->ui->stateCombo->currentIndex()));
 
     // connect density and molar mass extraction buttons
     auto extractProperty = [ this, dialogParent ]( Properties property ) {
@@ -74,12 +74,12 @@ TemplateWidget::TemplateWidget( QWidget *parent, const Row &row ) : QWidget( par
     this->ui->densityEdit->setMode( LineEdit::Density );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
     this->ui->assayEdit->setMode( LineEdit::Assay );
-    this->ui->nameEdit->setText( this->templateRow == Row::Invalid ? "" :  Template_N::instance()->name( row ));
-    this->ui->amountEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->amount( row ));
-    this->ui->densityEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->density( row ));
-    this->ui->molarMassEdit->setScaledValue( this->templateRow == Row::Invalid ? 18.0 : Template_N::instance()->molarMass( row ));
-    this->ui->assayEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->assay( row ));
-    this->ui->stateCombo->setCurrentIndex( this->templateRow == Row::Invalid ? static_cast<int>( Template_N::Solid ) : static_cast<int>(  Template_N::instance()->state( row )));
+    this->ui->nameEdit->setText( this->templateRow == Row::Invalid ? "" :  Template::instance()->name( row ));
+    this->ui->amountEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->amount( row ));
+    this->ui->densityEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->density( row ));
+    this->ui->molarMassEdit->setScaledValue( this->templateRow == Row::Invalid ? 18.0 : Template::instance()->molarMass( row ));
+    this->ui->assayEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->assay( row ));
+    this->ui->stateCombo->setCurrentIndex( this->templateRow == Row::Invalid ? static_cast<int>( Template::Solid ) : static_cast<int>(  Template::instance()->state( row )));
 }
 
 /**
@@ -174,22 +174,22 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
  */
 Row TemplateWidget::save( const Row &reagentRow ) {
     // check reagent
-    const Id reagentId = Reagent_N::instance()->id( reagentRow );
+    const Id reagentId = Reagent::instance()->id( reagentRow );
     if ( reagentId == Id::Invalid ) {
         qCritical() << this->tr( "invalid reagent" );
         return Row::Invalid;
     }
 
     // check template
-    if ( Template_N::instance()->id( this->templateRow ) == Id::Invalid ) {
-        this->templateRow = Template_N::instance()->add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), reagentId );
+    if ( Template::instance()->id( this->templateRow ) == Id::Invalid ) {
+        this->templateRow = Template::instance()->add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), reagentId );
     } else {
-        Template_N::instance()->setName( this->templateRow, this->name());
-        Template_N::instance()->setAmount( this->templateRow, this->amount());
-        Template_N::instance()->setDensity( this->templateRow, this->density());
-        Template_N::instance()->setMolarMass( this->templateRow, this->molarMass());
-        Template_N::instance()->setAssay( this->templateRow, this->assay());
-        Template_N::instance()->setState( this->templateRow, this->state());
+        Template::instance()->setName( this->templateRow, this->name());
+        Template::instance()->setAmount( this->templateRow, this->amount());
+        Template::instance()->setDensity( this->templateRow, this->density());
+        Template::instance()->setMolarMass( this->templateRow, this->molarMass());
+        Template::instance()->setAssay( this->templateRow, this->assay());
+        Template::instance()->setState( this->templateRow, this->state());
     }
 
     return this->templateRow;
@@ -199,8 +199,8 @@ Row TemplateWidget::save( const Row &reagentRow ) {
  * @brief TemplateWidget::setState
  * @param state
  */
-void TemplateWidget::setState( Template_N::State_N state ) {
-    if ( state == static_cast<int>( Template_N::Solid )) {
+void TemplateWidget::setState( Template::State state ) {
+    if ( state == static_cast<int>( Template::Solid )) {
         this->ui->densityEdit->setDisabled( true );
         this->ui->amountEdit->setCurrentUnits( "g" );
         this->ui->amountEdit->displayValue();
