@@ -29,9 +29,9 @@
  */
 namespace Main {
 #ifdef Q_CC_MSVC
-static constexpr const char *Path = ".fumingCube/test";
+static constexpr const char *Path = ".fumingCube";
 #else
-static constexpr const char __attribute__((unused)) *Path = ".fumingCube/test";
+static constexpr const char __attribute__((unused)) *Path = ".fumingCube";
 #endif
 }
 

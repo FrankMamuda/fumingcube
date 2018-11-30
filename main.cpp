@@ -106,7 +106,6 @@ int main( int argc, char *argv[] ) {
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
         GarbageMan::instance()->clear();
         delete GarbageMan::instance();
-        delete Database::instance();
 
         // fixes segfault on newer qt versions
         Variable::instance()->deleteLater();

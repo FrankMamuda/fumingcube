@@ -34,7 +34,7 @@ Template::Template() : Table( TemplateTable::Name ) {
     this->addField( Density,   "density",    QVariant::Double, "float" );
     this->addField( Assay,     "assay",      QVariant::Double, "float" );
     this->addField( MolarMass, "molarMass",  QVariant::Double, "float" );
-    this->addField( State,     "state",      QVariant::Int,    "integer" );
+    this->addField( ChemState, "state",      QVariant::Int,    "integer" );
     this->addField( Reagent,   "reagentId",  QVariant::Int,    "integer" );
 }
 
@@ -42,7 +42,7 @@ Template::Template() : Table( TemplateTable::Name ) {
  * @brief Template::add
  * @param name
  */
-Row Template::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const Id &reagentId ) {
+Row Template::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State &state, const Id &reagentId ) {
     return Table::add( QVariantList() << Database_::null <<
                        name << amount << density << assay << molarMass << static_cast<int>( state ) << static_cast<int>( reagentId ));
 }

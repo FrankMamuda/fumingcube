@@ -49,6 +49,11 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
         this->addNewTab();
     } );
 
+    // TODO: delete TAB here?
+    //QObject::connect( this->ui->tabWidget, &QTabWidget::tabCloseRequested, [this]( int index ) {
+    //    qDebug() << "close requested";
+    //} );
+
     this->setMode( mode );
 }
 

@@ -257,10 +257,6 @@ void MainWindow::restoreIndexes() {
  * @brief MainWindow::~MainWindow
  */
 MainWindow::~MainWindow() {
-    // unset models
-    this->ui->templateCombo->setModel( nullptr );
-    this->ui->reagentCombo->setModel( nullptr );
-
     this->disconnect( this->ui->reagentCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
     this->disconnect( this->ui->templateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
 

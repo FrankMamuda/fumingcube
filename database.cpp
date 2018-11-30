@@ -74,13 +74,11 @@ Database::Database( QObject *parent ) : QObject( parent ), m_initialised( false 
     if ( !database.open())
         qFatal( QT_TR_NOOP_UTF8( "could not load database" ));
 
-    qDebug() << database.tables() << database.databaseName();
-
     // done
     this->setInitialised();
 
     // add to garbage collector
-    //GarbageMan::instance()->add( this );
+    GarbageMan::instance()->add( this );
 }
 
 /**
@@ -96,9 +94,6 @@ void Database::removeOrphanedEntries() {
 /**
  * @brief Database::~Database
  */
-#include "property.h"
-#include "template.h"
-#include "reagent.h"
 Database::~Database() {
     QString connectionName;
     bool open = false;
@@ -113,10 +108,8 @@ Database::~Database() {
     // unbind variables
     //Variable::instance()->unbind( "reagentId" );
     //Variable::instance()->unbind( "templateId" );
-    qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
     foreach ( Table *table, this->tables )
         table->clear();
-
     qDeleteAll( this->tables );
 
     // according to Qt5 documentation, this must be out of scope
@@ -131,13 +124,9 @@ Database::~Database() {
         }
     }
 
-    qCInfo( Database_::Debug ) << this->tr( "removing database" );
-
     // only now we can sever the connection completely
     if ( open )
         QSqlDatabase::removeDatabase( connectionName );
-
-    qCInfo( Database_::Debug ) << this->tr( "done" );
 }
 
 /**
