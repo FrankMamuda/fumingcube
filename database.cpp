@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,142 +19,105 @@
 //
 // includes
 //
-#include "database.h"
-#include "property.h"
-#include "template.h"
-#include "main.h"
 #include <QDebug>
 #include <QDir>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
+#include <QApplication>
+#include "database.h"
+#include "table.h"
+#include "field.h"
+#include "main.h"
+#include "variable.h"
 
 /**
  * @brief Database::Database
  * @param parent
  */
-Database::Database( QObject *parent ) : QObject( parent ) {
-    QDir directory;
-    QFile file;
-    QString filename;
+Database_N::Database_N( QObject *parent ) : QObject( parent ), m_initialised( false ) {
+    QDir path( QDir::homePath() + "/" + Main::Path );
+    QFile file( path.absolutePath() + "/" + "database.db" );
     QSqlDatabase database( QSqlDatabase::database());
 
-    // set default path
-#ifdef QT_DEBUG
-    this->setPath( QDir::home().absolutePath() + "/.fumingCubeDebug" );
-#else
-    this->setPath( QDir::home().absolutePath() + "/.fumingCube" );
-#endif
-    directory.setPath( this->path());
+    if ( !path.exists()) {
+        qCDebug( Database_::Debug ) << this->tr( "making non-existant database path \"%1\"" ).arg( path.absolutePath());
+        path.mkpath( path.absolutePath());
 
-    // check if cache dir exists
-    if ( !directory.exists()) {
-        qInfo() << this->tr( "creating non-existant database dir" );
-        directory.mkpath( this->path());
-
-        // additional failsafe
-        if ( !directory.exists()) {
-            qFatal( this->tr( "unable to create database dir" ).toUtf8().constData());
-        }
+        if ( !path.exists())
+            qFatal( QT_TR_NOOP_UTF8( "could not create database path" ));
     }
 
-    // failafe
-    filename = QString( this->path() + "/database.db" );
-    file.setFileName( filename );
+    // failsafe
     if ( !file.exists()) {
         file.open( QFile::WriteOnly );
         file.close();
-        qInfo() << this->tr( "creating non-existant database" );
+        qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" );
 
         if ( !file.exists())
-            qFatal( this->tr( "unable to create database file" ).toUtf8().constData());
+            qFatal( QT_TR_NOOP_UTF8( "unable to create database file" ));
     }
 
     // announce
-    qInfo() << this->tr( "loading database" );
+    qCInfo( Database_::Debug ) << this->tr( "loading database" );
 
     // failsafe
     if ( !database.isDriverAvailable( "QSQLITE" ))
-        qFatal( this->tr( "sqlite not present on the system" ).toUtf8().constData());
+        qFatal( QT_TR_NOOP_UTF8( "sqlite not present on the system" ));
 
     // set sqlite driver
     database = QSqlDatabase::addDatabase( "QSQLITE" );
     database.setHostName( "localhost" );
-    database.setDatabaseName( filename );
+    database.setDatabaseName( QFileInfo( file ).absoluteFilePath());
 
     // set path and open
     if ( !database.open())
-        qFatal( this->tr( "could not load database" ).toUtf8().constData());
+        qFatal( QT_TR_NOOP_UTF8( "could not load database" ));
 
-    // create initial table structure (if non-existant)
-    if ( !this->createStructure())
-        qFatal( this->tr( "could not create internal database structure" ).toUtf8().constData());
+    qDebug() << database.tables() << database.databaseName();
+
+    // done
+    this->setInitialised();
 
     // add to garbage collector
-    //GarbageMan::instance()->add( this );
+    GarbageMan::instance()->add( this );
 }
 
 /**
- * @brief Database::createStructure
- * @return
+ * @brief Database::removeOrphanedEntries
  */
-bool Database::createStructure() {
-    unsigned int y, k;
+void Database_N::removeOrphanedEntries() {
     QSqlQuery query;
-    QSqlDatabase database( QSqlDatabase::database());
-    QStringList tables( database.tables());
-    bool mismatch = false;
 
-    // announce
-    if ( !tables.count())
-        qInfo() << this->tr( "creating an empty database" );
-
-    // validate schema
-    for ( y = 0; y < API::numTables; y++ ) {
-        table_t table = API::tables[y];
-
-        foreach ( const QString &tableName, tables ) {
-            if ( !QString::compare( table.name, tableName, Qt::CaseInsensitive )) {
-                for ( k = 0; k < table.numFields; k++ ) {
-                    if ( !database.record( table.name ).contains( table.fields[k].name ))
-                        mismatch = true;
-                }
-            }
-        }
-    }
-
-    // failure
-    if ( mismatch ) {
-        qCritical( this->tr( "database API mismatch" ).toUtf8().constData());
-        return false;
-    }
-
-    // create initial table structure (if non-existant)
-    return Database::createEmptyTable();
+    // remove orphans
+    // (..)
 }
 
 /**
  * @brief Database::~Database
  */
-Database::~Database() {
+Database_N::~Database_N() {
     QString connectionName;
     bool open = false;
 
+    // remove orphans
+    this->removeOrphanedEntries();
+
     // announce
-    qInfo() << this->tr( "unloading database" );
+    qCInfo( Database_::Debug ) << this->tr( "unloading database" );
+    this->setInitialised( false );
 
-    // remove reagents and templates
-    qDeleteAll( this->templateMap );
-    this->templateMap.clear();
-    qDeleteAll( this->reagentMap );
-    this->reagentMap.clear();
+    // unbind variables
+    //Variable::instance()->unbind( "reagentId" );
+    //Variable::instance()->unbind( "templateId" );
+    qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
+    // FIXME: segfault  qDeleteAll( this->tables );
 
-    // close database if open and delete orphaned logs on shutdown
     // according to Qt5 documentation, this must be out of scope
     {
         QSqlDatabase database( QSqlDatabase::database());
         if ( database.isOpen()) {
             open = true;
-            this->removeOrphanedEntries();
             connectionName = database.connectionName();
             database.close();
         }
@@ -166,72 +129,61 @@ Database::~Database() {
 }
 
 /**
- * @brief Database::load
+ * @brief Database::add
+ * @param table
  */
-void Database::load() {
-    // load reagents, templates and properties
-    Reagent::load();
-    Template::load();
-    Property::load();
-
-    // update gui
-    emit this->changed();
-}
-
-/**
- * @brief Database::generateSchemas
- * @return
- */
-QStringList Database::generateSchemas() {
-    unsigned int y, k;
-    QStringList schemas;
-
-    for ( y = 0; y < API::numTables; y++ ) {
-        table_t api = API::tables[y];
-        QString schema = QString( "create table if not exists %1 ( " ).arg( api.name );
-
-        for ( k = 0; k < api.numFields; k++ ) {
-            tableField_t apif = api.fields[k];
-            schema.append( QString( "%1 %2" ).arg( apif.name ).arg( apif.type ));
-
-            if ( k == api.numFields - 1 )
-                schema.append( " )" );
-            else
-                schema.append( " ," );
-        }
-        schemas << schema;
-    }
-    return schemas;
-}
-
-/**
- * @brief Database::createEmptyTable
- * @return
- */
-bool Database::createEmptyTable() {
+void Database_N::add( Table *table ) {
+    QSqlDatabase database( QSqlDatabase::database());
+    const QStringList tables( database.tables());
+    QString statement;
     QSqlQuery query;
-    QStringList schemas;
+    bool found = false;
 
-    // get schemas
-    schemas = this->generateSchemas();
-    foreach ( const QString &schema, schemas ) {
-        if ( !query.exec( schema ))
-            qFatal( this->tr( "could not create internal database structure, reason - '%1'" ).arg( query.lastError().text()).toUtf8().constData());
-    }
-    return true;
-}
-
-/**
- * @brief Database::removeOrphanedEntries
- */
-void Database::removeOrphanedEntries() {
-    QSqlQuery query;
+    // store table
+    this->tables[table->tableName()] = table;
 
     // announce
-    qInfo() << this->tr( "removing orphaned entries" );
+    if ( !tables.count())
+        qCInfo( Database_::Debug ) << this->tr( "creating an empty database" );
 
-    // remove orphaned logs (hard coded for now)
-    if ( !query.exec( "delete from templates where reagentId not in ( select id from reagents )" ) ||
-         !query.exec( "delete from properties where templateId not in ( select id from templates )" ))
-        qCritical() << this->tr( "could not delete orphaned entries, reason: '%1'" ).arg( query.lastError().text());
+    // validate schema
+    foreach ( const QString &tableName, tables ) {
+        if ( !QString::compare( table->tableName(), tableName )) {
+            foreach ( const Field &field, qAsConst( table->fields )) {
+                if ( !database.record( table->tableName()).contains( field->name())) {
+                    qCCritical( Database_::Debug ) << this->tr( "database field mismatch" );
+                    return;
+                }
+            }
+            found = true;
+        }
+    }
+
+    // table has been verified and is marked as valid
+    if ( found ) {
+        table->setValid();
+    } else {
+        // announce
+        qCInfo( Database_::Debug ) << this->tr( "creating an empty table - \"%1\"" ).arg( table->tableName());
+
+        // prepare statement
+        foreach ( const Field &field, qAsConst( table->fields )) {
+            statement.append( QString( "%1 %2" ).arg( field->name()).arg( field->format()));
+
+            if ( QString::compare( field->name(), table->fields.last()->name()))
+                statement.append( ", " );
+        }
+
+        if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName()).arg( statement )))
+            qCCritical( Database_::Debug ) << this->tr( "could not create table - \"%1\", reason - \"%2\"" ).arg( table->tableName()).arg( query.lastError().text());
+    }
+
+    // create table model
+    table->setTable( table->tableName());
+
+    // load data
+    if ( !table->select()) {
+        qCCritical( Database_::Debug ) << this->tr( "could not initialize model for table - \"%1\"" ).arg( table->tableName());
+        table->setValid( false );
+    }
 }

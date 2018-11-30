@@ -23,6 +23,7 @@
 //
 #include "propertyeditor.h"
 #include <QMainWindow>
+#include "table.h"
 
 //
 // classes
@@ -51,9 +52,9 @@ public:
         Down
     };
 
-    explicit PropertyDialog( QWidget *parent = 0, Template *t = nullptr );
+    explicit PropertyDialog( QWidget *parent = 0, const Row &id = Row::Invalid );
     ~PropertyDialog();
-    Property *current();
+    Row current();
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;
@@ -64,6 +65,6 @@ private slots:
 
 private:
     Ui::PropertyDialog *ui;
-    Template *templ;
+    Row templateRow;
     PropertyEditor *editor;
 };

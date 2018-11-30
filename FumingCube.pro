@@ -31,53 +31,52 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     entry.cpp \
-    template.cpp \
-    reagent.cpp \
     reagentdialog.cpp \
-    database.cpp \
     templatewidget.cpp \
     lineedit.cpp \
     messagedock.cpp \
-    property.cpp \
     charactermap.cpp \
     textedit.cpp \
     propertydialog.cpp \
     propertyeditor.cpp \
     propertydelegate.cpp \
-    propertymodel.cpp \
     imageutils.cpp \
     variable.cpp \
     xmltools.cpp \
-    extractiondialog.cpp
+    extractiondialog.cpp \
+    table.cpp \
+    database.cpp \
+    property.cpp \
+    reagent.cpp \
+    template.cpp
 
 HEADERS += \
         mainwindow.h \
     entry.h \
-    reagent.h \
-    template.h \
     reagentdialog.h \
-    database.h \
     templatewidget.h \
     lineedit.h \
     messagedock.h \
-    property.h \
     charactermap.h \
     textedit.h \
     propertydialog.h \
     propertyeditor.h \
     propertydelegate.h \
-    propertymodel.h \
     imageutils.h \
     variable.h \
     xmltools.h \
     networkmanager.h \
     extractiondialog.h \
     extractionmodel.h \
-    reagentmodel.h \
-    templatemodel.h \
     variableentry.h \
     widget.h \
-    main.h
+    main.h \
+    field.h \
+    table.h \
+    database.h \
+    property.h \
+    reagent.h \
+    template.h
 
 FORMS += \
         mainwindow.ui \

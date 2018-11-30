@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,104 +21,56 @@
 //
 // includes
 //
-#include "reagent.h"
-#include "template.h"
-#include <QMap>
+#include <QLoggingCategory>
+#include <QSharedPointer>
+#include <QSqlTableModel>
 
 //
 // classes
 //
-class Template;
-class Reagent;
-class Property;
+class Table;
 
 /**
- * @brief The tableField struct
+ * @brief The Dabanase_ class
  */
-typedef struct tableField_s {
-    const char *name;
-    const char *type;
-} tableField_t;
-
-/**
- * @brief The table struct
- */
-typedef struct table_s {
-    const char *name;
-    const tableField_t *fields;
-    const unsigned int numFields;
-} table_t;
-
-/**
- * @brief The API namespace
- */
-namespace API {
-// tasks
-const static tableField_t templateFields[] = {
-    { "id", "integer primary key" },
-    { "name", "text" },
-    { "amount", "float" },
-    { "density", "float" },
-    { "assay", "float" },
-    { "molarMass", "float" },
-    { "state", "integer" },
-    { "reagentId", "integer" },
+namespace Database_ {
+const static QLoggingCategory Debug( "database" );
+#ifdef Q_CC_MSVC
+const static unsigned int null = 0;
+#else
+const static  __attribute__((unused)) unsigned int null = 0;
+#endif
 };
 
-// properties
-const static tableField_t propertyFields[] = {
-    { "id", "integer primary key" },
-    { "name", "text" },
-    { "html", "text" },
-    { "templateId", "integer" },
-    { "parent", "integer" }
-};
-
-// reagents
-const static tableField_t reagentFields[] = {
-    { "id", "integer primary key" },
-    { "name", "text" },
-};
-
-// tables
-const static table_t tables[] = {
-    { "templates",   templateFields, sizeof( templateFields ) / sizeof( tableField_t ) },
-    { "properties",  propertyFields, sizeof( propertyFields ) / sizeof( tableField_t ) },
-    { "reagents",    reagentFields,  sizeof( reagentFields )  / sizeof( tableField_t ) },
-};
-const unsigned int numTables = sizeof( tables ) / sizeof( table_t );
-}
 
 /**
  * @brief The Database class
  */
-class Database : public QObject {
+class Database_N final : public QObject {
     Q_OBJECT
+    Q_DISABLE_COPY( Database_N )
 
 public:
-    static Database *instance() { static Database *instance( new Database()); return instance; }
-    ~Database();
-    QString path() const { return this->m_path; }
-    QMap<int, Reagent*> reagentMap;
-    QMap<int, Template*> templateMap;
-    QMap<int, Property*> propertyMap;
-
-signals:
-    void changed();
+    /**
+     * @brief instance
+     * @return
+     */
+    static Database_N *instance() { static Database_N *instance( new Database_N()); return instance; }
+    ~Database_N();
+    void add( Table *table );
+    bool hasInitialised() const { return this->m_initialised; }
 
 public slots:
-    void update() { emit this->changed(); }
-    void load();
-
-private slots:
-    void setPath( const QString &path ) { this->m_path = path; }
     void removeOrphanedEntries();
 
 private:
-    explicit Database( QObject *parent = nullptr );
-    static Database *createInstance() { return new Database(); }
-    QString m_path;
-    QStringList generateSchemas();
-    bool createEmptyTable();
-    bool createStructure();
+    explicit Database_N( QObject *parent = nullptr );
+    void setInitialised( bool initialised = true ) { this->m_initialised = initialised; }
+
+    /**
+     * @brief createInstance
+     * @return
+     */
+    QMap<QString, Table*> tables;
+    bool m_initialised;
 };

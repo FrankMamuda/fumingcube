@@ -23,6 +23,7 @@
 //
 #include <QDialog>
 #include "networkmanager.h"
+#include "table.h"
 
 //
 // classes
@@ -42,15 +43,15 @@ static const QString PatternWiki( "<tr>.*?(?=<td>)<td>(.*?(?=<\\/td>)).*?(?=<td>
  */
 class ExtractionDialog : public QDialog {
     Q_OBJECT
-    Q_PROPERTY( int templateId READ templateId WRITE setTemplateId )
+    Q_PROPERTY( Row templateRow READ templateRow WRITE setTemplateRow )
 
 public:
     explicit ExtractionDialog( QWidget *parent = nullptr );
     ~ExtractionDialog();
-    int templateId() const { return this->m_templateId; }
+    Row templateRow() const { return this->m_templateRow; }
 
 public slots:
-    void setTemplateId( int id = -1 );
+    void setTemplateRow( const Row &row = Row::Invalid );
     void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 private:
@@ -58,5 +59,5 @@ private:
     ExtractionModel *model;
     QStringList properties;
     QStringList values;
-    int m_templateId;
+    Row m_templateRow;
 };

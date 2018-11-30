@@ -23,6 +23,7 @@
 //
 #include <QDialog>
 #include <QToolButton>
+#include "table.h"
 
 /**
  * @brief The Ui namespace
@@ -56,17 +57,17 @@ public:
     ~ReagentDialog();
     Modes mode() const { return this->m_mode; }
     QString name() const;
-    int reagentId() const;
+    Row reagentRow() const { return this->m_reagentRow; };
 
 public slots:
     bool add();
     bool edit();
     void setMode( Modes mode );
-    void setReagent( Reagent *reagent );
+    void setReagentRow( const Row &row = Row::Invalid );
     void accept() override;
 
 private slots:
-    void addNewTab( Template *templ = nullptr );
+    void addNewTab( const Row &templateRow = Row::Invalid );
     void on_tabWidget_tabCloseRequested( int index );
 
 protected:
@@ -77,6 +78,6 @@ private:
     QToolButton *newTab;
     QList<TemplateWidget*> widgetList;
     Modes m_mode;
-    Reagent *reagent;
+    Row m_reagentRow;
     MessageDock *messageDock;
 };

@@ -36,14 +36,14 @@
  * @param parent
  */
 ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ExtractionDialog ),
-    model( new ExtractionModel( this )), m_templateId( -1 ) {
+    model( new ExtractionModel( this )), m_templateRow( Row::Invalid ) {
     this->ui->setupUi( this );
 
     // connect network manager
     this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
 
     // connect wiki extraction action
-    this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {        
+    this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {
         //
         // FIXME: finished requests ARE NOT REMOVED PROPERLY
         //
@@ -57,8 +57,14 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
 
     // connect buttonBox
     this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() {
-        if ( this->templateId() == -1 ) {
-            qCritical() << this->tr( "invalid template id" );
+        if ( this->templateRow() == Row::Invalid ) {
+            qCritical() << this->tr( "invalid template" );
+            return;
+        }
+
+        const Id id = Template_N::instance()->id( this->templateRow());
+        if ( id == Id::Invalid ) {
+            qCritical() << this->tr( "invalid template" );
             return;
         }
 
@@ -70,10 +76,10 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             // NOTE: ugly, but works
             const QString header( "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head></head><body style=\"font-family:'Times New Roman'; font-size:11pt; font-weight:400; font-style:normal;\">\n<p>" );
             const QString footer( "</p></body></html>" );
-            const QString title( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
-            const QString value( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
+            const QString name( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
+            const QString html( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
 
-            Property::add( title, value, this->templateId());
+            Property_N::instance()->add( name, html, id );
         }
     } );
 
@@ -96,18 +102,21 @@ ExtractionDialog::~ExtractionDialog() {
  * @brief ExtractionDialog::setTemplateId
  * @param id
  */
-void ExtractionDialog::setTemplateId( int id ) {
+void ExtractionDialog::setTemplateRow( const Row &row ) {
     // set id
-    this->m_templateId = id;
+    this->m_templateRow = row;
 
     // set reagent url
-    if ( this->templateId() >= 0 ) {
-        const Template *templ( Template::fromId( this->templateId()));
-        if ( templ != nullptr ) {
-            const Reagent *reagent( Reagent::fromId( templ->reagentId()));
-            if ( reagent != nullptr )
-                 this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( reagent->name()).replace( " ", "_" ));
-        }
+    if ( row != Row::Invalid ) {
+        const Id reagentId = Template_N::instance()->reagentId( row );
+        if ( reagentId == Id::Invalid )
+            return;
+
+        const Row reagentRow = Reagent_N::instance()->row( reagentId );
+        if ( reagentRow == Row::Invalid )
+            return;
+
+        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent_N::instance()->name( reagentRow )).replace( " ", "_" ));
     }
 }
 

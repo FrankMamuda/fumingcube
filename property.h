@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,46 +21,62 @@
 //
 // includes
 //
-#include "entry.h"
-#include <QSqlQuery>
+#include "table.h"
 
-//
-// classes
-//
-class Template;
+/**
+ * @brief The PropertyTable namespace
+ */
+namespace PropertyTable {
+const static QString Name( "properties" );
+}
 
 /**
  * @brief The Property class
  */
-class Property : public Entry {
+class Property_N final : public Table {
     Q_OBJECT
-    Q_DISABLE_COPY( Property )
-    Q_CLASSINFO( "description", "Property SQL Entry" )
-    Q_PROPERTY( QString title READ title WRITE setTitle )
-    Q_PROPERTY( QString html READ html WRITE setHtml )
-    Q_PROPERTY( int templateId READ templateId WRITE setTemplateId )
-    Q_PROPERTY( int order READ order WRITE setOrder )
+    Q_ENUMS( Fields )
+    Q_DISABLE_COPY( Property_N )
+    //friend class Template_N;
 
 public:
-    explicit Property( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "properties" ); }
-    ~Property() {}
+    enum Fields {
+        NoField = -1,
+        ID,
+        Name,
+        HTML,
+        Template,
+        Order,
 
-    QString title() const { return this->name(); }
-    QString html() const { return this->record().value( "html" ).toString(); }
-    int templateId() const { return this->record().value( "templateId" ).toInt(); }
-    int order() const { return this->record().value( "parent" ).toInt(); }
+        // count
+        Count
+    };
 
-    // static functions
-    static Property *fromId( int id );
-    static Property *add( const QString &title, const QString &html, int templateId );
-    static Property *store( const QSqlQuery &query );
-    static void load();
-    static bool contains( const QString &title );
-    static Property *fromTitle( const QString &title, int templateId );
+    enum Roles {
+        PropertyIdRole = Qt::UserRole,
+        NameWidthRole,
+        HTMLWidthRole
+    };
+
+    /**
+     * @brief instance
+     * @return
+     */
+    static Property_N *instance() { static Property_N *instance = new Property_N(); return instance; }
+    virtual ~Property_N() {}
+
+    Row add( const QString &name, const QString &html, const Id &templateId );
+    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
+    QString html( const Row &row ) const { return this->value( row, HTML ).toString(); }
 
 public slots:
-    void setTitle( const QString &title ) { this->setName( title ); }
-    void setHtml( const QString &html ) { this->setValue( "html", html ); }
-    void setTemplateId( const int templateId ) { this->setValue( "templateId", templateId ); }
-    void setOrder( const int order ) { this->setValue( "parent", order ); }
+    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
+    void setHTML( const Row &row, const QString &html ) { this->setValue( row, HTML, html ); }
+
+private:
+    explicit Property_N();
 };
+
+// declare enums
+Q_DECLARE_METATYPE( Property_N::Fields )

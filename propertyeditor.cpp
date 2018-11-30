@@ -100,21 +100,21 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->connect( this->ui->actionBold, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setFontWeight( this->ui->actionBold->isChecked() ? QFont::Bold : QFont::Normal );
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     } );
 
     // italic text toggle lambda
     this->connect( this->ui->actionItalic, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setFontItalic( this->ui->actionItalic->isChecked());
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     } );
 
     // underlined text toggle lambda
     this->connect( this->ui->actionUnderlined, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setFontUnderline( this->ui->actionUnderlined->isChecked());
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     } );
 
     // subScript text toggle lambda
@@ -122,7 +122,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->connect( this->ui->actionSubScript, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setVerticalAlignment( !this->ui->actionSubScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSubScript );
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     } );
 
     // superScript text toggle lambda
@@ -130,7 +130,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->connect( this->ui->actionSuperScript, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setVerticalAlignment( !this->ui->actionSuperScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSuperScript );
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     } );
 
     // font color picker lambda
@@ -141,7 +141,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
         QTextCharFormat format;
         format.setForeground( colour );
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
         this->colourChanged( colour );
     });
 
@@ -149,7 +149,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->connect( this->ui->comboFont, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), [ this ]( const QString &fontName ) {
         QTextCharFormat format;
         format.setFontFamily( fontName );
-        this->mergeFormat( format );
+        this->mergeFormat( qAsConst( format ));
     });
 
     // add font selector
@@ -160,7 +160,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->ui->comboSize->setEditable( true );
 
     // set up font sizes
-    foreach ( int size, QFontDatabase::standardSizes())
+    foreach ( const int &size, QFontDatabase::standardSizes())
         this->ui->comboSize->addItem( QString::number( size ));
 
     // set up size selector
@@ -169,7 +169,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
         if ( pointSize.toFloat() > 0 ) {
             QTextCharFormat format;
             format.setFontPointSize( pointSize.toDouble());
-            this->mergeFormat( format );
+            this->mergeFormat( qAsConst( format ));
         }
     } );
 
@@ -203,8 +203,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
 
     // resize title editor to minimum
-    QFontMetrics fm( this->ui->title->document()->defaultFont());
-    QMargins margins( this->ui->title->contentsMargins());
+    const QFontMetrics fm( this->ui->title->document()->defaultFont());
+    const QMargins margins( this->ui->title->contentsMargins());
     this->ui->title->setFixedHeight( static_cast<int>( fm.lineSpacing() + margins.top() + margins.bottom() + ( this->ui->title->document()->documentMargin() + this->ui->title->frameWidth()) * 2 ));
 
     // connect button box
@@ -334,11 +334,11 @@ void PropertyEditor::fontChanged( const QFont &font ) {
  */
 void PropertyEditor::colourChanged( const QColor &colour ) {
     QPixmap pixmap( ":/icons/colour" );
-    QBitmap mask( pixmap.createMaskFromColor( Qt::transparent, Qt::MaskInColor ));
+    const QBitmap mask( pixmap.createMaskFromColor( Qt::transparent, Qt::MaskInColor ));
 
     pixmap.fill( colour );
     pixmap.setMask( mask );
 
-    this->ui->actionColour->setIcon( QIcon( pixmap ));
+    this->ui->actionColour->setIcon( QIcon( qAsConst( pixmap )));
 }
 

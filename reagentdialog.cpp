@@ -34,7 +34,7 @@
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), reagent( nullptr ), messageDock( new MessageDock( this )) {
+ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ), newTab( new QToolButton( this )), m_reagentRow( Row::Invalid ), messageDock( new MessageDock( this )) {
     // set up ui
     this->ui->setupUi( this );
 
@@ -55,11 +55,12 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
 /**
  * @brief ReagentDialog::addNewTab
  */
-void ReagentDialog::addNewTab( Template *templ )  {
-    TemplateWidget *widget;
+void ReagentDialog::addNewTab( const Row &templateRow )  {
+    TemplateWidget *widget( new TemplateWidget( this, templateRow ));
 
-    widget = new TemplateWidget( this, templ );
-    const int tabIndex = this->ui->tabWidget->addTab( widget, templ == nullptr ? "" : templ->name());
+    // check template
+   // const Id templateId = Template_N::instance()->id( templateRow );
+    const int tabIndex = this->ui->tabWidget->addTab( widget, templateRow == Row::Invalid ? "" : Template_N::instance()->name( templateRow ));
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
 
@@ -74,7 +75,7 @@ void ReagentDialog::addNewTab( Template *templ )  {
         } );
     }
 
-    if ( templ != nullptr )
+    if ( templateRow != Row::Invalid )
         this->ui->tabWidget->setCurrentIndex( 0 );
 }
 
@@ -95,39 +96,31 @@ QString ReagentDialog::name() const {
 }
 
 /**
- * @brief ReagentDialog::reagentId
- * @return
- */
-int ReagentDialog::reagentId() const {
-    if ( this->reagent == nullptr )
-        return -1;
-
-    return this->reagent->id();
-}
-
-/**
  * @brief ReagentDialog::add
  */
 bool ReagentDialog::add() {
     int y;
     const QString name( this->ui->nameEdit->text());
 
-    if ( Reagent::contains( name )) {
+    if ( Reagent_N::instance()->contains( Reagent_N::Name, name )) {
         this->messageDock->displayMessage( this->tr( "Reagent already exists in database" ), MessageDock::Error, 3000 );
         return false;
     }
 
-    Reagent *reagent( Reagent::add( name ));
-    if ( reagent == nullptr )
+    Row row = Reagent_N::instance()->add( name );
+    if ( row == Row::Invalid )
+        return false;
+
+    Id id = Reagent_N::instance()->id( row );
+    if ( id == Id::Invalid )
         return false;
 
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
-        TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
-        Template::add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), reagent->id());
+        const TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
+        Template_N::instance()->add( widget->name(), widget->amount(), widget->density(), widget->assay(), widget->molarMass(), widget->state(), id );
     }
 
-    this->reagent = reagent;
-    Database::instance()->update();
+    this->m_reagentRow = row;
     return true;
 }
 
@@ -137,30 +130,34 @@ bool ReagentDialog::add() {
 bool ReagentDialog::edit() {
     int y;
     QSqlQuery query;
-    QList<int> idList;
+    QList<Row> rowList;
 
     // failsafe
-    if ( this->mode() != Edit || this->reagent == nullptr )
+    if ( this->mode() != Edit || this->reagentRow() == Row::Invalid )
         return false;
 
     // get modified and newly added template ids from template widget
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
-        idList << widget->save( reagent->id());
+        rowList << widget->save( this->reagentRow());
     }
 
     // clean up - remove deleted template entries
-    foreach ( const int key, reagent->templateMap.keys()) {
-        if ( idList.indexOf( key ) != -1 )
+    // NOTE: test me
+#if 0
+    // FIXME: this might not work. we must use ids
+    for ( int y; y < Template_N::instance()->count(); y++ ) {
+        const Row row = Template_N::instance()->row( y );
+        if ( rowList.indexOf( row ) != -1 )
             continue;
 
         if ( !query.exec( QString( "delete from templates where id=%1" ).arg( key )))
              qCritical() << this->tr( "could not delete removed templates, reason: '%1'" ).arg( query.lastError().text());
 
-        this->reagent->templateMap.remove( key );
+        Template_N::instance()->remove( row );
     }
+#endif
 
-    Database::instance()->update();
     return true;
 }
 
@@ -183,19 +180,20 @@ void ReagentDialog::setMode( ReagentDialog::Modes mode ) {
 }
 
 /**
- * @brief ReagentDialog::setReagent
- * @param reagent
+ * @brief ReagentDialog::setReagentRow
+ * @param row
  */
-void ReagentDialog::setReagent( Reagent *reagent ) {
-    if ( reagent == nullptr )
+void ReagentDialog::setReagentRow( const Row &row ) {
+    this->m_reagentRow = row;
+
+    if ( row == Row::Invalid )
         return;
 
-    this->reagent = reagent;
     this->setMode( Edit );
+    this->ui->nameEdit->setText( Reagent_N::instance()->name( this->reagentRow()));
 
-    this->ui->nameEdit->setText( reagent->name());
-    foreach ( Template *templ, reagent->templateMap )
-        this->addNewTab( templ );
+    for ( int y = 0; y < Template_N::instance()->count(); y++ )
+        this->addNewTab( Template_N::instance()->row( y ));
 }
 
 /**

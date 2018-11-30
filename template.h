@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,56 +21,73 @@
 //
 // includes
 //
-#include "entry.h"
+#include "table.h"
 
-//
-// classes
-//
-class QSqlQuery;
-class Property;
+/**
+ * @brief The TemplateTable namespace
+ */
+namespace TemplateTable {
+const static QString Name( "templates" );
+}
 
 /**
  * @brief The Template class
  */
-class Template : public Entry {
+class Template_N final : public Table {
     Q_OBJECT
-    Q_DISABLE_COPY( Template )
-    Q_CLASSINFO( "description", "Template SQL Entry" )
-    Q_PROPERTY( double amount READ amount WRITE setAmount )
-    Q_PROPERTY( double density READ density WRITE setDensity )
-    Q_PROPERTY( double assay READ assay WRITE setAssay )
-    Q_PROPERTY( double molarMass READ molarMass WRITE setMolarMass )
-    Q_PROPERTY( State state READ state WRITE setState )
-    Q_PROPERTY( int reagentId READ reagentId WRITE setReagentId )
-    Q_ENUMS( State )
+    Q_ENUMS( Fields )
+    Q_DISABLE_COPY( Template_N )
+    //friend class Reagent_N;
 
 public:
-    enum State {
+    enum Fields {
+        NoField = -1,
+        ID,
+        Name,
+        Amount,
+        Density,
+        Assay,
+        MolarMass,
+        State,
+        Reagent,
+
+        // count
+        Count
+    };
+
+    enum State_N {
         Solid = 0,
         Liquid
     };
-    explicit Template( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "templates" ); }
-    ~Template() {}
-    QMap<int, Property*> propertyMap;
 
-    double amount() const { return this->record().value( "amount" ).toDouble(); }
-    double density() const { return this->record().value( "density" ).toDouble(); }
-    double assay() const { return this->record().value( "assay" ).toDouble(); }
-    double molarMass() const { return this->record().value( "molarMass" ).toDouble(); }
-    State state() const { return static_cast<State>( this->record().value( "state" ).toInt()); }
-    int reagentId() const { return this->record().value( "reagentId" ).toInt(); }
+    /**
+     * @brief instance
+     * @return
+     */
+    static Template_N *instance() { static Template_N *instance = new Template_N(); return instance; }
+    virtual ~Template_N() {}
 
-    // static functions
-    static Template *fromId( int id );
-    static Template *add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State state, const int reagentId );
-    static void load();
-    static Template *store( const QSqlQuery &query );
+    Row add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State_N state, const Id &reagentId );
+    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
+    qreal amount( const Row &row ) const { return this->value( row, Amount ).toDouble(); }
+    qreal density( const Row &row ) const { return this->value( row, Density ).toDouble(); }
+    qreal assay( const Row &row ) const { return this->value( row, Assay ).toDouble(); }
+    qreal molarMass( const Row &row ) const { return this->value( row, MolarMass ).toDouble(); }
+    State_N state( const Row &row ) const { return static_cast<State_N>( this->value( row, State ).toInt()); }
+    Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
 
 public slots:
-    void setAmount( const double amount ) { this->setValue( "amount", amount ); }
-    void setDensity( const double density ) { this->setValue( "density", density ); }
-    void setAssay( const double assay ) { this->setValue( "assay", assay ); }
-    void setMolarMass( const double molarMass ) { this->setValue( "molarMass", molarMass ); }
-    void setState( const State state ) { this->setValue( "state", static_cast<int>( state )); }
-    void setReagentId( const int reagentId ) { this->setValue( "reagentId", reagentId ); }
+    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
+    void setAmount( const Row &row, const qreal &amount ) { this->setValue( row, Amount, amount ); }
+    void setDensity( const Row &row, const qreal &density ) { this->setValue( row, Density, density ); }
+    void setAssay( const Row &row, const qreal &assay ) { this->setValue( row, Assay, assay ); }
+    void setMolarMass( const Row &row, const qreal &molarMass ) { this->setValue( row, MolarMass, molarMass ); }
+    void setState( const Row &row, const State_N &state ) { this->setValue( row, State, state ); }
+
+private:
+    explicit Template_N();
 };
+
+// declare enums
+Q_DECLARE_METATYPE( Template_N::Fields )

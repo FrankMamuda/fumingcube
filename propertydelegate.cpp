@@ -20,22 +20,28 @@
 // includes
 //
 #include "propertydelegate.h"
-#include "propertymodel.h"
+#include "property.h"
 #include <QPainter>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
 #include <QDebug>
 #include <QApplication>
 #include <QPalette>
+#include <QTableView>
 
 /**
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
 void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
-    this->document.setHtml( index.data( Qt::DisplayRole ).toString());
+    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
+    const int width = view != nullptr ?
+                ( static_cast<int>( view->viewport()->width() * ( index.column() == Property_N::HTML ? 0.66 : 0.33 ))) :
+                64;
+
+        this->document.setHtml( index.data( Property_N::HTML ).toString());
     this->document.setDocumentMargin( 2 );
-    this->document.setTextWidth( index.data( PropertyModel::ColumnWidthRole ).toInt());
+    this->document.setTextWidth( width );
     this->document.setTextWidth( this->document.idealWidth());
 }
 

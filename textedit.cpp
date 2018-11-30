@@ -263,20 +263,20 @@ QString TextEdit::stripHTML( const QString &input ) {
     // NOTE: this is highly inefficient, but I just can't get QRegExp
     //       to work properly with QString::remove
     const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
-    QRegularExpressionMatchIterator i( re.globalMatch( html ));
+    QRegularExpressionMatchIterator i( re.globalMatch( qAsConst( html )));
     QStringList words;
 
     // capture all unnecessary html tags
     while ( i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        QString word = match.captured( 1 );
+        const QRegularExpressionMatch match( i.next());
+        const QString word( match.captured( 1 ));
 
         if ( !words.contains( word ))
             words << word;
     }
 
     // remove tags one by one
-    foreach ( const QString &word, words )
+    foreach ( const QString &word, qAsConst( words ))
         html = html.remove( word );
 
     // replace newline with space

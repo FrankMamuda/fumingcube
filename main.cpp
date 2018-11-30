@@ -52,6 +52,9 @@
 #include "database.h"
 #include "xmltools.h"
 #include "variable.h"
+#include "reagent.h"
+#include "template.h"
+#include "property.h"
 #include <QApplication>
 #include <QDebug>
 #include <QThread>
@@ -95,19 +98,21 @@ int main( int argc, char *argv[] ) {
 
     // show main window
     QApplication a( argc, argv );
+
+    // load database on separate thread
+    Database_N::instance();
+    Database_N::instance()->add( Reagent_N::instance());
+    Database_N::instance()->add( Template_N::instance());
+    Database_N::instance()->add( Property_N::instance());
+
     MainWindow w;
     w.show();
 
-    // load database on separate thread
-    //QThread *thread( new QThread );
-    //Database::instance()->moveToThread( thread );
-    //thread->start();
-    //thread->connect( thread, &QThread::finished, thread, &QThread::deleteLater );
-    Database::instance()->load();
-
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
-        //Database::instance()->deleteLater();
+        // FIXME: this fails
+        //delete Database_N::instance();
+        qDebug() << "clear garbage";
 
         GarbageMan::instance()->clear();
         delete GarbageMan::instance();

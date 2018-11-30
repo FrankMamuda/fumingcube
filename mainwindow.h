@@ -36,10 +36,6 @@ class MainWindow;
 //
 class LineEdit;
 class MessageDock;
-class ReagentModel;
-class TemplateModel;
-class Reagent;
-class Template;
 
 /**
  * @brief The MainWindow class
@@ -50,15 +46,12 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow();
-    Reagent *currentReagent() const;
-    Template *currentTemplate() const;
 
 public slots:
     void restoreIndexes();
 
 private slots:
     void on_actionAdd_triggered();
-    void fillTemplates();
     void calculate( int mode );
     void on_actionEdit_triggered();
     void on_actionRemove_triggered();
@@ -72,7 +65,5 @@ private:
     Ui::MainWindow *ui;
     QList<LineEdit*> inputList;
     MessageDock *messageDock;
-    ReagentModel *reagentModel;
-    TemplateModel *templateModel;
     QCompleter *reagentCompleter;
 };

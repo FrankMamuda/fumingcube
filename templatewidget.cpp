@@ -24,18 +24,19 @@
 #include <ui_templatewidget.h>
 #include "templatewidget.h"
 #include "ui_templatewidget.h"
-#include "template.h"
 #include "propertydialog.h"
 #include "reagentdialog.h"
 #include "networkmanager.h"
 #include "textedit.h"
+#include "template.h"
+#include "reagent.h"
 
 /**
  * @brief TemplateWidget::TemplateWidget
  * @param parent
  */
-TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent ), ui( new Ui::TemplateWidget ), templ( t ) {
-    QWidget *dialogParent = parent;
+TemplateWidget::TemplateWidget( QWidget *parent, const Row &row ) : QWidget( parent ), ui( new Ui::TemplateWidget ), templateRow( row ) {
+    const QWidget *dialogParent( parent );
 
     // set up ui
     this->ui->setupUi( this );
@@ -45,24 +46,22 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent
         emit this->nameChanged( name );
     } );
 
-    // toggle density input
-    this->connect<void( QComboBox::* )( int )>( this->ui->stateCombo, &QComboBox::currentIndexChanged, [ this ]( int index ) {
-        this->setState( static_cast<Template::State>( index ));
+    // toggle density input  
+    this->connect( this->ui->stateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), [ this ]( int index ) {
+        this->setState( static_cast<Template_N::State_N>( index ));
     } );
-    this->setState( static_cast<Template::State>( this->ui->stateCombo->currentIndex()));
+    this->setState( static_cast<Template_N::State_N>( this->ui->stateCombo->currentIndex()));
 
     // connect density and molar mass extraction buttons
     auto extractProperty = [ this, dialogParent ]( Properties property ) {
         bool ok;
-        ReagentDialog *dialog;
-
-        dialog = qobject_cast<ReagentDialog*>( dialogParent );
+        const ReagentDialog *dialog( qobject_cast<const ReagentDialog*>( dialogParent ));
         if ( dialog == nullptr )
             return;
 
         const QString url( QInputDialog::getText( this, this->tr( "Extract from Wikipedia" ), this->tr( "URL:" ), QLineEdit::Normal, QString( "https://en.wikipedia.org/wiki/%1" ).arg( dialog->name().replace( " ", "_" )), &ok ));
         if ( ok && !url.isEmpty())
-            NetworkManager::instance()->execute( url, NetworkManager::BasicProperties, property );       
+            NetworkManager::instance()->execute( qAsConst( url ), NetworkManager::BasicProperties, property );
     };
     this->connect( this->ui->densityButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( Density ); } );
     this->connect( this->ui->molarMassButton, &QToolButton::clicked, [ extractProperty ]() { extractProperty( MolarMass ); } );
@@ -75,12 +74,12 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent
     this->ui->densityEdit->setMode( LineEdit::Density );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
     this->ui->assayEdit->setMode( LineEdit::Assay );
-    this->ui->nameEdit->setText( templ == nullptr ? "" : templ->name());
-    this->ui->amountEdit->setScaledValue( templ == nullptr ? 1.0 : templ->amount());
-    this->ui->densityEdit->setScaledValue( templ == nullptr ? 1.0 : templ->density());
-    this->ui->molarMassEdit->setScaledValue( templ == nullptr ? 18.0 : templ->molarMass());
-    this->ui->assayEdit->setScaledValue( templ == nullptr ? 1.0 : templ->assay());
-    this->ui->stateCombo->setCurrentIndex( templ == nullptr ? static_cast<int>( Template::Solid ) : static_cast<int>( templ->state()));
+    this->ui->nameEdit->setText( this->templateRow == Row::Invalid ? "" :  Template_N::instance()->name( row ));
+    this->ui->amountEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->amount( row ));
+    this->ui->densityEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->density( row ));
+    this->ui->molarMassEdit->setScaledValue( this->templateRow == Row::Invalid ? 18.0 : Template_N::instance()->molarMass( row ));
+    this->ui->assayEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template_N::instance()->assay( row ));
+    this->ui->stateCombo->setCurrentIndex( this->templateRow == Row::Invalid ? static_cast<int>( Template_N::Solid ) : static_cast<int>(  Template_N::instance()->state( row )));
 }
 
 /**
@@ -88,7 +87,7 @@ TemplateWidget::TemplateWidget( QWidget *parent, Template *t ) : QWidget( parent
  */
 TemplateWidget::~TemplateWidget() {
     this->disconnect( this->ui->nameEdit, &QLineEdit::textChanged, this, nullptr );
-    this->disconnect<void( QComboBox::* )( int )>( this->ui->stateCombo, &QComboBox::currentIndexChanged, this, nullptr );
+    this->disconnect( this->ui->stateCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
     this->disconnect( this->ui->densityButton, &QToolButton::clicked, this, nullptr );
     this->disconnect( this->ui->molarMassButton, &QToolButton::clicked, this, nullptr );
     this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
@@ -170,28 +169,38 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
 
 /**
  * @brief TemplateWidget::save
+ * @param row
+ * @return
  */
-int TemplateWidget::save( int id ) {
-    if ( this->templ == nullptr ) {
-        this->templ = Template::add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), id );
-    } else {
-        templ->setName( this->name());
-        templ->setAmount( this->amount());
-        templ->setDensity( this->density());
-        templ->setMolarMass( this->molarMass());
-        templ->setAssay( this->assay());
-        templ->setState( this->state());
+Row TemplateWidget::save( const Row &reagentRow ) {
+    // check reagent
+    const Id reagentId = Reagent_N::instance()->id( reagentRow );
+    if ( reagentId == Id::Invalid ) {
+        qCritical() << this->tr( "invalid reagent" );
+        return Row::Invalid;
     }
 
-    return ( templ == nullptr ? -1 : templ->id());
+    // check template
+    if ( Template_N::instance()->id( this->templateRow ) == Id::Invalid ) {
+        this->templateRow = Template_N::instance()->add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), reagentId );
+    } else {
+        Template_N::instance()->setName( this->templateRow, this->name());
+        Template_N::instance()->setAmount( this->templateRow, this->amount());
+        Template_N::instance()->setDensity( this->templateRow, this->density());
+        Template_N::instance()->setMolarMass( this->templateRow, this->molarMass());
+        Template_N::instance()->setAssay( this->templateRow, this->assay());
+        Template_N::instance()->setState( this->templateRow, this->state());
+    }
+
+    return this->templateRow;
 }
 
 /**
  * @brief TemplateWidget::setState
  * @param state
  */
-void TemplateWidget::setState( Template::State state ) {
-    if ( state == static_cast<int>( Template::Solid )) {
+void TemplateWidget::setState( Template_N::State_N state ) {
+    if ( state == static_cast<int>( Template_N::Solid )) {
         this->ui->densityEdit->setDisabled( true );
         this->ui->amountEdit->setCurrentUnits( "g" );
         this->ui->amountEdit->displayValue();

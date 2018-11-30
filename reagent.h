@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,30 +21,51 @@
 //
 // includes
 //
-#include "entry.h"
+#include "table.h"
 
-//
-// classes
-//
-class Template;
+/**
+ * @brief The ReagentTable namespace
+ */
+namespace ReagentTable {
+const static QString Name( "reagents" );
+}
 
 /**
  * @brief The Reagent class
  */
-class Reagent : public Entry {
+class Reagent_N final : public Table {
     Q_OBJECT
-    Q_DISABLE_COPY( Reagent )
-    Q_CLASSINFO( "description", "Reagent SQL Entry" )
+    Q_ENUMS( Fields )
+    Q_DISABLE_COPY( Reagent_N )
+    //friend class Template_N;
 
 public:
-    explicit Reagent( const QSqlRecord &record ) { this->setRecord( record ); this->setTable( "reagents" ); }
-    ~Reagent() {}
-    QMap<int, Template*> templateMap;
+    enum Fields {
+        NoField = -1,
+        ID,
+        Name,
 
-    // static functions
-    static Reagent *fromId( int id );
-    static Reagent *add( const QString &name );
-    static void load();
-    static bool contains( const QString &name );
-    static Reagent *fromName( const QString &name );
+        // count
+        Count
+    };
+
+    /**
+     * @brief instance
+     * @return
+     */
+    static Reagent_N *instance() { static Reagent_N *instance = new Reagent_N(); return instance; }
+    virtual ~Reagent_N() {}
+
+    Row add( const QString &name );
+    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
+
+public slots:
+    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
+
+private:
+    explicit Reagent_N();
 };
+
+// declare enums
+Q_DECLARE_METATYPE( Reagent_N::Fields )

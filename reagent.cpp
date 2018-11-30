@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2018 Factory #12
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,95 +19,23 @@
 //
 // includes
 //
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QDebug>
 #include "reagent.h"
+#include "field.h"
 #include "database.h"
 
 /**
- * @brief Reagent::fromId
- * @param id
- * @return
+ * @brief Reagent::Reagent
+ * @param parent
  */
-Reagent *Reagent::fromId( int id ) {
-    if ( Database::instance()->reagentMap.contains( id ))
-        return Database::instance()->reagentMap[id];
-
-    return nullptr;
-}
-
-/**
- * @brief Reagent::fromName
- * @param name
- * @return
- */
-Reagent *Reagent::fromName( const QString &name ) {
-    foreach ( Reagent *reagent, Database::instance()->reagentMap ) {
-        if ( !QString::compare( name, reagent->name() ))
-            return reagent;
-    }
-
-    return nullptr;
+Reagent_N::Reagent_N() : Table( ReagentTable::Name ) {
+    this->addField( ID,   "id",   QVariant::UInt,   "integer primary key", true, true );
+    this->addField( Name, "name", QVariant::String, "text",                true );
 }
 
 /**
  * @brief Reagent::add
  * @param name
  */
-Reagent *Reagent::add( const QString &name ) {
-    QSqlQuery query;
-
-    // prepare statement
-    query.prepare( QString( "insert into reagents values ( null, :name )" ));
-    query.bindValue( ":name", name );
-
-    // excecute statement
-    if ( !query.exec()) {
-        qCritical() << QObject::tr( "could not add reagent, reason - '%1'" ).arg( query.lastError().text());
-        return nullptr;
-    }
-
-    // select the newly created entry and store in memory
-    query.exec( QString( "select * from reagents where id=%1" ).arg( query.lastInsertId().toInt()));
-    if ( query.next()) {
-        Reagent *reagent( new Reagent( query.record()));
-        Database::instance()->reagentMap[reagent->id()] = reagent;
-        return reagent;
-    }
-
-    return nullptr;
-}
-
-/**
- * @brief Reagent::load
- */
-void Reagent::load() {
-    QSqlQuery query;
-
-    // announce
-    qInfo() << QObject::tr( "loading reagents from database" );
-
-    // read all reagent entries
-    if ( !query.exec( "select * from reagents order by name asc;" ))
-        qCritical() << query.lastError().text();
-
-    // store entries in memory
-    while ( query.next()) {
-        Reagent *reagent( new Reagent( query.record()));
-        Database::instance()->reagentMap[reagent->id()] = reagent;
-    }
-}
-
-/**
- * @brief Reagent::contains
- * @param name
- */
-bool Reagent::contains( const QString &name ) {
-    foreach ( const Reagent *reagent, Database::instance()->reagentMap ) {
-        if ( !QString::compare( reagent->name(), name ))
-            return true;
-    }
-
-    return false;
+Row Reagent_N::add( const QString &name ) {
+    return Table::add( QVariantList() << Database_::null << name );
 }

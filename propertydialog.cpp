@@ -19,35 +19,41 @@
 //
 // includes
 //
+#include <QDebug>
+#include <QSqlError>
 #include "propertydialog.h"
 #include "ui_propertydialog.h"
 #include "propertydelegate.h"
-#include "propertymodel.h"
 #include "template.h"
 #include "property.h"
 #include "database.h"
 #include "extractiondialog.h"
-#include <QDebug>
-#include <QSqlError>
 
 /**
  * @brief PropertyDialog::PropertyDialog
  * @param parent
  */
-PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
+PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     QMainWindow( parent ),
     ui( new Ui::PropertyDialog ),
-    templ( t ),
+    templateRow( id ),
     editor( new PropertyEditor( this )) {
+    int y;
 
     // set up ui
     this->ui->setupUi( this );
 
     // set up property table
-    PropertyModel *model( new PropertyModel( this, this->templ ));
-    model->setView( this->ui->propertyView );
-    this->ui->propertyView->setModel( model );
-    this->ui->propertyView->setItemDelegate( new PropertyDelegate( this ));
+    this->ui->propertyView->setModel( Property_N::instance());
+
+    // hide unwanted columns
+    for ( y = 0; y < Property_N::instance()->columnCount(); y++ ) {
+        if ( y != Property_N::Name && y != Property_N::HTML )
+            this->ui->propertyView->hideColumn( y );
+    }
+
+    // set view delegate
+    this->ui->propertyView->setItemDelegate( new PropertyDelegate( this->ui->propertyView ));
     this->ui->propertyView->resizeColumnsToContents();
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->setTextElideMode( Qt::ElideRight );
@@ -57,22 +63,26 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         this->close();
     } );
 
+
     // connect property editor
-    this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
+    this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &name, const QString &html ) {
         // return if invalid template
-        if ( this->templ == nullptr )
+        if ( this->templateRow == Row::Invalid )
+            return;
+
+        const Id id = Template_N::instance()->id( this->templateRow );
+        if ( id == Id::Invalid )
             return;
 
         // TODO: display error is message bar
-        if ( title.isEmpty() || value.isEmpty())
+        if ( name.isEmpty() || html.isEmpty())
             return;
 
         switch ( mode ) {
         case PropertyEditor::Add:
         {
             // TODO: check of duplicates (is it really necessary at all?)
-            const Property *property( Property::add( title, value, this->templ->id()));
-            if ( property == nullptr )
+            if ( Property_N::instance()->add( name, html, id ) == Row::Invalid )
                 return;
 
             this->resetView();
@@ -81,14 +91,13 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
 
         case PropertyEditor::Edit:
         {
-            Property *property( this->current());
-
-            // TODO: nothing selected warning
-            if ( this->current() == nullptr )
+            const Row row( this->current());
+            if ( row == Row::Invalid )
                 return;
 
-            property->setName( title );
-            property->setHtml( value );
+            Property_N::instance()->setName( row, name );
+            Property_N::instance()->setHTML( row, html );
+
             this->resetView();
         }
             break;
@@ -103,43 +112,32 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         this->editor->open( PropertyEditor::Add );
     } );
 
+
     // connect edit action
     this->connect( this->ui->actionEdit, &QAction::triggered, [ this ]() {
-        const Property *property( this->current());
-        if ( property == nullptr )
+        const Row row( this->current());
+        if ( row == Row::Invalid )
             return;
 
-        this->editor->open( PropertyEditor::Edit, property->title(), property->html());
+        this->editor->open( PropertyEditor::Edit, Property_N::instance()->name( row ), Property_N::instance()->html( row ));
     } );
 
     // connect remove action
     this->connect( this->ui->actionRemove, &QAction::triggered, [ this ]() {
-        QSqlQuery query;
-
-        const Property *property( this->current());
-        if ( property == nullptr )
+        const Row row( this->current());
+        if ( row == Row::Invalid )
             return;
 
         // remove property from database
-        Database::instance()->propertyMap.remove( property->id());
-        if ( !query.exec( QString( "delete from properties where id=%1" ).arg( property->id())))
-            qCritical() << this->tr( "could not delete property, reason: '%1'" ).arg( query.lastError().text());
-
-        // retrieve template from templateId
-        Template *templ( Template::fromId( property->templateId()));
-        if ( templ == nullptr )
-            return;
-
-        // remove property from template's propertyMap
-        templ->propertyMap.remove( property->id());
+        Property_N::instance()->remove( row );
 
         // update table
+        // TODO/FIXME: do we need this?
         this->resetView();
     } );
 
     // connect up action
     this->connect( this->ui->actionUp, &QAction::triggered, [ this ]() {
-        //qDebug() << "move up not implemented yet";
         this->move( Up );
     } );
 
@@ -148,11 +146,11 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
         this->move( Down );
     } );
 
-
     // connect wiki extraction action
     this->connect( this->ui->actionWiki, &QAction::triggered, [ this ]() {
         ExtractionDialog ed;
-        ed.setTemplateId( this->templ->id());
+
+        ed.setTemplateRow( this->templateRow );
         ed.exec();
 
         this->resetView();
@@ -173,6 +171,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, Template *t ) :
  * @param direction
  */
 void PropertyDialog::move( Directions direction ) {
+    // TODO: implement actual sorting in model
+#if 0
     Property *p0, *p1;
 
     const QModelIndex currentIndex( this->ui->propertyView->currentIndex());
@@ -204,6 +204,8 @@ void PropertyDialog::move( Directions direction ) {
 
     // reselect value
     this->ui->propertyView->setCurrentIndex( swap );
+#endif
+    Q_UNUSED( direction )
 }
 
 /**
@@ -227,19 +229,15 @@ PropertyDialog::~PropertyDialog() {
  * @brief PropertyDialog::current
  * @return
  */
-Property *PropertyDialog::current() {
+Row PropertyDialog::current() {
     const QModelIndex index( this->ui->propertyView->currentIndex());
 
     // make sure template entry is valid
-    if ( this->templ == nullptr )
-        return nullptr;
+    if ( this->templateRow == Row::Invalid )
+        return Row::Invalid;
 
-    // check bounds
-    if ( index.row() < 0 || index.row() >= templ->propertyMap.count())
-        return nullptr;
-
-    // get property id from model and return the corresponding property
-    return Property::fromId( qobject_cast<PropertyModel*>( this->ui->propertyView->model())->data( index, PropertyModel::PropertyIdRole ).toInt());
+    // return property
+    return Property_N::instance()->row( index );
 }
 
 /**
@@ -255,7 +253,6 @@ void PropertyDialog::resizeEvent( QResizeEvent *event ) {
  * @brief PropertyDialog::resetView
  */
 void PropertyDialog::resetView() {
-    qobject_cast<PropertyModel*>( this->ui->propertyView->model())->reset();
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
 }

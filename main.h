@@ -25,6 +25,17 @@
 #include <QObject>
 
 /**
+ * namespace Main
+ */
+namespace Main {
+#ifdef Q_CC_MSVC
+static constexpr const char *Path = ".fumingCube/test";
+#else
+static constexpr const char __attribute__((unused)) *Path = ".fumingCube/test";
+#endif
+}
+
+/**
  * @brief The GarbageMan class
  */
 class GarbageMan final {
