@@ -135,7 +135,7 @@ bool ReagentDialog::add() {
 bool ReagentDialog::edit() {
     int y;
     QSqlQuery query;
-    QList<Row> rowList;
+    QList<Id> idList;
 
     // failsafe
     if ( this->mode() != Edit || this->reagentRow() == Row::Invalid )
@@ -144,24 +144,14 @@ bool ReagentDialog::edit() {
     // get modified and newly added template ids from template widget
     for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
         TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
-        rowList << widget->save( this->reagentRow());
+        idList << widget->save( this->reagentRow());
     }
 
     // clean up - remove deleted template entries
-    // NOTE: test me
-#if 0
-    // FIXME: this might not work. we must use ids
-    for ( int y; y < Template_N::instance()->count(); y++ ) {
-        const Row row = Template_N::instance()->row( y );
-        if ( rowList.indexOf( row ) != -1 )
-            continue;
-
-        if ( !query.exec( QString( "delete from templates where id=%1" ).arg( key )))
-             qCritical() << this->tr( "could not delete removed templates, reason: '%1'" ).arg( query.lastError().text());
-
-        Template_N::instance()->remove( row );
-    }
-#endif
+    //foreach ( const Id &id, idList ) {
+    //    if ( id != Id::Invalid )
+    //        Template::instance()->remove( Template::instance()->row( id ));
+    //}
 
     return true;
 }
@@ -191,12 +181,15 @@ void ReagentDialog::setMode( ReagentDialog::Modes mode ) {
 void ReagentDialog::setReagentRow( const Row &row ) {
     this->m_reagentRow = row;
 
-    if ( row == Row::Invalid )
+    if ( row == Row::Invalid ) {
+        qCritical() << this->tr( "editing invalid reagent" );
         return;
+    }
 
     this->setMode( Edit );
     this->ui->nameEdit->setText( Reagent::instance()->name( this->reagentRow()));
 
+    qDebug() << Template::instance()->count();
     for ( int y = 0; y < Template::instance()->count(); y++ )
         this->addNewTab( Template::instance()->row( y ));
 }

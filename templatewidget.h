@@ -64,7 +64,7 @@ public:
 
 public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
-    Row save( const Row &reagentRow );
+    Id save( const Row &reagentRow );
     void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 signals:

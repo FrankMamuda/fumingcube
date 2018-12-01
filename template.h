@@ -84,6 +84,7 @@ public slots:
     void setAssay( const Row &row, const qreal &assay ) { this->setValue( row, Assay, assay ); }
     void setMolarMass( const Row &row, const qreal &molarMass ) { this->setValue( row, MolarMass, molarMass ); }
     void setState( const Row &row, const State &state ) { this->setValue( row, ChemState, state ); }
+    void removeOrphanedEntries() override;
 
 private:
     explicit Template();

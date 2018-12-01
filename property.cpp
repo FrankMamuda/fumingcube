@@ -19,9 +19,11 @@
 //
 // includes
 //
+#include <QSqlQuery>
 #include "property.h"
 #include "field.h"
 #include "database.h"
+#include "template.h"
 
 /**
  * @brief Property::Property
@@ -40,5 +42,20 @@ Property::Property() : Table( PropertyTable::Name ) {
  * @param name
  */
 Row Property::add( const QString &name, const QString &html, const Id &templateId ) {
+    qDebug() << "add property" << name;
+
     return Table::add( QVariantList() << Database_::null << name << html << static_cast<int>( templateId ) << 0 );
+}
+
+/**
+ * @brief Property::removeOrphanedEntries
+ */
+void Property::removeOrphanedEntries() {
+    // remove orphaned properties
+    QSqlQuery().exec( QString( "delete from %1 where %2 not in (select %3 from %4)" )
+                .arg( this->tableName())
+                .arg( this->fieldName( Template ))
+                .arg( Template::instance()->fieldName( Template::ID ))
+                .arg( Template::instance()->tableName()));
+    this->select();
 }

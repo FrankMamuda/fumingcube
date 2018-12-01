@@ -172,16 +172,17 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
  * @param row
  * @return
  */
-Row TemplateWidget::save( const Row &reagentRow ) {
+Id TemplateWidget::save( const Row &reagentRow ) {
     // check reagent
     const Id reagentId = Reagent::instance()->id( reagentRow );
     if ( reagentId == Id::Invalid ) {
         qCritical() << this->tr( "invalid reagent" );
-        return Row::Invalid;
+        return Id::Invalid;
     }
 
     // check template
-    if ( Template::instance()->id( this->templateRow ) == Id::Invalid ) {
+    const Id templateId = Template::instance()->id( this->templateRow );
+    if ( templateId == Id::Invalid ) {
         this->templateRow = Template::instance()->add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), reagentId );
     } else {
         Template::instance()->setName( this->templateRow, this->name());
@@ -192,7 +193,7 @@ Row TemplateWidget::save( const Row &reagentRow ) {
         Template::instance()->setState( this->templateRow, this->state());
     }
 
-    return this->templateRow;
+    return templateId;
 }
 
 /**

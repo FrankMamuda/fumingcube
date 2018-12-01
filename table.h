@@ -69,7 +69,7 @@ public:
     };
 
     Table( const QString &tableName = QString()) { this->setTable( tableName ); }
-    virtual ~Table() { this->setValid( false ); this->clear(); }
+    virtual ~Table() override { this->setValid( false ); this->clear(); }
     bool isValid() const { return this->m_valid; }
     bool hasPrimaryField() const { return this->m_hasPrimary; }
     int count() const;
@@ -91,6 +91,7 @@ public slots:
     Row add( const QVariantList &arguments );
     void remove( const Row &row );
     void setValue( const Row &row, int fieldId, const QVariant &value );
+    virtual void removeOrphanedEntries() {}
 
 protected:
     QMap<int, QSharedPointer<Field_>> fields;

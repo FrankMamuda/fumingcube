@@ -85,10 +85,8 @@ Database::Database( QObject *parent ) : QObject( parent ), m_initialised( false 
  * @brief Database::removeOrphanedEntries
  */
 void Database::removeOrphanedEntries() {
-    QSqlQuery query;
-
-    // remove orphans
-    // (..)
+    foreach ( Table *table, this->tables )
+        table->removeOrphanedEntries();
 }
 
 /**

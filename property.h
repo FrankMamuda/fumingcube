@@ -62,8 +62,6 @@ public:
      * @return
      */
     static Property *instance() { static Property *instance = new Property(); return instance; }
-    virtual ~Property() {}
-
     Row add( const QString &name, const QString &html, const Id &templateId );
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
@@ -72,6 +70,7 @@ public:
 public slots:
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
     void setHTML( const Row &row, const QString &html ) { this->setValue( row, HTML, html ); }
+    void removeOrphanedEntries() override;
 
 private:
     explicit Property();

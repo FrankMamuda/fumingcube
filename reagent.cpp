@@ -37,5 +37,7 @@ Reagent::Reagent() : Table( ReagentTable::Name ) {
  * @param name
  */
 Row Reagent::add( const QString &name ) {
+    qDebug() << "add reagent" << name;
+
     return Table::add( QVariantList() << Database_::null << name );
 }

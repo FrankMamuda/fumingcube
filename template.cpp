@@ -19,9 +19,11 @@
 //
 // includes
 //
+#include <QSqlQuery>
 #include "template.h"
 #include "field.h"
 #include "database.h"
+#include "reagent.h"
 
 /**
  * @brief Template::Template
@@ -43,6 +45,21 @@ Template::Template() : Table( TemplateTable::Name ) {
  * @param name
  */
 Row Template::add( const QString &name, const double amount, const double density, const double assay, const double molarMass, const State &state, const Id &reagentId ) {
+    qDebug() << "add template" << name;
+
     return Table::add( QVariantList() << Database_::null <<
                        name << amount << density << assay << molarMass << static_cast<int>( state ) << static_cast<int>( reagentId ));
+}
+
+/**
+ * @brief Template::removeOrphanedEntries
+ */
+void Template::removeOrphanedEntries() {
+    // remove orphaned templates
+    QSqlQuery().exec( QString( "delete from %1 where %2 not in (select %3 from %4)" )
+                .arg( this->tableName())
+                .arg( this->fieldName( Reagent ))
+                .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                .arg( Reagent::instance()->tableName()));
+    this->select();
 }
