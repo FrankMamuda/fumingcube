@@ -50,6 +50,10 @@ public slots:
     void displayMessage( const QString &message, Modes mode = Error, int timeout = 2500, qreal opacity = 1.0 );
     void hideMessage();
 
+protected:
+    void showEvent( QShowEvent *event ) override;
+    void hideEvent( QHideEvent *event ) override;
+
 private:
     QDockWidget *dockWidget;
     QWidget *titleBar;

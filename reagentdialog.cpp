@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QMessageBox>
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
 #include "templatewidget.h"
@@ -49,10 +50,6 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
         this->addNewTab();
     } );
 
-    // TODO: delete TAB here?
-    //QObject::connect( this->ui->tabWidget, &QTabWidget::tabCloseRequested, [this]( int index ) {
-    //    qDebug() << "close requested";
-    //} );
 
     this->setMode( mode );
 }
@@ -64,7 +61,7 @@ void ReagentDialog::addNewTab( const Row &templateRow )  {
     TemplateWidget *widget( new TemplateWidget( this, templateRow ));
 
     // check template
-   // const Id templateId = Template_N::instance()->id( templateRow );
+    // const Id templateId = Template_N::instance()->id( templateRow );
     const int tabIndex = this->ui->tabWidget->addTab( widget, templateRow == Row::Invalid ? "" : Template::instance()->name( templateRow ));
     this->ui->tabWidget->setCurrentWidget( widget );
     this->widgetList << widget;
@@ -73,10 +70,8 @@ void ReagentDialog::addNewTab( const Row &templateRow )  {
         this->ui->tabWidget->setTabText( tabIndex, this->tr( "Default template" ));
         widget->setDefault();
     } else {
-        QObject *object( new QObject( this ));
-        this->connect( widget, &TemplateWidget::nameChanged, object, [ this, tabIndex, object ]( const QString &name ) {
+        this->connect( widget, &TemplateWidget::nameChanged, [ this, tabIndex ]( const QString &name ) {
             this->ui->tabWidget->setTabText( tabIndex, name );
-            object->deleteLater();
         } );
     }
 
@@ -133,25 +128,21 @@ bool ReagentDialog::add() {
  * @brief ReagentDialog::edit
  */
 bool ReagentDialog::edit() {
-    int y;
     QSqlQuery query;
-    QList<Id> idList;
 
     // failsafe
     if ( this->mode() != Edit || this->reagentRow() == Row::Invalid )
         return false;
 
     // get modified and newly added template ids from template widget
-    for ( y = 0; y < this->ui->tabWidget->count(); y++ ) {
-        TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y )));
-        idList << widget->save( this->reagentRow());
-    }
+    for ( int y = 0; y < this->ui->tabWidget->count(); y++ )
+        qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( y ))->save( this->reagentRow());
 
     // clean up - remove deleted template entries
-    //foreach ( const Id &id, idList ) {
-    //    if ( id != Id::Invalid )
-    //        Template::instance()->remove( Template::instance()->row( id ));
-    //}
+    foreach ( const Id &id, idList ) {
+        if ( id != Id::Invalid )
+            Template::instance()->remove( Template::instance()->row( id ));
+    }
 
     return true;
 }
@@ -232,9 +223,24 @@ void ReagentDialog::on_tabWidget_tabCloseRequested( int index ) {
     if ( index == 0 )
         return;
 
-    TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( index )));
-    this->widgetList.removeOne( widget );
-    this->ui->tabWidget->removeTab( index );
+    if ( this->reagentRow() != Row::Invalid ) {
+        const QString tabName( this->ui->tabWidget->currentWidget()->windowTitle());
+        const Row row = Template::instance()->row( index );
+
+        if ( row == Row::Invalid )
+            return;
+
+        const QString templateName( Template::instance()->name( row ));
+
+        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove template '%1'" ).arg( templateName ), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
+            return;
+
+        qDebug() << "beep bop, removing";
+        TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( index )));
+        this->widgetList.removeOne( widget );
+        this->ui->tabWidget->removeTab( index );
+        idList << Template::instance()->id( row );
+    }
 }
 
 /**

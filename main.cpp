@@ -36,6 +36,7 @@
 //
 // OTHER:
 //   fix constants, etc.
+//   fix network manager
 //
 
 //
@@ -54,7 +55,7 @@
 #include <QThread>
 
 // default message handler
-static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( 0 );
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( nullptr );
 
 /**
  * @brief messageFilter

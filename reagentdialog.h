@@ -80,4 +80,5 @@ private:
     Modes m_mode;
     Row m_reagentRow;
     MessageDock *messageDock;
+    QList<Id> idList;
 };

@@ -49,17 +49,26 @@ MessageDock::MessageDock( QWidget *parent ) :
         foreach( const QSize &size, icon.availableSizes()) {
             QImage tmp( icon.pixmap( size ).toImage());
             tmp.invertPixels();
+
+            // make it really white
+            for ( int y = 0; y < tmp.width(); y++ ) {
+                for ( int k = 0; k < tmp.height(); k++ )
+                    tmp.setPixelColor( y, k, tmp.pixelColor( y, k ).lighter( 500 ));
+            }
+
             out.addPixmap( QPixmap::fromImage( tmp ));
         }
 
         return out;
     };
 
+
     // make 'close message' button
     this->closeButton->setIcon( convertIcon( qApp->style()->standardIcon( QStyle::SP_TitleBarCloseButton )));
     this->closeButton->setFlat( true );
-    this->closeButton->setFixedSize( 16, 16 );
+    this->closeButton->setFixedSize( 8, 8 );
     this->closeButton->setStyleSheet( "QPushButton { padding: 0px; outline: 0px; border: 0px; } QPushButton:hover { background-color: rgba(100, 100, 100, 150); }" );
+    this->closeButton->hide();
     this->connect( this->closeButton, &QPushButton::clicked, [ this ]() {
         this->hide();
     } );
@@ -72,7 +81,7 @@ MessageDock::MessageDock( QWidget *parent ) :
     // add widgets to title bar layout
     this->titleBarLayout->addWidget( this->titleLabel );
     this->titleBarLayout->addWidget( this->closeButton );
-    this->titleBarLayout->setContentsMargins( 0, 0, 0, 0 );
+    this->titleBarLayout->setContentsMargins( 0, 0, 4, 0 );
     this->titleBarLayout->setSpacing( 0 );
 
     // set styleSheet and layout to title bar
@@ -135,6 +144,25 @@ void MessageDock::displayMessage( const QString &message, Modes mode, int timeou
 void MessageDock::hideMessage() {
     this->timer.stop();
     this->hide();
+}
+
+/**
+ * @brief MessageDock::showEvent
+ * @param event
+ */
+void MessageDock::showEvent( QShowEvent *event ) {
+    this->closeButton->show();
+    QWidget::showEvent( event );
+}
+
+
+/**
+ * @brief MessageDock::hideEvent
+ * @param event
+ */
+void MessageDock::hideEvent( QHideEvent *event ) {
+    this->closeButton->hide();
+    QWidget::hideEvent( event );
 }
 
 /**

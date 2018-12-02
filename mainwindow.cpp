@@ -224,6 +224,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // trigger reagent & template change
     reagentChanged( this->ui->reagentCombo->currentIndex());
+
+    // hide message dock
+    this->messageDock->hide();
 }
 
 /**
