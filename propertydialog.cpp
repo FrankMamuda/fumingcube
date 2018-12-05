@@ -21,6 +21,7 @@
 //
 #include <QDebug>
 #include <QSqlError>
+#include <QTextEdit>
 #include "propertydialog.h"
 #include "ui_propertydialog.h"
 #include "propertydelegate.h"
@@ -53,9 +54,17 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
         const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
         if ( plainName.contains( "NFPA 704" )) {
             const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+            const QRegularExpression reProp( "(\\d).+?(?=(\\d)).+?(?=(\\d))(?:.+?(?=(OX|W|SA)))?" );
+            QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
+
+            // parse html
+            const QRegularExpressionMatch match( reProp.match( parms ));
+            if ( !match.hasMatch())
+                return;
 
             // TODO: delete me
-            NFPAWidget *nfpa( new NFPAWidget( parms.simplified().split( " " )));
+            const QStringList parmList = QStringList() << match.captured( 1 ) << match.captured( 2 ) << match.captured( 3 ) << match.captured( 4 );
+            NFPAWidget *nfpa( new NFPAWidget( parmList ));
             this->ui->propertyView->setIndexWidget( Property::instance()->index( y, Property::HTML ), nfpa );
         }
     }

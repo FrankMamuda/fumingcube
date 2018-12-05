@@ -23,6 +23,7 @@
 //
 #include <QPainter>
 #include <QWidget>
+#include <QtMath>
 
 /**
  * @brief The NFPAWidget class
@@ -35,7 +36,7 @@ public:
 
 protected:
     void paintEvent( QPaintEvent * ) override {
-        const qreal vScale = sqrt( 2 * ( this->scale * this->scale ));
+        const qreal vScale = qSqrt( 2 * ( this->scale * this->scale ));
 
         // translate painter and rotate it by 45 degrees
         QPainter painter( this );
@@ -73,7 +74,7 @@ protected:
 
                                );
 
-        for ( int y = 0; y < this->parameters.count(); y++ )
+        for ( int y = 0; y < qMin( this->parameters.count(), 4 ); y++ )
             painter.drawText( rects.at( y ), this->parameters.at( y ), { Qt::AlignCenter });
     }
 
