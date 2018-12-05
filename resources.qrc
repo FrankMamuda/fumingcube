@@ -13,5 +13,17 @@
         <file alias="extract">icons/extract.png</file>
         <file alias="up">icons/up.png</file>
         <file alias="clean">icons/clean.png</file>
+        <file alias="hazard">icons/hazard.png</file>
+    </qresource>
+    <qresource prefix="/pictograms">
+        <file alias="compressed">pictograms/compressed.svg</file>
+        <file alias="corrosive">pictograms/corrosive.svg</file>
+        <file alias="environment">pictograms/environment.svg</file>
+        <file alias="explosive">pictograms/explosive.svg</file>
+        <file alias="flammable">pictograms/flammable.svg</file>
+        <file alias="harmful">pictograms/harmful.svg</file>
+        <file alias="health">pictograms/health.svg</file>
+        <file alias="oxidizing">pictograms/oxidizing.svg</file>
+        <file alias="toxic">pictograms/toxic.svg</file>
     </qresource>
 </RCC>

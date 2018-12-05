@@ -35,7 +35,7 @@ class ExtractionModel;
  */
 namespace Ui {
 class ExtractionDialog;
-static const QString PatternWiki( "<tr>.*?(?=<td>)<td>(.*?(?=<\\/td>)).*?(?=<td>)<td>(.*?(?=<\\/td>))" );
+//static const QString PatternWiki( "<tr>.*?(?=<td>)<td>(.*?(?=<\\/td>)).*?(?=<td>)<td>(.*?(?=<\\/td>))" );
 }
 
 /**

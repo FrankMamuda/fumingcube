@@ -158,10 +158,7 @@ void Database::add( Table *table ) {
         }
     }
 
-    // table has been verified and is marked as valid
-    if ( found ) {
-        table->setValid();
-    } else {
+    if ( !found ) {
         // announce
         qCInfo( Database_::Debug ) << this->tr( "creating an empty table - \"%1\"" ).arg( table->tableName());
 
@@ -176,6 +173,9 @@ void Database::add( Table *table ) {
         if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName()).arg( statement )))
             qCCritical( Database_::Debug ) << this->tr( "could not create table - \"%1\", reason - \"%2\"" ).arg( table->tableName()).arg( query.lastError().text());
     }
+
+    // table has been verified and is marked as valid
+    table->setValid();
 
     // create table model
     table->setTable( table->tableName());

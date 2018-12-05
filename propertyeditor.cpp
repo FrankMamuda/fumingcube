@@ -26,6 +26,7 @@
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QBitmap>
+#include <QMenu>
 #include "charactermap.h"
 
 /**
@@ -37,6 +38,18 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
     // set up ui
     this->ui->setupUi( this );
+
+    // load pictograms
+    // TODO: better yet handle these automatically (just like NFPA widget)
+    this->pictograms[Harmful] = QIcon( ":/pictograms/harmful" );
+    this->pictograms[Flammable] = QIcon( ":/pictograms/flammable" );
+    this->pictograms[Toxic] = QIcon( ":/pictograms/toxic" );
+    this->pictograms[Corrosive] = QIcon( ":/pictograms/corrosive" );
+    this->pictograms[Environment] = QIcon( ":/pictograms/environment" );
+    this->pictograms[Health] = QIcon( ":/pictograms/health" );
+    this->pictograms[Explosive] = QIcon( ":/pictograms/explosive" );
+    this->pictograms[Oxidizing] = QIcon( ":/pictograms/oxidizing" );
+    this->pictograms[Compressed] = QIcon( ":/pictograms/compressed" );
 
     // set font toolbar below other buttons
     this->insertToolBarBreak( this->ui->fontToolBar );
@@ -72,6 +85,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
         this->ui->comboFont->setEnabled( enable );
         this->ui->comboSize->setEnabled( enable );
         this->ui->actionImage->setEnabled( enable );
+        this->ui->actionGHS->setEnabled( enable );
         this->ui->actionColour->setEnabled( enable );
     };
 
@@ -197,6 +211,22 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
             this->activeEditor->insertPixmap( pixmap );
     } );
 
+    // set up image selector action
+    this->connect( this->ui->actionGHS, &QAction::triggered, [ this ]() {
+        QMenu *menu( new QMenu());
+
+        foreach ( const QIcon &icon, this->pictograms ) {
+            menu->addAction( icon, this->tr( "" ), [ this, icon ]() {
+                const QPixmap pixmap( icon.pixmap( this->GHSPictogramScale, this->GHSPictogramScale ));
+                if ( !pixmap.isNull())
+                    this->activeEditor->insertPixmap( pixmap );
+            } );
+        }
+
+        menu->exec( QCursor::pos());
+        menu->deleteLater();
+    } );
+
     // disable title editor lambda
     this->connect( this->ui->comboCommon, static_cast< void( QComboBox::* )( int )>( &QComboBox::activated ), [ this ]( int index ) {
         this->ui->title->setEnabled( index == 0 );
@@ -244,6 +274,7 @@ PropertyEditor::~PropertyEditor() {
     this->disconnect( this->ui->actionCharacterMap, &QAction::triggered, this, nullptr );
     this->disconnect( this->characterMap, &CharacterMap::characterSelected, this, nullptr );
     this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
+    this->disconnect( this->ui->actionGHS, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->comboCommon, static_cast< void( QComboBox::* )( int )>( &QComboBox::activated ), this, nullptr );
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::rejected, this, nullptr );

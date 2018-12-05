@@ -56,57 +56,13 @@ signals:
     void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 public slots:
-    /**
-     * @brief execute
-     * @param url
-     * @param type
-     */
-    void execute( const QString &url, Type type, const QVariant &userData = QVariant()) {
-        QNetworkRequest request;
-
-        request.setUrl( QUrl::fromEncoded( url.toLocal8Bit()));
-        request.setAttribute( QNetworkRequest::User, static_cast<int>( type ));
-        request.setAttribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ), userData );
-
-        this->activeRequests << this->manager.get( request );;
-    }
-
-    /**
-     * @brief requestCompleted
-     * @param reply
-     */
-    void requestCompleted( QNetworkReply *reply ) {
-        int status;
-        Type type;
-        QVariant userData;
-        QUrl url( reply->url());
-
-        if ( reply->error()) {
-            qCritical() << this->tr( "request \"%1\" failed: %2" ).arg( url.toEncoded().constData()).arg( reply->errorString());
-        } else {
-            status = reply->attribute( QNetworkRequest::HttpStatusCodeAttribute ).toInt();
-            type = static_cast<Type>( reply->request().attribute( QNetworkRequest::User ).toInt());
-            userData = reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ));
-
-            if ( status == 301 || status == 302 || status == 303 || status == 305 || status == 307 || status == 308 ) {
-                qWarning()  << this->tr( "request \"%1\" redirected" );
-                QString redirectURL( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toString());
-                this->execute( redirectURL, type, userData );
-            } else
-                emit this->finished( url.toString(), type, userData, reply->readAll());
-        }
-
-        this->activeRequests.removeAll( reply );
-        reply->deleteLater();
-    }
+    void execute( const QString &url, Type type, const QVariant &userData = QVariant());
 
 private:
     /**
      * @brief NetworkManager
      */
     explicit NetworkManager() {
-        this->connect( &this->manager, SIGNAL( finished( QNetworkReply* )), SLOT( requestCompleted( QNetworkReply* )));
-
         // disable ssl warnings
         QLoggingCategory::setFilterRules( "qt.network.ssl.warning=false" );
 
@@ -114,12 +70,5 @@ private:
         GarbageMan::instance()->add( this );
     }
 
-    /**
-     * @brief createInstance
-     * @return
-     */
-    static NetworkManager *createInstance() { return new NetworkManager(); }
-
     QNetworkAccessManager manager;
-    QList<QNetworkReply* > activeRequests;
 };

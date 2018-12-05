@@ -28,6 +28,7 @@
 #include "property.h"
 #include "database.h"
 #include "extractiondialog.h"
+#include "nfpawidget.h"
 
 /**
  * @brief PropertyDialog::PropertyDialog
@@ -46,6 +47,19 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     // set up property table
     this->ui->propertyView->setModel( Property::instance());
 
+    // custom NFPA widget
+    for ( y = 0; y < Property::instance()->count(); y++ ) {
+        const QModelIndex index( Property::instance()->index( y, Property::Name ));
+        const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+        if ( plainName.contains( "NFPA 704" )) {
+            const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+
+            // TODO: delete me
+            NFPAWidget *nfpa( new NFPAWidget( parms.simplified().split( " " )));
+            this->ui->propertyView->setIndexWidget( Property::instance()->index( y, Property::HTML ), nfpa );
+        }
+    }
+
     // hide unwanted columns
     for ( y = 0; y < Property::instance()->columnCount(); y++ ) {
         if ( y != Property::Name && y != Property::HTML )
@@ -62,7 +76,6 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() {
         this->close();
     } );
-
 
     // connect property editor
     this->connect( this->editor, &PropertyEditor::accepted, [ this ]( PropertyEditor::Modes mode, const QString &name, const QString &html ) {

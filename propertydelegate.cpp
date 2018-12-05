@@ -21,6 +21,7 @@
 //
 #include "propertydelegate.h"
 #include "property.h"
+#include "nfpawidget.h"
 #include <QPainter>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
@@ -28,6 +29,10 @@
 #include <QApplication>
 #include <QPalette>
 #include <QTableView>
+
+//
+// TODO: precache document, instead of making it in paint and sizeHint
+//
 
 /**
  * @brief PropertyDelegate::setupDocument
@@ -59,14 +64,21 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     if ( option.state & QStyle::State_Selected ) {
         QColor hilight( qApp->palette().highlight().color());
         hilight.setAlpha( 128 );
-        painter->fillRect( option.rect, QBrush( hilight ));
+        painter->fillRect( option.rect, QBrush( qAsConst( hilight )));
     }
+
+    // TODO: must be a better way to detect this
+    /*if ( index.column() == Property::Name ) {
+        const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+        if ( plainName.contains( "NFPA 704" ))
+            return;
+    }*/
 
     // draw html
     painter->save();
-    painter->translate( option.rect.left(),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
+    painter->translate( option.rect.left(), option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
     //painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
-    document.drawContents(painter);
+    document.drawContents( painter );
     painter->restore();
 }
 
@@ -79,6 +91,15 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &, const QModelIndex &index ) const {
     // setup html document
     this->setupDocument( index );
+
+    //
+    /*if ( index.column() == Property::Name ) {
+        const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+        if ( plainName.contains( "NFPA 704" )) {
+            NFPAWidget nfpa( QStringList(), nullptr );
+            return nfpa.size();
+        }
+    }*/
 
     // return document size
     return document.size().toSize();

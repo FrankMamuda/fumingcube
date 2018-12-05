@@ -148,6 +148,7 @@ p, li { white-space: pre-wrap; }
    <addaction name="actionCharacterMap"/>
    <addaction name="actionColour"/>
    <addaction name="actionImage"/>
+   <addaction name="actionGHS"/>
    <addaction name="actionCleanHTML"/>
   </widget>
   <widget class="QToolBar" name="fontToolBar">
@@ -283,6 +284,18 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Clean HTML</string>
+   </property>
+  </action>
+  <action name="actionGHS">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/hazard</normaloff>:/icons/hazard</iconset>
+   </property>
+   <property name="text">
+    <string>GHS</string>
+   </property>
+   <property name="toolTip">
+    <string>Add GHS pictogram</string>
    </property>
   </action>
  </widget>

@@ -59,6 +59,19 @@ public:
         Edit
     };
 
+    enum Pictograms {
+        NoPictogram = -1,
+        Harmful,
+        Flammable,
+        Toxic,
+        Corrosive,
+        Environment,
+        Health,
+        Explosive,
+        Oxidizing,
+        Compressed
+    };
+
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = NoMode );
     ~PropertyEditor();
 
@@ -80,4 +93,6 @@ private:
     TextEdit *activeEditor;
     Modes mode;
     CharacterMap *characterMap;
+    QMap<Pictograms, QIcon> pictograms;
+    const int GHSPictogramScale = 48;
 };

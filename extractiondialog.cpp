@@ -137,36 +137,62 @@ void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type
         return;
     }*/
 
+    qDebug() << "got data" << type << url << userData;
+
     switch ( type ) {
     case NetworkManager::Properties:
     {
-        // we currently support only wikipedia
-        const QRegularExpression re( Ui::PatternWiki, QRegularExpression::DotMatchesEverythingOption );
-        QRegularExpressionMatchIterator i( re.globalMatch( data ));
-        QStringList words;
-        QStringList plainList;
-
         // clear previous entries
         this->properties.clear();
         this->values.clear();
 
-        // capture all unnecessary html tags
-        while ( i.hasNext()) {
-            const QRegularExpressionMatch match( i.next());
+        auto extractFromWikipedia = [ this ]( const QString &buffer ) {
+            const QRegularExpression reTable( "(?:<table.+?(?=Identifiers))(.+?(?=Infobox&#160;references))", QRegularExpression::DotMatchesEverythingOption );
+            const QRegularExpressionMatch remTable( reTable.match( buffer ));
+            QString table( remTable.hasMatch() ? remTable.captured( 0 ) : "" );
+            QStringList plainList;
 
-            const QString property( TextEdit::stripHTML( match.captured( 1 )).simplified());
-            const QString value( TextEdit::stripHTML( match.captured( 2 )).simplified());
-            const QString plain( QString( property ).remove( QRegExp( "<[^>]*>" )));
-            const QString plainValue( QString( property ).remove( QRegExp( "<[^>]*>" )));
+            if ( table.isEmpty())
+                return QStringList();
 
-            if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
-                continue;
+            // strip html of useless tags
+            const QString stripped(
+                        table
+                        .replace( QRegularExpression( "((?:<\\/?(?:table|a|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" ), "" )
+                        .replace( QRegularExpression( "<sup.id=.+?(?=class=\\\"reference\\\").+?(?=\\/sup>)\\/sup>" ), "" )
+                        .replace( QRegularExpression( "<sup>&#160;Y<\\/sup>" ), "" )
+                        .replace( QRegularExpression( "style=.+?(?=>)" ), "" )
+                        .replace( "&#160;", " " )
+                        .replace( "&#x20;", " " )
+                        .replace( "\n", "#" )
+                        .replace( QRegularExpression( "InChI.+?(?=<)" ), "" )
+                        );
 
-            this->properties << property;
-            this->values << value;
-            plainList << plain;
-        }
-        this->model->reset( plainList );
+            // match properties and their values
+            const QRegularExpression reProp( "<\\/tr>[\\s|#]{0,}<tr>[\\s|#]?<t\\w(?:\\sscope.+?(?=>)>|>)(.+?(?=<\\/t\\w>))<\\/t\\w>[\\s|#]{0,}<t.+?(?=>)>(.+?(?=<\\/t\\w>))<\\/t\\w>" );
+            QRegularExpressionMatchIterator i( reProp.globalMatch( stripped ));
+
+            // capture all unnecessary html tags
+            while ( i.hasNext()) {
+                const QRegularExpressionMatch match( i.next());
+
+                const QString property( match.captured( 1 ).replace( "#", "\n" ).simplified());
+                const QString value( match.captured( 2 ).replace( "#", "\n" ).simplified());
+                const QString plain( QString( property ).remove( QRegExp( "<[^>]*>" )));
+                const QString plainValue( QString( value ).remove( QRegExp( "<[^>]*>" )));
+
+                if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
+                    continue;
+
+                this->properties << property;
+                this->values << value;
+                plainList << plain;
+            }
+
+            return plainList;
+        };
+
+        this->model->reset( extractFromWikipedia( data ));
     }
         break;
 

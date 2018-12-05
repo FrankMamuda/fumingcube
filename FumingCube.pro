@@ -48,7 +48,8 @@ SOURCES += \
     database.cpp \
     property.cpp \
     reagent.cpp \
-    template.cpp
+    template.cpp \
+    networkmanager.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -76,7 +77,8 @@ HEADERS += \
     database.h \
     property.h \
     reagent.h \
-    template.h
+    template.h \
+    nfpawidget.h
 
 FORMS += \
         mainwindow.ui \
