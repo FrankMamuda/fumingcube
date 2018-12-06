@@ -74,8 +74,17 @@ protected:
 
                                );
 
-        for ( int y = 0; y < qMin( this->parameters.count(), 4 ); y++ )
+        for ( int y = 0; y < qMin( this->parameters.count(), 4 ); y++ ) {
+            painter.save();
+            if ( !QString::compare( this->parameters.at( y ), "W" )) {
+                QFont font( painter.font());
+                font.setStrikeOut( true );
+                painter.setFont( QFont( font ));
+            }
+
             painter.drawText( rects.at( y ), this->parameters.at( y ), { Qt::AlignCenter });
+            painter.restore();
+        }
     }
 
     /**

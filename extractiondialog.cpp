@@ -137,8 +137,6 @@ void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type
         return;
     }*/
 
-    qDebug() << "got data" << type << url << userData;
-
     switch ( type ) {
     case NetworkManager::Properties:
     {

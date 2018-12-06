@@ -24,8 +24,8 @@
 //      search
 //      allow creation of custom tables based on properties
 //        (for example - chemical formula, name, cas number
-//      ghs hazard dialog
-//      nfpa 704 dialog
+//      ghs hazard creation dialog
+//      nfpa 704 creation dialog
 //   various modes for app
 //      the 'classic' calculation mode
 //      molarity, dilution etc.
@@ -34,24 +34,16 @@
 //   proper warnings
 //   property sorting combo (custom, alphabetically, etc.)
 //   default fonts
-//   icons for actions
 //   calculator widget
-//   fix templateWidget init lag
 //   built-in database
 //   disable toolTips and volume/density values for Solid states
 //   copy data from default template, upon opening new tab
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
-//   BUG: cannot add reagent if blank database has just been made
-//        (need additional select?)
 //   BUG: crash on property removal from dialog
 //        QAbstractItemModelPrivate::rowsRemoved:
 //        QAbstractItemModel::endRemoveRows:  Invalid index
-//   some reagent property extraction fails (eg. Acetone)
-//
-// OTHER:
 //   fix constants, etc.
-//   fix network manager
 //   eventually split database, variable, etc. in a separate lib
 //
 

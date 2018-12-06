@@ -30,6 +30,8 @@
 #include "database.h"
 #include "extractiondialog.h"
 #include "nfpawidget.h"
+#include "ghswidget.h"
+#include "tagdialog.h"
 
 /**
  * @brief PropertyDialog::PropertyDialog
@@ -49,13 +51,14 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     this->ui->propertyView->setModel( Property::instance());
 
     // custom NFPA widget
+    // FIXME: disappears on model reset
+    // TODO: also update on change
     for ( y = 0; y < Property::instance()->count(); y++ ) {
         const QModelIndex index( Property::instance()->index( y, Property::Name ));
         const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
         if ( plainName.contains( "NFPA 704" )) {
             const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
             const QRegularExpression reProp( "(\\d).+?(?=(\\d)).+?(?=(\\d))(?:.+?(?=(OX|W|SA)))?" );
-            QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
 
             // parse html
             const QRegularExpressionMatch match( reProp.match( parms ));
@@ -66,6 +69,22 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
             const QStringList parmList = QStringList() << match.captured( 1 ) << match.captured( 2 ) << match.captured( 3 ) << match.captured( 4 );
             NFPAWidget *nfpa( new NFPAWidget( parmList ));
             this->ui->propertyView->setIndexWidget( Property::instance()->index( y, Property::HTML ), nfpa );
+        } else if ( plainName.contains( "GHS Pictograms" )) {
+            const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
+            const QRegularExpression reProp( "(GHS07|GHS02|GHS06|GHS05|GHS09|GHS08|GHS01|GHS03|GHS04)" );
+            QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
+            QStringList parmList;
+
+            // capture all unnecessary html tags
+            while ( i.hasNext()) {
+                const QRegularExpressionMatch match( i.next());
+                parmList << match.captured( 1 );
+                qDebug() << "found" << match.captured( 1 );
+            }
+
+            // TODO: delete me
+            GHSWidget *ghsWidget( new GHSWidget( parmList ));
+            this->ui->propertyView->setIndexWidget( Property::instance()->index( y, Property::HTML ), ghsWidget );
         }
     }
 
@@ -130,7 +149,6 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     this->connect( this->ui->actionAdd, &QAction::triggered, [ this ]() {
         this->editor->open( PropertyEditor::Add );
     } );
-
 
     // connect edit action
     this->connect( this->ui->actionEdit, &QAction::triggered, [ this ]() {
@@ -271,6 +289,14 @@ void PropertyDialog::resizeEvent( QResizeEvent *event ) {
  * @brief PropertyDialog::resetView
  */
 void PropertyDialog::resetView() {
+    dynamic_cast<PropertyDelegate*>( this->ui->propertyView->itemDelegate())->clearDocumentCache();
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
+}
+
+/**
+ * @brief PropertyDialog::on_actionTags_triggered
+ */
+void PropertyDialog::on_actionTags_triggered() {
+    TagDialog().show();
 }

@@ -49,7 +49,9 @@ SOURCES += \
     property.cpp \
     reagent.cpp \
     template.cpp \
-    networkmanager.cpp
+    networkmanager.cpp \
+    tagdialog.cpp \
+    tag.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -78,7 +80,10 @@ HEADERS += \
     property.h \
     reagent.h \
     template.h \
-    nfpawidget.h
+    nfpawidget.h \
+    ghswidget.h \
+    tagdialog.h \
+    tag.h
 
 FORMS += \
         mainwindow.ui \
@@ -87,7 +92,8 @@ FORMS += \
     propertydialog.ui \
     propertyeditor.ui \
     imageutils.ui \
-    extractiondialog.ui
+    extractiondialog.ui \
+    tagdialog.ui
 
 RESOURCES += \
     resources.qrc

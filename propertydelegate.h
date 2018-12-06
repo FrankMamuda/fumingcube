@@ -23,6 +23,7 @@
 //
 #include <QStyledItemDelegate>
 #include <QTextDocument>
+#include <QMap>
 
 /**
  * @brief The PropertyDelegate class
@@ -33,9 +34,12 @@ public:
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 
+public slots:
+    void clearDocumentCache() { qDeleteAll( this->documentMap ); this->documentMap.clear(); }
+
 private slots:
     void setupDocument( const QModelIndex &index ) const;
 
 private:
-    mutable QTextDocument document;
+    mutable QMap<QModelIndex, QTextDocument*> documentMap;
 };

@@ -63,6 +63,8 @@ private slots:
     void resetView();
     void move( Directions direction );
 
+    void on_actionTags_triggered();
+
 private:
     Ui::PropertyDialog *ui;
     Row templateRow;

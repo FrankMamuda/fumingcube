@@ -45,6 +45,7 @@ public:
         Name,
         HTML,
         Template,
+      //Tag,
         Order,
 
         // count
@@ -66,6 +67,8 @@ public:
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
     QString html( const Row &row ) const { return this->value( row, HTML ).toString(); }
+    Id templateId( const Row &row ) const { return static_cast<Id>( this->value( row, Template ).toInt()); }
+  //Id tagId( const Row &row ) const { return static_cast<Id>( this->value( row, Tag ).toInt()); }
 
 public slots:
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }

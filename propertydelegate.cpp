@@ -40,14 +40,17 @@
  */
 void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
     const QTableView *view( qobject_cast<QTableView*>( this->parent()));
-    const int width = view != nullptr ?
-                ( static_cast<int>( view->viewport()->width() * ( index.column() == Property::HTML ? 0.66 : 0.33 ))) :
-                64;
+    const int width = view != nullptr ? ( static_cast<int>( view->viewport()->width() * ( index.column() == Property::HTML ? 0.66 : 0.33 ))) : 64;
 
-        this->document.setHtml( index.data( Property::HTML ).toString());
-    this->document.setDocumentMargin( 2 );
-    this->document.setTextWidth( width );
-    this->document.setTextWidth( this->document.idealWidth());
+    if ( this->documentMap.contains( index ))
+        return;
+
+    QTextDocument *document( new QTextDocument());
+    document->setHtml( index.data( Property::HTML ).toString());
+    document->setDocumentMargin( 2 );
+    document->setTextWidth( width );
+    document->setTextWidth( document->idealWidth());
+    this->documentMap[index] = document;
 }
 
 /**
@@ -57,8 +60,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
  * @param index
  */
 void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    // setup html document
-    this->setupDocument( index );
+    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
 
     // draw custom selection hilight
     if ( option.state & QStyle::State_Selected ) {
@@ -67,6 +69,15 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         painter->fillRect( option.rect, QBrush( qAsConst( hilight )));
     }
 
+    // don't draw anything else if a custom widget is used
+    if ( view->indexWidget( index ) != nullptr )
+        return;
+
+    // setup html document
+    this->setupDocument( index );
+    if ( !this->documentMap.contains( index ))
+        return;
+
     // TODO: must be a better way to detect this
     /*if ( index.column() == Property::Name ) {
         const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
@@ -74,11 +85,14 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
             return;
     }*/
 
+    // get document
+    QTextDocument *document( this->documentMap[index] );
+
     // draw html
     painter->save();
-    painter->translate( option.rect.left(), option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
+    painter->translate( option.rect.left(), option.rect.top() + option.rect.height() / 2 - document->size().height() / 2 );
     //painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
-    document.drawContents( painter );
+    document->drawContents( painter );
     painter->restore();
 }
 
@@ -88,19 +102,12 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @param index
  * @return
  */
-QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &, const QModelIndex &index ) const {
+QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
     // setup html document
     this->setupDocument( index );
-
-    //
-    /*if ( index.column() == Property::Name ) {
-        const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
-        if ( plainName.contains( "NFPA 704" )) {
-            NFPAWidget nfpa( QStringList(), nullptr );
-            return nfpa.size();
-        }
-    }*/
+    if ( !this->documentMap.contains( index ))
+        return QStyledItemDelegate::sizeHint( item, index );
 
     // return document size
-    return document.size().toSize();
+    return this->documentMap[index]->size().toSize();
 }

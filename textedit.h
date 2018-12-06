@@ -32,7 +32,7 @@ class TextEdit : public QTextEdit {
 
 public:
     TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_cleanHTML( true ) {}
-    void insertPixmap( const QPixmap &image );
+    void insertPixmap( const QPixmap &image, const int forcedSize = -1 );
     bool cleanHTML() const { return this->m_cleanHTML; }
     static QString stripHTML( const QString &input );
 

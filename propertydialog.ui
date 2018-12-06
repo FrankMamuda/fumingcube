@@ -95,6 +95,7 @@
    <addaction name="actionUp"/>
    <addaction name="actionDown"/>
    <addaction name="actionWiki"/>
+   <addaction name="actionTags"/>
   </widget>
   <action name="actionAdd">
    <property name="icon">
@@ -151,6 +152,18 @@
    </property>
    <property name="toolTip">
     <string>Extract properties from online sources</string>
+   </property>
+  </action>
+  <action name="actionTags">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/clean</normaloff>:/icons/clean</iconset>
+   </property>
+   <property name="text">
+    <string>Tags</string>
+   </property>
+   <property name="toolTip">
+    <string>Modify tags</string>
    </property>
   </action>
  </widget>

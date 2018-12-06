@@ -59,18 +59,16 @@ public:
         Edit
     };
 
-    enum Pictograms {
-        NoPictogram = -1,
-        Harmful,
-        Flammable,
-        Toxic,
-        Corrosive,
-        Environment,
-        Health,
-        Explosive,
-        Oxidizing,
-        Compressed
-    };
+    /*const QStringList Pictograms = QStringList() <<
+        "Harmful" <<
+        "Flammable" <<
+        "Toxic" <<
+        "Corrosive" <<
+        "Environment hazard" <<
+        "Health hazard" <<
+        "Explosive" <<
+        "Oxidizing" <<
+        "Compressed gas";*/
 
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = NoMode );
     ~PropertyEditor();
@@ -93,6 +91,6 @@ private:
     TextEdit *activeEditor;
     Modes mode;
     CharacterMap *characterMap;
-    QMap<Pictograms, QIcon> pictograms;
+    QMap<QString, QIcon> pictograms;
     const int GHSPictogramScale = 48;
 };

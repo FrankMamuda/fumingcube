@@ -41,15 +41,15 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
     // load pictograms
     // TODO: better yet handle these automatically (just like NFPA widget)
-    this->pictograms[Harmful] = QIcon( ":/pictograms/harmful" );
-    this->pictograms[Flammable] = QIcon( ":/pictograms/flammable" );
-    this->pictograms[Toxic] = QIcon( ":/pictograms/toxic" );
-    this->pictograms[Corrosive] = QIcon( ":/pictograms/corrosive" );
-    this->pictograms[Environment] = QIcon( ":/pictograms/environment" );
-    this->pictograms[Health] = QIcon( ":/pictograms/health" );
-    this->pictograms[Explosive] = QIcon( ":/pictograms/explosive" );
-    this->pictograms[Oxidizing] = QIcon( ":/pictograms/oxidizing" );
-    this->pictograms[Compressed] = QIcon( ":/pictograms/compressed" );
+    this->pictograms["Harmful"] = QIcon( ":/pictograms/harmful" );
+    this->pictograms["Flammable"] = QIcon( ":/pictograms/flammable" );
+    this->pictograms["Toxic"] = QIcon( ":/pictograms/toxic" );
+    this->pictograms["Corrosive"] = QIcon( ":/pictograms/corrosive" );
+    this->pictograms["Environment hazard"] = QIcon( ":/pictograms/environment" );
+    this->pictograms["Health hazard"] = QIcon( ":/pictograms/health" );
+    this->pictograms["Explosive"] = QIcon( ":/pictograms/explosive" );
+    this->pictograms["Oxidizing"] = QIcon( ":/pictograms/oxidizing" );
+    this->pictograms["Compressed gas"] = QIcon( ":/pictograms/compressed" );
 
     // set font toolbar below other buttons
     this->insertToolBarBreak( this->ui->fontToolBar );
@@ -160,7 +160,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     });
 
     // font selector lambda
-    this->connect( this->ui->comboFont, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), [ this ]( const QString &fontName ) {
+    this->connect( this->ui->comboFont, QOverload<const QString &>::of( &QComboBox::activated ), [ this ]( const QString &fontName ) {
         QTextCharFormat format;
         format.setFontFamily( fontName );
         this->mergeFormat( qAsConst( format ));
@@ -179,7 +179,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
 
     // set up size selector
     this->ui->comboSize->setCurrentIndex( QFontDatabase::standardSizes().indexOf( QApplication::font().pointSize()));
-    this->connect( this->ui->comboSize, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), [ this ] ( const QString &pointSize ) {
+    this->connect( this->ui->comboSize, QOverload<const QString &>::of( &QComboBox::activated ), [ this ] ( const QString &pointSize ) {
         if ( pointSize.toFloat() > 0 ) {
             QTextCharFormat format;
             format.setFontPointSize( pointSize.toDouble());
@@ -215,8 +215,9 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->connect( this->ui->actionGHS, &QAction::triggered, [ this ]() {
         QMenu *menu( new QMenu());
 
-        foreach ( const QIcon &icon, this->pictograms ) {
-            menu->addAction( icon, this->tr( "" ), [ this, icon ]() {
+        foreach ( const QString &ghs, this->pictograms.keys()) {
+            const QIcon icon( this->pictograms[ghs] );
+            menu->addAction( icon, ghs, [ this, icon ]() {
                 const QPixmap pixmap( icon.pixmap( this->GHSPictogramScale, this->GHSPictogramScale ));
                 if ( !pixmap.isNull())
                     this->activeEditor->insertPixmap( pixmap );
@@ -228,7 +229,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
 
     // disable title editor lambda
-    this->connect( this->ui->comboCommon, static_cast< void( QComboBox::* )( int )>( &QComboBox::activated ), [ this ]( int index ) {
+    this->connect( this->ui->comboCommon, QOverload<int>::of( &QComboBox::activated ), [ this ]( int index ) {
         this->ui->title->setEnabled( index == 0 );
     } );
 
@@ -269,13 +270,13 @@ PropertyEditor::~PropertyEditor() {
     this->disconnect( this->ui->actionSubScript, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionSuperScript, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionColour, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->comboFont, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), this, nullptr );
-    this->disconnect( this->ui->comboSize, static_cast< void( QComboBox::* )( const QString & )>( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->comboFont, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->comboSize, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
     this->disconnect( this->ui->actionCharacterMap, &QAction::triggered, this, nullptr );
     this->disconnect( this->characterMap, &CharacterMap::characterSelected, this, nullptr );
     this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionGHS, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->comboCommon, static_cast< void( QComboBox::* )( int )>( &QComboBox::activated ), this, nullptr );
+    this->disconnect( this->ui->comboCommon, QOverload<int>::of( &QComboBox::activated ), this, nullptr );
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::rejected, this, nullptr );
     this->disconnect( this->ui->actionCleanHTML, &QAction::toggled, this, nullptr );

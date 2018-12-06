@@ -37,23 +37,32 @@
  * @brief TextEdit::insertPixmap
  * @param pixmap
  */
-void TextEdit::insertPixmap( const QPixmap &pixmap ) {
-    ImageUtils iu( this, pixmap );
+void TextEdit::insertPixmap( const QPixmap &pixmap, const int forcedSize ) {
+    bool accepted = true;
+    QPixmap out( pixmap );
 
-    if ( iu.exec() == QDialog::Accepted ) {
+    if ( forcedSize > 0 ) {
+        ImageUtils iu( this, pixmap );
+        accepted = iu.exec();
+
+        if ( accepted )
+            out = iu.pixmap;
+    }
+
+    if ( accepted ) {
         QByteArray bytes;
         QBuffer buffer( &bytes );
 
         // abort on invalid pixmap
-        if ( iu.pixmap.isNull())
+        if ( out.isNull())
             return;
 
         // convert image to png internally
         buffer.open( QIODevice::WriteOnly );
-        iu.pixmap.save( &buffer, "PNG" );
+        out.save( &buffer, "PNG" );
 
         // insert in textEdit
-        this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( iu.pixmap.width()).arg( iu.pixmap.height()).arg( bytes.toBase64().constData()));
+        this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( out.width()).arg( out.height()).arg( bytes.toBase64().constData()));
     }
 }
 
