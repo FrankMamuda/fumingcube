@@ -72,10 +72,6 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int forcedSize ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
-    //
-    // TODO: HERE!!!
-    //
-
     // check if dropped item is an image
     foreach ( const QUrl &url, source->urls()) {
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
@@ -262,33 +258,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
  * @return
  */
 QString TextEdit::stripHTML( const QString &input ) {
-    QString html( input );
-
-    // TODO: also remove references
-
-    //
-    // NOTE: this is highly inefficient, but I just can't get QRegExp
-    //       to work properly with QString::remove
     const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
-    QRegularExpressionMatchIterator i( re.globalMatch( qAsConst( html )));
-    QStringList words;
-
-    // capture all unnecessary html tags
-    while ( i.hasNext()) {
-        const QRegularExpressionMatch match( i.next());
-        const QString word( match.captured( 1 ));
-
-        if ( !words.contains( word ))
-            words << word;
-    }
-
-    // remove tags one by one
-    foreach ( const QString &word, qAsConst( words ))
-        html = html.remove( word );
-
-    // replace newline with space
-    html = html.replace( "\n", " " );
-
-    // return stripped down HTML
-    return html;
+    return QString( input ).replace( re, "" );
 }

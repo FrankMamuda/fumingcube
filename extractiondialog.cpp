@@ -44,9 +44,6 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
 
     // connect wiki extraction action
     this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {
-        //
-        // FIXME: finished requests ARE NOT REMOVED PROPERLY
-        //
         if ( this->ui->urlEdit->text().isEmpty()) {
             qCritical() << this->tr( "no url specified" );
             return;

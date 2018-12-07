@@ -223,11 +223,8 @@ void Table::remove( const Row &row ) {
     if ( !this->isValid() || row == Row::Invalid )
         return;
 
-    this->beginRemoveRows( QModelIndex(), static_cast<int>( row ), static_cast<int>( row ));
     this->removeRow( static_cast<int>( row ));
-    this->submit();
     this->select();
-    this->endRemoveRows();
 }
 
 /**

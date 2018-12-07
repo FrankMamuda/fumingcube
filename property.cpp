@@ -34,8 +34,12 @@ Property::Property() : Table( PropertyTable::Name ) {
     this->addField( Name,     "name",       QVariant::String, "text" );
     this->addField( HTML,     "html",       QVariant::String, "text" );
     this->addField( Template, "templateId", QVariant::Int,    "integer" );
-  //this->addField( Tag,      "tagId",      QVariant::Int,    "integer", true ); // MUST BREAK API EVENTUALLY
+  //this->addField( Tag,      "tagId",      QVariant::Int,    "integer" ); // MUST BREAK API EVENTUALLY
     this->addField( Order,    "parent",     QVariant::Int,    "integer" );
+
+    // enable sorting
+    this->setSort( Order, Qt::AscendingOrder );
+    qDebug() << this->selectStatement();
 }
 
 /**

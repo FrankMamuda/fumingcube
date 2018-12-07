@@ -50,7 +50,6 @@ ReagentDialog::ReagentDialog( QWidget *parent, Modes mode ) : QDialog( parent ),
         this->addNewTab();
     } );
 
-
     this->setMode( mode );
 }
 
@@ -179,8 +178,6 @@ void ReagentDialog::setReagentRow( const Row &row ) {
 
     this->setMode( Edit );
     this->ui->nameEdit->setText( Reagent::instance()->name( this->reagentRow()));
-
-    qDebug() << Template::instance()->count();
     for ( int y = 0; y < Template::instance()->count(); y++ )
         this->addNewTab( Template::instance()->row( y ));
 }

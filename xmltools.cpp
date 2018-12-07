@@ -44,14 +44,14 @@ XMLTools::XMLTools( QObject *parent ) : QObject( parent ) {
  * @param mode
  */
 void XMLTools::write() {
-    QString path, savedData, newData;
-    QDir configDir( XML::ConfigPath );
+    QString savedData, newData;
+    const QDir configDir( XML::ConfigPath );
 
     if ( !configDir.exists())
         configDir.mkpath( configDir.absolutePath());
 
     // set path
-    path = configDir.absolutePath() + "/" + XML::Variables;
+    const QString path( configDir.absolutePath() + "/" + XML::Variables );
 
     // read xml file and create buffer
     QFile xmlFile( path );
@@ -131,44 +131,38 @@ void XMLTools::write() {
  * @param object
  */
 void XMLTools::read() {
-    QString path;
     QDomDocument document;
-    QDomNode node, childNode;
-    QDomElement element, childElement;
-    QDir configDir( XML::ConfigPath );
+    const QDir configDir( XML::ConfigPath );
 
     if ( !configDir.exists())
         configDir.mkpath( configDir.absolutePath());
 
     // set path
-    path = configDir.absolutePath() + "/" + XML::Variables;
+    const QString path( configDir.absolutePath() + "/" + XML::Variables );
 
     // load xml file
     QFile xmlFile( path );
-
     if ( !xmlFile.exists() || !xmlFile.open( QFile::ReadOnly | QFile::Text )) {
         qCritical() << this->tr( "no configuration file found" );
         return;
     }
 
     document.setContent( &xmlFile );
-    node = document.documentElement().firstChild();
 
+    QDomNode node( qAsConst( document ).documentElement().firstChild());
     while ( !node.isNull()) {
-        element = node.toElement();
+        const QDomElement element( qAsConst( node ).toElement());
 
         if ( !element.isNull()) {
             if ( !QString::compare( element.tagName(), "variable" )) {
-                QString key;
                 QVariant value;
-
-                childNode = element.firstChild();
-                key = element.attribute( "key" );
+                const QDomNode childNode( element.firstChild());
+                const QString key( element.attribute( "key" ));
 
                 if ( element.hasAttribute( "binary" )) {
-                    QByteArray array;
-                    array = QByteArray::fromBase64( element.attribute( "binary" ).toUtf8().constData());
+                    QByteArray array( QByteArray::fromBase64( element.attribute( "binary" ).toUtf8().constData()));
                     QBuffer buffer( &array );
+
                     buffer.open( QIODevice::ReadOnly );
                     QDataStream in( &buffer );
                     in >> value;
@@ -179,7 +173,7 @@ void XMLTools::read() {
                     Variable::instance()->setValue( key, value, true );
             }
         }
-        node = node.nextSibling();
+        node = qAsConst( node ).nextSibling();
     }
 
     document.clear();

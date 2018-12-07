@@ -62,8 +62,10 @@ protected:
 private slots:
     void resetView();
     void move( Directions direction );
-
+    void buttonTest( const QModelIndex &index = QModelIndex());
     void on_actionTags_triggered();
+    void setSpecialWidget( const QModelIndex &index );
+    void setSpecialWidgets();
 
 private:
     Ui::PropertyDialog *ui;

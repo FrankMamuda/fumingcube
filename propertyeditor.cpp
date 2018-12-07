@@ -39,8 +39,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     // set up ui
     this->ui->setupUi( this );
 
-    // load pictograms
-    // TODO: better yet handle these automatically (just like NFPA widget)
+    // load pictograms for manual addition
+    //   although these are handled automatically (just like NFPA widget)
     this->pictograms["Harmful"] = QIcon( ":/pictograms/harmful" );
     this->pictograms["Flammable"] = QIcon( ":/pictograms/flammable" );
     this->pictograms["Toxic"] = QIcon( ":/pictograms/toxic" );

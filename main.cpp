@@ -40,11 +40,10 @@
 //   copy data from default template, upon opening new tab
 //   fix messageBar timeOut
 //   after reagent addition, select the newly added
-//   BUG: crash on property removal from dialog
-//        QAbstractItemModelPrivate::rowsRemoved:
-//        QAbstractItemModel::endRemoveRows:  Invalid index
 //   fix constants, etc.
+//   restore last reagent/template
 //   eventually split database, variable, etc. in a separate lib
+//   fix broken property sorting
 //
 
 //
@@ -58,6 +57,7 @@
 #include "reagent.h"
 #include "template.h"
 #include "property.h"
+#include "tag.h"
 #include <QApplication>
 #include <QDebug>
 #include <QThread>
@@ -107,9 +107,11 @@ int main( int argc, char *argv[] ) {
     Database::instance()->add( Reagent::instance());
     Database::instance()->add( Template::instance());
     Database::instance()->add( Property::instance());
+    Database::instance()->add( Tag::instance());
 
     MainWindow w;
     w.show();
+    w.restoreIndexes();
 
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {

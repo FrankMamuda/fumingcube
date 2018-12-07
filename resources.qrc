@@ -14,6 +14,9 @@
         <file alias="up">icons/up.png</file>
         <file alias="clean">icons/clean.png</file>
         <file alias="hazard">icons/hazard.png</file>
+        <file alias="accept">icons/accept.png</file>
+        <file alias="close">icons/close.png</file>
+        <file alias="star">icons/star.png</file>
     </qresource>
     <qresource prefix="/pictograms">
         <file alias="compressed">pictograms/compressed.svg</file>

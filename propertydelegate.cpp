@@ -30,10 +30,6 @@
 #include <QPalette>
 #include <QTableView>
 
-//
-// TODO: precache document, instead of making it in paint and sizeHint
-//
-
 /**
  * @brief PropertyDelegate::setupDocument
  * @param index
@@ -78,20 +74,12 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     if ( !this->documentMap.contains( index ))
         return;
 
-    // TODO: must be a better way to detect this
-    /*if ( index.column() == Property::Name ) {
-        const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
-        if ( plainName.contains( "NFPA 704" ))
-            return;
-    }*/
-
     // get document
     QTextDocument *document( this->documentMap[index] );
 
     // draw html
     painter->save();
     painter->translate( option.rect.left(), option.rect.top() + option.rect.height() / 2 - document->size().height() / 2 );
-    //painter->translate( qMax( option.rect.left(), static_cast<int>( option.rect.left() + option.rect.width() / 2 - document.size().width() / 2 )),  option.rect.top() + option.rect.height() / 2 - document.size().height() / 2 );
     document->drawContents( painter );
     painter->restore();
 }

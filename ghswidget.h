@@ -26,7 +26,6 @@
 #include <QWidget>
 #include <QtMath>
 #include <QMap>
-#include <QDebug>
 
 /**
  * @brief The GHSWidget class
@@ -49,7 +48,6 @@ public:
             if ( !this->statements.contains( key ))
                 this->statements.removeAll( key );
         }
-        qDebug() << this->statements;
     }
 
 protected:

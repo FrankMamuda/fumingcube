@@ -118,11 +118,11 @@ void TemplateWidget::requestFinished( const QString &url, NetworkManager::Type t
 
         switch ( static_cast<Properties>( userData.toInt())) {
         case Density:
-            re.setPattern( "<td.*?(?=Density).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+            re.setPattern( "<t\\w.*?(?=Density).*?(?=>)>(\\d+(?:.\\d+)?).*?(?=<\\/t\\w>)" );
             break;
 
         case MolarMass:
-            re.setPattern( "<td.*?(?=Molar mass).*?(?=<td>)<td>(\\d+(?:.\\d+)?).*?(?=<\\/td>)" );
+            re.setPattern( "<t\\w.*?(?=Molar mass).*?(?=>)>(\\d+(?:.\\d+)?).*?(?=<\\/t\\w>)" );
             break;
 
         case NoProperty:

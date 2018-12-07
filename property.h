@@ -68,11 +68,13 @@ public:
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
     QString html( const Row &row ) const { return this->value( row, HTML ).toString(); }
     Id templateId( const Row &row ) const { return static_cast<Id>( this->value( row, Template ).toInt()); }
+    int order( const Row &row ) const { return this->value( row, Order ).toInt(); }
   //Id tagId( const Row &row ) const { return static_cast<Id>( this->value( row, Tag ).toInt()); }
 
 public slots:
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
     void setHTML( const Row &row, const QString &html ) { this->setValue( row, HTML, html ); }
+    void setOrder( const Row &row, const int order ) { this->setValue( row, Order, order ); }
     void removeOrphanedEntries() override;
 
 private:

@@ -108,7 +108,7 @@ p, li { white-space: pre-wrap; }
      </layout>
     </item>
     <item>
-     <widget class="QDialogButtonBox" name="buttonBox">
+     <widget class="ButtonBox" name="buttonBox">
       <property name="standardButtons">
        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
       </property>
@@ -300,6 +300,11 @@ p, li { white-space: pre-wrap; }
   </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonBox</class>
+   <extends>QDialogButtonBox</extends>
+   <header>buttonbox.h</header>
+  </customwidget>
   <customwidget>
    <class>TextEdit</class>
    <extends>QTextEdit</extends>

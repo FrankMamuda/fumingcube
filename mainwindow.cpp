@@ -127,7 +127,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         // filter templates
         Template::instance()->setFilter( QString( "reagentId=%1" ).arg( static_cast<int>( Reagent::instance()->id( row ))));
 
-        // TODO: remember last?
         if ( Template::instance()->count())
             this->ui->templateCombo->setCurrentIndex( 0 );
     };
@@ -147,7 +146,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         this->ui->stackedWidget->setCurrentIndex( 0 );
     };
-    // TODO: disconnect
     this->connect( this->reagentCompleter, QOverload<const QString &>::of( &QCompleter::activated ), [ setReagent ]( const QString &name ) { setReagent( name ); } );
     this->connect( this->ui->findEdit, &QLineEdit::returnPressed, [ this, setReagent ] { setReagent( this->ui->findEdit->text()); } );
 
@@ -266,11 +264,14 @@ MainWindow::~MainWindow() {
     foreach ( LineEdit *lineEdit, this->inputList )
         this->disconnect( lineEdit, SIGNAL( valueChanged()));
 
-    this->disconnect( this->ui->findEdit, &QLineEdit::returnPressed, this, nullptr );
-    this->disconnect( this->ui->findButton, &QPushButton::clicked, this, nullptr );
-    this->disconnect( this->ui->clearButton, &QPushButton::clicked, this, nullptr );
+    this->disconnect( this->reagentCompleter, SLOT( activated( QString )));
+    this->disconnect( this->ui->findEdit, SLOT( returnPressed()));
+    this->disconnect( this->ui->findButton, SLOT( clicked( bool )));
+    this->disconnect( this->ui->clearButton, SLOT( clicked( bool )));
 
     delete this->reagentCompleter;
+
+
 
     // connect for updates
     foreach ( LineEdit *lineEdit, this->inputList )
@@ -439,7 +440,7 @@ void MainWindow::on_actionRemove_triggered() {
 
     // remove reagent and its templates
     Reagent::instance()->remove( row );
-    // FIXME: also remove templates (or handle those in removeOrphans)
+    Template::instance()->removeOrphanedEntries();
 }
 
 /**

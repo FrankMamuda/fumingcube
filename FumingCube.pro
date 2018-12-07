@@ -83,7 +83,8 @@ HEADERS += \
     nfpawidget.h \
     ghswidget.h \
     tagdialog.h \
-    tag.h
+    tag.h \
+    buttonbox.h
 
 FORMS += \
         mainwindow.ui \
