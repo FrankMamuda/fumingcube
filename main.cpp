@@ -60,6 +60,7 @@
 #include "tag.h"
 #include <QApplication>
 #include <QDebug>
+#include <QSslSocket>
 #include <QThread>
 
 // default message handler

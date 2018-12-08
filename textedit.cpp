@@ -26,11 +26,11 @@
 #include <QMimeData>
 #include <QDropEvent>
 #include <QDebug>
+#include <QRegularExpression>
 #ifdef Q_OS_WIN
-#include <windows.h>
+#include <Windows.h>
 #include <QtWin>
 #include <QWinMime>
-#include <QRegularExpression>
 #endif
 
 /**

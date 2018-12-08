@@ -132,7 +132,11 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
 
     // subScript text toggle lambda
+#ifdef Q_CC_MSVC
+    this->ui->actionSubScript->setText( "\xe2\x96\xbc" );
+#else
     this->ui->actionSubScript->setText( "\u25bc" );
+#endif
     this->connect( this->ui->actionSubScript, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setVerticalAlignment( !this->ui->actionSubScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSubScript );
@@ -140,7 +144,11 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
 
     // superScript text toggle lambda
+#ifdef Q_CC_MSVC
+    this->ui->actionSuperScript->setText( "\xe2\x96\xb2" );
+#else
     this->ui->actionSuperScript->setText( "\u25b2" );
+#endif
     this->connect( this->ui->actionSuperScript, &QAction::triggered, [ this ] () {
         QTextCharFormat format;
         format.setVerticalAlignment( !this->ui->actionSuperScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSuperScript );
@@ -188,7 +196,11 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     } );
 
     // add character map action
+#ifdef Q_CC_MSVC
+    this->ui->actionCharacterMap->setText( "\xe2\x84\xab" );
+#else
     this->ui->actionCharacterMap->setText( "\u212b" );
+#endif
     this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
         this->characterMap->show();
     } );

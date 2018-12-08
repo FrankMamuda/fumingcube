@@ -4,14 +4,15 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql qml xml winextras network
+QT       += core gui sql xml network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = FumingCube
 TEMPLATE = app
 
-win32:LIBS += -lgdi32
+win32:QT += winextras
+win32:LIBS += -lgdi32 -luser32
 win32:CONFIG += openssl-linked
 
 # The following define makes your compiler emit warnings if you use
