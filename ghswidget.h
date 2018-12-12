@@ -21,19 +21,22 @@
 //
 // includes
 //
+#include "propertywidget.h"
 #include <QIcon>
 #include <QPainter>
 #include <QWidget>
 #include <QtMath>
 #include <QMap>
+#include <QDebug>
+#include <QRegularExpression>
 
 /**
  * @brief The GHSWidget class
  */
-class GHSWidget final : public QWidget {
+class GHSWidget final : public PropertyWidget {
 public:
     const int scale = 48;
-    explicit GHSWidget( const QStringList &st, QWidget *parent = nullptr ) : QWidget( parent ), statements( st ) {
+    explicit GHSWidget( const QString &parms, QWidget *parent = nullptr ) : PropertyWidget( parms, parent ) {
         this->pictograms["GHS07"] = QIcon( ":/pictograms/harmful" ).pixmap( this->scale, this->scale );
         this->pictograms["GHS02"] = QIcon( ":/pictograms/flammable" ).pixmap( this->scale, this->scale );
         this->pictograms["GHS06"] = QIcon( ":/pictograms/toxic" ).pixmap( this->scale, this->scale );
@@ -44,9 +47,31 @@ public:
         this->pictograms["GHS03"] = QIcon( ":/pictograms/oxidizing" ).pixmap( this->scale, this->scale );
         this->pictograms["GHS04"] = QIcon( ":/pictograms/compressed" ).pixmap( this->scale, this->scale );
 
+        this->update( parms );
+
         foreach ( const QString &key, this->pictograms.keys()) {
             if ( !this->statements.contains( key ))
                 this->statements.removeAll( key );
+        }
+    }
+
+public slots:
+    void update( const QString &parms ) override {
+        // no update necessary
+        if ( !QString::compare( this->html, parms ))
+             return;
+
+        //qDebug() << "update GHS widget";
+        this->html = parms;
+        const QString stripped( QString( parms ).remove( QRegExp("<[^>]*>" )));
+        const QRegularExpression reProp( "(GHS07|GHS02|GHS06|GHS05|GHS09|GHS08|GHS01|GHS03|GHS04)" );
+        QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
+
+        // capture all unnecessary html tags
+        this->statements.clear();
+        while ( i.hasNext()) {
+            const QRegularExpressionMatch match( i.next());
+            this->statements << match.captured( 1 );
         }
     }
 
@@ -89,6 +114,7 @@ protected:
     }
 
 private:
+    QString html;
     QStringList statements;
     QMap<QString, QPixmap> pictograms;
 };

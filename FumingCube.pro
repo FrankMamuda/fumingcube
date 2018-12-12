@@ -85,7 +85,8 @@ HEADERS += \
     ghswidget.h \
     tagdialog.h \
     tag.h \
-    buttonbox.h
+    buttonbox.h \
+    propertywidget.h
 
 FORMS += \
         mainwindow.ui \

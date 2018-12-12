@@ -23,7 +23,6 @@
 //
 #include <QPaintEvent>
 #include <QWidget>
-#pragma setlocale(".UTF-8")
 
 /**
  * @brief The Character namespace

@@ -23,6 +23,7 @@
 //
 #include "propertyeditor.h"
 #include <QMainWindow>
+#include <QTimer>
 #include "table.h"
 
 //
@@ -64,11 +65,11 @@ private slots:
     void move( Directions direction );
     void buttonTest( const QModelIndex &index = QModelIndex());
     void on_actionTags_triggered();
-    void setSpecialWidget( const QModelIndex &index );
     void setSpecialWidgets();
 
 private:
     Ui::PropertyDialog *ui;
+    QTimer resizeTimer;
     Row templateRow;
     PropertyEditor *editor;
 };

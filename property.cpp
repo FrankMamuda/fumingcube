@@ -39,7 +39,6 @@ Property::Property() : Table( PropertyTable::Name ) {
 
     // enable sorting
     this->setSort( Order, Qt::AscendingOrder );
-    qDebug() << this->selectStatement();
 }
 
 /**
@@ -49,7 +48,12 @@ Property::Property() : Table( PropertyTable::Name ) {
 Row Property::add( const QString &name, const QString &html, const Id &templateId ) {
     qDebug() << "add property" << name;
 
-    return Table::add( QVariantList() << Database_::null << name << html << static_cast<int>( templateId ) << 0 );
+    // find highest order
+    int highest = -1;
+    for ( int y = 0; y < this->count(); y++ )
+        highest = qMax( highest, this->order( this->row( y )));
+
+    return Table::add( QVariantList() << Database_::null << name << html << static_cast<int>( templateId ) << highest );
 }
 
 /**

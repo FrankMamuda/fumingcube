@@ -50,16 +50,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
 
     // set up property table
     this->ui->propertyView->setModel( Property::instance());
-
-    // custom NFPA widget
-    this->connect( Property::instance(), &Property::dataChanged, [ this ]( const QModelIndex &topLeft, const QModelIndex &, const QVector<int> & ) {
-        // does not matter which column, this just avoids resetting it multiple times
-        if ( topLeft.column() != Property::HTML )
-            return;
-
-        this->setSpecialWidget( topLeft );
-    } );
-    this->setSpecialWidgets();
+    Property::instance()->sort( Property::Order, Qt::AscendingOrder );
 
     // hide unwanted columns
     for ( y = 0; y < Property::instance()->columnCount(); y++ ) {
@@ -169,6 +160,15 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Row &id ) :
     //this->connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentRowChanged, [ upDownCheck ]() { upDownCheck(); } );
     this->connect( this->ui->propertyView, SIGNAL( clicked( QModelIndex )), this, SLOT( buttonTest( QModelIndex )));
     this->buttonTest();
+
+    // setup resizeTimer (delay resetView, to avoid too frequent updates)
+    this->resizeTimer.setSingleShot( true );
+    this->connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
+        this->ui->stackedWidget->setCurrentIndex( 0 );
+        //this->ui->propertyView->show();
+        //this->ui->propertyView->setUpdatesEnabled( true );
+        this->resetView();
+    } );
 }
 
 /**
@@ -225,16 +225,28 @@ void PropertyDialog::move( Directions direction ) {
     const int order0 = Property::instance()->order( Property::instance()->row( index ));
     const int order1 = Property::instance()->order( Property::instance()->row( other ));
 
+    // swap widgets (so that we don't do useless updates)
+#if 0
+    // doesn't work
+    QWidget *widget( this->ui->propertyView->indexWidget( index ));
+    QWidget *otherWidget( this->ui->propertyView->indexWidget( other ));
+    this->ui->propertyView->setIndexWidget( index, otherWidget );
+    this->ui->propertyView->setIndexWidget( other, widget );
+#endif
+
     // swap order
     Property::instance()->setOrder( Property::instance()->row( id0 ), order1 );
     Property::instance()->setOrder( Property::instance()->row( id1 ), order0 );
 
-    Property::instance()->select();
+    // sort and reset view
+    Property::instance()->sort( Property::Order, Qt::AscendingOrder );
+    this->resetView();
+
+    // restore index and check up/down buttons
     const QModelIndex current( container->model()->index( static_cast<int>( Property::instance()->row( id0 )), 0 ));
     container->setCurrentIndex( current );
     container->setFocus();
     this->buttonTest( current );
-   // this->resetView();
 }
 
 /**
@@ -275,7 +287,13 @@ Row PropertyDialog::current() {
  * @param event
  */
 void PropertyDialog::resizeEvent( QResizeEvent *event ) {
-    this->resetView();
+    //this->resetView();
+
+    this->resizeTimer.start( 100 );
+    //this->ui->propertyView->hide();
+    //this->ui->thumbnail->setPixmap( this->ui->propertyView->grab( this->ui->propertyView->rect()));
+    this->ui->stackedWidget->setCurrentIndex( 1 );
+
     QMainWindow::resizeEvent( event );
 }
 
@@ -284,6 +302,7 @@ void PropertyDialog::resizeEvent( QResizeEvent *event ) {
  */
 void PropertyDialog::resetView() {
     dynamic_cast<PropertyDelegate*>( this->ui->propertyView->itemDelegate())->clearDocumentCache();
+    this->setSpecialWidgets();
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
     this->buttonTest();
@@ -297,60 +316,34 @@ void PropertyDialog::on_actionTags_triggered() {
 }
 
 /**
- * @brief PropertyDialog::setSpecialWidget
- * @param index
- */
-void PropertyDialog::setSpecialWidget( const QModelIndex &index ) {
-    const QString plainName( Property::instance()->name( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
-
-    //if ( this->ui->propertyView->indexWidget( index ) != nullptr )
-    //    return;
-
-    if ( plainName.contains( "NFPA 704" )) {
-        const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
-        const QRegularExpression reProp( "(\\d).+?(?=(\\d)).+?(?=(\\d))(?:.+?(?=(OX|W|SA)))?" );
-
-        // parse html
-        const QRegularExpressionMatch match( reProp.match( parms ));
-        if ( !match.hasMatch())
-            return;
-
-        const QStringList parmList = QStringList() << match.captured( 1 ) << match.captured( 2 ) << match.captured( 3 ) << match.captured( 4 );
-
-        // create a new NFPA704 widget
-        NFPAWidget *nfpa( new NFPAWidget( parmList ));
-        this->ui->propertyView->setIndexWidget( Property::instance()->index( index.row(), Property::HTML ), nfpa );
-
-        // make sure to delete it on close
-        nfpa->setAttribute( Qt::WA_DeleteOnClose, true );
-    } else if ( plainName.contains( "GHS Pictograms" )) {
-        const QString parms( Property::instance()->html( Property::instance()->row( index )).remove( QRegExp("<[^>]*>" )));
-        const QRegularExpression reProp( "(GHS07|GHS02|GHS06|GHS05|GHS09|GHS08|GHS01|GHS03|GHS04)" );
-        QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
-        QStringList parmList;
-
-        // capture all unnecessary html tags
-        while ( i.hasNext()) {
-            const QRegularExpressionMatch match( i.next());
-            parmList << match.captured( 1 );
-        }
-
-        // create a new GHS widget
-        GHSWidget *ghsWidget( new GHSWidget( parmList ));
-        this->ui->propertyView->setIndexWidget( Property::instance()->index( index.row(), Property::HTML ), ghsWidget );
-
-        // make sure to delete it on close
-        ghsWidget->setAttribute( Qt::WA_DeleteOnClose, true );
-    }
-}
-
-/**
  * @brief PropertyDialog::setSpecialWidgets
  */
 void PropertyDialog::setSpecialWidgets() {
     for ( int y = 0; y < Property::instance()->count(); y++ ) {
-        const QModelIndex index( Property::instance()->index( y, Property::Name ));
-        this->setSpecialWidget( index );
+        const QModelIndex index( Property::instance()->index( y, Property::HTML ));
+        const Row row = Property::instance()->row( y );
+        const QString plainName( Property::instance()->name( row ).remove( QRegExp("<[^>]*>" )));
+        QWidget *widget( this->ui->propertyView->indexWidget( index ));
+        const QString html( Property::instance()->html( row ));
+        bool hasWidget = widget != nullptr;
+
+        auto setWidget = [ this, index, hasWidget, row, html ]( PropertyWidget *widget ) {
+            if ( hasWidget && widget != nullptr ) {
+                widget->update( html );
+            } else {
+                // set widget and make sure to delete it on close
+                this->ui->propertyView->setIndexWidget( index, widget );
+                widget->setAttribute( Qt::WA_DeleteOnClose, true );
+            }
+        };
+
+        if ( plainName.contains( "NFPA 704" )) {
+            NFPAWidget *nfpa( hasWidget ? dynamic_cast<NFPAWidget*>( widget ) : new NFPAWidget( html ));
+            setWidget( nfpa );
+        } else if ( plainName.contains( "GHS Pictograms" )) {
+            GHSWidget *ghs( hasWidget ? dynamic_cast<GHSWidget*>( widget ) : new GHSWidget( html ));
+            setWidget( ghs );
+        }
     }
 }
 

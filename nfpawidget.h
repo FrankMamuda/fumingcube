@@ -21,18 +21,42 @@
 //
 // includes
 //
+#include "propertywidget.h"
 #include <QPainter>
+#include <QRegularExpression>
 #include <QWidget>
 #include <QtMath>
+#include <QDebug>
 
 /**
  * @brief The NFPAWidget class
  */
-class NFPAWidget final : public QWidget {
+class NFPAWidget final : public PropertyWidget {
 public:
     const qreal scale = 32;
-    explicit NFPAWidget( const QStringList &parms, QWidget *parent = nullptr ) : QWidget( parent ), parameters( parms ) {}
+    explicit NFPAWidget( const QString &parms, QWidget *parent = nullptr ) : PropertyWidget( parms, parent ) {
+        this->update( parms );
+    }
     QSize size() const { return this->sizeHint(); }
+
+public slots:
+    void update( const QString &parms ) override {
+        // no update necessary
+        if ( !QString::compare( this->html, parms ))
+             return;
+
+        //qDebug() << "update NFPA widget" << this->html.length() << parms.length() << !QString::compare( this->html, parms );
+        this->html = parms;
+        const QString stripped( QString( parms ).remove( QRegExp("<[^>]*>" )));
+        const QRegularExpression reProp( "(\\d)\\s(\\d)\\s(\\d)(?:.+?(?=(OX|W|SA)))?" );
+
+        // parse html
+        const QRegularExpressionMatch match( reProp.match( parms ));
+        if ( !match.hasMatch())
+            return;
+
+        this->parameters = QStringList() << match.captured( 1 ) << match.captured( 2 ) << match.captured( 3 ) << match.captured( 4 );
+    }
 
 protected:
     void paintEvent( QPaintEvent * ) override {
@@ -40,7 +64,7 @@ protected:
 
         // translate painter and rotate it by 45 degrees
         QPainter painter( this );
-        painter.translate( this->width() * 0.5, this->height() * 0.5 );
+        painter.translate( vScale, this->height() * 0.5 );
         painter.rotate( 45 );
 
         // draw rects
@@ -61,7 +85,7 @@ protected:
 
         // reset transformations
         painter.resetTransform();
-        painter.translate( this->width() * 0.5, this->height() * 0.5 );
+        painter.translate( vScale, this->height() * 0.5 );
 
         // draw numbers
         painter.setFont( QFont( this->font().family(), static_cast<int>( this->scale * 0.5 )));
@@ -97,5 +121,6 @@ protected:
     }
 
 private:
+    QString html;
     QStringList parameters;
 };

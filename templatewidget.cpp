@@ -69,17 +69,41 @@ TemplateWidget::TemplateWidget( QWidget *parent, const Row &row ) : QWidget( par
     // connect network manager
     this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
 
+    //const bool invalidRow = this->templateRow == Row::Invalid;
+    //const qreal amount = Reagent::instance()
+
     // set up inputs
     this->ui->amountEdit->setMode( LineEdit::Amount );
     this->ui->densityEdit->setMode( LineEdit::Density );
     this->ui->molarMassEdit->setMode( LineEdit::MolarMass );
     this->ui->assayEdit->setMode( LineEdit::Assay );
     this->ui->nameEdit->setText( this->templateRow == Row::Invalid ? "" :  Template::instance()->name( row ));
-    this->ui->amountEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->amount( row ));
-    this->ui->densityEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->density( row ));
-    this->ui->molarMassEdit->setScaledValue( this->templateRow == Row::Invalid ? 18.0 : Template::instance()->molarMass( row ));
-    this->ui->assayEdit->setScaledValue( this->templateRow == Row::Invalid ? 1.0 :  Template::instance()->assay( row ));
-    this->ui->stateCombo->setCurrentIndex( this->templateRow == Row::Invalid ? static_cast<int>( Template::Solid ) : static_cast<int>(  Template::instance()->state( row )));
+
+    // set values
+    if ( this->templateRow == Row::Invalid )
+        this->setValues();
+    else
+        this->setValues( Template::instance()->amount( row ),
+                         Template::instance()->density( row ),
+                         Template::instance()->molarMass( row ),
+                         Template::instance()->assay( row ),
+                         Template::instance()->state( row ));
+}
+
+/**
+ * @brief TemplateWidget::setValues
+ * @param amount
+ * @param density
+ * @param molarMass
+ * @param assay
+ * @param state
+ */
+void TemplateWidget::setValues( qreal amount, qreal density, qreal molarMass, qreal assay, Template::State state ) {
+    this->ui->amountEdit->setScaledValue( amount );
+    this->ui->densityEdit->setScaledValue( density );
+    this->ui->molarMassEdit->setScaledValue( molarMass );
+    this->ui->assayEdit->setScaledValue( assay );
+    this->ui->stateCombo->setCurrentIndex( static_cast<int>( state ));
 }
 
 /**
@@ -181,7 +205,7 @@ Id TemplateWidget::save( const Row &reagentRow ) {
     }
 
     // check template
-    const Id templateId = Template::instance()->id( this->templateRow );
+    const Id templateId = this->templateRow == Row::Invalid ? Id::Invalid : Template::instance()->id( this->templateRow );
     if ( templateId == Id::Invalid ) {
         this->templateRow = Template::instance()->add( this->name(), this->amount(), this->density(), this->assay(), this->molarMass(), this->state(), reagentId );
     } else {

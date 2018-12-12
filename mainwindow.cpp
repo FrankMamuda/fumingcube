@@ -88,6 +88,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         // failsafe
         const Row row = Template::instance()->row( index );
         if ( row == Row::Invalid ) {
+            // try again
+            if ( this->ui->templateCombo->count()) {
+                this->ui->templateCombo->setCurrentIndex( 0 );
+                return;
+            }
+
             Property::instance()->setFilter( "templateId=-1" );
             uiLocker( true );
             return;

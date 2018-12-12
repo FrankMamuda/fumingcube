@@ -68,6 +68,7 @@ public slots:
     void setDefault() { this->ui->nameEdit->setDisabled( true ); this->ui->nameEdit->setText( "<default>" ); }
     Id save( const Row &reagentRow );
     void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
+    void setValues( qreal amount = 1.0, qreal density = 1.0, qreal molarMass = 18.0, qreal assay = 1.0, Template::State state = Template::Solid );
 
 signals:
     void nameChanged( const QString &name );

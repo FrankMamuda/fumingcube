@@ -72,6 +72,10 @@ void ReagentDialog::addNewTab( const Row &templateRow )  {
         this->connect( widget, &TemplateWidget::nameChanged, [ this, tabIndex ]( const QString &name ) {
             this->ui->tabWidget->setTabText( tabIndex, name );
         } );
+
+        // copy data from the default tab
+        TemplateWidget *def( this->widgetList.at( 0 ));
+        widget->setValues( def->amount(), def->density(), def->molarMass(), def->assay(), def->state());
     }
 
     if ( templateRow != Row::Invalid )
@@ -223,16 +227,16 @@ void ReagentDialog::on_tabWidget_tabCloseRequested( int index ) {
     if ( this->reagentRow() != Row::Invalid ) {
         const QString tabName( this->ui->tabWidget->currentWidget()->windowTitle());
         const Row row = Template::instance()->row( index );
-
-        if ( row == Row::Invalid )
+        if ( row == Row::Invalid ) {
+            // allows to close tabs that have not been saved yet
+            this->ui->tabWidget->removeTab( index );
             return;
+        }
 
         const QString templateName( Template::instance()->name( row ));
-
         if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove template '%1'" ).arg( templateName ), QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton ) != QMessageBox::Yes )
             return;
 
-        qDebug() << "beep bop, removing";
         TemplateWidget *widget( qobject_cast<TemplateWidget *>( this->ui->tabWidget->widget( index )));
         this->widgetList.removeOne( widget );
         this->ui->tabWidget->removeTab( index );

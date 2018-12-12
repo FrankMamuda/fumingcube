@@ -19,8 +19,7 @@
 //
 // TODO:
 //   properties
-//      common properties (predefined)
-//      order
+//      common properties (tags, predefined)
 //      search
 //      allow creation of custom tables based on properties
 //        (for example - chemical formula, name, cas number
@@ -32,18 +31,13 @@
 //      various tables
 //      structure draw (and search eventually)
 //   proper warnings
-//   property sorting combo (custom, alphabetically, etc.)
 //   default fonts
 //   calculator widget
 //   built-in database
 //   disable toolTips and volume/density values for Solid states
-//   copy data from default template, upon opening new tab
 //   fix messageBar timeOut
-//   after reagent addition, select the newly added
 //   fix constants, etc.
-//   restore last reagent/template
 //   eventually split database, variable, etc. in a separate lib
-//   fix broken property sorting
 //
 
 //
