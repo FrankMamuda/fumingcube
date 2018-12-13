@@ -75,7 +75,7 @@ public:
     qreal assay( const Row &row ) const { return this->value( row, Assay ).toDouble(); }
     qreal molarMass( const Row &row ) const { return this->value( row, MolarMass ).toDouble(); }
     State state( const Row &row ) const { return static_cast<State>( this->value( row, ChemState ).toInt()); }
-    Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+    Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, Reagent ).toInt()); }
 
 public slots:
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }

@@ -312,7 +312,12 @@ void PropertyDialog::resetView() {
  * @brief PropertyDialog::on_actionTags_triggered
  */
 void PropertyDialog::on_actionTags_triggered() {
-    TagDialog().show();
+    TagDialog *td;
+
+    // display tag dialog
+    td = new TagDialog( this );
+    td->setAttribute( Qt::WA_DeleteOnClose, true );
+    td->show();
 }
 
 /**
