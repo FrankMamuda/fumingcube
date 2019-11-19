@@ -35,8 +35,8 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QSharedMemory>
 #include <QDesktopWidget>
+#include <QSharedMemory>
 
 //
 // TODO:
@@ -45,15 +45,19 @@
 //   - renaming
 //   - richtext for names?
 //   - omit alias in treeview if it is the same as name
-//   - resolve reagent alias from built in templates
-//        'Sodium hydroxide' -> NaOH
 //   - multiple aliases?
+//   - groups, sorting
 //
 //  properties:
 //   - ordering
 //   - editing
+//   - fix extraction and add support for propery mapping to tags
 //
 //  tag editor
+//
+//  future:
+//   - common reaction browser
+//   - molecule drawing (and search)
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list
@@ -118,10 +122,8 @@ int main( int argc, char *argv[] ) {
     DockWidget::initalize( "propertyDock", Qt::RightDockWidgetArea );
 
     Variable::instance()->add( "mainWindow/geometry", QRect(), Var::Flag::ReadOnly );
-
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
 
-   // DockWidget2::initalize( "test" );
 
     // read configuration
     XMLTools::instance()->read();

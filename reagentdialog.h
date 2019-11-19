@@ -21,6 +21,7 @@
 /*
  * includes
  */
+#include <QCompleter>
 #include <QDialog>
 
 /**
@@ -47,5 +48,5 @@ private slots:
 
 private:
     Ui::ReagentDialog *ui;
+    QCompleter *completer;
 };
-

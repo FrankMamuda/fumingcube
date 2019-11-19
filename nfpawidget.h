@@ -93,12 +93,15 @@ protected:
             painter.save();
             QFont font( painter.font());
 
-            if ( !QString::compare( this->parameters().at( y ), "W" ))
-                font.setStrikeOut( true );
-
             const QString parm( this->parameters().at( y ));
-            font.setPointSize(( y == 3 ) ? scales[parm.length()] : static_cast<int>( this->scale * 0.5 ));
-            painter.setFont( font );
+            if ( !parm.isEmpty()) {
+                if ( !QString::compare( this->parameters().at( y ), "W" ))
+                    font.setStrikeOut( true );
+
+                font.setPointSize(( y == 3 ) ? scales[parm.length()] : static_cast<int>( this->scale * 0.5 ));
+                painter.setFont( font );
+            }
+
             painter.drawText( rects.at( y ), parm, { Qt::AlignCenter });
             painter.restore();
         }
