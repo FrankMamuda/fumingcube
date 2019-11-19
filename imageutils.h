@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QDialog>
 
 /**
@@ -38,7 +39,7 @@ class ImageUtils : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ImageUtils( QWidget *parent = 0, const QPixmap &pixmap = QPixmap());
+    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0 );
     ~ImageUtils();
     QPixmap pixmap;
 

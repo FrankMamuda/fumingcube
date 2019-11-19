@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "propertywidget.h"
 #include <QIcon>
 #include <QPainter>
@@ -29,50 +30,43 @@
 #include <QMap>
 #include <QDebug>
 #include <QRegularExpression>
+#include "propertydock.h"
 
 /**
  * @brief The GHSWidget class
  */
 class GHSWidget final : public PropertyWidget {
 public:
-    const int scale = 48;
-    explicit GHSWidget( const QString &parms, QWidget *parent = nullptr ) : PropertyWidget( parms, parent ) {
-        this->pictograms["GHS07"] = QIcon( ":/pictograms/harmful" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS02"] = QIcon( ":/pictograms/flammable" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS06"] = QIcon( ":/pictograms/toxic" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS05"] = QIcon( ":/pictograms/corrosive" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS09"] = QIcon( ":/pictograms/environment" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS08"] = QIcon( ":/pictograms/health" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS01"] = QIcon( ":/pictograms/explosive" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS03"] = QIcon( ":/pictograms/oxidizing" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS04"] = QIcon( ":/pictograms/compressed" ).pixmap( this->scale, this->scale );
+    static constexpr const int scale = 48;
+    explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyWidget( parent, parms ) {
+
+        // TODO: make these global to be shared
+        this->pictograms["GHS07"] = QIcon( ":/pictograms/GHS07" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS02"] = QIcon( ":/pictograms/GHS02" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS06"] = QIcon( ":/pictograms/GHS06" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS05"] = QIcon( ":/pictograms/GHS05" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS09"] = QIcon( ":/pictograms/GHS09" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS08"] = QIcon( ":/pictograms/GHS08" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS01"] = QIcon( ":/pictograms/GHS01" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS03"] = QIcon( ":/pictograms/GHS03" ).pixmap( this->scale, this->scale );
+        this->pictograms["GHS04"] = QIcon( ":/pictograms/GHS04" ).pixmap( this->scale, this->scale );
 
         this->update( parms );
 
         foreach ( const QString &key, this->pictograms.keys()) {
-            if ( !this->statements.contains( key ))
-                this->statements.removeAll( key );
+            if ( !this->parameters().contains( key ))
+                this->parameters().removeAll( key );
         }
     }
 
+    int iconsPerRow() const { return this->m_iconsPerRow; }
+
 public slots:
-    void update( const QString &parms ) override {
-        // no update necessary
-        if ( !QString::compare( this->html, parms ))
-             return;
-
-        //qDebug() << "update GHS widget";
-        this->html = parms;
-        const QString stripped( QString( parms ).remove( QRegExp("<[^>]*>" )));
-        const QRegularExpression reProp( "(GHS07|GHS02|GHS06|GHS05|GHS09|GHS08|GHS01|GHS03|GHS04)" );
-        QRegularExpressionMatchIterator i( reProp.globalMatch( parms ));
-
-        // capture all unnecessary html tags
-        this->statements.clear();
-        while ( i.hasNext()) {
-            const QRegularExpressionMatch match( i.next());
-            this->statements << match.captured( 1 );
-        }
+    void update( const QStringList &parms ) override {
+        //if ( this->parameters() == parms )
+        //     return;
+        this->m_parameters = parms;
+        this->repaint();
     }
 
 protected:
@@ -82,10 +76,9 @@ protected:
         int yOffset = 0;
         int index = 0;
 
-        foreach ( const QString &name, this->statements ) {
+        foreach ( const QString &name, this->parameters()) {
             const QPixmap pixmap( this->pictograms[name] );
-
-            if ( index == 4 || index == 8) {
+            if ( xOffset >= this->iconsPerRow() * this->scale ) {
                 xOffset = 0;
                 yOffset += this->scale;
             }
@@ -101,20 +94,22 @@ protected:
      * @return
      */
     QSize sizeHint() const override {
-        int height = this->scale;
+        const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
+        if ( sectionSize == 0 )
+            return QSize();
 
-        if ( this->statements.count() > 4 ) {
+        this->m_iconsPerRow = qMax( 1, ( sectionSize - ( sectionSize % this->scale )) / this->scale );
+        const int numIcons = this->parameters().count();
+        const int rows = ( numIcons - ( numIcons % this->iconsPerRow())) / this->iconsPerRow() + ( numIcons % this->iconsPerRow() > 0 ? 1 : 0 );
+
+        int height = this->scale;
+        for ( int y = 1; y < rows; y++ )
             height += this->scale;
 
-            if ( this->statements.count() > 8 )
-                height += this->scale;
-        }
-
-        return QSize( this->statements.count() * this->scale, height );
+        return QSize( this->parameters().count() * this->scale, height );
     }
 
 private:
-    QString html;
-    QStringList statements;
     QMap<QString, QPixmap> pictograms;
+    mutable int m_iconsPerRow = 0;
 };

@@ -1,22 +1,22 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2017-10-31T11:44:31
+# Project created by QtCreator 2019-09-19T14:17:30
 #
 #-------------------------------------------------
 
-QT       += core gui sql xml network
+QT       += core gui sql xml qml
+
+win32:QT += winextras
+win32:LIBS += -lgdi32 -luser32
+win32:CONFIG += openssl-linked
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = FumingCube
 TEMPLATE = app
 
-win32:QT += winextras
-win32:LIBS += -lgdi32 -luser32
-win32:CONFIG += openssl-linked
-
 # The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked as deprecated (the exact warnings
+# any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -26,77 +26,90 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-win32:RC_FILE = icon.rc
+CONFIG += c++11
 
 SOURCES += \
+    charactermap.cpp \
+    extractiondialog.cpp \
+    ghsbuilder.cpp \
+    imageutils.cpp \
         main.cpp \
         mainwindow.cpp \
-    entry.cpp \
-    reagentdialog.cpp \
-    templatewidget.cpp \
-    lineedit.cpp \
-    messagedock.cpp \
-    charactermap.cpp \
-    textedit.cpp \
-    propertydialog.cpp \
-    propertyeditor.cpp \
+    database.cpp \
+    networkmanager.cpp \
+    nfpabuilder.cpp \
     propertydelegate.cpp \
-    imageutils.cpp \
+    propertydialog.cpp \
+    propertydock.cpp \
+    propertyeditor.cpp \
+    propertyview.cpp \
+    reagentdialog.cpp \
+    reagentdock.cpp \
+    reagentmodel.cpp \
+    script.cpp \
+    syntaxhighlighter.cpp \
+    table.cpp \
+    tag.cpp \
+    textedit.cpp \
     variable.cpp \
     xmltools.cpp \
-    extractiondialog.cpp \
-    table.cpp \
-    database.cpp \
-    property.cpp \
     reagent.cpp \
-    template.cpp \
-    networkmanager.cpp \
-    tagdialog.cpp \
-    tag.cpp
+    property.cpp \
+    calcedit.cpp
 
 HEADERS += \
-        mainwindow.h \
-    entry.h \
-    reagentdialog.h \
-    templatewidget.h \
-    lineedit.h \
-    messagedock.h \
+    buttonbox.h \
     charactermap.h \
-    textedit.h \
-    propertydialog.h \
-    propertyeditor.h \
-    propertydelegate.h \
-    imageutils.h \
-    variable.h \
-    xmltools.h \
-    networkmanager.h \
+    dockwidget.h \
     extractiondialog.h \
     extractionmodel.h \
+    ghsbuilder.h \
+    ghswidget.h \
+    imageutils.h \
+        mainwindow.h \
+    database.h \
+    field.h \
+    networkmanager.h \
+    nfpabuilder.h \
+    nfpawidget.h \
+    propertydelegate.h \
+    propertydialog.h \
+    propertydock.h \
+    propertyeditor.h \
+    propertyview.h \
+    propertywidget.h \
+    reagentdialog.h \
+    reagentdock.h \
+    reagentmodel.h \
+    script.h \
+    syntaxhighlighter.h \
+    table.h \
+    tag.h \
+    textedit.h \
+    variable.h \
     variableentry.h \
     widget.h \
+    xmltools.h \
     main.h \
-    field.h \
-    table.h \
-    database.h \
-    property.h \
     reagent.h \
-    template.h \
-    nfpawidget.h \
-    ghswidget.h \
-    tagdialog.h \
-    tag.h \
-    buttonbox.h \
-    propertywidget.h
+    property.h \
+    calcedit.h
 
 FORMS += \
+        extractiondialog.ui \
+        imageutils.ui \
         mainwindow.ui \
-    reagentdialog.ui \
-    templatewidget.ui \
-    propertydialog.ui \
-    propertyeditor.ui \
-    imageutils.ui \
-    extractiondialog.ui \
-    tagdialog.ui
+        nfpabuilder.ui \
+        propertydialog.ui \
+        propertydock.ui \
+        propertyeditor.ui \
+        reagentdialog.ui \
+        reagentdock.ui
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
     resources.qrc

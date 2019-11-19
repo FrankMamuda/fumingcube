@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2017-2018 Factory #12
+﻿/*
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,106 +16,175 @@
  *
  */
 
-//
-// TODO:
-//   properties
-//      common properties (tags, predefined)
-//      search
-//      allow creation of custom tables based on properties
-//        (for example - chemical formula, name, cas number
-//      ghs hazard creation dialog
-//      nfpa 704 creation dialog
-//   various modes for app
-//      the 'classic' calculation mode
-//      molarity, dilution etc.
-//      various tables
-//      structure draw (and search eventually)
-//   proper warnings
-//   default fonts
-//   calculator widget
-//   built-in database
-//   disable toolTips and volume/density values for Solid states
-//   fix messageBar timeOut
-//   fix constants, etc.
-//   eventually split database, variable, etc. in a separate lib
-//
-
-//
-// includes
-//
+/*
+ * includes
+ */
+#include "database.h"
 #include "main.h"
 #include "mainwindow.h"
-#include "database.h"
-#include "xmltools.h"
-#include "variable.h"
+#include "table.h"
 #include "reagent.h"
-#include "template.h"
+#include "variable.h"
+#include "xmltools.h"
 #include "property.h"
 #include "tag.h"
+#include "dockwidget.h"
+#include "script.h"
 #include <QApplication>
-#include <QDebug>
-#include <QSslSocket>
-#include <QThread>
+#include <QDate>
+#include <QDir>
+#include <QFile>
+#include <QMessageBox>
+#include <QSharedMemory>
+#include <QDesktopWidget>
 
-// default message handler
-static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler( nullptr );
+//
+// TODO:
+//
+//  reagents:
+//   - renaming
+//   - richtext for names?
+//   - omit alias in treeview if it is the same as name
+//   - resolve reagent alias from built in templates
+//        'Sodium hydroxide' -> NaOH
+//   - multiple aliases?
+//
+//  properties:
+//   - ordering
+//   - editing
+//
+//  tag editor
+//
+//  completion:
+//   - complete batch from selected reagent, not the whole list
+//   - complete function( "CURSOR to function( "CURSOR"
+//
+//  scripting:
+//   - add additional functions such as mol( mass, reagent ) which returns:
+//     mol = mass * assay( reagent ) / molarMass( reagent )
+//   - add any as batch name (a whildcard that chooses any batch with the property)
+//
+//  misc:
+//   - store images (formulas) fullsize but rescale in property view
+//     this could be used for special props (add custom property -> image )
+//
 
 /**
- * @brief messageFilter
- * @param type
- * @param context
- * @param msg
- */
-void messageFilter( QtMsgType type, const QMessageLogContext &context, const QString &msg ) {
-    (*QT_DEFAULT_MESSAGE_HANDLER)( type, context, msg );
-
-    if ( type == QtFatalMsg ) {
-        QApplication::quit();
-        exit( 0 );
-    }
-}
-
-/**
- * @brief qMain
+ * @brief main
  * @param argc
  * @param argv
  * @return
  */
 int main( int argc, char *argv[] ) {
-    // set console output pattern
-    qSetMessagePattern( "%{if-category}%{category}: %{endif}%{function}: %{message}" );
-
-    // log to file in non-qtcreator environment
-    qInstallMessageHandler( messageFilter );
-
-    // load settings
-    Variable::instance()->add( "ui_lastReagentIndex", -1 );
-    Variable::instance()->add( "ui_lastTemplateIndex", -1 );
-    Variable::instance()->add( "ui_lastValue", 1.0 );
-    XMLTools::instance()->read();
-
-    // show main window
     QApplication a( argc, argv );
 
-    // load database on separate thread
-    Database::instance();
-    Database::instance()->add( Reagent::instance());
-    Database::instance()->add( Template::instance());
-    Database::instance()->add( Property::instance());
-    Database::instance()->add( Tag::instance());
+    // simple single instance implementation
+    // NOTE: this however will fail if app crashes during startup
+#ifndef QT_DEBUG
+    class SharedMemory : public QSharedMemory {
+    public:
+        SharedMemory( const QString &key, QObject *parent = nullptr ) : QSharedMemory( key, parent ) {}
+        ~SharedMemory() { if ( this->isAttached()) { this->detach(); } }
 
-    MainWindow w;
-    w.show();
-    w.restoreIndexes();
+        bool lock() {
+            if ( this->isAttached()) return false;
+            if ( this->attach( QSharedMemory::ReadOnly )) { this->detach(); return false; }
+            return this->create( sizeof( quint64 ));
+        }
+    };
+    QSharedPointer<SharedMemory> sharedMemory( new SharedMemory( "fumingCube_singleInstance", &a ));
+    if ( !sharedMemory->lock())
+        return 0;
+#endif
+
+    // dummy file
+    const QString apiFileName( QDir::currentPath() + "/badapi" );
+
+    // register metatypes
+    //qRegisterMetaType<Reagent::Fields>();
+    qRegisterMetaType<Id>();
+    qRegisterMetaType<Row>();
+    qRegisterMetaType<Table::Roles>();
+    qRegisterMetaType<QList<QList<qreal> >>( "QList<QList<qreal> >");
+
+    // set variable defaults
+    Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
+    Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
+    Variable::instance()->add( "propertyNameColumnSize", 128, Var::Flag::Hidden );
+    Variable::instance()->add( "system/consoleHistory", "", Var::Flag::ReadOnly );
+    Variable::instance()->add( "calculator/history", "", Var::Flag::ReadOnly );
+
+    DockWidget::initalize( "reagentDock", Qt::LeftDockWidgetArea  );
+    DockWidget::initalize( "propertyDock", Qt::RightDockWidgetArea );
+
+    Variable::instance()->add( "mainWindow/geometry", QRect(), Var::Flag::ReadOnly );
+
+    Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
+
+   // DockWidget2::initalize( "test" );
+
+    // read configuration
+    XMLTools::instance()->read();
 
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
+        MainWindow::instance()->saveHistory();
+
+        XMLTools::instance()->write();
+
         GarbageMan::instance()->clear();
         delete GarbageMan::instance();
 
-        // fixes segfault on newer qt versions
-        Variable::instance()->deleteLater();
+        if ( Database::instance() != nullptr )
+            delete Database::instance();
+
+        delete Variable::instance();
     } );
+
+    // check for previous crashes
+    if ( QFileInfo( apiFileName ).exists()) {
+        const QFileInfo info( Variable::instance()->string( "databasePath" ));
+
+        // just change path
+        Variable::instance()->setString( "databasePath", info.absolutePath() + "/database_"
+                                         + QDateTime::currentDateTime()
+                                         .toString( "yyyyMMdd_hhmmss" ) +
+                                         ".db" );
+        QFile::remove( apiFileName );
+    }
+
+    // initialize database and its tables
+    Database::instance();
+    auto loadTables = []() {
+        bool success = true;
+        success &= Database::instance()->add( Reagent::instance());
+        success &= Database::instance()->add( Property::instance());
+        success &= Database::instance()->add( Tag::instance());
+
+        if ( !Tag::instance()->count())
+            Tag::instance()->populate();
+
+        return success;
+    };
+
+    if ( !loadTables()) {
+        QMessageBox::critical( QApplication::desktop(),
+                               QObject::tr( "Internal error" ),
+                               QObject::tr( "Could not load database\n"
+                                            "New database will be created\n"
+                                            "Please restart the application" ),
+                               QMessageBox::Ok );
+
+        QFile file( QDir::currentPath() + "/badapi" );
+        if ( file.open( QIODevice::WriteOnly ))
+            file.close();
+
+        QApplication::quit();
+        return 0;
+    }
+
+    MainWindow::instance()->show();
+    MainWindow::instance()->scrollToBottom();
 
     return a.exec();
 }

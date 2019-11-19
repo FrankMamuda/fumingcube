@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,10 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
+#include <QFileInfo>
 #include <QLoggingCategory>
 #include <QSharedPointer>
 #include <QSqlTableModel>
@@ -31,17 +32,16 @@
 class Table;
 
 /**
- * @brief The Dabanase_ class
+ * @brief The Database_ class
  */
 namespace Database_ {
 const static QLoggingCategory Debug( "database" );
 #ifdef Q_CC_MSVC
-const static unsigned int null = 0;
+const static int null = 0;
 #else
-const static  __attribute__((unused)) unsigned int null = 0;
+const static  __attribute__((unused)) int null = 0;
 #endif
 };
-
 
 /**
  * @brief The Database class
@@ -57,7 +57,7 @@ public:
      */
     static Database *instance() { static Database *instance( new Database()); return instance; }
     ~Database();
-    void add( Table *table );
+    bool add( Table *table );
     bool hasInitialised() const { return this->m_initialised; }
 
 public slots:
@@ -65,6 +65,7 @@ public slots:
 
 private:
     explicit Database( QObject *parent = nullptr );
+    bool testPath( const QString &path );
     void setInitialised( bool initialised = true ) { this->m_initialised = initialised; }
 
     /**
@@ -72,5 +73,5 @@ private:
      * @return
      */
     QMap<QString, Table*> tables;
-    bool m_initialised;
+    bool m_initialised = false;
 };

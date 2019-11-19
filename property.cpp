@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,55 +16,83 @@
  *
  */
 
-//
-// includes
-//
-#include <QSqlQuery>
+/*
+ * includes
+ */
 #include "property.h"
 #include "field.h"
 #include "database.h"
-#include "template.h"
+#include "tag.h"
+#include "reagent.h"
+#include <QSqlQuery>
 
 /**
  * @brief Property::Property
- * @param parent
  */
-Property::Property() : Table( PropertyTable::Name ) {
-    this->addField( ID,       "id",         QVariant::UInt,   "integer primary key", true, true );
-    this->addField( Name,     "name",       QVariant::String, "text" );
-    this->addField( HTML,     "html",       QVariant::String, "text" );
-    this->addField( Template, "templateId", QVariant::Int,    "integer" );
-  //this->addField( Tag,      "tagId",      QVariant::Int,    "integer" ); // MUST BREAK API EVENTUALLY
-    this->addField( Order,    "parent",     QVariant::Int,    "integer" );
-
-    // enable sorting
-    this->setSort( Order, Qt::AscendingOrder );
+Property::Property() : Table( "property" ) {
+    this->addField( PRIMARY_FIELD( ID )); // Id
+    this->addField( FIELD( Name, String ));      // rich text
+    this->addField( FIELD( TagID, Int ));        // special tag
+    this->addField( FIELD( Value, ByteArray ));  // value (can be anything)
+    this->addField( FIELD( ReagentID, Int ));     // Id in parent table
 }
 
 /**
  * @brief Property::add
  * @param name
+ * @param tagId
+ * @param value
+ * @param tableId
+ * @param parentId
+ * @return
  */
-Row Property::add( const QString &name, const QString &html, const Id &templateId ) {
-    qDebug() << "add property" << name;
+Row Property::add(const QString &name, const Id &tagId,
+                   const QByteArray &value, const Id &parentId ) {
 
-    // find highest order
-    int highest = -1;
-    for ( int y = 0; y < this->count(); y++ )
-        highest = qMax( highest, this->order( this->row( y )));
+    return Table::add( QVariantList() << Database_::null <<
+                       (( tagId == Id::Invalid ) ? name : QByteArray()) <<
+                       static_cast<int>( tagId ) <<
+                       value <<
+                       static_cast<int>( parentId )
+                       );
+}
 
-    return Table::add( QVariantList() << Database_::null << name << html << static_cast<int>( templateId ) << highest );
+/**
+ * @brief Property::data
+ * @param index
+ * @param role
+ * @return
+ */
+QVariant Property::data( const QModelIndex &index, int role ) const {
+    const QVariant value( Table::data( index, role ));
+
+    if ( role == Qt::DisplayRole && ( index.column() == Name )) {
+        const Row row = this->row( index );
+        const Id tagId = this->tagId( row );
+
+        // FIXME:
+        if ( tagId == Id::Invalid )
+            return value;
+
+        const Row tagRow = Tag::instance()->row( tagId );
+        if ( tagRow == Row::Invalid )
+            return QVariant();
+
+        // FIXME: proper find
+        if ( index.column() == Name )
+            return Tag::instance()->name( tagRow );
+    }
+
+    return value;
 }
 
 /**
  * @brief Property::removeOrphanedEntries
  */
 void Property::removeOrphanedEntries() {
-    // remove orphaned properties
-    QSqlQuery().exec( QString( "delete from %1 where %2 not in (select %3 from %4)" )
-                .arg( this->tableName())
-                .arg( this->fieldName( Template ))
-                .arg( Template::instance()->fieldName( Template::ID ))
-                .arg( Template::instance()->tableName()));
-    this->select();
+    QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
+                      .arg( this->tableName())
+                      .arg( this->fieldName( Property::ReagentID ))
+                      .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                      .arg( Reagent::instance()->tableName()));
 }

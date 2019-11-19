@@ -6,40 +6,40 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
-    <height>297</height>
+    <width>310</width>
+    <height>111</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Reagents</string>
+   <string>Add</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/reagent</normaloff>:/icons/reagent</iconset>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="1" column="0">
     <widget class="QLabel" name="nameLabel">
      <property name="text">
-      <string>Name:</string>
+      <string>Reagent name</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QLineEdit" name="nameEdit">
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="nameEdit"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="aliasLabel">
      <property name="text">
-      <string/>
+      <string>Alias (short name)</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
-     <property name="tabsClosable">
-      <bool>true</bool>
-     </property>
-    </widget>
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="aliasEdit"/>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="ButtonBox" name="buttonBox">
+   <item row="5" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -50,14 +50,9 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ButtonBox</class>
-   <extends>QDialogButtonBox</extends>
-   <header>buttonbox.h</header>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

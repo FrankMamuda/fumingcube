@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Zvaigznu Planetarijs
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,26 @@
 
 #pragma once
 
-//
-// includes
-//
-#include <QList>
-#include <QObject>
+/*
+ * includes
+ */
+#include <QSharedPointer>
+#include <QtGlobal>
 
 /**
  * namespace Main
  */
 namespace Main {
 #ifdef Q_CC_MSVC
-static constexpr const char *Path = ".fumingCube";
+static constexpr const char *Path = ".fumingCubeAlt";
 #else
-static constexpr const char __attribute__((unused)) *Path = ".fumingCube";
+static constexpr const char __attribute__((unused)) *Path = ".fumingCubeAlt";
+static QObject __attribute__((unused)) *Console( nullptr );
 #endif
+enum TimeFormat {
+    DecimalTime = 0,
+    HoursMinutes
+};
 }
 
 /**
@@ -58,7 +63,7 @@ public:
     }
 
     /**
-     * @brief clear deletes poiners in reverse order
+     * @brief clear deletes pointers in reverse order
      */
     void clear() {
         std::reverse( this->garbage.begin(), this->garbage.end());

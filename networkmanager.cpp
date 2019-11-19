@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "networkmanager.h"
 
 /**
@@ -38,6 +39,8 @@ void NetworkManager::execute( const QString &url, NetworkManager::Type type, con
     // get reply
     QNetworkReply *reply( this->manager.get( request ));
 
+    qDebug() << "execute";
+
     // handle replies
     this->connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
         const Type type = static_cast<Type>( reply->request().attribute( QNetworkRequest::User ).toInt());
@@ -45,6 +48,9 @@ void NetworkManager::execute( const QString &url, NetworkManager::Type type, con
 
         // abort on errors
         if ( reply->error()) {
+            qDebug() << "error" << reply->errorString();
+
+
             reply->deleteLater();
             return;
         }

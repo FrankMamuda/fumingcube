@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QSqlField>
 
 /**
@@ -32,7 +32,7 @@ public:
     bool isUnique() const { return this->m_unique; }
     QString format() const { return m_format; }
     int id() const { return this->m_id; }
-    bool isPrimary() { return this->isAutoValue() && this->type() == QVariant::UInt && this->format().contains( "primary key" ); }
+    bool isPrimary() { return this->isAutoValue() && this->format().contains( "primary key" ); }
 
 private:
     int m_id;

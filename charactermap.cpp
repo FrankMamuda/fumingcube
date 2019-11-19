@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "charactermap.h"
 #include <QPainter>
 #include <QtMath>

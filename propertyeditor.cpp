@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "propertyeditor.h"
 #include "ui_propertyeditor.h"
 #include <QPainter>
@@ -27,29 +28,64 @@
 #include <QFileDialog>
 #include <QBitmap>
 #include <QMenu>
+#include <QStandardItem>
+#include <QListWidgetItem>
 #include "charactermap.h"
+
+//
+// TODO: store a reference to the font in HTML style=\" font-family:'##FONT##'; font-size:9pt; font-weight:400;
+//       to be replaced on every system with native font
+//
+
+/**
+ * @brief PropertyEditor::eventFilter
+ * @param watched
+ * @param event
+ * @return
+ */
+bool PropertyEditor::eventFilter( QObject *object, QEvent *event ) {
+    if ( object == this->ui->title ) {
+        if ( event->type() == QEvent::KeyPress ) {
+            const QKeyEvent *keyEvent( static_cast<QKeyEvent*>( event ));
+
+            if ( keyEvent->key() == Qt::Key_Tab ) {
+                this->ui->value->setFocus();
+                return true;
+            }
+        }
+    }
+
+    return QMainWindow::eventFilter( object, event );
+}
 
 /**
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
 PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( m ), characterMap( new CharacterMap( this )) {
-    const QFont font( "Times New Roman", 11 );
-
     // set up ui
     this->ui->setupUi( this );
+    QListWidget w;
+    const QFont font( QApplication::font( &w ));
+
+    // we don't currently need this
+    this->ui->fontToolBar->hide();
+
+    // fix tab issues
+    this->ui->title->installEventFilter( this );
+    this->ui->title->setSimpleEditor( true );
 
     // load pictograms for manual addition
     //   although these are handled automatically (just like NFPA widget)
-    this->pictograms["Harmful"] = QIcon( ":/pictograms/harmful" );
-    this->pictograms["Flammable"] = QIcon( ":/pictograms/flammable" );
-    this->pictograms["Toxic"] = QIcon( ":/pictograms/toxic" );
-    this->pictograms["Corrosive"] = QIcon( ":/pictograms/corrosive" );
-    this->pictograms["Environment hazard"] = QIcon( ":/pictograms/environment" );
-    this->pictograms["Health hazard"] = QIcon( ":/pictograms/health" );
-    this->pictograms["Explosive"] = QIcon( ":/pictograms/explosive" );
-    this->pictograms["Oxidizing"] = QIcon( ":/pictograms/oxidizing" );
-    this->pictograms["Compressed gas"] = QIcon( ":/pictograms/compressed" );
+    this->pictograms["Harmful"]            = QIcon( ":/pictograms/GHS07" );
+    this->pictograms["Flammable"]          = QIcon( ":/pictograms/GHS02" );
+    this->pictograms["Toxic"]              = QIcon( ":/pictograms/GHS06" );
+    this->pictograms["Corrosive"]          = QIcon( ":/pictograms/GHS05" );
+    this->pictograms["Environment hazard"] = QIcon( ":/pictograms/GHS09" );
+    this->pictograms["Health hazard"]      = QIcon( ":/pictograms/GHS08" );
+    this->pictograms["Explosive"]          = QIcon( ":/pictograms/GHS01" );
+    this->pictograms["Oxidizing"]          = QIcon( ":/pictograms/GHS03" );
+    this->pictograms["Compressed gas"]     = QIcon( ":/pictograms/GHS04" );
 
     // set font toolbar below other buttons
     this->insertToolBarBreak( this->ui->fontToolBar );

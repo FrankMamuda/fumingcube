@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,12 @@
 
 #pragma once
 
-//
-// includes
-//
-#include <QCompleter>
+/*
+ * includes
+ */
+#include "syntaxhighlighter.h"
+#include "reagentmodel.h"
+#include <QLineEdit>
 #include <QMainWindow>
 
 /**
@@ -31,12 +33,6 @@ namespace Ui {
 class MainWindow;
 }
 
-//
-// classes
-//
-class LineEdit;
-class MessageDock;
-
 /**
  * @brief The MainWindow class
  */
@@ -44,26 +40,20 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow( QWidget *parent = nullptr );
-    ~MainWindow();
+    static MainWindow *instance() { static MainWindow *instance( new MainWindow()); return instance; }
+    ~MainWindow() override;
+    QLineEdit *calculatorWidget();
 
 public slots:
-    void restoreIndexes();
+    void appendToCalculator( const QString &line );
+    void saveHistory();
+    void scrollToBottom();
 
 private slots:
-    void on_actionAdd_triggered();
-    void calculate( int mode );
-    void on_actionEdit_triggered();
-    void on_actionRemove_triggered();
-    void on_actionProperties_triggered();
-
-protected:
-    void resizeEvent( QResizeEvent *event ) override;
-    void closeEvent( QCloseEvent *event ) override;
+    void on_actionClear_triggered();
 
 private:
+    explicit MainWindow( QWidget *parent = nullptr );
     Ui::MainWindow *ui;
-    QList<LineEdit*> inputList;
-    MessageDock *messageDock;
-    QCompleter *reagentCompleter;
+    SyntaxHighlighter *highlighter;
 };

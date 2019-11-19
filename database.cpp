@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,43 +16,75 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QDebug>
 #include <QDir>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QApplication>
+#include <QTime>
 #include "database.h"
 #include "table.h"
 #include "field.h"
 #include "main.h"
 #include "variable.h"
+#include "mainwindow.h"
 
 /**
- * @brief Database::Database
- * @param parent
+ * @brief Database::testPath checks if provided database path is valid and creates non-existant sub-directories
+ * @param path database path
+ * @return success
  */
-Database::Database( QObject *parent ) : QObject( parent ), m_initialised( false ) {
-    QDir path( QDir::homePath() + "/" + Main::Path );
-    QFile file( path.absolutePath() + "/" + "database.db" );
+bool Database::testPath( const QString &path ) {
+    const QDir dir( QFileInfo( path ).absoluteDir());
+
+    // reject empty paths
+    if ( path.isEmpty()) {
+        qCDebug( Database_::Debug ) << this->tr( "empty database path" );
+        return false;
+    }
+
+    // only accept absolute paths
+    if ( !dir.isAbsolute()) {
+        qCDebug( Database_::Debug ) << this->tr( "relative or invalid database path \"%1\"" ).arg( path );
+        return false;
+    }
+
+    if ( !dir.exists()) {
+        qCDebug( Database_::Debug ) << this->tr( "making non-existant database path \"%1\"" ).arg( dir.absolutePath());
+        dir.mkpath( dir.absolutePath());
+
+        if ( !dir.exists())
+            return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Database::Database initializes database
+ * @param parent any qobject parent
+ */
+Database::Database( QObject *parent ) : QObject( parent ) {
     QSqlDatabase database( QSqlDatabase::database());
 
-    if ( !path.exists()) {
-        qCDebug( Database_::Debug ) << this->tr( "making non-existant database path \"%1\"" ).arg( path.absolutePath());
-        path.mkpath( path.absolutePath());
+    // validate path
+    if ( !testPath( Variable::instance()->string( "databasePath" ))) {
+        Variable::instance()->setString( "databasePath", QDir( QDir::homePath() + "/" + Main::Path ).absolutePath() + "/" + "database.db" );
 
-        if ( !path.exists())
+        if ( !this->testPath( Variable::instance()->string( "databasePath" )))
             qFatal( QT_TR_NOOP_UTF8( "could not create database path" ));
     }
 
     // failsafe
+    QFile file( Variable::instance()->string( "databasePath" ));
     if ( !file.exists()) {
         file.open( QFile::WriteOnly );
         file.close();
-        qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" );
+        qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" ) << '"' << Variable::instance()->string( "databasePath" ) << '"';
 
         if ( !file.exists())
             qFatal( QT_TR_NOOP_UTF8( "unable to create database file" ));
@@ -76,13 +108,10 @@ Database::Database( QObject *parent ) : QObject( parent ), m_initialised( false 
 
     // done
     this->setInitialised();
-
-    // add to garbage collector
-    GarbageMan::instance()->add( this );
 }
 
 /**
- * @brief Database::removeOrphanedEntries
+ * @brief Database::removeOrphanedEntries removes orphaned entries in database tables
  */
 void Database::removeOrphanedEntries() {
     foreach ( Table *table, this->tables )
@@ -104,10 +133,12 @@ Database::~Database() {
     this->setInitialised( false );
 
     // unbind variables
-    //Variable::instance()->unbind( "reagentId" );
-    //Variable::instance()->unbind( "templateId" );
+    //Variable::instance()->unbind( "report" );
+    qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
     foreach ( Table *table, this->tables )
         table->clear();
+
+    // delete all tables
     qDeleteAll( this->tables );
 
     // according to Qt5 documentation, this must be out of scope
@@ -128,15 +159,12 @@ Database::~Database() {
 }
 
 /**
- * @brief Database::add
- * @param table
+ * @brief Database::add adds and validates Table instance to database
+ * @param table Table instance (QSqlTableModel)
  */
-void Database::add( Table *table ) {
+bool Database::add( Table *table ) {
     QSqlDatabase database( QSqlDatabase::database());
     const QStringList tables( database.tables());
-    QString statement;
-    QSqlQuery query;
-    bool found = false;
 
     // store table
     this->tables[table->tableName()] = table;
@@ -146,17 +174,31 @@ void Database::add( Table *table ) {
         qCInfo( Database_::Debug ) << this->tr( "creating an empty database" );
 
     // validate schema
+    bool found = false;
     foreach ( const QString &tableName, tables ) {
         if ( !QString::compare( table->tableName(), tableName )) {
             foreach ( const Field &field, qAsConst( table->fields )) {
+
                 if ( !database.record( table->tableName()).contains( field->name())) {
-                    qCCritical( Database_::Debug ) << this->tr( "database field mismatch" );
-                    return;
+                    qCCritical( Database_::Debug ) << this->tr( "database field mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg( field->name());
+                    return false;
+                } else {
+                    // ignore unsigned ints for now
+                    const QVariant::Type internalType = field->type() == QVariant::UInt ? QVariant::Int : field->type();
+                    const QVariant::Type databaseType = database.record( table->tableName()).field( field->id()).type();
+
+                    if ( internalType != databaseType ) {
+                        qCCritical( Database_::Debug ) << this->tr( "database type mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg( field->name());
+                        return false;
+                    }
                 }
             }
             found = true;
         }
     }
+
+    QString statement;
+    QSqlQuery query;
 
     if ( !found ) {
         // announce
@@ -166,8 +208,35 @@ void Database::add( Table *table ) {
         foreach ( const Field &field, qAsConst( table->fields )) {
             statement.append( QString( "%1 %2" ).arg( field->name()).arg( field->format()));
 
+            if ( field->isUnique())
+                statement.append( " unique" );
+
             if ( QString::compare( field->name(), table->fields.last()->name()))
                 statement.append( ", " );
+        }
+
+        // check for constraints
+        QString constraints;
+        const int tc = table->constraints.count();
+
+        if ( tc > 0 ) {
+            for ( int y = 0; y < table->constraints.count(); y++ ) {
+                constraints.append( "unique( " );
+
+                const int cc = table->constraints.at( y ).count();
+                for ( int k = 0; k < cc; k++ ) {
+                    const QSharedPointer<Field_> field( table->constraints.at( y ).at( k ));
+                    constraints.append( field->name());
+                    constraints.append( k == cc - 1 ? " )" : ", " );
+
+                }
+
+                if ( y < tc - 1 )
+                    constraints.append( ", " );
+            }
+
+            statement.append( ", " );
+            statement.append( constraints );
         }
 
         if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName()).arg( statement )))
@@ -185,4 +254,7 @@ void Database::add( Table *table ) {
         qCCritical( Database_::Debug ) << this->tr( "could not initialize model for table - \"%1\"" ).arg( table->tableName());
         table->setValid( false );
     }
+
+    return true;
 }
+

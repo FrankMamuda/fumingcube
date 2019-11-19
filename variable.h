@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2013-2018 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2013-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QMap>
 #include <QString>
 #include <QMetaMethod>
@@ -136,6 +137,7 @@ public:
 public slots:
     void setInteger( const QString &key, int value ) { Variable::instance()->setValue<int>( key, value ); }
     void setDecimalValue( const QString &key, qreal value ) { Variable::instance()->setValue<qreal>( key, value ); }
+    void setEnabled( const QString &key, bool value ) { Variable::instance()->setValue<bool>( key, value ); }
     void enable( const QString &key ) { Variable::instance()->setValue<bool>( key, true ); }
     void disable( const QString &key ) { Variable::instance()->setValue<bool>( key, false ); }
     void setString( const QString &key, const QString &string ) { Variable::instance()->setValue<QString>( key, string ); }

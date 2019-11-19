@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,28 +16,59 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "reagent.h"
 #include "field.h"
 #include "database.h"
+#include <QSqlQuery>
 
 /**
  * @brief Reagent::Reagent
- * @param parent
  */
-Reagent::Reagent() : Table( ReagentTable::Name ) {
-    this->addField( ID,   "id",   QVariant::UInt,   "integer primary key", true, true );
-    this->addField( Name, "name", QVariant::String, "text",                true );
+Reagent::Reagent() : Table( "reagent" ) {
+    this->addField( PRIMARY_FIELD( ID ));
+    this->addField( FIELD( Name, String ));
+    this->addField( FIELD( Alias, String ));
+    this->addField( FIELD( ParentID, Int ));
+    this->setSort( Name, Qt::AscendingOrder );
 }
 
 /**
  * @brief Reagent::add
  * @param name
+ * @return
  */
-Row Reagent::add( const QString &name ) {
-    qDebug() << "add reagent" << name;
+Row Reagent::add( const QString &name, const QString &alias, const Id &parentId ) {
+    return Table::add( QVariantList() << Database_::null << name << alias << static_cast<int>( parentId ));
+}
 
-    return Table::add( QVariantList() << Database_::null << name );
+/**
+ * @brief Reagent::children
+ * @return
+ */
+QList<Row> Reagent::children( const Row &row ) const {
+    QList<Row> list;
+
+    const Id id = this->id( row );
+    QSqlQuery query;
+    query.exec( QString( "select %1 from %2 where %3=%4" )
+                .arg( Reagent::instance()->fieldName( ID ))
+                .arg( Reagent::instance()->tableName())
+                .arg( Reagent::instance()->fieldName( ParentID ))
+                .arg( static_cast<int>( id )));
+    while ( query.next()) {
+        const Id id = static_cast<Id>( query.value( 0 ).toInt());
+        list << this->row( id );
+    }
+
+    return list;
+}
+
+/**
+ * @brief Reagent::removeOrphanedEntries
+ */
+void Reagent::removeOrphanedEntries() {
+    // NOTE: STUB
 }

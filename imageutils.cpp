@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +17,9 @@
  *
  */
 
-
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "imageutils.h"
 #include "ui_imageutils.h"
 #include <QDebug>
@@ -29,8 +29,11 @@
  * @param parent
  * @param px
  */
-ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
+ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &preferredWidth ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
     QPixmap scaledPixmap( pixmap );
+
+    if ( preferredWidth > 0 )
+        scaledPixmap = scaledPixmap.scaledToWidth( preferredWidth, Qt::SmoothTransformation );
 
     // limit width
     if ( scaledPixmap.width() > Ui::MaxImageSize )
@@ -86,8 +89,8 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap ) : QDialog( pare
     this->connect( this->ui->sizeSlider, &QSlider::valueChanged, scalePixmap );
 
     // connect ok button
-    this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this, scaledPixmap ]() {
-        this->pixmap = scaledPixmap.scaled( this->size, Qt::KeepAspectRatio, Qt::SmoothTransformation );
+    this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this, pixmap ]() {
+        this->pixmap = pixmap.scaled( this->size, Qt::KeepAspectRatio, Qt::SmoothTransformation );
     } );
 
     // limit frame size

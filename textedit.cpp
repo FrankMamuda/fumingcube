@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "imageutils.h"
 #include "textedit.h"
 #include <QBuffer>
@@ -28,7 +29,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #ifdef Q_OS_WIN
-#include <Windows.h>
+#include <windows.h>
 #include <QtWin>
 #include <QWinMime>
 #endif
@@ -36,13 +37,14 @@
 /**
  * @brief TextEdit::insertPixmap
  * @param pixmap
+ * @param preferredWidth
  */
-void TextEdit::insertPixmap( const QPixmap &pixmap, const int forcedSize ) {
+void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
     bool accepted = true;
     QPixmap out( pixmap );
 
-    if ( forcedSize > 0 ) {
-        ImageUtils iu( this, pixmap );
+    if ( preferredWidth > 0 ) {
+        ImageUtils iu( this, pixmap, preferredWidth );
         accepted = iu.exec();
 
         if ( accepted )
@@ -72,6 +74,9 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int forcedSize ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
+    if ( this->isSimpleEditor())
+        return false;
+
     // check if dropped item is an image
     foreach ( const QUrl &url, source->urls()) {
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
@@ -87,6 +92,9 @@ bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
  * @param event
  */
 void TextEdit::dropEvent( QDropEvent *event ) {
+    if ( this->isSimpleEditor())
+        return;
+
     // move cursot to drop position
     this->setTextCursor( this->cursorForPosition( event->pos()));
 
@@ -104,6 +112,9 @@ void TextEdit::dropEvent( QDropEvent *event ) {
  * @param source
  */
 void TextEdit::insertFromMimeData( const QMimeData *source ) {
+    if ( this->isSimpleEditor())
+        return;
+
     QMimeDatabase db;
 
     // insert as plain text if required
@@ -140,6 +151,9 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     // open clipBoard to retrieve metaFiles (formulas from ChemDraw, Accelrys Draw, etc.)
     // QWinMime does not work for some reason, so we read metaFiles directly from win32 clipBoard
     if ( OpenClipboard( nullptr )) {
+        QPixmap pixmap;
+        int endWidth = 0;
+
         // check clipBoard for metaFiles
         if ( IsClipboardFormatAvailable( CF_ENHMETAFILE )) {
             HENHMETAFILE metaFile;
@@ -164,15 +178,12 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
                 HBITMAP bitmap;
                 HBRUSH brush;
                 int width, height;
-                qreal aspect;
-                const int MaxPixmapWidth = 1024;
+                const qreal scaleFactor = 0.125;
 
                 // get metaFile dimensions
-                width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ));
-                height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ));
-                aspect = static_cast<qreal>( width ) / static_cast<qreal>( height );
-                width = qMin( MaxPixmapWidth, width );
-                height = static_cast<int>( width / aspect );
+                width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ) * scaleFactor );
+                height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ) * scaleFactor );
+                endWidth = static_cast<int>( width * static_cast<qreal>( header.szlMillimeters.cx ) / static_cast<qreal>( header.szlDevice.cx ));
 
                 // construct rectangle
                 memset( &rect, 0, sizeof( RECT ));
@@ -181,8 +192,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
                 // proceed with valid sizes
                 if ( width > 0 && height > 0 ) {
-                    QPixmap pixmap;
-
                     // get device context
                     deviceContext = GetDC( nullptr );
                     memDC = CreateCompatibleDC( deviceContext );
@@ -202,10 +211,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
                     // convert to pixmap
                     pixmap = QtWin::fromHBITMAP( bitmap );
-                    if ( !pixmap.isNull()) {
-                        this->insertPixmap( pixmap );
-                        return;
-                    }
 
                     // clean up
                     DeleteObject( bitmap );
@@ -221,6 +226,11 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
         // close clipBoard
         CloseClipboard();
+
+        if ( !pixmap.isNull()) {
+            this->insertPixmap( pixmap, endWidth );
+            return;
+        }
     }
 #endif
 

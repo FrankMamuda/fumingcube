@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2013-2018 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2013-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +17,14 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "variable.h"
 #include "widget.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QSpinBox>
-#include <QDebug>
 #include <QLineEdit>
 #include <QTimeEdit>
 #include <QAction>

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2013-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QDebug>
 #include "xmltools.h"
 #include "variable.h"
@@ -31,12 +32,62 @@
 #include "main.h"
 
 /**
- * @brief XMLTools::XMLTools
- * @param parent
+ * @brief XMLTools::read
+ * @param mode
+ * @param object
  */
-XMLTools::XMLTools( QObject *parent ) : QObject( parent ) {
-    // add to garbage collector
-    GarbageMan::instance()->add( this );
+void XMLTools::read() {
+    QDomDocument document;
+    const QDir configDir( QDir::homePath() + "/" + Main::Path );
+
+#ifdef QT_DEBUG
+    // announce
+    qCInfo( XMLTools_::Debug ) << this->tr( "reading configuration" );
+#endif
+
+    if ( !configDir.exists())
+        configDir.mkpath( configDir.absolutePath());
+
+    // set path
+    const QString path( configDir.absolutePath() + "/" + XMLTools_::ConfigFile );
+
+    // load xml file
+    QFile xmlFile( path );
+    if ( !xmlFile.exists() || !xmlFile.open( QFile::ReadOnly | QFile::Text )) {
+        qCCritical( XMLTools_::Debug ) << this->tr( "no configuration file found" );
+        return;
+    }
+
+    document.setContent( &xmlFile );
+    QDomNode node( document.documentElement().firstChild());
+
+    while ( !node.isNull()) {
+        const QDomElement element( node.toElement());
+
+        if ( !element.isNull()) {
+            if ( !QString::compare( element.tagName(), "variable" )) {
+                const QString key( element.attribute( "key" ));
+                QVariant value;
+
+                if ( element.hasAttribute( "binary" )) {
+                    QByteArray array( QByteArray::fromBase64( element.attribute( "binary" ).toUtf8().constData()));
+                    QBuffer buffer( &array );
+                    buffer.open( QIODevice::ReadOnly );
+                    QDataStream in( &buffer );
+                    in >> value;
+                } else {
+                    value = element.attribute( "value" );
+                }
+
+                if ( Variable::instance()->contains( key ) && !key.isEmpty())
+                    Variable::instance()->setValue( key, value, true );
+            }
+        }
+        node = qAsConst( node ).nextSibling();
+    }
+
+    document.clear();
+    xmlFile.close();
 }
 
 /**
@@ -45,13 +96,18 @@ XMLTools::XMLTools( QObject *parent ) : QObject( parent ) {
  */
 void XMLTools::write() {
     QString savedData, newData;
-    const QDir configDir( XML::ConfigPath );
+    const QDir configDir( QDir::homePath() + "/" + Main::Path );
+
+#ifdef QT_DEBUG
+    // announce
+    qCInfo( XMLTools_::Debug ) << this->tr( "writing configuration" );
+#endif
 
     if ( !configDir.exists())
         configDir.mkpath( configDir.absolutePath());
 
     // set path
-    const QString path( configDir.absolutePath() + "/" + XML::Variables );
+    const QString path( configDir.absolutePath() + "/" + XMLTools_::ConfigFile );
 
     // read xml file and create buffer
     QFile xmlFile( path );
@@ -114,68 +170,12 @@ void XMLTools::write() {
     if ( QString::compare( savedData, newData )) {
         // write out as binary (not QIODevice::Text) to avoid CR line endings
         if ( !xmlFile.open( QFile::WriteOnly | QFile::Truncate )) {
-            qCritical() << "could not open configuration file" << path;
+            qCCritical( XMLTools_::Debug ) << this->tr( "could not open configuration file \"%1\"" ).arg( path );
             return;
         }
-
         xmlFile.write( newData.toUtf8().replace( "\r", "" ));
     }
 
     // close file
-    xmlFile.close();
-}
-
-/**
- * @brief XMLTools::read
- * @param mode
- * @param object
- */
-void XMLTools::read() {
-    QDomDocument document;
-    const QDir configDir( XML::ConfigPath );
-
-    if ( !configDir.exists())
-        configDir.mkpath( configDir.absolutePath());
-
-    // set path
-    const QString path( configDir.absolutePath() + "/" + XML::Variables );
-
-    // load xml file
-    QFile xmlFile( path );
-    if ( !xmlFile.exists() || !xmlFile.open( QFile::ReadOnly | QFile::Text )) {
-        qCritical() << this->tr( "no configuration file found" );
-        return;
-    }
-
-    document.setContent( &xmlFile );
-
-    QDomNode node( qAsConst( document ).documentElement().firstChild());
-    while ( !node.isNull()) {
-        const QDomElement element( qAsConst( node ).toElement());
-
-        if ( !element.isNull()) {
-            if ( !QString::compare( element.tagName(), "variable" )) {
-                QVariant value;
-                const QDomNode childNode( element.firstChild());
-                const QString key( element.attribute( "key" ));
-
-                if ( element.hasAttribute( "binary" )) {
-                    QByteArray array( QByteArray::fromBase64( element.attribute( "binary" ).toUtf8().constData()));
-                    QBuffer buffer( &array );
-
-                    buffer.open( QIODevice::ReadOnly );
-                    QDataStream in( &buffer );
-                    in >> value;
-                } else
-                    value = element.attribute( "value" );
-
-                if ( Variable::instance()->contains( key ))
-                    Variable::instance()->setValue( key, value, true );
-            }
-        }
-        node = qAsConst( node ).nextSibling();
-    }
-
-    document.clear();
     xmlFile.close();
 }

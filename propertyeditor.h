@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QMainWindow>
 #include <QTextCharFormat>
 
@@ -59,19 +60,10 @@ public:
         Edit
     };
 
-    /*const QStringList Pictograms = QStringList() <<
-        "Harmful" <<
-        "Flammable" <<
-        "Toxic" <<
-        "Corrosive" <<
-        "Environment hazard" <<
-        "Health hazard" <<
-        "Explosive" <<
-        "Oxidizing" <<
-        "Compressed gas";*/
-
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = NoMode );
-    ~PropertyEditor();
+    ~PropertyEditor() override;
+
+    bool eventFilter( QObject *watched, QEvent *event ) override;
 
 public slots:
     void open( Modes mode, const QString &title = QString(), const QString &value = QString());

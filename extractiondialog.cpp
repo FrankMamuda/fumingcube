@@ -23,7 +23,6 @@
 #include "extractionmodel.h"
 #include "property.h"
 #include "reagent.h"
-#include "template.h"
 #include "textedit.h"
 #include "ui_extractiondialog.h"
 
@@ -36,7 +35,7 @@
  * @param parent
  */
 ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ExtractionDialog ),
-    model( new ExtractionModel( this )), m_templateRow( Row::Invalid ) {
+    model( new ExtractionModel( this )) {
     this->ui->setupUi( this );
 
     // connect network manager
@@ -54,14 +53,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
 
     // connect buttonBox
     this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() {
-        if ( this->templateRow() == Row::Invalid ) {
-            qCritical() << this->tr( "invalid template" );
-            return;
-        }
-
-        const Id id = Template::instance()->id( this->templateRow());
-        if ( id == Id::Invalid ) {
-            qCritical() << this->tr( "invalid template" );
+        if ( this->reagentId() == Id::Invalid ) {
+            qCritical() << this->tr( "invalid reagent" );
             return;
         }
 
@@ -76,7 +69,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( n
             const QString name( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
             const QString html( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
 
-            Property::instance()->add( name, html, id );
+            Property::instance()->add( name, Id::Invalid, html.toUtf8().constData(), this->reagentId());
         }
     } );
 
@@ -99,21 +92,24 @@ ExtractionDialog::~ExtractionDialog() {
  * @brief ExtractionDialog::setTemplateId
  * @param id
  */
-void ExtractionDialog::setTemplateRow( const Row &row ) {
+void ExtractionDialog::setReagentId( const Id &id ) {
     // set id
-    this->m_templateRow = row;
+    this->m_reagentId = id;
 
     // set reagent url
-    if ( row != Row::Invalid ) {
-        const Id reagentId = Template::instance()->reagentId( row );
-        if ( reagentId == Id::Invalid )
+    if ( id != Id::Invalid ) {
+        Row row = Reagent::instance()->row( id );
+        if ( row == Row::Invalid )
             return;
 
-        const Row reagentRow = Reagent::instance()->row( reagentId );
-        if ( reagentRow == Row::Invalid )
-            return;
+        const Id parentId = Reagent::instance()->parentId( row );
+        if ( parentId != Id::Invalid ) {
+            const Row parentRow = Reagent::instance()->row( parentId );
+            if ( parentRow != Row::Invalid )
+                row = parentRow;
+        }
 
-        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent::instance()->name( reagentRow )).replace( " ", "_" ));
+        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent::instance()->name( qAsConst( row ))).replace( " ", "_" ));
     }
 }
 

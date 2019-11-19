@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,10 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QDialog>
-#include <QToolButton>
-#include "table.h"
 
 /**
  * @brief The Ui namespace
@@ -32,53 +30,22 @@ namespace Ui {
 class ReagentDialog;
 }
 
-//
-// classes
-//
-class TemplateWidget;
-class Reagent;
-class Template;
-class MessageDock;
-
 /**
  * @brief The ReagentDialog class
  */
 class ReagentDialog : public QDialog {
     Q_OBJECT
-    Q_ENUMS( Modes )
 
 public:
-    enum Modes {
-        NoMode = -1,
-        Add,
-        Edit
-    };
-    explicit ReagentDialog( QWidget *parent = nullptr, Modes mode = Add );
+    explicit ReagentDialog( QWidget *parent = nullptr );
     ~ReagentDialog();
-    Modes mode() const { return this->m_mode; }
     QString name() const;
-    Row reagentRow() const { return this->m_reagentRow; };
-
-public slots:
-    bool add();
-    bool edit();
-    void setMode( Modes mode );
-    void setReagentRow( const Row &row = Row::Invalid );
-    void accept() override;
+    QString alias() const;
 
 private slots:
-    void addNewTab( const Row &templateRow = Row::Invalid );
-    void on_tabWidget_tabCloseRequested( int index );
-
-protected:
-    void resizeEvent( QResizeEvent *event ) override;
+    void on_nameEdit_textChanged( const QString &text );
 
 private:
     Ui::ReagentDialog *ui;
-    QToolButton *newTab;
-    QList<TemplateWidget*> widgetList;
-    Modes m_mode;
-    Row m_reagentRow;
-    MessageDock *messageDock;
-    QList<Id> idList;
 };
+

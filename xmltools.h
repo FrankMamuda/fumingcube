@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2013-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,33 +19,39 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
+#include "main.h"
 #include <QDir>
+#include <QLoggingCategory>
 #include <QMap>
 
 /**
  * @brief The XML namespace
  */
-namespace XML {
-const static QString Variables( "configuration.xml" );
-const static QString ConfigPath( QDir::homePath() + "/.fumingCubeDebug/" );
+namespace XMLTools_ {
+#ifdef Q_CC_MSVC
+static constexpr const char *ConfigFile( "configuration.xml" );
+#else
+static constexpr const char __attribute__((unused)) *ConfigFile( "configuration.xml" );
+#endif
+const static QLoggingCategory Debug( "xml" );
 }
 
 /**
  * @brief The XMLTools class
  */
-class XMLTools : public QObject {
+class XMLTools final : public QObject {
+    Q_DISABLE_COPY( XMLTools )
     Q_OBJECT
 
 public:
-    ~XMLTools() {}
+    virtual ~XMLTools() = default;
     static XMLTools *instance() { static XMLTools *instance( new XMLTools()); return instance; }
     void write();
     void read();
 
 private:
-    XMLTools( QObject *parent = nullptr );
-    static XMLTools *createInstance() { return new XMLTools(); }
+    explicit XMLTools( QObject *parent = nullptr ) : QObject( parent ) { this->setObjectName( "XMLTools" ); GarbageMan::instance()->add( this ); }
 };

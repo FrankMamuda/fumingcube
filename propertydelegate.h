@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +17,12 @@
  *
  */
 
+
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QStyledItemDelegate>
 #include <QTextDocument>
 #include <QMap>
@@ -33,13 +35,13 @@ public:
     PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    mutable QMap<QModelIndex, QTextDocument*> documentMap;
 
 public slots:
     void clearDocumentCache() { qDeleteAll( this->documentMap ); this->documentMap.clear(); }
 
 private slots:
-    void setupDocument( const QModelIndex &index ) const;
+    void setupDocument( const QModelIndex &index, const QFont &font ) const;
 
 private:
-    mutable QMap<QModelIndex, QTextDocument*> documentMap;
 };

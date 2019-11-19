@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +17,15 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "propertydelegate.h"
 #include "property.h"
-#include "nfpawidget.h"
+#include "textedit.h"
+#include "tag.h"
+#include "variable.h"
+//#include "nfpawidget.h"
 #include <QPainter>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
@@ -34,17 +38,34 @@
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
-void PropertyDelegate::setupDocument( const QModelIndex &index ) const {
-    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
-    const int width = view != nullptr ? ( static_cast<int>( view->viewport()->width() * ( index.column() == Property::HTML ? 0.66 : 0.33 ))) : 64;
-
+void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {
     if ( this->documentMap.contains( index ))
         return;
 
+    const Row row = Property::instance()->row( index );
+    const Id tagId =  Property::instance()->tagId( row );
+
     QTextDocument *document( new QTextDocument());
-    document->setHtml( index.data( Property::HTML ).toString());
+    if ( tagId != Id::Invalid ) {
+        const Row tagRow = Tag::instance()->row( tagId );
+        if ( tagRow == Row::Invalid )
+            return;
+
+        const QString units( Tag::instance()->units( tagRow ));
+        const QString data( index.column() == Property::Name ? Tag::instance()->name( tagRow ) : ( TextEdit::stripHTML( Property::instance()->valueData( row ).constData() + units )));
+
+        document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">" )
+                           .arg( font.pointSize())
+                           .arg( font.family())
+                           + data
+                           + "<\\p>" );
+    } else {
+        document->setHtml(( index.column() == Property::Name ) ? Property::instance()->name( row ) : Property::instance()->valueData( row ).constData());
+    }
+
+    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
     document->setDocumentMargin( 2 );
-    document->setTextWidth( width );
+    document->setTextWidth( view != nullptr ? static_cast<int>( view->columnWidth( index.column())) : 128 );
     document->setTextWidth( document->idealWidth());
     this->documentMap[index] = document;
 }
@@ -70,7 +91,7 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
         return;
 
     // setup html document
-    this->setupDocument( index );
+    this->setupDocument( index, painter->font());
     if ( !this->documentMap.contains( index ))
         return;
 
@@ -91,11 +112,14 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
+  //  qDebug() << "size hint";
+
     // setup html document
-    this->setupDocument( index );
+    this->setupDocument( index, item.font );
     if ( !this->documentMap.contains( index ))
         return QStyledItemDelegate::sizeHint( item, index );
 
     // return document size
+    //qDebug() << "height" <<this->documentMap[index]->size().toSize();
     return this->documentMap[index]->size().toSize();
 }

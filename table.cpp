@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QSqlRecord>
 #include "table.h"
 #include "database.h"
@@ -56,6 +56,30 @@ QVariant Table::value( const Row &row, int fieldId ) const {
     return QSqlTableModel::data( index );
 }
 
+
+/**
+ * @brief Table::value this only works if table has a primary key
+ * @param id
+ * @param fieldId
+ * @return
+ */
+QVariant Table::value( const Id &id, int fieldId ) const {
+    if ( !this->isValid())
+        return -1;
+
+    if ( !this->hasPrimaryField())
+        return -1;
+
+    QSqlQuery query;
+    query.exec( QString( "select %1, %2 from %3 where %1=%4" )
+                .arg( this->fieldName( this->primaryField()->id()))
+                .arg( this->fieldName( fieldId ))
+                .arg( this->tableName())
+                .arg( static_cast<int>( id )));
+
+    return query.next() ? query.value( 1 ) : "";
+}
+
 /**
  * @brief Table::select
  * @return
@@ -71,13 +95,21 @@ bool Table::select() {
 }
 
 /**
- * @brief Table::find
+ * @brief Table::row
  * @param id
  * @return
  */
 Row Table::row( const Id &id ) const {
     const QModelIndexList list( this->match( this->index( 0, 0 ), IDRole, static_cast<int>( id ), 1, Qt::MatchExactly ));
     return this->row( list.isEmpty() ? QModelIndex() : list.first());
+}
+
+/**
+ * @brief Table::addConstraint
+ * @param fields
+ */
+void Table::addUniqueConstraint( const QList<QSharedPointer<Field_>> &fields ) {
+    this->constraints << fields;
 }
 
 /**
@@ -168,7 +200,7 @@ Row Table::add( const QVariantList &arguments ) {
     const int row = this->count();
     this->beginInsertRows( QModelIndex(), this->count(), this->count());
     if ( !this->insertRow( this->count())) {
-        qDebug() << this->tr( "cannot insert row into table \"%1\"" ).arg( this->tableName());
+        qCCritical( Database_::Debug ) << this->tr( "cannot insert row into table \"%1\"" ).arg( this->tableName());
         this->endInsertRows();
         return Row::Invalid;
     }
@@ -213,6 +245,68 @@ Row Table::add( const QVariantList &arguments ) {
     this->endInsertRows();
     this->select();
     return this->row( row );
+}
+
+/**
+ * @brief Table::prepare
+ * @return
+ */
+QSqlQuery Table::prepare() const {
+    if ( !this->isValid())
+        return QSqlQuery();
+
+    // prepare statement
+    QString statement( "insert or ignore into " + this->tableName() + " (" );
+    QString values;
+    for ( int y = 0; y < this->fields.count(); y++ ) {
+        const Field &field( this->fields[y] );
+        if ( field->isPrimary())
+            continue;
+
+        const bool last = ( y == this->fields.count() - 1 );
+
+        values.append( " :_" + field->name() + + ( last ? " )" : "," ));
+        statement.append( " " + field->name() + ( last ? " ) values(" + values : "," ));
+    }
+    QSqlQuery query;
+    query.prepare( statement );
+
+    return query;
+}
+
+/**
+ * @brief Table::bind
+ * @param query
+ * @param arguments
+ */
+void Table::bind( QSqlQuery &query, const QVariantList &arguments ) {
+    if ( !this->isValid())
+        return;
+
+    const int numFields = this->fields.count() - ( this->hasPrimaryField() ? 1 : 0 );
+    if ( numFields != arguments.count())
+        qCCritical( Database_::Debug ) << this->tr( "argument count mismatch - %1, required - %2" ).arg( arguments.count()).arg( this->fields.count());
+
+    // prepare statement
+    int y = 0;
+    foreach ( const Field &field, this->fields ) {
+        if ( field->isPrimary())
+            continue;
+
+        const QVariant argument( arguments.at( y ));
+
+        // compare types
+        if ( field->type() != argument.type()) {
+            qCCritical( Database_::Debug ) << this->tr( "incompatible field type - %1 for argument %2 (%3), required - %4" )
+                                              .arg( argument.type()).arg( y ).arg( field->format()).arg( field->type());
+            return;
+        }
+
+        // bind value
+        query.bindValue( ":_" + field->name(), argument );
+
+        y++;
+    }
 }
 
 /**

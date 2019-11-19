@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QWidget>
 
 /**
@@ -30,8 +31,12 @@ class PropertyWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PropertyWidget( const QString &, QWidget *parent = nullptr ) : QWidget( parent ) {}
+    explicit PropertyWidget( QWidget *parent = nullptr, const QStringList & = QStringList()) : QWidget( parent ) {}
+    QStringList parameters() const { return this->m_parameters; }
 
 public slots:
-    virtual void update( const QString &parms ) = 0;
+    virtual void update( const QStringList &parms ) = 0;
+
+protected:
+    QStringList m_parameters;
 };

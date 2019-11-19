@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QTextEdit>
 
 /**
@@ -31,10 +32,11 @@ class TextEdit : public QTextEdit {
     Q_PROPERTY( bool cleanHTML READ cleanHTML WRITE setCleanHTML )
 
 public:
-    TextEdit( QWidget *parent = 0 ) : QTextEdit( parent ), m_cleanHTML( true ) {}
+    TextEdit( QWidget *parent = nullptr ) : QTextEdit( parent ), m_cleanHTML( true ) {}
     void insertPixmap( const QPixmap &image, const int forcedSize = -1 );
     bool cleanHTML() const { return this->m_cleanHTML; }
     static QString stripHTML( const QString &input );
+    bool isSimpleEditor() const { return this->m_simpleEditor; }
 
 signals:
     void entered();
@@ -47,7 +49,9 @@ protected:
 
 public slots:
     void setCleanHTML( bool enable ) { this->m_cleanHTML = enable; }
+    void setSimpleEditor( bool simple ) { this->m_simpleEditor = simple; }
 
 private:
     bool m_cleanHTML;
+    bool m_simpleEditor = false;
 };

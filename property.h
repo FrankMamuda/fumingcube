@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,64 +18,106 @@
 
 #pragma once
 
-//
-// includes
-//
-#include "table.h"
-
-/**
- * @brief The PropertyTable namespace
+/*
+ * includes
  */
-namespace PropertyTable {
-const static QString Name( "properties" );
-}
+#include "table.h"
 
 /**
  * @brief The Property class
  */
 class Property final : public Table {
     Q_OBJECT
-    Q_ENUMS( Fields )
     Q_DISABLE_COPY( Property )
 
 public:
+    enum StateOfMatter {
+        NoState = -1,
+        Solid,
+        Liquid,
+        Gaseous,
+        Plasma,
+
+        OtherState = 1024
+    };
+
+    /**
+     * @brief The Fields enum
+     */
     enum Fields {
         NoField = -1,
         ID,
         Name,
-        HTML,
-        Template,
-      //Tag,
-        Order,
+        TagID,
+        Value,
+        ReagentID,
 
-        // count
+        // count (DO NOT REMOVE)
         Count
     };
-
-    enum Roles {
-        PropertyIdRole = Qt::UserRole,
-        NameWidthRole,
-        HTMLWidthRole
-    };
+    Q_ENUM( Fields )
 
     /**
      * @brief instance
      * @return
      */
-    static Property *instance() { static Property *instance = new Property(); return instance; }
-    Row add( const QString &name, const QString &html, const Id &templateId );
+    static Property *instance() { static Property *property( new Property()); return property; }
+    ~Property() override = default;
+    Row add( const QString &name = QByteArray(), const Id &tagId = Id::Invalid,
+             const QByteArray &value = QByteArray(), const Id &reagentId = Id::Invalid );
+
+    /**
+     * @brief id
+     * @param row
+     * @return
+     */
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+
+    /**
+     * @brief name
+     * @param row
+     * @return
+     */
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
-    QString html( const Row &row ) const { return this->value( row, HTML ).toString(); }
-    Id templateId( const Row &row ) const { return static_cast<Id>( this->value( row, Template ).toInt()); }
-    int order( const Row &row ) const { return this->value( row, Order ).toInt(); }
-  //Id tagId( const Row &row ) const { return static_cast<Id>( this->value( row, Tag ).toInt()); }
+
+    /**
+     * @brief tag
+     * @param row
+     * @return
+     */
+    Id tagId( const Row &row ) const { return static_cast<Id>( this->value( row, TagID ).toInt()); }
+
+    /**
+     * @brief parentId
+     * @param row
+     * @return
+     */
+    Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ReagentID ).toInt()); }
+
+    /**
+     * @brief data
+     * @param index
+     * @param role
+     * @return
+     */
+    QVariant data( const QModelIndex &index, int role ) const override;
+
+    /**
+     * @brief valueData
+     * @param row
+     * @return
+     */
+    QByteArray valueData( const Row &row ) const { return this->value( row, Value ).toByteArray(); }
 
 public slots:
-    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
-    void setHTML( const Row &row, const QString &html ) { this->setValue( row, HTML, html ); }
-    void setOrder( const Row &row, const int order ) { this->setValue( row, Order, order ); }
     void removeOrphanedEntries() override;
+
+    /**
+     * @brief setName
+     * @param row
+     * @param name
+     */
+    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
 
 private:
     explicit Property();

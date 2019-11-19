@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,44 +19,34 @@
 
 #pragma once
 
-//
-// includes
-//
-#include "propertywidget.h"
+/*
+ * includes
+ */
 #include <QPainter>
 #include <QRegularExpression>
 #include <QWidget>
 #include <QtMath>
 #include <QDebug>
+#include "propertywidget.h"
 
 /**
  * @brief The NFPAWidget class
  */
 class NFPAWidget final : public PropertyWidget {
 public:
-    const qreal scale = 32;
-    explicit NFPAWidget( const QString &parms, QWidget *parent = nullptr ) : PropertyWidget( parms, parent ) {
+    static constexpr const qreal scale = 32;
+    explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyWidget( parent, parms ) {
         this->update( parms );
     }
     QSize size() const { return this->sizeHint(); }
 
 public slots:
-    void update( const QString &parms ) override {
-        // no update necessary
-        if ( !QString::compare( this->html, parms ))
+    void update( const QStringList &parms ) override {
+        if ( this->parameters() == parms )
              return;
 
-        //qDebug() << "update NFPA widget" << this->html.length() << parms.length() << !QString::compare( this->html, parms );
-        this->html = parms;
-        const QString stripped( QString( parms ).remove( QRegExp("<[^>]*>" )));
-        const QRegularExpression reProp( "(\\d)\\s(\\d)\\s(\\d)(?:.+?(?=(OX|W|SA)))?" );
-
-        // parse html
-        const QRegularExpressionMatch match( reProp.match( parms ));
-        if ( !match.hasMatch())
-            return;
-
-        this->parameters = QStringList() << match.captured( 1 ) << match.captured( 2 ) << match.captured( 3 ) << match.captured( 4 );
+        this->m_parameters = parms;
+        this->repaint();
     }
 
 protected:
@@ -88,7 +79,7 @@ protected:
         painter.translate( vScale, this->height() * 0.5 );
 
         // draw numbers
-        painter.setFont( QFont( this->font().family(), static_cast<int>( this->scale * 0.5 )));
+        const QMap<int,int> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.30 }, { 4, this->scale * 0.22 } };
         const QList<QRectF> rects( QList<QRectF>()<<
                                QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
                                    QRectF( -vScale, -vScale * 0.5, vScale, vScale ) <<
@@ -98,15 +89,17 @@ protected:
 
                                );
 
-        for ( int y = 0; y < qMin( this->parameters.count(), 4 ); y++ ) {
+        for ( int y = 0; y < qMin( this->parameters().count(), 4 ); y++ ) {
             painter.save();
-            if ( !QString::compare( this->parameters.at( y ), "W" )) {
-                QFont font( painter.font());
-                font.setStrikeOut( true );
-                painter.setFont( QFont( font ));
-            }
+            QFont font( painter.font());
 
-            painter.drawText( rects.at( y ), this->parameters.at( y ), { Qt::AlignCenter });
+            if ( !QString::compare( this->parameters().at( y ), "W" ))
+                font.setStrikeOut( true );
+
+            const QString parm( this->parameters().at( y ));
+            font.setPointSize(( y == 3 ) ? scales[parm.length()] : static_cast<int>( this->scale * 0.5 ));
+            painter.setFont( font );
+            painter.drawText( rects.at( y ), parm, { Qt::AlignCenter });
             painter.restore();
         }
     }
@@ -119,8 +112,4 @@ protected:
         const qreal vScale = sqrt( 2 * ( this->scale * this->scale ));
         return QSizeF( vScale * 2, vScale * 2 ).toSize();
     }
-
-private:
-    QString html;
-    QStringList parameters;
 };

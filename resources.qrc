@@ -17,16 +17,18 @@
         <file alias="accept">icons/accept.png</file>
         <file alias="close">icons/close.png</file>
         <file alias="star">icons/star.png</file>
+        <file alias="reagent">icons/reagent.png</file>
+        <file alias="property">icons/property.png</file>
     </qresource>
     <qresource prefix="/pictograms">
-        <file alias="compressed">pictograms/compressed.svg</file>
-        <file alias="corrosive">pictograms/corrosive.svg</file>
-        <file alias="environment">pictograms/environment.svg</file>
-        <file alias="explosive">pictograms/explosive.svg</file>
-        <file alias="flammable">pictograms/flammable.svg</file>
-        <file alias="harmful">pictograms/harmful.svg</file>
-        <file alias="health">pictograms/health.svg</file>
-        <file alias="oxidizing">pictograms/oxidizing.svg</file>
-        <file alias="toxic">pictograms/toxic.svg</file>
+        <file alias="GHS04">pictograms/compressed.svg</file>
+        <file alias="GHS05">pictograms/corrosive.svg</file>
+        <file alias="GHS09">pictograms/environment.svg</file>
+        <file alias="GHS01">pictograms/explosive.svg</file>
+        <file alias="GHS02">pictograms/flammable.svg</file>
+        <file alias="GHS07">pictograms/harmful.svg</file>
+        <file alias="GHS08">pictograms/health.svg</file>
+        <file alias="GHS03">pictograms/oxidizing.svg</file>
+        <file alias="GHS06">pictograms/toxic.svg</file>
     </qresource>
 </RCC>

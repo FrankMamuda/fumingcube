@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QDialog>
 #include "networkmanager.h"
 #include "table.h"
@@ -43,21 +44,21 @@ class ExtractionDialog;
  */
 class ExtractionDialog : public QDialog {
     Q_OBJECT
-    Q_PROPERTY( Row templateRow READ templateRow WRITE setTemplateRow )
+    Q_PROPERTY( Id reagentId READ reagentId WRITE setReagentId )
 
 public:
     explicit ExtractionDialog( QWidget *parent = nullptr );
     ~ExtractionDialog();
-    Row templateRow() const { return this->m_templateRow; }
+    Id reagentId() const { return this->m_reagentId; }
 
 public slots:
-    void setTemplateRow( const Row &row = Row::Invalid );
+    void setReagentId( const Id &id = Id::Invalid );
     void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
 
 private:
     Ui::ExtractionDialog *ui;
-    ExtractionModel *model;
+    ExtractionModel *model = nullptr;
     QStringList properties;
     QStringList values;
-    Row m_templateRow;
+    Id m_reagentId = Id::Invalid;
 };

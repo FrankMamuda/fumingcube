@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +18,11 @@
 
 #pragma once
 
-//
-// includes
-//
-#include "propertyeditor.h"
-#include <QMainWindow>
-#include <QTimer>
-#include "table.h"
-
-//
-// classes
-//
-class Property;
-class Template;
+/*
+ * includes
+ */
+#include <QDialog>
+#include "property.h"
 
 /**
  * @brief The Ui namespace
@@ -42,34 +34,19 @@ class PropertyDialog;
 /**
  * @brief The PropertyDialog class
  */
-class PropertyDialog : public QMainWindow {
+class PropertyDialog : public QDialog {
     Q_OBJECT
-    Q_ENUMS( Directions )
 
 public:
-    enum Directions {
-        NoDirection = -1,
-        Up,
-        Down
-    };
-
-    explicit PropertyDialog( QWidget *parent = 0, const Row &id = Row::Invalid );
+    explicit PropertyDialog( const Id &tagId = Id::Invalid, const Id &reagentId = Id::Invalid, QWidget *parent = nullptr );
     ~PropertyDialog();
-    Row current();
-
-protected:
-    void resizeEvent( QResizeEvent *event ) override;
+    QVariant value() const;
 
 private slots:
-    void resetView();
-    void move( Directions direction );
-    void buttonTest( const QModelIndex &index = QModelIndex());
-    void on_actionTags_triggered();
-    void setSpecialWidgets();
+    void on_advancedButton_clicked();
 
 private:
     Ui::PropertyDialog *ui;
-    QTimer resizeTimer;
-    Row templateRow;
-    PropertyEditor *editor;
+    Id tag;
+    Id reagent;
 };

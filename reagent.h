@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,48 +18,80 @@
 
 #pragma once
 
-//
-// includes
-//
-#include "table.h"
-
-/**
- * @brief The ReagentTable namespace
+/*
+ * includes
  */
-namespace ReagentTable {
-const static QString Name( "reagents" );
-}
+#include "table.h"
 
 /**
  * @brief The Reagent class
  */
 class Reagent final : public Table {
     Q_OBJECT
-    Q_ENUMS( Fields )
     Q_DISABLE_COPY( Reagent )
 
 public:
+    /**
+     * @brief The Fields enum
+     */
     enum Fields {
         NoField = -1,
         ID,
         Name,
+        Alias,
+        ParentID,
 
-        // count
+        // count (DO NOT REMOVE)
         Count
     };
+    Q_ENUM( Fields )
 
     /**
      * @brief instance
      * @return
      */
-    static Reagent *instance() { static Reagent *instance = new Reagent(); return instance; }
-    virtual ~Reagent() = default;
+    static Reagent *instance() { static Reagent *reagent( new Reagent()); return reagent; }
+    ~Reagent() override = default;
+    Row add( const QString &name , const QString &alias, const Id &parentId = Id::Invalid );
 
-    Row add( const QString &name );
+    /**
+     * @brief id
+     * @param row
+     * @return
+     */
     Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+
+    /**
+     * @brief name
+     * @param row
+     * @return
+     */
     QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
 
+    /**
+     * @brief alias
+     * @param row
+     * @return
+     */
+    QString alias( const Row &row ) const { return this->value( row, Alias ).toString(); }
+
+    /**
+     * @brief parentId
+     * @param row
+     * @return
+     */
+    Id parentId( const Row &row ) const { return static_cast<Id>( this->value( row, ParentID ).toInt()); }
+
+    QList<Row> children( const Row &row ) const;
+
 public slots:
+    void removeOrphanedEntries() override;
+
+    /**
+     * @brief setName
+     * @param row
+     * @param name
+     */
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
 
 private:

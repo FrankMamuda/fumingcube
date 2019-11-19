@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Factory #12
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 
 #pragma once
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include <QSqlRelationalTableModel>
 #include <QSharedPointer>
 #include <QSqlRecord>
@@ -30,17 +30,7 @@
 //
 class Field_;
 class QDebug;
-
-/**
- * namespace Database
- */
-namespace Database_ {
-#ifdef Q_CC_MSVC
-static constexpr const char *TimeFormat = "hh:mm";
-#else
-static constexpr const char __attribute__((unused)) *TimeFormat = "hh:mm";
-#endif
-}
+class QSqlQuery;
 
 /**
  * @brief The Id enum strong-typed id
@@ -54,12 +44,19 @@ QDebug operator<<( QDebug debug, const Id &id );
 enum class Row : int { Invalid = -1 };
 QDebug operator<<( QDebug debug, const Row &row );
 
+/*
+ * FIELD macro generates a lowercase fieldName from field index (enum)
+ */
+static const QMap<QVariant::Type,QString> _fieldTypes {{ QVariant::Int, "integer" }, { QVariant::Double, "real" }, { QVariant::String, "text" }, { QVariant::ByteArray, "blob" }};
+#define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type]
+#define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type], true
+#define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QVariant::Int, "integer primary key", true, true
+
 /**
  * @brief The Table_ class
  */
 class Table : public QSqlTableModel {
     Q_OBJECT
-    Q_ENUMS( Roles )
     Q_DISABLE_COPY( Table )
     friend class Database;
 
@@ -67,13 +64,15 @@ public:
     enum Roles {
         IDRole = Qt::UserRole
     };
+    Q_ENUM( Roles )
 
     Table( const QString &tableName = QString()) { this->setTable( tableName ); }
     virtual ~Table() override { this->setValid( false ); this->clear(); }
     bool isValid() const { return this->m_valid; }
     bool hasPrimaryField() const { return this->m_hasPrimary; }
-    int count() const;
-    QVariant value( const Row &row, int fieldId ) const;
+    Q_INVOKABLE int count() const;
+    virtual QVariant value( const Row &row, int fieldId ) const;
+    virtual QVariant value( const Id &id, int fieldId ) const;
     bool contains( int fieldId, const QVariant &value ) const { return this->contains( this->field( fieldId ), value ); }
     virtual bool select() override;
     QSharedPointer<Field_> primaryField() const { return this->m_primaryField; }
@@ -82,8 +81,10 @@ public:
     QString fieldName( int id ) const;
     Row row( const int index ) const { if ( index < 0 || index >= this->count()) return Row::Invalid; return static_cast<Row>( index ); }
     Row row( const QModelIndex &index ) const { if ( index.row() < 0 || index.row() >= this->count() || index.model() != this ) return Row::Invalid; return static_cast<Row>( index.row()); }
-    QModelIndex find( const Id &id ) const;
     Row row( const Id &id ) const;
+    void addUniqueConstraint( const QList<QSharedPointer<Field_>> &fields );
+    QSqlQuery prepare() const;
+    void bind( QSqlQuery &query, const QVariantList &arguments );
 
 public slots:
     void setValid( bool valid = true ) { this->m_valid = valid; }
@@ -102,6 +103,7 @@ private:
     bool m_valid = false;
     bool m_hasPrimary = false;
     QSharedPointer<Field_> m_primaryField;
+    QList<QList<QSharedPointer<Field_>>> constraints;
 };
 
 // declare enums
