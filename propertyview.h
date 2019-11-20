@@ -21,6 +21,8 @@
 /*
  * includes
  */
+#include "propertydelegate.h"
+
 #include <QObject>
 #include <QTableView>
 
@@ -32,10 +34,14 @@ class PropertyView : public QTableView {
 
 public:
     PropertyView( QWidget *parent = nullptr );
+    ~PropertyView() override { delete this->delegate; }
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;
 
 public slots:
     void resizeToContents();
+    void clearDocumentCache() { this->delegate->clearDocumentCache(); }
+private:
+    PropertyDelegate *delegate = nullptr;
 };

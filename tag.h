@@ -23,6 +23,8 @@
  */
 #include "table.h"
 
+constexpr const static Id PixmapTag = static_cast<Id>( -2 );
+
 /**
  * @brief The Tag class
  */

@@ -51,6 +51,7 @@ public:
         TagID,
         Value,
         ReagentID,
+        Index,
 
         // count (DO NOT REMOVE)
         Count
@@ -109,6 +110,13 @@ public:
      */
     QByteArray valueData( const Row &row ) const { return this->value( row, Value ).toByteArray(); }
 
+    /**
+    * @brief order
+    * @param row
+    * @return
+    */
+   int order( const Row &row ) const { return this->value( row, Index ).toInt(); }
+
 public slots:
     void removeOrphanedEntries() override;
 
@@ -118,6 +126,13 @@ public slots:
      * @param name
      */
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
+
+    /**
+     * @brief setOrder
+     * @param row
+     * @param position
+     */
+    void setOrder( const Row &row, const int &position ) { this->setValue( row, Index, position ); }
 
 private:
     explicit Property();

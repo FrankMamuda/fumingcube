@@ -30,6 +30,15 @@
  * @param parent
  */
 PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
+    this->setModel( Property::instance());
+    this->hideColumn( Property::ID );
+    this->hideColumn( Property::TagID );
+    this->hideColumn( Property::ReagentID );
+    this->hideColumn( Property::Index );
+    this->delegate = new PropertyDelegate( this );
+    this->setItemDelegateForColumn( Property::Value, this->delegate );
+    this->setItemDelegateForColumn( Property::Name, this->delegate );
+
     this->connect( this->horizontalHeader(), &QHeaderView::sectionResized, [ this ]( const int column, const int oldWidth, const int newWidth ) {
         if ( oldWidth == newWidth )
             return;

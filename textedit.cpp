@@ -33,6 +33,7 @@
 #include <QtWin>
 #include <QWinMime>
 #endif
+#include "propertydock.h"
 
 /**
  * @brief TextEdit::insertPixmap
@@ -143,7 +144,8 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         if ( image.isNull())
             image = qvariant_cast<QImage>( source->imageData());
 
-        this->insertPixmap( QPixmap::fromImage( qAsConst( image )));
+        const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
+        this->insertPixmap( QPixmap::fromImage( qAsConst( image )), qMin( sectionSize, image.width()));
         return;
     }
 

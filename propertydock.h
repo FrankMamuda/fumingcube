@@ -56,9 +56,10 @@ private slots:
     void on_propertyView_customContextMenuRequested( const QPoint &pos );
     void on_removePropButton_clicked();
 
+    void on_editPropButton_clicked();
+
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;
-    PropertyDelegate *delegate = nullptr;
     QModelIndex reagentIndex;
 };

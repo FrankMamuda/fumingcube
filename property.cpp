@@ -34,7 +34,9 @@ Property::Property() : Table( "property" ) {
     this->addField( FIELD( Name, String ));      // rich text
     this->addField( FIELD( TagID, Int ));        // special tag
     this->addField( FIELD( Value, ByteArray ));  // value (can be anything)
-    this->addField( FIELD( ReagentID, Int ));     // Id in parent table
+    this->addField( FIELD( ReagentID, Int ));    // Id in parent table
+    this->addField( FIELD( Index, Int ));        // order
+    this->setSort( Index, Qt::AscendingOrder );
 }
 
 /**
@@ -46,11 +48,11 @@ Property::Property() : Table( "property" ) {
  * @param parentId
  * @return
  */
-Row Property::add(const QString &name, const Id &tagId,
+Row Property::add( const QString &name, const Id &tagId,
                    const QByteArray &value, const Id &parentId ) {
 
     return Table::add( QVariantList() << Database_::null <<
-                       (( tagId == Id::Invalid ) ? name : QByteArray()) <<
+                       (( tagId == Id::Invalid || tagId == PixmapTag ) ? name : QByteArray()) <<
                        static_cast<int>( tagId ) <<
                        value <<
                        static_cast<int>( parentId )

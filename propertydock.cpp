@@ -35,6 +35,10 @@
 #include "ghswidget.h"
 #include "ghsbuilder.h"
 #include "extractiondialog.h"
+#include "imageutils.h"
+#include <QBuffer>
+#include <QFileDialog>
+#include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
 
@@ -45,33 +49,109 @@
 PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( "propertyDock", parent ), ui( new Ui::PropertyDock ) {
     this->ui->setupUi( this );
 
-    this->ui->propertyView->setModel( Property::instance());
-    this->ui->propertyView->hideColumn( Property::ID );
-    this->ui->propertyView->hideColumn( Property::TagID );
-    this->ui->propertyView->hideColumn( Property::ReagentID );
+    // buttonTest lambda
+    auto buttonTest = [ this ]( const QModelIndex &index ) {
+        if ( Property::instance()->count() < 2 ) {
+            this->ui->upButton->setDisabled( true );
+            this->ui->downButton->setDisabled( true );
+        }
+
+        this->ui->upButton->setEnabled( index.isValid() && index.row() != 0 );
+        this->ui->downButton->setEnabled( index.isValid() && index.row() != Property::instance()->count() - 1 );
+    };
 
     this->ui->addPropButton->setEnabled( false );
     this->ui->removePropButton->setEnabled( false );
-
-    this->ui->propertyView->selectionModel()->connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentChanged, [ this ]( const QModelIndex &current, const QModelIndex & ) {
+    this->ui->propertyView->selectionModel()->connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentChanged, [ this, buttonTest ]( const QModelIndex &current, const QModelIndex & ) {
         this->ui->removePropButton->setEnabled( current.isValid());
-    } );
+        this->ui->editPropButton->setEnabled( current.isValid());
 
-    this->delegate = new PropertyDelegate( this->ui->propertyView );
-    this->ui->propertyView->setItemDelegateForColumn( Property::Value, this->delegate );
-    this->ui->propertyView->setItemDelegateForColumn( Property::Name, this->delegate );
+        buttonTest( current );
+    } );
 
     ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged, [ this ]( const QModelIndex &current ) {
         this->reagentIndex = current;
         this->ui->addPropButton->setEnabled( this->reagentIndex.isValid());
     } );
+
+    // move up/down lambda
+    auto move = [ this, buttonTest ]( bool up ) {
+        // test integrity
+        QSet<int> orderSet;
+        bool reindex = false;
+        int y;
+        for ( y = 0; y < Property::instance()->count(); y++ ) {
+            const int order = Property::instance()->order( Property::instance()->row( y ));
+            if ( orderSet.contains( order )) {
+                reindex = true;
+                break;
+            }
+
+            orderSet << order;
+        }
+
+        // reindex tasks if requested
+        if ( reindex ) {
+            QList<Id> idList;
+
+            // get id list
+            for ( int y = 0; y < Property::instance()->count(); y++ )
+                idList << Property::instance()->id( Property::instance()->row( y ));
+
+            // reorder tasks accordint to id list
+            y = 0;
+            foreach ( const Id id, idList ) {
+                Property::instance()->setOrder( Property::instance()->row( id ), y );
+                y++;
+            }
+        }
+
+        // get container pointer and order indexes
+        PropertyView *container( this->ui->propertyView );
+        const QModelIndex index( container->currentIndex());
+        const QModelIndex other( container->model()->index( container->currentIndex().row() + ( up ? -1 : 1 ), 0 ));
+
+        if ( !index.isValid() || !other.isValid())
+            return;
+
+        const Row row0 = Property::instance()->row( index );
+        const Row row1 = Property::instance()->row( other );
+
+        // use ids in lookup (QPersistentModel index should work too?)
+        const Id id0 = Property::instance()->id( row0 );
+        const Id id1 = Property::instance()->id( row1 );
+
+        if ( id0 == Id::Invalid || id1 == Id::Invalid )
+            return;
+
+        const int order0 = Property::instance()->order( row0 );
+        const int order1 = Property::instance()->order( row1 );
+
+        // swap order
+        Property::instance()->setOrder( Property::instance()->row( id0 ), order1 );
+        Property::instance()->setOrder( Property::instance()->row( id1 ), order0 );
+
+        Property::instance()->sort( Property::Index, Qt::AscendingOrder );
+        Property::instance()->select();
+        this->resizeViewContents();
+
+        const QModelIndex current( container->model()->index( static_cast<int>( Property::instance()->row( id0 )), 0 ));
+        container->setCurrentIndex( current );
+
+        container->setFocus();
+        buttonTest( current );
+    };
+    buttonTest( this->ui->propertyView->currentIndex());
+
+    // move
+    this->ui->upButton->connect( this->ui->upButton, &QToolButton::clicked, std::bind( move, true ));
+    this->ui->downButton->connect( this->ui->downButton, &QToolButton::clicked, std::bind( move, false ));
 }
 
 /**
  * @brief PropertyDock::~PropertyDock
  */
 PropertyDock::~PropertyDock() {
-    delete this->delegate;
     delete this->ui;
 }
 
@@ -102,7 +182,7 @@ void PropertyDock::resizeViewContents() {
  * @brief PropertyDock::clearDocumentCache
  */
 void PropertyDock::clearDocumentCache() {
-    this->delegate->clearDocumentCache();
+    this->ui->propertyView->clearDocumentCache();
 }
 
 /**
@@ -198,6 +278,34 @@ void PropertyDock::on_addPropButton_clicked() {
             return;
 
         this->addCustomProperty( id );
+    } );
+
+    menu.addAction( this->tr( "Add image to '%1'" ).arg( Reagent::instance()->name( row )), [ this, item ]() {
+        const Id id = static_cast<Id>( item->data( TreeItem::Id ).toInt());
+        if ( id == Id::Invalid )
+            return;
+
+        const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
+        if ( fileName.isEmpty())
+            return;
+
+        // load image
+        const QPixmap pixmap( fileName );
+        if ( !pixmap.isNull()) {
+            QByteArray bytes;
+            QBuffer buffer( &bytes );
+            buffer.open( QIODevice::WriteOnly );
+            QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
+
+            bool ok;
+            const QString title( QInputDialog::getText( this, this->tr( "Set title" ), this->tr( "Title:" ), QLineEdit::Normal, "", &ok ));
+            if ( ok && !title.isEmpty()) {
+                this->ui->propertyView->setUpdatesEnabled( false );
+                Property::instance()->add( title, PixmapTag, bytes, id );
+                this->resizeViewContents();
+                this->ui->propertyView->setUpdatesEnabled( true );
+            }
+        }
     } );
 
     menu.addAction( this->tr( "Extract properties from Wikipedia" ), [ this ]() {
@@ -323,11 +431,12 @@ void PropertyDock::setSpecialWidgets() {
         const Row row = Property::instance()->row( y );
         const Id tagId = Property::instance()->tagId( row );
 
-        if ( tagId == Id::Invalid )
+        if ( tagId == Id::Invalid || tagId == PixmapTag )
             continue;
 
         const Row tagRow = Tag::instance()->row( tagId );
         const Tag::Types type = Tag::instance()->type( tagRow );
+
         if ( type == Tag::NFPA || type == Tag::GHS ) {
             const QModelIndex index( Property::instance()->index( y, Property::Value ));
             const QStringList parms( QString( Property::instance()->valueData( row ).constData()).split( " " ));
@@ -384,4 +493,14 @@ void PropertyDock::addCustomProperty( const Id &reagent ) {
         this->resizeViewContents();
         this->ui->propertyView->setUpdatesEnabled( true );
     } );
+}
+
+/**
+ * @brief PropertyDock::on_editPropButton_clicked
+ */
+void PropertyDock::on_editPropButton_clicked() {
+    if ( !this->ui->propertyView->currentIndex().isValid())
+        return;
+
+    qDebug() << "STUB";
 }

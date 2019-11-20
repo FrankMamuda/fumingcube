@@ -49,7 +49,6 @@
 //   - groups, sorting
 //
 //  properties:
-//   - ordering
 //   - editing
 //   - fix extraction and add support for propery mapping to tags
 //

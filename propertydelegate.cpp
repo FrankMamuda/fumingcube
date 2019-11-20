@@ -33,6 +33,7 @@
 #include <QApplication>
 #include <QPalette>
 #include <QTableView>
+#include "propertydock.h"
 
 /**
  * @brief PropertyDelegate::setupDocument
@@ -46,7 +47,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     const Id tagId =  Property::instance()->tagId( row );
 
     QTextDocument *document( new QTextDocument());
-    if ( tagId != Id::Invalid ) {
+    if ( tagId != Id::Invalid && tagId != PixmapTag ) {
         const Row tagRow = Tag::instance()->row( tagId );
         if ( tagRow == Row::Invalid )
             return;
@@ -59,6 +60,15 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                            .arg( font.family())
                            + data
                            + "<\\p>" );
+    } else if ( tagId == PixmapTag && index.column() == Property::Value ) {
+        const QByteArray data( Property::instance()->valueData( row ));
+        QPixmap pixmap;
+        pixmap.loadFromData( data );
+
+        const qreal aspect = static_cast<qreal>( pixmap.height()) / static_cast<qreal>( pixmap.width());
+        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width());
+        const int preferredHeight = static_cast<int>( preferredWidth * aspect );
+        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( data.toBase64().constData()));
     } else {
         document->setHtml(( index.column() == Property::Name ) ? Property::instance()->name( row ) : Property::instance()->valueData( row ).constData());
     }
@@ -90,6 +100,19 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     if ( view->indexWidget( index ) != nullptr )
         return;
 
+    /* const Row row = Property::instance()->row( index );
+    const Id tagId =  Property::instance()->tagId( row );
+    if ( tagId == Tag::Pixmap && index.column() == Property::Value ) {
+        const Row tagRow = Tag::instance()->row( tagId );
+        if ( tagRow == Row::Invalid )
+            return;
+
+        const QByteArray data( Property::instance()->valueData( row ));
+
+        painter->drawImage( )
+        return;
+    }*/
+
     // setup html document
     this->setupDocument( index, painter->font());
     if ( !this->documentMap.contains( index ))
@@ -112,7 +135,7 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
-  //  qDebug() << "size hint";
+    //  qDebug() << "size hint";
 
     // setup html document
     this->setupDocument( index, item.font );

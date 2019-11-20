@@ -141,6 +141,8 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
                                      .arg( Property::instance()->fieldName( Property::TagID ))       // 4
                                      .arg( Property::instance()->tableName())                        // 5
                                      );
+    Property::instance()->sort( Property::Index, Qt::AscendingOrder );
+    Property::instance()->select();
 
 
     // resize the property view to fit contents
