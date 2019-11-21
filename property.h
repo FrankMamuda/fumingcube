@@ -51,7 +51,7 @@ public:
         TagID,
         Value,
         ReagentID,
-        Index,
+        Order_,
 
         // count (DO NOT REMOVE)
         Count
@@ -114,7 +114,7 @@ public:
     * @param row
     * @return
     */
-   int order( const Row &row ) const { return this->value( row, Index ).toInt(); }
+   int order( const Row &row ) const { return this->value( row, Order_ ).toInt(); }
 
 public slots:
     void removeOrphanedEntries() override;
@@ -131,7 +131,7 @@ public slots:
      * @param row
      * @param position
      */
-    void setOrder( const Row &row, const int &position ) { this->setValue( row, Index, position ); }
+    void setOrder( const Row &row, const int &position ) { this->setValue( row, Order_, position ); }
 
     /**
      * @brief setStringValue

@@ -34,7 +34,7 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
     this->hideColumn( Property::ID );
     this->hideColumn( Property::TagID );
     this->hideColumn( Property::ReagentID );
-    this->hideColumn( Property::Index );
+    this->hideColumn( Property::Order_ );
     this->delegate = new PropertyDelegate( this );
     this->setItemDelegateForColumn( Property::Value, this->delegate );
     this->setItemDelegateForColumn( Property::Name, this->delegate );

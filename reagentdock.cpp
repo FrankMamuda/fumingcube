@@ -40,7 +40,7 @@
  * @brief ReagentDock::ReagentDock
  * @param parent
  */
-ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( "reagentDock", parent ), ui( new Ui::ReagentDock ) {
+ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::ReagentDock ) {
     // set up ui
     this->ui->setupUi( this );
 
@@ -141,7 +141,7 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
                                      .arg( Property::instance()->fieldName( Property::TagID ))       // 4
                                      .arg( Property::instance()->tableName())                        // 5
                                      );
-    Property::instance()->sort( Property::Index, Qt::AscendingOrder );
+    Property::instance()->sort( Property::Order_, Qt::AscendingOrder );
     Property::instance()->select();
 
 

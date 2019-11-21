@@ -35,8 +35,8 @@ Property::Property() : Table( "property" ) {
     this->addField( FIELD( TagID, Int ));        // special tag
     this->addField( FIELD( Value, ByteArray ));  // value (can be anything)
     this->addField( FIELD( ReagentID, Int ));    // Id in parent table
-    this->addField( FIELD( Index, Int ));        // order
-    this->setSort( Index, Qt::AscendingOrder );
+    this->addField( FIELD( Order_, Int ));        // order
+    this->setSort( Order_, Qt::AscendingOrder );
 }
 
 /**

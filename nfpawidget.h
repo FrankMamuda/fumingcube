@@ -80,7 +80,7 @@ protected:
 
         // draw numbers
         // TODO: put this as a static member
-        const QMap<int,int> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.35 }, { 4, this->scale * 0.22 } };
+        const QMap<int,qreal> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.35 }, { 4, this->scale * 0.22 } };
         const QList<QRectF> rects( QList<QRectF>()<<
                                QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
                                    QRectF( -vScale, -vScale * 0.5, vScale, vScale ) <<
@@ -97,7 +97,7 @@ protected:
                 if ( !QString::compare( this->parameters().at( y ), "W" ))
                     font.setStrikeOut( true );
 
-                font.setPointSize(( y == 3 ) ? scales[parm.length()] : static_cast<int>( this->scale * 0.5 ));
+                font.setPointSize(( y == 3 ) ? static_cast<int>( scales[parm.length()] ) : static_cast<int>( this->scale * 0.5 ));
                 painter.setFont( font );
             }
 

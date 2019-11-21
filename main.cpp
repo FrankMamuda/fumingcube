@@ -28,7 +28,6 @@
 #include "xmltools.h"
 #include "property.h"
 #include "tag.h"
-#include "dockwidget.h"
 #include "script.h"
 #include <QApplication>
 #include <QDate>
@@ -70,6 +69,10 @@
 //  misc:
 //   - store images (formulas) fullsize but rescale in property view
 //     this could be used for special props (add custom property -> image )
+//
+//  variable:
+//   - automatically store QByteArray as base64
+//
 //
 
 /**
@@ -116,13 +119,9 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "propertyNameColumnSize", 128, Var::Flag::Hidden );
     Variable::instance()->add( "system/consoleHistory", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "calculator/history", "", Var::Flag::ReadOnly );
-
-    DockWidget::initalize( "reagentDock", Qt::LeftDockWidgetArea  );
-    DockWidget::initalize( "propertyDock", Qt::RightDockWidgetArea );
-
-    Variable::instance()->add( "mainWindow/geometry", QRect(), Var::Flag::ReadOnly );
+    Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
+    Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
-
 
     // read configuration
     XMLTools::instance()->read();
@@ -130,7 +129,6 @@ int main( int argc, char *argv[] ) {
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
         MainWindow::instance()->saveHistory();
-
         XMLTools::instance()->write();
 
         GarbageMan::instance()->clear();

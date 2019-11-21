@@ -46,7 +46,7 @@
  * @brief PropertyDock::PropertyDock
  * @param parent
  */
-PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( "propertyDock", parent ), ui( new Ui::PropertyDock ) {
+PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::PropertyDock ) {
     this->ui->setupUi( this );
 
     // buttonTest lambda
@@ -131,7 +131,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( "propertyDock", pare
         Property::instance()->setOrder( Property::instance()->row( id0 ), order1 );
         Property::instance()->setOrder( Property::instance()->row( id1 ), order0 );
 
-        Property::instance()->sort( Property::Index, Qt::AscendingOrder );
+        Property::instance()->sort( Property::Order_, Qt::AscendingOrder );
         Property::instance()->select();
         this->resizeViewContents();
 

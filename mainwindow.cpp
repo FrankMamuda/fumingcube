@@ -38,9 +38,15 @@
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
     this->ui->setupUi( this );
 
-    // setup dock widgets (reagent and property)
-    ReagentDock::instance()->setup( this, this->ui->actionReagents );
-    PropertyDock::instance()->setup( this, this->ui->actionProperties );
+    // restore geometry, state dock widgets (reagent and property)
+    this->addDockWidget( Qt::LeftDockWidgetArea, ReagentDock::instance());
+    this->addDockWidget( Qt::RightDockWidgetArea, PropertyDock::instance());
+    ReagentDock::instance()->setup( this->ui->actionReagents );
+    PropertyDock::instance()->setup( this->ui->actionProperties );
+    this->restoreGeometry( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/geometry" )));
+    this->restoreState( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/state" )));
+    this->restoreDockWidget( ReagentDock::instance());
+    this->restoreDockWidget( PropertyDock::instance());
 
     // slightly increase font in calculator view
     QFont font( this->ui->calcView->font());
@@ -131,5 +137,15 @@ void MainWindow::on_actionClear_triggered() {
  * @brief MainWindow::on_actionTags_triggered
  */
 void MainWindow::on_actionTags_triggered() {
-   qDebug() << "STUB";
+    qDebug() << "STUB";
+}
+
+/**
+ * @brief MainWindow::closeEvent
+ * @param event
+ */
+void MainWindow::closeEvent( QCloseEvent *event ) {
+    Variable::instance()->setValue( "mainWindow/geometry", MainWindow::instance()->saveGeometry().toBase64());
+    Variable::instance()->setValue( "mainWindow/state", MainWindow::instance()->saveState().toBase64());
+    QMainWindow::closeEvent( event );
 }

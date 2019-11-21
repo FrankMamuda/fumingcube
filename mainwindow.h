@@ -53,6 +53,9 @@ private slots:
     void on_actionClear_triggered();
     void on_actionTags_triggered();
 
+protected:
+    void closeEvent( QCloseEvent *event ) override;
+
 private:
     explicit MainWindow( QWidget *parent = nullptr );
     Ui::MainWindow *ui;
