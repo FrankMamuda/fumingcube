@@ -79,14 +79,13 @@ protected:
         painter.translate( vScale, this->height() * 0.5 );
 
         // draw numbers
-        const QMap<int,int> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.30 }, { 4, this->scale * 0.22 } };
+        // TODO: put this as a static member
+        const QMap<int,int> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.35 }, { 4, this->scale * 0.22 } };
         const QList<QRectF> rects( QList<QRectF>()<<
                                QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
                                    QRectF( -vScale, -vScale * 0.5, vScale, vScale ) <<
                                    QRectF( 0, -vScale * 0.5, vScale, vScale ) <<
-
                                    QRectF( -vScale * 0.5, 0, vScale, vScale )
-
                                );
 
         for ( int y = 0; y < qMin( this->parameters().count(), 4 ); y++ ) {

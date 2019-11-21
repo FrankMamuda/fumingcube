@@ -33,7 +33,7 @@
  * @param tag
  * @param parent
  */
-PropertyDialog::PropertyDialog( const Id &tagId, const Id &reagentId, QWidget *parent ) : QDialog( parent ), ui( new Ui::PropertyDialog ), tag( tagId ), reagent( reagentId ) {
+PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString &defaultValue ) : QDialog( parent ), ui( new Ui::PropertyDialog ), tag( tagId ) {
     this->ui->setupUi( this );
 
     const Row row = Tag::instance()->row( tagId );
@@ -49,7 +49,7 @@ PropertyDialog::PropertyDialog( const Id &tagId, const Id &reagentId, QWidget *p
         const QRegularExpression pattern( type == Tag::Integer ? "-?\\d+" : "-?\\d*(?:[,|\\.]\\d*)?" );
         QRegularExpressionValidator *validator( new QRegularExpressionValidator( pattern, this ));
         this->ui->textEdit->setValidator( validator );
-        this->ui->textEdit->setText( Tag::instance()->defaultValue( row ).toString());
+        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( row ).toString() : defaultValue );
         this->ui->textEdit->setAlignment( Qt::AlignRight );
         this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, row, type ]( const QString &text ) {
             bool ok;
@@ -105,6 +105,8 @@ PropertyDialog::PropertyDialog( const Id &tagId, const Id &reagentId, QWidget *p
     this->ui->unitsLabel->setText( Tag::instance()->units( row ));
     this->ui->unitsLabel->setTextFormat( Qt::RichText );
 
+    // focus on input dialog
+    this->ui->textEdit->setFocus();
 }
 
 /**
@@ -146,6 +148,5 @@ QVariant PropertyDialog::value() const {
  * @brief PropertyDialog::on_advancedButton_clicked
  */
 void PropertyDialog::on_advancedButton_clicked() {
-    PropertyDock::instance()->addCustomProperty( this->reagent );
-    this->reject();
+    this->done( PropertyDialog::Advanced );
 }

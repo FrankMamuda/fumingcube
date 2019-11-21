@@ -22,7 +22,7 @@
 /*
  * includes
  */
-#include <QMainWindow>
+#include <QDialog>
 #include <QTextCharFormat>
 
 //
@@ -41,7 +41,7 @@ class PropertyEditor;
 /**
  * @brief The PropertyEditor class
  */
-class PropertyEditor : public QMainWindow {
+class PropertyEditor : public QDialog {
     Q_OBJECT
     Q_ENUMS( Editors )
     Q_ENUMS( Modes )
@@ -50,7 +50,7 @@ class PropertyEditor : public QMainWindow {
 public:
     enum Editors {
         NoEditor = -1,
-        Title,
+        Name,
         Value
     };
 
@@ -60,17 +60,11 @@ public:
         Edit
     };
 
-    explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = NoMode );
+    explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(), const QString &value = QString());
     ~PropertyEditor() override;
-
     bool eventFilter( QObject *watched, QEvent *event ) override;
-
-public slots:
-    void open( Modes mode, const QString &title = QString(), const QString &value = QString());
-
-signals:
-    void accepted( Modes mode, const QString &title, const QString &value );
-    void rejected();
+    QString name() const;
+    QString value() const;
 
 private slots:
     void mergeFormat( const QTextCharFormat &format );

@@ -25,6 +25,7 @@
 #include "propertydelegate.h"
 #include <QDockWidget>
 #include "table.h"
+#include "propertyeditor.h"
 
 /**
  * @brief The Ui namespace
@@ -49,17 +50,17 @@ public slots:
     void resizeViewContents();
     void clearDocumentCache();
     void setSpecialWidgets();
-    void addCustomProperty( const Id &reagent );
 
 private slots:
     void on_addPropButton_clicked();
     void on_propertyView_customContextMenuRequested( const QPoint &pos );
     void on_removePropButton_clicked();
-
     void on_editPropButton_clicked();
+    void addProperty( const QString &name, const QVariant &value, const Id &reagentId, const Id &tagId = Id::Invalid );
 
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;
     QModelIndex reagentIndex;
+    QPair<QString, QVariant> getPropertyValue(const Id &reagentId, const Id &tagId = Id::Invalid, const Id &propertyId = Id::Invalid ) const;
 };

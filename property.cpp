@@ -44,49 +44,26 @@ Property::Property() : Table( "property" ) {
  * @param name
  * @param tagId
  * @param value
- * @param tableId
- * @param parentId
+ * @param reagentId
  * @return
  */
-Row Property::add( const QString &name, const Id &tagId,
-                   const QByteArray &value, const Id &parentId ) {
+Row Property::add( const QString &name, const Id &tagId, const QVariant &value, const Id &reagentId ) {
+    // advance position in propertyView
+    int maxOrder = 0;
+    for ( int y = 0; y < Property::instance()->count(); y++ )
+        maxOrder = qMax( maxOrder, Property::instance()->order( static_cast<Row>( y )));
+    maxOrder++;
 
+    // add the property
     return Table::add( QVariantList() << Database_::null <<
-                       (( tagId == Id::Invalid || tagId == PixmapTag ) ? name : QByteArray()) <<
+                       (( tagId == Id::Invalid || tagId == PixmapTag ) ? name : QString()) <<
                        static_cast<int>( tagId ) <<
-                       value <<
-                       static_cast<int>( parentId )
+                       value.toByteArray() <<
+                       static_cast<int>( reagentId ) <<
+                       maxOrder
                        );
 }
 
-/**
- * @brief Property::data
- * @param index
- * @param role
- * @return
- */
-QVariant Property::data( const QModelIndex &index, int role ) const {
-    const QVariant value( Table::data( index, role ));
-
-    if ( role == Qt::DisplayRole && ( index.column() == Name )) {
-        const Row row = this->row( index );
-        const Id tagId = this->tagId( row );
-
-        // FIXME:
-        if ( tagId == Id::Invalid )
-            return value;
-
-        const Row tagRow = Tag::instance()->row( tagId );
-        if ( tagRow == Row::Invalid )
-            return QVariant();
-
-        // FIXME: proper find
-        if ( index.column() == Name )
-            return Tag::instance()->name( tagRow );
-    }
-
-    return value;
-}
 
 /**
  * @brief Property::removeOrphanedEntries

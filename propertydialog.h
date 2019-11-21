@@ -38,9 +38,10 @@ class PropertyDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit PropertyDialog( const Id &tagId = Id::Invalid, const Id &reagentId = Id::Invalid, QWidget *parent = nullptr );
+    explicit PropertyDialog( QWidget *parent = nullptr, const Id &tagId = Id::Invalid, const QString &defaultValue = QString());
     ~PropertyDialog();
     QVariant value() const;
+    static const int Advanced = QDialog::Accepted + 2;
 
 private slots:
     void on_advancedButton_clicked();
@@ -48,5 +49,4 @@ private slots:
 private:
     Ui::PropertyDialog *ui;
     Id tag;
-    Id reagent;
 };

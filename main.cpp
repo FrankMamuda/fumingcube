@@ -49,7 +49,7 @@
 //   - groups, sorting
 //
 //  properties:
-//   - editing
+//   - editing (ALMOST DONE: remaining issues wirth NFPABuilder, GHSBuilder )
 //   - fix extraction and add support for propery mapping to tags
 //
 //  tag editor

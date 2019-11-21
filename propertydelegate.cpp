@@ -40,37 +40,45 @@
  * @param index
  */
 void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {
-    if ( this->documentMap.contains( index ))
+    // reuse document from cache if any
+    if ( this->documentMap.contains( index ) || !index.isValid())
         return;
 
+    // get property row, data and tagId
     const Row row = Property::instance()->row( index );
-    const Id tagId =  Property::instance()->tagId( row );
+    const QVariant data( Property::instance()->valueData( row ));
+    const Id tagId = Property::instance()->tagId( row );
 
+    // create a new document
     QTextDocument *document( new QTextDocument());
-    if ( tagId != Id::Invalid && tagId != PixmapTag ) {
-        const Row tagRow = Tag::instance()->row( tagId );
-        if ( tagRow == Row::Invalid )
-            return;
 
-        const QString units( Tag::instance()->units( tagRow ));
-        const QString data( index.column() == Property::Name ? Tag::instance()->name( tagRow ) : ( TextEdit::stripHTML( Property::instance()->valueData( row ).constData() + units )));
-
-        document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">" )
-                           .arg( font.pointSize())
-                           .arg( font.family())
-                           + data
-                           + "<\\p>" );
-    } else if ( tagId == PixmapTag && index.column() == Property::Value ) {
-        const QByteArray data( Property::instance()->valueData( row ));
+    // special handling of pixmaps
+    if ( tagId == PixmapTag && index.column() == Property::Value ) {
         QPixmap pixmap;
-        pixmap.loadFromData( data );
+        pixmap.loadFromData( data.toByteArray());
 
+        // scale pixmap to fit property view value column
         const qreal aspect = static_cast<qreal>( pixmap.height()) / static_cast<qreal>( pixmap.width());
         const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width());
         const int preferredHeight = static_cast<int>( preferredWidth * aspect );
-        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( data.toBase64().constData()));
+        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( data.toByteArray().toBase64().constData()));
     } else {
-        document->setHtml(( index.column() == Property::Name ) ? Property::instance()->name( row ) : Property::instance()->valueData( row ).constData());
+        QString html;
+
+        if ( tagId == Id::Invalid || tagId == PixmapTag ) {
+            // custom properties however do display their names
+            html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
+        } else {
+            // properties with built-in tags don't use property names, but rather tag names
+            const Row tagRow = Tag::instance()->row( tagId );
+            if ( tagRow == Row::Invalid )
+                return;
+
+            const QString units( Tag::instance()->units( tagRow ));
+            html = ( index.column() == Property::Name ? Tag::instance()->name( tagRow ) : ( TextEdit::stripHTML( data.toString() + units )));
+        }
+
+        document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( qAsConst( html )));
     }
 
     const QTableView *view( qobject_cast<QTableView*>( this->parent()));
@@ -100,19 +108,6 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     if ( view->indexWidget( index ) != nullptr )
         return;
 
-    /* const Row row = Property::instance()->row( index );
-    const Id tagId =  Property::instance()->tagId( row );
-    if ( tagId == Tag::Pixmap && index.column() == Property::Value ) {
-        const Row tagRow = Tag::instance()->row( tagId );
-        if ( tagRow == Row::Invalid )
-            return;
-
-        const QByteArray data( Property::instance()->valueData( row ));
-
-        painter->drawImage( )
-        return;
-    }*/
-
     // setup html document
     this->setupDocument( index, painter->font());
     if ( !this->documentMap.contains( index ))
@@ -135,14 +130,11 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
-    //  qDebug() << "size hint";
-
     // setup html document
     this->setupDocument( index, item.font );
     if ( !this->documentMap.contains( index ))
         return QStyledItemDelegate::sizeHint( item, index );
 
     // return document size
-    //qDebug() << "height" <<this->documentMap[index]->size().toSize();
     return this->documentMap[index]->size().toSize();
 }

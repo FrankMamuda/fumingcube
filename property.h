@@ -64,8 +64,8 @@ public:
      */
     static Property *instance() { static Property *property( new Property()); return property; }
     ~Property() override = default;
-    Row add( const QString &name = QByteArray(), const Id &tagId = Id::Invalid,
-             const QByteArray &value = QByteArray(), const Id &reagentId = Id::Invalid );
+    Row add( const QString &name = QString(), const Id &tagId = Id::Invalid,
+             const QVariant &value = QVariant(), const Id &reagentId = Id::Invalid );
 
     /**
      * @brief id
@@ -96,19 +96,18 @@ public:
     Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ReagentID ).toInt()); }
 
     /**
-     * @brief data
-     * @param index
-     * @param role
-     * @return
-     */
-    QVariant data( const QModelIndex &index, int role ) const override;
-
-    /**
      * @brief valueData
      * @param row
      * @return
      */
-    QByteArray valueData( const Row &row ) const { return this->value( row, Value ).toByteArray(); }
+    QVariant valueData( const Row &row ) const { return this->value( row, Value ); }
+
+    /**
+     * @brief stringValue
+     * @param row
+     * @return
+     */
+    QString stringValue( const Row &row ) const { return this->value( row, Value ).toString(); }
 
     /**
     * @brief order
@@ -133,6 +132,14 @@ public slots:
      * @param position
      */
     void setOrder( const Row &row, const int &position ) { this->setValue( row, Index, position ); }
+
+    /**
+     * @brief setStringValue
+     * @param row
+     * @param value
+     */
+    void setStringValue( const Row &row, const QString &value ) { this->setValue( row, Value, value ); }
+
 
 private:
     explicit Property();

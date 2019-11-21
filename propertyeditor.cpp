@@ -44,7 +44,7 @@
  * @return
  */
 bool PropertyEditor::eventFilter( QObject *object, QEvent *event ) {
-    if ( object == this->ui->title ) {
+    if ( object == this->ui->name ) {
         if ( event->type() == QEvent::KeyPress ) {
             const QKeyEvent *keyEvent( static_cast<QKeyEvent*>( event ));
 
@@ -55,16 +55,34 @@ bool PropertyEditor::eventFilter( QObject *object, QEvent *event ) {
         }
     }
 
-    return QMainWindow::eventFilter( object, event );
+    return QDialog::eventFilter( object, event );
+}
+
+/**
+ * @brief PropertyEditor::name
+ * @return
+ */
+QString PropertyEditor::name() const {
+    return this->ui->name->toHtml();
+}
+
+/**
+ * @brief PropertyEditor::value
+ * @return
+ */
+QString PropertyEditor::value() const {
+    return this->ui->value->toHtml();
 }
 
 /**
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
-PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( m ), characterMap( new CharacterMap( this )) {
+PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( mode ), characterMap( new CharacterMap( this )) {
     // set up ui
     this->ui->setupUi( this );
+    this->ui->mainWindow->setWindowFlags( Qt::Widget );
+
     QListWidget w;
     const QFont font( QApplication::font( &w ));
 
@@ -72,8 +90,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->ui->fontToolBar->hide();
 
     // fix tab issues
-    this->ui->title->installEventFilter( this );
-    this->ui->title->setSimpleEditor( true );
+    this->ui->name->installEventFilter( this );
+    this->ui->name->setSimpleEditor( true );
 
     // load pictograms for manual addition
     //   although these are handled automatically (just like NFPA widget)
@@ -88,7 +106,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     this->pictograms["Compressed gas"]     = QIcon( ":/pictograms/GHS04" );
 
     // set font toolbar below other buttons
-    this->insertToolBarBreak( this->ui->fontToolBar );
+    this->ui->mainWindow->insertToolBarBreak( this->ui->fontToolBar );
 
     /**
      * @brief formatChanged (lambda) changes ui elements (buttons, font selector, etc.) to match text format
@@ -107,7 +125,7 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
     auto activeFormatChanged = [ this, formatChanged ]() { formatChanged( this->activeEditor->currentCharFormat()); };
 
     // make sure to change ui elements on active editor switch
-    this->connect( this->ui->title, &TextEdit::currentCharFormatChanged, formatChanged );
+    this->connect( this->ui->name, &TextEdit::currentCharFormatChanged, formatChanged );
     this->connect( this->ui->value, &TextEdit::currentCharFormatChanged, formatChanged );
 
     // set default font for property value editor
@@ -125,15 +143,15 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
         this->ui->actionColour->setEnabled( enable );
     };
 
-    // actions performed upon entering property title editor
-    this->connect( this->ui->title, &TextEdit::entered, [ this, activeFormatChanged, flipFlop, font ]() {
-        this->activeEditor = this->ui->title;
+    // actions performed upon entering property name editor
+    this->connect( this->ui->name, &TextEdit::entered, [ this, activeFormatChanged, flipFlop, font ]() {
+        this->activeEditor = this->ui->name;
         activeFormatChanged();
         flipFlop( false );
 
         // must always use default font (disallow other fonts)
-        this->ui->title->setFont( font );
-        this->fontChanged( this->ui->title->currentFont());
+        this->ui->name->setFont( font );
+        this->fontChanged( this->ui->name->currentFont());
     } );
 
     // actions performed upon entering property value editor
@@ -143,8 +161,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
         flipFlop( true );
     } );
 
-    // focus on the title editor to begin with
-    this->ui->title->setFocus();
+    // focus on the name editor to begin with
+    this->ui->name->setFocus();
 
     // bold text toggle lambda
     this->connect( this->ui->actionBold, &QAction::triggered, [ this ] () {
@@ -276,41 +294,46 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes m ) : QMainWindow( parent
         menu->deleteLater();
     } );
 
-    // disable title editor lambda
-    this->connect( this->ui->comboCommon, QOverload<int>::of( &QComboBox::activated ), [ this ]( int index ) {
-        this->ui->title->setEnabled( index == 0 );
-    } );
-
-    // resize title editor to minimum
-    const QFontMetrics fm( this->ui->title->document()->defaultFont());
-    const QMargins margins( this->ui->title->contentsMargins());
-    this->ui->title->setFixedHeight( static_cast<int>( fm.lineSpacing() + margins.top() + margins.bottom() + ( this->ui->title->document()->documentMargin() + this->ui->title->frameWidth()) * 2 ));
-
-    // connect button box
-    this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() { this->close(); emit this->accepted( this->mode, this->ui->title->toHtml(), this->ui->value->toHtml()); } );
-    this->connect( this->ui->buttonBox, &QDialogButtonBox::rejected, [ this ]() { this->close(); emit this->rejected(); } );
-
+    // resize name editor to minimum
+    //const QFontMetrics fm( this->ui->name->document()->defaultFont());
+    //const QMargins margins( this->ui->name->contentsMargins());
+    //this->ui->name->setFixedHeight( static_cast<int>( fm.lineSpacing() + margins.top() + margins.bottom() + ( this->ui->name->document()->documentMargin() + this->ui->name->frameWidth()) * 2 ));
     // connect actionCleanHTML
     this->connect( this->ui->actionCleanHTML, &QAction::toggled, [ this ]( bool enable ) {
         this->ui->value->setCleanHTML( enable );
     } );
     this->ui->actionCleanHTML->setChecked( true );
 
-    // make sure title editor gets plain HTML from clipboard
-    this->ui->title->setCleanHTML( true );
+    // make sure name editor gets plain HTML from clipboard
+    this->ui->name->setCleanHTML( true );
 
-    // for now
-    this->ui->comboCommon->hide();
+    // setup view
+    if ( mode == Add ) {
+        this->setText( Name, "" );
+        this->setText( Value, "" );
+
+        this->ui->name->setDisabled( false );
+    } else if ( mode == Edit ) {
+        this->ui->name->setDisabled( true );
+
+        if ( !name.isEmpty())
+            this->setText( Name, name );
+
+        if ( !value.isEmpty())
+            this->setText( Value, value );
+    }
 }
 
 /**
  * @brief PropertyEditor::~PropertyEditor
  */
 PropertyEditor::~PropertyEditor() {
+    qDebug() << "DEL";
+
     // disconnects
-    this->disconnect( this->ui->title, &TextEdit::currentCharFormatChanged, this, nullptr );
+    this->disconnect( this->ui->name, &TextEdit::currentCharFormatChanged, this, nullptr );
     this->disconnect( this->ui->value, &TextEdit::currentCharFormatChanged, this, nullptr );
-    this->disconnect( this->ui->title, &TextEdit::entered, this, nullptr );
+    this->disconnect( this->ui->name, &TextEdit::entered, this, nullptr );
     this->disconnect( this->ui->value, &TextEdit::entered, this, nullptr );
     this->disconnect( this->ui->actionBold, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionItalic, &QAction::triggered, this, nullptr );
@@ -324,9 +347,6 @@ PropertyEditor::~PropertyEditor() {
     this->disconnect( this->characterMap, &CharacterMap::characterSelected, this, nullptr );
     this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionGHS, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->comboCommon, QOverload<int>::of( &QComboBox::activated ), this, nullptr );
-    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
-    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::rejected, this, nullptr );
     this->disconnect( this->ui->actionCleanHTML, &QAction::toggled, this, nullptr );
 
     delete this->characterMap;
@@ -340,8 +360,8 @@ PropertyEditor::~PropertyEditor() {
  */
 void PropertyEditor::setText( Editors editor, const QString &text ) {
     switch ( editor ) {
-    case Title:
-        this->ui->title->setHtml( text );
+    case Name:
+        this->ui->name->setHtml( text );
         break;
 
     case Value:
@@ -351,35 +371,6 @@ void PropertyEditor::setText( Editors editor, const QString &text ) {
     case NoEditor:
         break;
     }
-}
-
-/**
- * @brief PropertyEditor::open
- * @param mode
- * @param title
- * @param value
- */
-void PropertyEditor::open( PropertyEditor::Modes mode, const QString &title, const QString &value ) {
-    this->mode = mode;
-
-    if ( mode == Add ) {
-        this->setText( Title, "" );
-        this->setText( Value, "" );
-
-        this->ui->comboCommon->setDisabled( false );
-        this->ui->title->setDisabled( false );
-    } else if ( mode == Edit ) {
-        this->ui->comboCommon->setDisabled( true );
-        this->ui->title->setDisabled( true );
-
-        if ( !title.isEmpty())
-            this->setText( Title, title );
-
-        if ( !value.isEmpty())
-            this->setText( Value, value );
-    }
-
-    this->show();
 }
 
 /**

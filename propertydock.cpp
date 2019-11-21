@@ -149,6 +149,79 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( "propertyDock", pare
 }
 
 /**
+ * @brief PropertyDock::getPropertyValue
+ * @param reagentId
+ * @param tagRow
+ * @return
+ */
+QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &propertyId ) const {
+    QPair<QString, QVariant> values;
+    QString name, value;
+    PropertyEditor::Modes mode = PropertyEditor::Add;
+
+    if ( reagentId == Id::Invalid )
+        return values;
+
+    if ( propertyId != Id::Invalid ) {
+        const Row row = Property::instance()->row( propertyId );
+        name = Property::instance()->name( row );
+        value = Property::instance()->stringValue( row );
+        mode = PropertyEditor::Edit;
+    }
+
+    if ( tagId != Id::Invalid ) {
+        switch ( Tag::instance()->type( Tag::instance()->row( tagId ))) {
+        case Tag::CAS:
+        case Tag::Text:
+        case Tag::Integer:
+        case Tag::Real:
+        {
+            PropertyDialog pd( PropertyDock::instance(), tagId, qAsConst( value ));
+            int result = pd.exec();
+            if ( result == QDialog::Accepted )
+                return { QString(), pd.value() };
+            else if ( result == PropertyDialog::Rejected )
+                return values;
+
+            break;
+        }
+
+        case Tag::NFPA:
+        {
+            NFPABuilder nfpa( PropertyDock::instance());
+            return ( nfpa.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), nfpa.parameters().join( " " )) : values;
+        }
+
+        case Tag::GHS:
+        {
+            GHSBuilder ghs( PropertyDock::instance());
+            return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) : values;
+        }
+
+        case Tag::NoType:
+        case Tag::State:
+            return values;
+        }
+    }
+
+    PropertyEditor *pe( new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
+    if ( pe->exec() == QDialog::Accepted ) {
+        const QString name( TextEdit::stripHTML( pe->name()));
+
+        QTextEdit ed;
+        ed.setText( name );
+        if ( ed.toPlainText().isEmpty()) {
+            QMessageBox::warning( PropertyDock::instance(), this->tr( "Cannot add property" ), this->tr( "Property missing name" ));
+            return values;
+        }
+
+        return { name, pe->value() };
+    }
+
+    return values;
+}
+
+/**
  * @brief PropertyDock::~PropertyDock
  */
 PropertyDock::~PropertyDock() {
@@ -189,102 +262,39 @@ void PropertyDock::clearDocumentCache() {
  * @brief PropertyDock::on_addPropButton_clicked
  */
 void PropertyDock::on_addPropButton_clicked() {
+    // check if reagent is valid
     if ( !this->reagentIndex.isValid())
         return;
 
+    // get reagent id
+    const Id reagentId = static_cast<Id>( static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).toInt());
+    if ( reagentId == Id::Invalid )
+        return;
+
+    // get reagent name
+    const QString reagentName( Reagent::instance()->name( Reagent::instance()->row( reagentId )));
+
+    // add built-in properties to menu
     QMenu menu;
-    const TreeItem *item( static_cast<TreeItem*>( this->reagentIndex.internalPointer()));
-
-    const Id id = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-    if ( id == Id::Invalid )
-        return;
-    const Row row = Reagent::instance()->row( id );
-    if ( row == Row::Invalid )
-        return;
-
-    /*
-     * addProperty
-     */
-    auto addProperty = [ this, item ]( const QVariant &value, const Row &row ) {
-        // less flickering with updates disabled
-        this->ui->propertyView->setUpdatesEnabled( false );
-
-        Property::instance()->add( Tag::instance()->name( row ),
-                                   Tag::instance()->id( row ),
-                                   value.toString().toUtf8().constData(),
-                                   static_cast<Id>( item->data( TreeItem::Id ).toInt()));
-
-        this->resizeViewContents();
-        this->ui->propertyView->setUpdatesEnabled( true );
-    };
-
-    /*
-     * addPropertyDialog
-     * TODO: replace with custom/universal dialog
-     */
-    auto addPropertyDialog = [ this, addProperty, item ]( const Row &tagRow ) {
-        QVariant value;
-
-        switch ( Tag::instance()->type( tagRow )) {
-        case Tag::CAS:
-        case Tag::Text:
-        case Tag::Integer:
-        case Tag::Real:
-        {
-            PropertyDialog pd( Tag::instance()->id( tagRow ), static_cast<Id>( item->data( TreeItem::Id ).toInt()), this );
-            if ( pd.exec() == QDialog::Accepted )
-                value = pd.value();
-        }
-            break;
-
-        case Tag::NFPA:
-        {
-            NFPABuilder nfpa( this );
-            if ( nfpa.exec() == QDialog::Accepted )
-                value = nfpa.parameters().join( " " );
-            break;
-        }
-
-        case Tag::GHS:
-        {
-            GHSBuilder ghs( this );
-            if ( ghs.exec() == QDialog::Accepted )
-                value = ghs.parameters().join( " " );
-            break;
-        }
-
-        case Tag::NoType:
-        case Tag::State:
-            ;
-        }
-
-        if ( !value.isNull())
-            addProperty( qAsConst( value ), tagRow );
-    };
-
     QMenu *subMenu( menu.addMenu( this->tr( "Add property" )));
-    //foreach ( const Property::TagData &tag, Property::tags ) {
-    //    subMenu->addAction( tag.name, std::bind( addPropertyDialog, tag ));
-    //}
-
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
-        const Row row = Tag::instance()->row( y );
-        subMenu->addAction( Tag::instance()->name( row ), std::bind( addPropertyDialog, row ));
+        const Row tagRow = Tag::instance()->row( y );
+        const Id tagId = Tag::instance()->id( tagRow );
+
+        subMenu->addAction( Tag::instance()->name( tagRow ), [ this, reagentId, tagId ]() {
+            const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
+            this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
+        } );
     }
 
-    menu.addAction( this->tr( "Add custom property to '%1'" ).arg( Reagent::instance()->name( row )), [ this, item ]() {
-        const Id id = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-        if ( id == Id::Invalid )
-            return;
-
-        this->addCustomProperty( id );
+    // add an option to add custom properties
+    menu.addAction( this->tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
+        const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Id::Invalid ));
+        this->addProperty( values.first, values.second, reagentId );
     } );
 
-    menu.addAction( this->tr( "Add image to '%1'" ).arg( Reagent::instance()->name( row )), [ this, item ]() {
-        const Id id = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-        if ( id == Id::Invalid )
-            return;
-
+    // add an option to embed images
+    menu.addAction( this->tr( "Add image to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
         const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
         if ( fileName.isEmpty())
             return;
@@ -299,35 +309,20 @@ void PropertyDock::on_addPropButton_clicked() {
 
             bool ok;
             const QString title( QInputDialog::getText( this, this->tr( "Set title" ), this->tr( "Title:" ), QLineEdit::Normal, "", &ok ));
-            if ( ok && !title.isEmpty()) {
-                this->ui->propertyView->setUpdatesEnabled( false );
-                Property::instance()->add( title, PixmapTag, bytes, id );
-                this->resizeViewContents();
-                this->ui->propertyView->setUpdatesEnabled( true );
-            }
+            if ( ok && !title.isEmpty())
+                this->addProperty( title, bytes, reagentId, PixmapTag );
         }
     } );
 
-    menu.addAction( this->tr( "Extract properties from Wikipedia" ), [ this ]() {
-        if ( !this->reagentIndex.isValid())
-            return;
-
-        const TreeItem *item( static_cast<TreeItem*>( this->reagentIndex.internalPointer()));
-        if ( item == nullptr )
-            return;
-
-        const Id id = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-        if ( id == Id::Invalid )
-            return;
-
+    // add an option to get properties from the internet
+    menu.addAction( this->tr( "Extract properties from Wikipedia" ), [ this, reagentId ]() {
         ExtractionDialog ed( this );
-        ed.setReagentId( id );
+        ed.setReagentId( reagentId );
         ed.exec();
     } );
 
+    // display the menu
     menu.exec( this->mapToGlobal( this->ui->addPropButton->pos()));
-
-    //pe->show();
 }
 
 
@@ -335,7 +330,7 @@ void PropertyDock::on_addPropButton_clicked() {
  * @brief PropertyDock::on_propertyView_customContextMenuRequested
  * @param pos
  */
-void PropertyDock::on_propertyView_customContextMenuRequested(const QPoint &pos) {
+void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos ) {
     if ( !this->ui->propertyView->currentIndex().isValid())
         return;
 
@@ -439,7 +434,7 @@ void PropertyDock::setSpecialWidgets() {
 
         if ( type == Tag::NFPA || type == Tag::GHS ) {
             const QModelIndex index( Property::instance()->index( y, Property::Value ));
-            const QStringList parms( QString( Property::instance()->valueData( row ).constData()).split( " " ));
+            const QStringList parms( Property::instance()->valueData( row ).toString().split( " " ));
             QWidget *widget( this->ui->propertyView->indexWidget( index ));
             bool hasWidget = widget != nullptr;
 
@@ -465,42 +460,58 @@ void PropertyDock::setSpecialWidgets() {
 }
 
 /**
- * @brief PropertyDock::addCustomProperty
- * @param reagent
- */
-void PropertyDock::addCustomProperty( const Id &reagent ) {
-    PropertyEditor *pe( new PropertyEditor());
-    pe->setAttribute( Qt::WA_DeleteOnClose, true );
-    pe->setWindowModality( Qt::ApplicationModal );
-    pe->open( PropertyEditor::Add, this->tr( "Add custom property" ));
-    pe->connect( pe, &PropertyEditor::accepted, [ this, reagent ]( PropertyEditor::Modes, const QString &name, const QString &value ) {
-        // less flickering with updates disabled
-        this->ui->propertyView->setUpdatesEnabled( false );
-
-
-        const QString strippedName( TextEdit::stripHTML( name ));
-
-        // HACK: checking if name is empty
-        QTextEdit ed;
-        ed.setText( strippedName );
-        if ( ed.toPlainText().isEmpty()) {
-            QMessageBox::warning( this,  this->tr( "Cannot add property" ), this->tr( "Property missing name" ));
-            this->ui->propertyView->setUpdatesEnabled( true );
-            return;
-        }
-
-        Property::instance()->add( strippedName, Id::Invalid, value.toUtf8().constData(), reagent );
-        this->resizeViewContents();
-        this->ui->propertyView->setUpdatesEnabled( true );
-    } );
-}
-
-/**
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
-    if ( !this->ui->propertyView->currentIndex().isValid())
+    if ( !this->ui->propertyView->currentIndex().isValid() || this->ui->propertyView->selectionModel()->selectedRows().count() > 1 || !this->reagentIndex.isValid())
         return;
 
-    qDebug() << "STUB";
+    // get reagent id
+    const Id reagentId = static_cast<Id>( static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).toInt());
+    if ( reagentId == Id::Invalid )
+        return;
+
+    // get property row
+    const Row propertyRow = Property::instance()->row( this->ui->propertyView->currentIndex());
+    if ( propertyRow == Row::Invalid )
+        return;
+
+    // get property id
+    const Id propertyId = Property::instance()->id( propertyRow );
+    if ( propertyId == Id::Invalid )
+        return;
+
+    // set new value
+    this->ui->propertyView->setUpdatesEnabled( false );
+    const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Property::instance()->tagId( propertyRow ), propertyId ));
+    if ( !values.second.isNull())
+        Property::instance()->setStringValue( propertyRow, values.second.toString());
+
+    // update view
+    this->resizeViewContents();
+    this->ui->propertyView->setUpdatesEnabled( true );
+}
+
+/**
+ * @brief PropertyDock::addProperty
+ * @param name
+ * @param value
+ * @param reagentId
+ * @param tagId
+ */
+void PropertyDock::addProperty( const QString &name, const QVariant &value, const Id &reagentId, const Id &tagId ) {
+    if ( reagentId == Id::Invalid || value.isNull())
+        return;
+
+    // less flickering with updates disabled
+    this->ui->propertyView->setUpdatesEnabled( false );
+
+    // add property
+    Property::instance()->add(( tagId == Id::Invalid || tagId == PixmapTag ) ? name : "", tagId, value, reagentId );
+
+    // clear document cache and resize view
+    this->resizeViewContents();
+
+    // enable updates
+    this->ui->propertyView->setUpdatesEnabled( true );
 }
