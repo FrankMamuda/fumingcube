@@ -26,13 +26,35 @@
  * @brief NFPABuilder::NFPABuilder
  * @param parent
  */
-NFPABuilder::NFPABuilder( QWidget *parent ) : QDialog( parent ), ui( new Ui::NFPABuilder ) {
+NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDialog( parent ), ui( new Ui::NFPABuilder ) {
     this->ui->setupUi( this );
-    this->updateNFPA();
 
+    if ( parameters.count() == 4 ) {
+        this->ui->nfpaWidget->update( parameters );
+        this->ui->flameSlider->setValue( parameters.at( 0 ).toInt());
+        this->ui->healthSlider->setValue( parameters.at( 1 ).toInt());
+        this->ui->reactSlider->setValue( parameters.at( 2 ).toInt());
 
-    this->ui->healthSlider->connect( this->ui->healthSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
+        const QString hazard( parameters.at( 3 ));
+        if ( hazard.isEmpty())
+            this->ui->hazardCombo->setCurrentIndex( 0 );
+        else if ( !QString::compare( hazard, "OX" ))
+            this->ui->hazardCombo->setCurrentIndex( 1 );
+        else if ( !QString::compare( hazard, "W" ))
+            this->ui->hazardCombo->setCurrentIndex( 2 );
+        else if ( !QString::compare( hazard, "SA" ))
+            this->ui->hazardCombo->setCurrentIndex( 3 );
+        else {
+            this->ui->hazardCombo->setCurrentIndex( 4 );
+            this->ui->customHazard->setText( hazard );
+            this->ui->customHazard->setEnabled( true );
+        }
+    } else {
+        this->updateNFPA();
+    }
+
     this->ui->flameSlider->connect( this->ui->flameSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
+    this->ui->healthSlider->connect( this->ui->healthSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
     this->ui->reactSlider->connect( this->ui->reactSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
     this->ui->hazardCombo->connect( this->ui->hazardCombo, SIGNAL( currentIndexChanged( int )), this, SLOT( updateNFPA()));
     this->ui->customHazard->connect( this->ui->customHazard, SIGNAL( textChanged( QString )), this, SLOT( updateNFPA()));
@@ -94,5 +116,4 @@ void NFPABuilder::updateNFPA() {
                                   .arg( this->ui->reactSlider->value())
                                   .arg( qAsConst( hazard )).split( " " )
                                   );
-   // this->ui->nfpaWidget->repaint();
 }

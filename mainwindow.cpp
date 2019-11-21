@@ -126,3 +126,10 @@ void MainWindow::scrollToBottom() {
 void MainWindow::on_actionClear_triggered() {
     this->ui->calcView->clear();
 }
+
+/**
+ * @brief MainWindow::on_actionTags_triggered
+ */
+void MainWindow::on_actionTags_triggered() {
+   qDebug() << "STUB";
+}

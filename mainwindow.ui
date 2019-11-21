@@ -78,6 +78,7 @@
    </attribute>
    <addaction name="actionReagents"/>
    <addaction name="actionProperties"/>
+   <addaction name="actionTags"/>
    <addaction name="actionClear"/>
   </widget>
   <action name="actionReagents">
@@ -111,6 +112,15 @@
    </property>
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionTags">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/clean</normaloff>:/icons/clean</iconset>
+   </property>
+   <property name="text">
+    <string>Tags</string>
    </property>
   </action>
  </widget>

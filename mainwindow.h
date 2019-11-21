@@ -51,6 +51,7 @@ public slots:
 
 private slots:
     void on_actionClear_triggered();
+    void on_actionTags_triggered();
 
 private:
     explicit MainWindow( QWidget *parent = nullptr );

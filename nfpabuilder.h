@@ -37,7 +37,7 @@ class NFPABuilder : public QDialog {
     Q_OBJECT
 
 public:
-    explicit NFPABuilder( QWidget *parent = nullptr );
+    explicit NFPABuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
     ~NFPABuilder();
     QStringList parameters() const;
 

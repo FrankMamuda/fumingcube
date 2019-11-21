@@ -33,7 +33,7 @@ class GHSBuilder : public QDialog {
     Q_OBJECT
 
 public:
-    explicit GHSBuilder( QWidget *parent = nullptr );
+    explicit GHSBuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
     ~GHSBuilder();
     QStringList parameters() const;
 

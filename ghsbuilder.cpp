@@ -27,7 +27,7 @@
  * @brief GHSBuilder::GHSBuilder
  * @param parent
  */
-GHSBuilder::GHSBuilder( QWidget *parent ) : QDialog( parent ) {
+GHSBuilder::GHSBuilder( QWidget *parent, const QStringList &parameters ) : QDialog( parent ) {
     grid->setSpacing( 0 );
 
     /*
@@ -66,6 +66,10 @@ GHSBuilder::GHSBuilder( QWidget *parent ) : QDialog( parent ) {
             button->setStyleSheet( "QToolButton { background: rgba( 255, 255, 255, 0 ); outline: 0px; }" );
             button->setText( iconName );
             button->setToolButtonStyle( Qt::ToolButtonIconOnly );
+
+            // set previous value
+            if ( parameters.contains( iconName ))
+                button->setChecked( true );
 
             // add to layout and garbage collector
             this->buttons << button;

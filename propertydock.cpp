@@ -188,13 +188,13 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
 
         case Tag::NFPA:
         {
-            NFPABuilder nfpa( PropertyDock::instance());
+            NFPABuilder nfpa( PropertyDock::instance(), value.split( " " ));
             return ( nfpa.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), nfpa.parameters().join( " " )) : values;
         }
 
         case Tag::GHS:
         {
-            GHSBuilder ghs( PropertyDock::instance());
+            GHSBuilder ghs( PropertyDock::instance(), value.split( " " ));
             return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) : values;
         }
 

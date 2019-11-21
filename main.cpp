@@ -47,9 +47,9 @@
 //   - omit alias in treeview if it is the same as name
 //   - multiple aliases?
 //   - groups, sorting
+//   - don't expand whole list if search string is empty
 //
 //  properties:
-//   - editing (ALMOST DONE: remaining issues wirth NFPABuilder, GHSBuilder )
 //   - fix extraction and add support for propery mapping to tags
 //
 //  tag editor
