@@ -38,7 +38,7 @@ class ReagentDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ReagentDialog( QWidget *parent = nullptr );
+    explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(), const QString &alias = QString());
     ~ReagentDialog();
     QString name() const;
     QString alias() const;

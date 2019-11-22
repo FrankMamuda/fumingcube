@@ -51,6 +51,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     this->ui->removeButton->setEnabled( false );
     this->ui->reagentView->selectionModel()->connect( this->ui->reagentView->selectionModel(), &QItemSelectionModel::currentChanged, [ this ]( const QModelIndex &current, const QModelIndex & ) {
         this->ui->removeButton->setEnabled( current.isValid());
+        this->ui->editButton->setEnabled( current.isValid());
         emit this->currentIndexChanged( current );
     } );
 
@@ -70,7 +71,8 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
         }
 
         // expand all nodes in search since we want to see all reagents and batches that match the search criteria
-        this->ui->reagentView->expandAll();
+        if ( !filter.isEmpty())
+            this->ui->reagentView->expandAll();
 
         if ( this->currentMatch == Id::Invalid || !this->matches.contains( this->currentMatch )) {
             // do this if:
@@ -114,6 +116,42 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 ReagentDock::~ReagentDock() {
     delete this->model;
     delete ui;
+}
+
+/**
+ * @brief ReagentDock::checkForDuplicates
+ * @param name
+ * @param alias
+ * @return
+ */
+bool ReagentDock::checkForDuplicates(const QString &name, const QString &alias, const Id reagentId ) const {
+    QSqlQuery query;
+
+    // check alias for duplicates
+    query.exec( QString( "select %1 from %2 where %1='%3' and %4!=%5" )
+                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                .arg( Reagent::instance()->tableName())
+                .arg( alias )
+                .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                .arg( static_cast<int>( reagentId )));
+    if ( query.next()) {
+        QMessageBox::warning( ReagentDock::instance(), reagentId != Id::Invalid ? this->tr( "Cannot rename reagent" ) : this->tr( "Cannot add reagent" ), this->tr( "Alias '%1' already exists" ).arg( alias ));
+        return false;
+    }
+
+    // check name for duplicates
+    query.exec( QString( "select %1 from %2 where %1='%3' and %4!=%5" )
+                .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                .arg( Reagent::instance()->tableName())
+                .arg( name )
+                .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                .arg( static_cast<int>( reagentId )));
+    if ( query.next()) {
+        QMessageBox::warning( ReagentDock::instance(), reagentId != Id::Invalid ? this->tr( "Cannot rename reagent" ) : this->tr( "Cannot add reagent" ), this->tr( "Reagent '%1' already exists" ).arg( name ));
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -176,27 +214,8 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
             name = rd.name();
             alias = rd.alias();
 
-            QSqlQuery query;
-
-            // check alias for duplicates
-            query.exec( QString( "select %1 from %2 where %1='%3'" )
-                             .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                             .arg( Reagent::instance()->tableName())
-                             .arg( alias ));
-            if ( query.next()) {
-                QMessageBox::warning( this,  this->tr( "Cannot add reagent" ), this->tr( "Alias '%1' already exists" ).arg( alias ));
+            if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
                 return;
-            }
-
-            // check name for duplicates
-            query.exec( QString( "select %1 from %2 where %1='%3'" )
-                             .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                             .arg( Reagent::instance()->tableName())
-                             .arg( name ));
-            if ( query.next()) {
-                QMessageBox::warning( this,  this->tr( "Cannot add reagent" ), this->tr( "Reagent '%1' already exists" ).arg( name ));
-                return;
-            }
         }
 
         if ( ok ) {
@@ -361,4 +380,50 @@ void ReagentDock::on_buttonFind_clicked() {
     this->ui->searchEdit->setVisible( !visible );
     if ( !visible )
         this->ui->searchEdit->setFocus();
+}
+
+/**
+ * @brief ReagentDock::on_editButton_clicked
+ */
+void ReagentDock::on_editButton_clicked() {
+    // get current index
+    const QModelIndex index( this->ui->reagentView->currentIndex());
+    if ( !index.isValid())
+        return;
+
+    // get current item
+    const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
+    const Id reagentId = static_cast<Id>( item->data( TreeItem::Id ).toInt());
+    if ( reagentId == Id::Invalid )
+        return;
+
+    const Row reagentRow = Reagent::instance()->row( reagentId );
+    if ( reagentRow == Row::Invalid )
+        return;
+
+    const Id parentId = static_cast<Id>( item->data( TreeItem::ParentId ).toInt());
+    const QString previousName( Reagent::instance()->name( reagentRow ));
+    const QString previousAlias( Reagent::instance()->alias( reagentRow ));
+
+    bool ok;
+    if ( parentId != Id::Invalid ) {
+        const QString name( QInputDialog::getText( this, this->tr( "Rename batch" ), this->tr( "Name:" ), QLineEdit::Normal, previousName, &ok ));
+
+        if ( !name.isEmpty())
+            Reagent::instance()->setName( reagentRow, name );
+    } else {
+        ReagentDialog rd( this, previousName, previousAlias );
+        ok = ( rd.exec() == QDialog::Accepted );
+        const QString name( rd.name());
+        const QString alias( rd.alias());
+
+        if ( !this->checkForDuplicates( name, alias, reagentId ) || name.isEmpty() || alias.isEmpty())
+            return;
+
+        Reagent::instance()->setName( reagentRow, name );
+        Reagent::instance()->setAlias( reagentRow, alias );
+    }
+
+    this->reset();
+    this->restoreIndex();
 }

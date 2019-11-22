@@ -140,7 +140,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
         bool found = false;
 
         // make a new reagent treeItem
-        TreeItem *reagent( new TreeItem( QVariantList() << ( QString( "%1 (%2)" ).arg( reagentName ).arg( alias )) << static_cast<int>( reagentId ) << static_cast<int>( Id::Invalid )));
+        TreeItem *reagent( new TreeItem( QVariantList() << ( !QString::compare( reagentName, alias ) ? reagentName : QString( "%1 (%2)" ).arg( reagentName ).arg( alias )) << static_cast<int>( reagentId ) << static_cast<int>( Id::Invalid )));
 
         // go through batches (children of the reagent)
         const QList<Row>children( Reagent::instance()->children( row ));

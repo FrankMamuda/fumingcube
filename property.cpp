@@ -49,10 +49,10 @@ Property::Property() : Table( "property" ) {
  */
 Row Property::add( const QString &name, const Id &tagId, const QVariant &value, const Id &reagentId ) {
     // advance position in propertyView
-    int maxOrder = 0;
+    int highestOrder = 0;
     for ( int y = 0; y < Property::instance()->count(); y++ )
-        maxOrder = qMax( maxOrder, Property::instance()->order( static_cast<Row>( y )));
-    maxOrder++;
+        highestOrder = qMax( highestOrder, Property::instance()->order( static_cast<Row>( y )));
+    highestOrder++;
 
     // add the property
     return Table::add( QVariantList() << Database_::null <<
@@ -60,7 +60,7 @@ Row Property::add( const QString &name, const Id &tagId, const QVariant &value, 
                        static_cast<int>( tagId ) <<
                        value.toByteArray() <<
                        static_cast<int>( reagentId ) <<
-                       maxOrder
+                       qAsConst( highestOrder )
                        );
 }
 

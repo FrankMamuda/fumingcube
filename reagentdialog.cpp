@@ -125,11 +125,17 @@ const static QMap<QString, QString> reagentAliases {
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
+ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QString &alias ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
     this->completer = new QCompleter( reagentAliases.keys());
     this->completer->setCaseSensitivity( Qt::CaseInsensitive );
     this->ui->setupUi( this );
     this->ui->nameEdit->setCompleter( completer );
+
+    if ( !name.isEmpty())
+        this->ui->nameEdit->setText( name );
+
+    if ( !alias.isEmpty())
+        this->ui->aliasEdit->setText( alias );
 }
 
 /**

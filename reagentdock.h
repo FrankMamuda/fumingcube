@@ -41,6 +41,7 @@ class ReagentDock final : public DockWidget {
 public:
     static ReagentDock *instance() { static ReagentDock *reagentDock( new ReagentDock()); return reagentDock; }
     ~ReagentDock() override;
+    bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
 
 signals:
     void currentIndexChanged( const QModelIndex &index );
@@ -57,6 +58,7 @@ private slots:
     void on_addButton_clicked();
     void on_removeButton_clicked();
     void on_buttonFind_clicked();
+    void on_editButton_clicked();
 
 private:
     explicit ReagentDock( QWidget *parent = nullptr );

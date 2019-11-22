@@ -41,12 +41,9 @@
 // TODO:
 //
 //  reagents:
-//   - renaming
 //   - richtext for names?
-//   - omit alias in treeview if it is the same as name
 //   - multiple aliases?
 //   - groups, sorting
-//   - don't expand whole list if search string is empty
 //
 //  properties:
 //   - fix extraction and add support for propery mapping to tags
@@ -69,6 +66,9 @@
 //  misc:
 //   - store images (formulas) fullsize but rescale in property view
 //     this could be used for special props (add custom property -> image )
+//     this however causes a performance penalty while resizing property
+//     view. one option would be to use a precached image or sacrifice quality
+//     with fast transform
 //
 //  variable:
 //   - automatically store QByteArray as base64

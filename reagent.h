@@ -94,6 +94,13 @@ public slots:
      */
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
 
+    /**
+     * @brief setAlias
+     * @param row
+     * @param alias
+     */
+    void setAlias( const Row &row, const QString &alias ) { this->setValue( row, Alias, alias ); }
+
 private:
     explicit Reagent();
 };
