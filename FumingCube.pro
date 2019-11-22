@@ -33,8 +33,8 @@ SOURCES += \
     extractiondialog.cpp \
     ghsbuilder.cpp \
     imageutils.cpp \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     database.cpp \
     networkmanager.cpp \
     nfpabuilder.cpp \
@@ -50,6 +50,7 @@ SOURCES += \
     syntaxhighlighter.cpp \
     table.cpp \
     tag.cpp \
+    tagdialog.cpp \
     textedit.cpp \
     variable.cpp \
     xmltools.cpp \
@@ -66,7 +67,7 @@ HEADERS += \
     ghsbuilder.h \
     ghswidget.h \
     imageutils.h \
-        mainwindow.h \
+    mainwindow.h \
     database.h \
     field.h \
     networkmanager.h \
@@ -85,6 +86,7 @@ HEADERS += \
     syntaxhighlighter.h \
     table.h \
     tag.h \
+    tagdialog.h \
     textedit.h \
     variable.h \
     variableentry.h \
@@ -104,7 +106,8 @@ FORMS += \
         propertydock.ui \
         propertyeditor.ui \
         reagentdialog.ui \
-        reagentdock.ui
+        reagentdock.ui \
+        tagdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

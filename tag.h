@@ -55,14 +55,14 @@ public:
     Q_ENUM( Fields )
 
     enum Types {
-        NoType = 0,
+        NoType = -1,
         Text,
         Integer,
         Real,
-        State,
         GHS,
         NFPA,
-        CAS
+        CAS,
+        State
     };
     Q_ENUM( Types )
 

@@ -27,6 +27,7 @@
 #include "dockwidget.h"
 #include "script.h"
 #include "tag.h"
+#include "tagdialog.h"
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
@@ -138,6 +139,8 @@ void MainWindow::on_actionClear_triggered() {
  */
 void MainWindow::on_actionTags_triggered() {
     qDebug() << "STUB";
+    TagDialog td( this );
+    td.exec();
 }
 
 /**
