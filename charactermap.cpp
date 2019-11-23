@@ -29,7 +29,7 @@
  * @brief CharacterMap::CharacterMap
  * @param parent
  */
-CharacterMap::CharacterMap( QWidget *parent ) : QWidget( parent ), blockId( QPair<int,int>( -1, -1 )) {
+CharacterMap::CharacterMap( QWidget *parent ) : QDialog( parent ), blockId( QPair<int,int>( -1, -1 )) {
     // this->size
     this->setWindowFlags( this->windowFlags() | Qt::Tool );
     this->setWindowTitle( this->tr( "Character selector" ));

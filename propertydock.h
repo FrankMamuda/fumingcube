@@ -47,7 +47,7 @@ public:
     int sectionSize( int column ) const;
 
 public slots:
-    void resizeViewContents();
+    void updateView();
     void clearDocumentCache();
     void setSpecialWidgets();
 

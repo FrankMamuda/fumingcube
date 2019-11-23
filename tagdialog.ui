@@ -100,7 +100,7 @@
             <widget class="QLineEdit" name="functionEdit"/>
            </item>
            <item row="3" column="3">
-            <widget class="QTextEdit" name="unitsEdit">
+            <widget class="TextEdit" name="unitsEdit" native="true">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -109,15 +109,6 @@
              </property>
              <property name="inputMethodHints">
               <set>Qt::ImhNone</set>
-             </property>
-             <property name="verticalScrollBarPolicy">
-              <enum>Qt::ScrollBarAlwaysOff</enum>
-             </property>
-             <property name="horizontalScrollBarPolicy">
-              <enum>Qt::ScrollBarAlwaysOff</enum>
-             </property>
-             <property name="lineWrapMode">
-              <enum>QTextEdit::NoWrap</enum>
              </property>
             </widget>
            </item>
@@ -289,6 +280,35 @@
       <addaction name="actionEdit"/>
       <addaction name="actionRemove"/>
      </widget>
+     <widget class="QToolBar" name="styleToolbar">
+      <property name="movable">
+       <bool>false</bool>
+      </property>
+      <property name="allowedAreas">
+       <set>Qt::TopToolBarArea</set>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="toolButtonStyle">
+       <enum>Qt::ToolButtonFollowStyle</enum>
+      </property>
+      <property name="floatable">
+       <bool>false</bool>
+      </property>
+      <attribute name="toolBarArea">
+       <enum>TopToolBarArea</enum>
+      </attribute>
+      <attribute name="toolBarBreak">
+       <bool>false</bool>
+      </attribute>
+      <addaction name="actionSubScript"/>
+      <addaction name="actionSuperScript"/>
+      <addaction name="actionCharacterMap"/>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -319,7 +339,35 @@
     <string>Edit</string>
    </property>
   </action>
+  <action name="actionSubScript">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Subscript</string>
+   </property>
+  </action>
+  <action name="actionSuperScript">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Superscript</string>
+   </property>
+  </action>
+  <action name="actionCharacterMap">
+   <property name="text">
+    <string>CharacterMap</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TextEdit</class>
+   <extends>QWidget</extends>
+   <header>textedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

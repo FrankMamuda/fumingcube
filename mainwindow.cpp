@@ -138,9 +138,9 @@ void MainWindow::on_actionClear_triggered() {
  * @brief MainWindow::on_actionTags_triggered
  */
 void MainWindow::on_actionTags_triggered() {
-    qDebug() << "STUB";
     TagDialog td( this );
     td.exec();
+    PropertyDock::instance()->updateView();
 }
 
 /**

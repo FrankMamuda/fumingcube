@@ -256,7 +256,9 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
     this->ui->actionCharacterMap->setText( "\u212b" );
 #endif
     this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
-        this->characterMap->show();
+
+        // TODO: remove from private member?
+        this->characterMap->exec();
     } );
 
     // add character map action
@@ -328,8 +330,6 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
  * @brief PropertyEditor::~PropertyEditor
  */
 PropertyEditor::~PropertyEditor() {
-    qDebug() << "DEL";
-
     // disconnects
     this->disconnect( this->ui->name, &TextEdit::currentCharFormatChanged, this, nullptr );
     this->disconnect( this->ui->value, &TextEdit::currentCharFormatChanged, this, nullptr );

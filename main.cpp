@@ -51,12 +51,6 @@
 //
 //  properties:
 //   - fix extraction and add support for propery mapping to tags
-//   - disable 'advanced' button when editing
-//
-//  tags:
-//   - if min/max is empty, assume its -LIMIT and +LIMIT
-//   - richText units editor
-//   - potentially remove nextline when adding new tags: ex. 4242\nfoo/bar
 //
 //  future:
 //   - common reaction browser

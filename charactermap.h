@@ -23,7 +23,7 @@
  * includes
  */
 #include <QPaintEvent>
-#include <QWidget>
+#include <QDialog>
 
 /**
  * @brief The Character namespace
@@ -50,7 +50,7 @@ static const QString SpecialChars( "\xc2\xb0;\xce\x91;\xce\x92;\xce\x93;\xce\x94
 /**
  * @brief The CharacterMap class
  */
-class CharacterMap : public QWidget {
+class CharacterMap : public QDialog {
     Q_OBJECT
 
 public:

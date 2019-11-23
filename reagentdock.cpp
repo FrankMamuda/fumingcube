@@ -184,7 +184,7 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
 
 
     // resize the property view to fit contents
-    PropertyDock::instance()->resizeViewContents();
+    PropertyDock::instance()->updateView();
 
     // store last selection in a variabe
     Variable::instance()->setInteger( "reagentDock/selection", static_cast<int>( reagentId ));

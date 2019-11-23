@@ -333,7 +333,7 @@ p, li { white-space: pre-wrap; }
  <customwidgets>
   <customwidget>
    <class>TextEdit</class>
-   <extends>QWidget</extends>
+   <extends>QTextEdit</extends>
    <header>textedit.h</header>
   </customwidget>
  </customwidgets>

@@ -133,7 +133,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
         Property::instance()->sort( Property::Order_, Qt::AscendingOrder );
         Property::instance()->select();
-        this->resizeViewContents();
+        this->updateView();
 
         const QModelIndex current( container->model()->index( static_cast<int>( Property::instance()->row( id0 )), 0 ));
         container->setCurrentIndex( current );
@@ -244,9 +244,9 @@ int PropertyDock::sectionSize( int column ) const {
 }
 
 /**
- * @brief PropertyDock::resizeViewContents
+ * @brief PropertyDock::updateView
  */
-void PropertyDock::resizeViewContents() {
+void PropertyDock::updateView() {
     this->setSpecialWidgets();
     this->ui->propertyView->resizeToContents();
 }
@@ -419,7 +419,7 @@ void PropertyDock::on_removePropButton_clicked() {
     }
 
     this->ui->removePropButton->setEnabled( false );
-    this->resizeViewContents();
+    this->updateView();
 }
 
 /**
@@ -492,7 +492,7 @@ void PropertyDock::on_editPropButton_clicked() {
         Property::instance()->setStringValue( propertyRow, values.second.toString());
 
     // update view
-    this->resizeViewContents();
+    this->updateView();
     this->ui->propertyView->setUpdatesEnabled( true );
 }
 
@@ -514,7 +514,7 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     Property::instance()->add(( tagId == Id::Invalid || tagId == PixmapTag ) ? name : "", tagId, value, reagentId );
 
     // clear document cache and resize view
-    this->resizeViewContents();
+    this->updateView();
 
     // enable updates
     this->ui->propertyView->setUpdatesEnabled( true );

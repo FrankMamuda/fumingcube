@@ -23,6 +23,7 @@
  * includes
  */
 #include <QDialog>
+#include <QTextCharFormat>
 
 /**
  * @brief The Ui namespace
@@ -47,6 +48,7 @@ public:
     };
     Q_ENUM( Modes )
     Modes mode() const { return this->m_mode; }
+    static QString captureBody( const QString &input );
 
 private slots:
     void on_actionAdd_triggered();
@@ -54,6 +56,7 @@ private slots:
     void on_actionEdit_triggered();
     void clear();
     void setMode( const Modes &mode = NoMode ) { this->m_mode = mode; }
+    void mergeFormat( const QTextCharFormat &format );
 
 protected:
     bool eventFilter( QObject *object, QEvent *event ) override;

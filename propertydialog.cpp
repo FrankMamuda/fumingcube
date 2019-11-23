@@ -54,10 +54,13 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, row, type ]( const QString &text ) {
             bool ok;
 
+            const QString minStr( Tag::instance()->min( row ).toString());
+            const QString maxStr( Tag::instance()->max( row ).toString());
+
             if ( type == Tag::Integer ) {
                 const int value = text.toInt( &ok );
-                const int min = Tag::instance()->min( row ).toInt();
-                const int max = Tag::instance()->max( row ).toInt();
+                const int min = minStr.isEmpty() ? std::numeric_limits<int>::min() : Tag::instance()->min( row ).toInt();
+                const int max = maxStr.isEmpty() ? std::numeric_limits<int>::max() :Tag::instance()->max( row ).toInt();
 
                 if ( value < min )
                     ok = false;
@@ -65,8 +68,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
                     ok = false;
             } else {
                 const qreal value = QString( text ).replace( ",", "." ).toDouble( &ok );
-                const qreal min = Tag::instance()->min( row ).toReal();
-                const qreal max = Tag::instance()->max( row ).toReal();
+                const qreal min = minStr.isEmpty() ? std::numeric_limits<qreal>::min() : Tag::instance()->min( row ).toDouble();
+                const qreal max = maxStr.isEmpty() ? std::numeric_limits<qreal>::max() :Tag::instance()->max( row ).toDouble();
 
                 if ( value < min )
                     ok = false;
@@ -100,10 +103,13 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         return;
     }
 
-    this->setWindowTitle( this->tr( "Add '%1'" ).arg( Tag::instance()->name( row )));
+    this->setWindowTitle(( defaultValue.isEmpty() ? this->tr( "Add" ) : this->tr( "Edit" )) + QString( " '%1'" ).arg( Tag::instance()->name( row )));
     this->ui->nameLabel->setText( Tag::instance()->name( row ));
     this->ui->unitsLabel->setText( Tag::instance()->units( row ));
     this->ui->unitsLabel->setTextFormat( Qt::RichText );
+
+    if ( !defaultValue.isEmpty())
+        this->ui->advancedButton->hide();
 
     // focus on input dialog
     this->ui->textEdit->setFocus();

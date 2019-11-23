@@ -59,10 +59,7 @@ void Tag::removeOrphanedEntries() {
  * @brief Tag::populate
  */
 void Tag::populate() {
-    const double mind = std::numeric_limits<double>::min();
-    const double maxd = std::numeric_limits<double>::max();
-
-    this->add( this->tr( "Molar mass" ),           Real, this->tr( "&nbsp;g/mol" ),   1.0,  maxd,  18.0,  2, "molarMass"            );
+    this->add( this->tr( "Molar mass" ),           Real, this->tr( "&nbsp;g/mol" ),   1.0,    "",  18.0,  2, "molarMass"            );
     this->add( this->tr( "Density" ),              Real, this->tr( "&nbsp;g/ml" ),  0.001, 100.0,   1.0,  3, "density"              );
     this->add( this->tr( "Assay" ),                Real, this->tr( "&percnt;" ),      0.0, 110.0, 100.0,  3, "assay",          0.01 );
     this->add( this->tr( "State" ),                State );
@@ -74,11 +71,11 @@ void Tag::populate() {
     this->add( this->tr( "Impurities" ),           Real, this->tr( "&percnt;" ),      0.0,  110.0,   0.0, 2, "impurities",    0.01 );
     this->add( this->tr( "Water content" ),        Real, this->tr( "&percnt;" ),      0.0, 1000.0,   0.0, 2, "waterContent",  0.01 );
     this->add( this->tr( "Concentration" ),        Real, this->tr( "&percnt;" ),      0.0,  110.0, 100.0, 5, "concentration", 0.01 );
-    this->add( this->tr( "Boiling point" ),        Real, this->tr( "&deg;C" ),    -273.15,   maxd, 100.0, 1, "boilingPoint"        );
-    this->add( this->tr( "Melting point" ),        Real, this->tr( "&deg;C" ),    -273.15,   maxd,   0.0, 1, "meltingPoint"        );
-    this->add( this->tr( "Flash point" ),          Real, this->tr( "&deg;C" ),    -273.15,   maxd,  50.0, 1, "flashPoint"          );
+    this->add( this->tr( "Boiling point" ),        Real, this->tr( "&deg;C" ),    -273.15,     "", 100.0, 1, "boilingPoint"        );
+    this->add( this->tr( "Melting point" ),        Real, this->tr( "&deg;C" ),    -273.15,     "",   0.0, 1, "meltingPoint"        );
+    this->add( this->tr( "Flash point" ),          Real, this->tr( "&deg;C" ),    -273.15,     "",  50.0, 1, "flashPoint"          );
     this->add( this->tr( "CAS number" ),           CAS );
-    this->add( this->tr( "Viscosity" ),            Real, this->tr( "&nbsp;mPa·s" ),  mind,   maxd,  1.00, 3, "viscosity"           );
+    this->add( this->tr( "Viscosity" ),            Real, this->tr( "&nbsp;mPa·s" ),    "",     "",  1.00, 3, "viscosity"           );
     this->add( this->tr( "Reftractive index" ),    Real, "",                          1.0,   10.0,  1.00, 3 );
     this->add( this->tr( "GHS pictograms" ),       GHS );
     this->add( this->tr( "NFPA 704" ),             NFPA );
