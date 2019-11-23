@@ -87,19 +87,10 @@ public:
 public slots:
     void removeOrphanedEntries() override;
 
-    /**
-     * @brief setName
-     * @param row
-     * @param name
-     */
-    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
-
-    /**
-     * @brief setAlias
-     * @param row
-     * @param alias
-     */
-    void setAlias( const Row &row, const QString &alias ) { this->setValue( row, Alias, alias ); }
+    // setters
+    FIELD_SETTER( QString, Name )
+    FIELD_SETTER( QString, Alias )
+    FIELD_SETTER( QString, ParentID )
 
 private:
     explicit Reagent();

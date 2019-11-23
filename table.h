@@ -51,6 +51,8 @@ static const QMap<QVariant::Type,QString> _fieldTypes {{ QVariant::Int, "integer
 #define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type]
 #define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type], true
 #define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QVariant::Int, "integer primary key", true, true
+#define FIELD_GETTER( type, fieldId ) type get##fieldId( const Row &row ) const { return this->value( row, fieldId ).value<type>(); }
+#define FIELD_SETTER( type, fieldId ) void set##fieldId( const Row &row, const type &variable ) { this->setValue( row, fieldId, variable ); }
 
 /**
  * @brief The Table_ class
@@ -71,6 +73,10 @@ public:
     bool isValid() const { return this->m_valid; }
     bool hasPrimaryField() const { return this->m_hasPrimary; }
     Q_INVOKABLE int count() const;
+
+    //template<typename Type>
+    //Type value( const Row &row, int fieldId ) const { return this->value( row, fieldId )}
+
     virtual QVariant value( const Row &row, int fieldId ) const;
     virtual QVariant value( const Id &id, int fieldId ) const;
     bool contains( int fieldId, const QVariant &value ) const { return this->contains( this->field( fieldId ), value ); }

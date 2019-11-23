@@ -52,10 +52,6 @@
 //  properties:
 //   - fix extraction and add support for propery mapping to tags
 //
-//  future:
-//   - common reaction browser
-//   - molecule drawing (and search)
-//
 //  completion:
 //   - complete batch from selected reagent, not the whole list
 //   - complete function( "CURSOR to function( "CURSOR"
@@ -75,8 +71,9 @@
 //  variable:
 //   - automatically store QByteArray as base64
 //
-//  database:
-//   - getters/setters via macros
+//  future:
+//   - common reaction browser
+//   - molecule drawing (and search)
 //
 //
 
