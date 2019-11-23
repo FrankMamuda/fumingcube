@@ -407,10 +407,14 @@ void PropertyDock::on_removePropButton_clicked() {
     };
 
     if ( indexes.count() == 1 ) {
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove selected property" )) == QMessageBox::Yes )
+        const QModelIndex index( this->ui->propertyView->currentIndex());
+        if ( !index.isValid())
+            return;
+
+        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove selected property?" )) == QMessageBox::Yes )
             removeProperty( QModelIndexList() << this->ui->propertyView->currentIndex());
     } else if ( indexes.count() > 1 ) {
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 properties" ).arg( indexes.count())) == QMessageBox::Yes )
+        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 properties?" ).arg( indexes.count())) == QMessageBox::Yes )
             removeProperty( indexes );
     }
 

@@ -154,6 +154,14 @@ public slots:
      * @param name
      */
     void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
+    void setType( const Row &row, const Types &type ) { this->setValue( row, Type, type ); }
+    void setUnits( const Row &row, const QString &units ) { this->setValue( row, Units, units ); }
+    void setMinValue( const Row &row, const QVariant &value ) { this->setValue( row, Min, value ); }
+    void setMaxValue( const Row &row, const QVariant &value ) { this->setValue( row, Max, value ); }
+    void setDefaultValue( const Row &row, const QVariant &value ) { this->setValue( row, Value, value ); }
+    void setPrecison( const Row &row, const int precision ) { this->setValue( row, Precision, precision ); }
+    void setFunction( const Row &row, const QString &function ) { this->setValue( row, Function, function ); }
+    void setScale( const Row &row, const qreal &scale ) { this->setValue( row, Scale, scale ); }
 
 private:
     explicit Tag();

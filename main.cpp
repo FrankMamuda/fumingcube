@@ -51,8 +51,12 @@
 //
 //  properties:
 //   - fix extraction and add support for propery mapping to tags
+//   - disable 'advanced' button when editing
 //
-//  tag editor
+//  tags:
+//   - if min/max is empty, assume its -LIMIT and +LIMIT
+//   - richText units editor
+//   - potentially remove nextline when adding new tags: ex. 4242\nfoo/bar
 //
 //  future:
 //   - common reaction browser
@@ -76,6 +80,9 @@
 //
 //  variable:
 //   - automatically store QByteArray as base64
+//
+//  database:
+//   - getters/setters via macros
 //
 //
 

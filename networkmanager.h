@@ -33,7 +33,6 @@
  */
 class NetworkManager: public QObject {
     Q_OBJECT
-    Q_ENUMS( Type )
 
 public:
     enum Type {
@@ -41,6 +40,7 @@ public:
         BasicProperties,
         Properties
     };
+    Q_ENUM( Type )
 
     /**
      * @brief instance

@@ -24,6 +24,7 @@
 #include "ui_tagdialog.h"
 #include "tag.h"
 #include <QDebug>
+#include <QMessageBox>
 
 /**
  * @brief TagDialog::TagDialog
@@ -82,10 +83,44 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
     widgetText( this->ui->typeCombo->currentIndex());
 
     this->ui->buttonBox->connect( this->ui->buttonBox, &QDialogButtonBox::clicked, [ this ]( QAbstractButton *button ) {
-        qDebug() << "clicked on" << this->ui->buttonBox->buttonRole( button );
-        this->ui->dockWidget->close();
+        const QDialogButtonBox::ButtonRole role = this->ui->buttonBox->buttonRole( button );
 
-        // CLEAR EVERYTHING AFTER addition/edit
+        if ( role == QDialogButtonBox::AcceptRole ) {
+            const QModelIndex index( this->ui->tagView->currentIndex());
+            if ( !index.isValid())
+                return;
+
+            const Row row = Tag::instance()->row( index );
+            if ( row == Row::Invalid )
+                return;
+
+            if ( this->mode() == Edit ) {
+                Tag::instance()->setType( row, static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()));
+                Tag::instance()->setName( row, this->ui->nameEdit->text());
+                Tag::instance()->setUnits( row, this->ui->unitsEdit->toHtml());
+                Tag::instance()->setMinValue( row, this->ui->minEdit->text());
+                Tag::instance()->setMaxValue( row, this->ui->maxEdit->text());
+                Tag::instance()->setDefaultValue( row, this->ui->valueEdit->text());
+                Tag::instance()->setPrecison( row, this->ui->precisionSpin->value());
+                Tag::instance()->setFunction( row, this->ui->functionEdit->text());
+                Tag::instance()->setScale( row, this->ui->scaleSpin->value());
+            } else if ( this->mode() == Add ) {
+                Tag::instance()->add(
+                            this->ui->nameEdit->text(),
+                            static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()),
+                            this->ui->unitsEdit->toHtml(),
+                            this->ui->minEdit->text(),
+                            this->ui->maxEdit->text(),
+                            this->ui->valueEdit->text(),
+                            this->ui->precisionSpin->value(),
+                            this->ui->functionEdit->text(),
+                            this->ui->scaleSpin->value()
+                            );
+            }
+        }
+
+        this->ui->dockWidget->close();
+        this->clear();
     } );
 }
 
@@ -100,16 +135,49 @@ TagDialog::~TagDialog() {
  * @brief TagDialog::on_actionAdd_triggered
  */
 void TagDialog::on_actionAdd_triggered() {
-
-    // CLEAR EVERYTHING
-
+    this->ui->dockWidget->show();
+    this->setMode( Add );
 }
 
 /**
  * @brief TagDialog::on_actionRemove_triggered
  */
 void TagDialog::on_actionRemove_triggered() {
+    const QModelIndexList indexes( this->ui->tagView->selectionModel()->selectedRows());
+    auto removeProperty = []( const QModelIndexList &indexList ) {
+        QList<Id> idList;
 
+        // must build an id list, because indexes/rows change on removal
+        foreach ( const QModelIndex &index, indexList ) {
+            if ( !index.isValid())
+                continue;
+
+            const Row row = Tag::instance()->row( index );
+            if ( row == Row::Invalid )
+                return;
+
+            idList << Tag::instance()->id( row );
+        }
+
+        foreach ( const Id &id, idList )
+            Tag::instance()->remove( Tag::instance()->row( id ));
+    };
+
+    if ( indexes.count() == 1 ) {
+        const QModelIndex index( this->ui->tagView->currentIndex());
+        if ( !index.isValid())
+            return;
+
+        const Row row = Tag::instance()->row( index );
+        if ( row == Row::Invalid )
+            return;
+
+        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove '%1'?" ).arg( Tag::instance()->name( row ))) == QMessageBox::Yes )
+            removeProperty( QModelIndexList() << this->ui->tagView->currentIndex());
+    } else if ( indexes.count() > 1 ) {
+        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 tags?" ).arg( indexes.count())) == QMessageBox::Yes )
+            removeProperty( indexes );
+    }
 }
 
 /**
@@ -125,8 +193,9 @@ void TagDialog::on_actionEdit_triggered() {
         return;
 
     this->ui->dockWidget->show();
-    this->ui->typeCombo->setCurrentIndex( static_cast<int>( Tag::instance()->type( row )));
+    this->setMode( Edit );
 
+    this->ui->typeCombo->setCurrentIndex( static_cast<int>( Tag::instance()->type( row )));
     this->ui->nameEdit->setText( Tag::instance()->name( row ));
     this->ui->unitsEdit->setHtml( Tag::instance()->units( row ));
     this->ui->minEdit->setText( Tag::instance()->min( row ).toString());
@@ -135,6 +204,22 @@ void TagDialog::on_actionEdit_triggered() {
     this->ui->precisionSpin->setValue( Tag::instance()->precison( row ));
     this->ui->functionEdit->setText( Tag::instance()->function( row ));
     this->ui->scaleSpin->setValue( Tag::instance()->scale( row ));
+}
+
+/**
+ * @brief TagDialog::clear
+ */
+void TagDialog::clear() {
+    this->ui->nameEdit->clear();
+    this->ui->unitsEdit->clear();
+    this->ui->minEdit->clear();
+    this->ui->maxEdit->clear();
+    this->ui->valueEdit->clear();
+    this->ui->precisionSpin->setValue( 2 );
+    this->ui->functionEdit->clear();
+    this->ui->scaleSpin->setValue( 1.0 );
+    this->ui->typeCombo->setCurrentIndex( 0 );
+    this->setMode();
 }
 
 /**

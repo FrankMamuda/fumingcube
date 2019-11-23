@@ -40,6 +40,7 @@ public:
 
         OtherState = 1024
     };
+    Q_ENUM( StateOfMatter )
 
     /**
      * @brief The Fields enum

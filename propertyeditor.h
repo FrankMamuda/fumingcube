@@ -43,8 +43,6 @@ class PropertyEditor;
  */
 class PropertyEditor : public QDialog {
     Q_OBJECT
-    Q_ENUMS( Editors )
-    Q_ENUMS( Modes )
     Q_DISABLE_COPY( PropertyEditor )
 
 public:
@@ -53,12 +51,14 @@ public:
         Name,
         Value
     };
+    Q_ENUM( Editors )
 
     enum Modes {
         NoMode = -1,
         Add,
         Edit
     };
+    Q_ENUM( Modes )
 
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(), const QString &value = QString());
     ~PropertyEditor() override;

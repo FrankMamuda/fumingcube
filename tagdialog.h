@@ -40,16 +40,26 @@ class TagDialog : public QDialog {
 public:
     explicit TagDialog( QWidget *parent = nullptr );
     ~TagDialog() override;
+    enum Modes {
+        NoMode = -1,
+        Add,
+        Edit
+    };
+    Q_ENUM( Modes )
+    Modes mode() const { return this->m_mode; }
 
 private slots:
     void on_actionAdd_triggered();
     void on_actionRemove_triggered();
     void on_actionEdit_triggered();
+    void clear();
+    void setMode( const Modes &mode = NoMode ) { this->m_mode = mode; }
 
 protected:
     bool eventFilter( QObject *object, QEvent *event ) override;
 
 private:
     Ui::TagDialog *ui;
+    Modes m_mode = NoMode;
 };
 
