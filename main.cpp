@@ -29,6 +29,10 @@
 #include "property.h"
 #include "tag.h"
 #include "script.h"
+#ifdef Q_OS_LINUX
+#include "reagentdock.h"
+#include "propertydock.h"
+#endif
 #include <QApplication>
 #include <QDate>
 #include <QDir>
@@ -184,6 +188,14 @@ int main( int argc, char *argv[] ) {
 
     MainWindow::instance()->show();
     MainWindow::instance()->scrollToBottom();
+
+#ifdef Q_OS_LINUX
+    // fixes issues with dockwidgets on linux
+    ReagentDock::instance()->setFloating( ReagentDock::instance()->isFloating());
+    PropertyDock::instance()->setFloating( PropertyDock::instance()->isFloating());
+    ReagentDock::instance()->setVisible( ReagentDock::instance()->isVisible());
+    PropertyDock::instance()->setVisible( PropertyDock::instance()->isVisible());
+#endif
 
     return a.exec();
 }
