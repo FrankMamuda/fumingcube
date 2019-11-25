@@ -46,14 +46,14 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
     // get property row, data and tagId
     const Row row = Property::instance()->row( index );
-    const QVariant data( Property::instance()->valueData( row ));
+    const QVariant data( Property::instance()->propertyData( row ));
     const Id tagId = Property::instance()->tagId( row );
 
     // create a new document
     QTextDocument *document( new QTextDocument());
 
     // special handling of pixmaps
-    if ( tagId == PixmapTag && index.column() == Property::Value ) {
+    if ( tagId == PixmapTag && index.column() == Property::PropertyData ) {
         QPixmap pixmap;
         pixmap.loadFromData( data.toByteArray());
 
@@ -70,12 +70,8 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
         } else {
             // properties with built-in tags don't use property names, but rather tag names
-            const Row tagRow = Tag::instance()->row( tagId );
-            if ( tagRow == Row::Invalid )
-                return;
-
-            const QString units( Tag::instance()->units( tagRow ));
-            html = ( index.column() == Property::Name ? Tag::instance()->name( tagRow ) : ( TextEdit::stripHTML( data.toString() + units )));
+            const QString units( Tag::instance()->units( tagId ));
+            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML( data.toString() + units )));
         }
 
         document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( qAsConst( html )));

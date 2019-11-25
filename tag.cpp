@@ -31,9 +31,9 @@ Tag::Tag() : Table( "tag" ) {
     this->addField( UNIQUE_FIELD( Name, String ));
     this->addField( FIELD( Type, Int ));
     this->addField( FIELD( Units, String ));
-    this->addField( FIELD( Min, ByteArray ));
-    this->addField( FIELD( Max, ByteArray ));
-    this->addField( FIELD( Value, ByteArray ));
+    this->addField( FIELD( MinValue, ByteArray ));
+    this->addField( FIELD( MaxValue, ByteArray ));
+    this->addField( FIELD( DefaultValue, ByteArray ));
     this->addField( FIELD( Precision, Int ));
     this->addField( FIELD( Function, String ));
     this->addField( FIELD( Scale, Double ));

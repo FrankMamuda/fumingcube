@@ -51,6 +51,12 @@
 //
 //  properties:
 //   - fix extraction and add support for propery mapping to tags
+//   - use pubchem.ncbi.nlm.nih.gov
+//     first get cid https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/sodium-hydroxide/cids/TXT
+//     then fetch properties https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/Sodium-hydroxide/property/MolecularWeight/TXT
+//          CAS, MolecularWeight, formula (not much else)
+//     or parse https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/CID/JSON (CID=14798 for sodium hydroxide)
+//     for additional properties such as solubility, etc.
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list

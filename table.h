@@ -37,12 +37,15 @@ class QSqlQuery;
  */
 enum class Id : int { Invalid = -1 };
 QDebug operator<<( QDebug debug, const Id &id );
+typedef Id _Id;
+Q_DECLARE_METATYPE( Id )
 
 /**
  * @brief The Row enum strong-typed row
  */
 enum class Row : int { Invalid = -1 };
 QDebug operator<<( QDebug debug, const Row &row );
+Q_DECLARE_METATYPE( Row )
 
 /*
  * FIELD macro generates a lowercase fieldName from field index (enum)
@@ -51,8 +54,9 @@ static const QMap<QVariant::Type,QString> _fieldTypes {{ QVariant::Int, "integer
 #define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type]
 #define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type], true
 #define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QVariant::Int, "integer primary key", true, true
-#define FIELD_GETTER( type, fieldId ) type get##fieldId( const Row &row ) const { return this->value( row, fieldId ).value<type>(); }
-#define FIELD_SETTER( type, fieldId ) void set##fieldId( const Row &row, const type &variable ) { this->setValue( row, fieldId, variable ); }
+#define FIELD_GETTER( type, fieldId, name ) public:  type name( const Row &row ) const { return this->value( row, fieldId ).value<type>(); } type name( const Id &id ) const { return this->value( id, fieldId ).value<type>(); }
+#define FIELD_SETTER( type, fieldId ) public slots: void set##fieldId( const Row &row, const type &variable ) { this->setValue( row, fieldId, QVariant::fromValue( variable )); }
+#define INITIALIZE_FIELD( type, fieldId, name ) FIELD_GETTER( type, fieldId, name ) FIELD_SETTER( type, fieldId )
 
 /**
  * @brief The Table_ class
@@ -114,5 +118,3 @@ private:
 
 // declare enums
 Q_DECLARE_METATYPE( Table::Roles )
-Q_DECLARE_METATYPE( Id )
-Q_DECLARE_METATYPE( Row )

@@ -128,7 +128,6 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
         this->engine.throwError( QJSValue::ReferenceError, this->tr( "function \"%1\" is not defined" ).arg( functionName ));
         return QJSValue();
     }
-    const Row propertyRow = Tag::instance()->row( propertyId );
 
     // get reagentId
     const Id reagentId = this->getReagentId( reagentAlias );
@@ -166,7 +165,7 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
     }
 
     // return scaled (for example assay is % or 0.01) value
-    return value * Tag::instance()->scale( propertyRow );
+    return value * Tag::instance()->scale( propertyId );
 }
 
 /**
@@ -182,7 +181,7 @@ Id Script::getPropertyId( const QString &name ) const {
                 .arg( Tag::instance()->fieldName( Tag::Function ))
                 .arg( name )
                 );
-    return query.next() ? static_cast<Id>( query.value( 0 ).toInt()) : Id::Invalid;
+    return query.next() ? query.value( 0 ).value<Id>() : Id::Invalid;
 }
 
 /**
@@ -199,11 +198,11 @@ Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
                 .arg( Reagent::instance()->fieldName( Reagent::Alias ))
                 .arg( alias )
                 .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                .arg( Reagent::instance()->fieldName( Reagent::ParentID ))
+                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
                 .arg( static_cast<int>( parentId ))
                 );
 
-    return query.next() ? static_cast<Id>( query.value( 0 ).toInt()) : Id::Invalid;
+    return query.next() ? query.value( 0 ).value<Id>() : Id::Invalid;
 }
 
 /**
@@ -216,11 +215,11 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3=%4 and %5=%6 ) "
                          "or ( %3=%4 and %5=%7 and ( select count(*) from %2 where ( %3=%4 and %5=%6 )) = 0 )" )
-                .arg( Property::instance()->fieldName( Property::Value ))       // 1
+                .arg( Property::instance()->fieldName( Property::PropertyData ))       // 1
                 .arg( Property::instance()->tableName())                        // 2
-                .arg( Property::instance()->fieldName( Property::TagID ))       // 3
+                .arg( Property::instance()->fieldName( Property::TagId ))       // 3
                 .arg( static_cast<int>( tagId ))                                // 4
-                .arg( Property::instance()->fieldName( Property::ReagentID ))   // 5
+                .arg( Property::instance()->fieldName( Property::ReagentId ))   // 5
                 .arg( static_cast<int>( reagentId ))                            // 6
                 .arg( static_cast<int>( parentId ))                             // 7
                 );

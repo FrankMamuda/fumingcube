@@ -32,11 +32,11 @@
 Property::Property() : Table( "property" ) {
     this->addField( PRIMARY_FIELD( ID )); // Id
     this->addField( FIELD( Name, String ));      // rich text
-    this->addField( FIELD( TagID, Int ));        // special tag
-    this->addField( FIELD( Value, ByteArray ));  // value (can be anything)
-    this->addField( FIELD( ReagentID, Int ));    // Id in parent table
-    this->addField( FIELD( Order_, Int ));        // order
-    this->setSort( Order_, Qt::AscendingOrder );
+    this->addField( FIELD( TagId, Int ));        // special tag
+    this->addField( FIELD( PropertyData, ByteArray ));  // value (can be anything)
+    this->addField( FIELD( ReagentId, Int ));    // Id in parent table
+    this->addField( FIELD( TableOrder, Int ));        // order
+    this->setSort( TableOrder, Qt::AscendingOrder );
 }
 
 /**
@@ -51,7 +51,7 @@ Row Property::add( const QString &name, const Id &tagId, const QVariant &value, 
     // advance position in propertyView
     int highestOrder = 0;
     for ( int y = 0; y < Property::instance()->count(); y++ )
-        highestOrder = qMax( highestOrder, Property::instance()->order( static_cast<Row>( y )));
+        highestOrder = qMax( highestOrder, Property::instance()->tableOrder( static_cast<Row>( y )));
     highestOrder++;
 
     // add the property
@@ -64,6 +64,29 @@ Row Property::add( const QString &name, const Id &tagId, const QVariant &value, 
                        );
 }
 
+/**
+ * @brief Property::headerData
+ * @param section
+ * @param orientation
+ * @param role
+ * @return
+ */
+QVariant Property::headerData( int section, Qt::Orientation orientation, int role ) const {
+    if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
+        switch ( section ) {
+        case Property::Name:
+            return this->tr( "Property" );
+
+        case Property::PropertyData:
+            return this->tr( "Value" );
+
+        default:
+            break;
+        }
+    }
+
+    return Table::headerData( section, orientation, role );
+}
 
 /**
  * @brief Property::removeOrphanedEntries
@@ -71,7 +94,7 @@ Row Property::add( const QString &name, const Id &tagId, const QVariant &value, 
 void Property::removeOrphanedEntries() {
     QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
                       .arg( this->tableName())
-                      .arg( this->fieldName( Property::ReagentID ))
+                      .arg( this->fieldName( Property::ReagentId ))
                       .arg( Reagent::instance()->fieldName( Reagent::ID ))
                       .arg( Reagent::instance()->tableName()));
 }

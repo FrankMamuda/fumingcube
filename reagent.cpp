@@ -31,7 +31,7 @@ Reagent::Reagent() : Table( "reagent" ) {
     this->addField( PRIMARY_FIELD( ID ));
     this->addField( FIELD( Name, String ));
     this->addField( FIELD( Alias, String ));
-    this->addField( FIELD( ParentID, Int ));
+    this->addField( FIELD( ParentId, Int ));
     this->setSort( Name, Qt::AscendingOrder );
 }
 
@@ -56,10 +56,10 @@ QList<Row> Reagent::children( const Row &row ) const {
     query.exec( QString( "select %1 from %2 where %3=%4" )
                 .arg( Reagent::instance()->fieldName( ID ))
                 .arg( Reagent::instance()->tableName())
-                .arg( Reagent::instance()->fieldName( ParentID ))
+                .arg( Reagent::instance()->fieldName( ParentId ))
                 .arg( static_cast<int>( id )));
     while ( query.next()) {
-        const Id id = static_cast<Id>( query.value( 0 ).toInt());
+        const Id id = query.value( 0 ).value<Id>();
         list << this->row( id );
     }
 

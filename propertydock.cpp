@@ -81,7 +81,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
         bool reindex = false;
         int y;
         for ( y = 0; y < Property::instance()->count(); y++ ) {
-            const int order = Property::instance()->order( Property::instance()->row( y ));
+            const int order = Property::instance()->tableOrder( Property::instance()->row( y ));
             if ( orderSet.contains( order )) {
                 reindex = true;
                 break;
@@ -101,7 +101,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
             // reorder tasks accordint to id list
             y = 0;
             foreach ( const Id id, idList ) {
-                Property::instance()->setOrder( Property::instance()->row( id ), y );
+                Property::instance()->setTableOrder( Property::instance()->row( id ), y );
                 y++;
             }
         }
@@ -124,14 +124,14 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
         if ( id0 == Id::Invalid || id1 == Id::Invalid )
             return;
 
-        const int order0 = Property::instance()->order( row0 );
-        const int order1 = Property::instance()->order( row1 );
+        const int order0 = Property::instance()->tableOrder( row0 );
+        const int order1 = Property::instance()->tableOrder( row1 );
 
         // swap order
-        Property::instance()->setOrder( Property::instance()->row( id0 ), order1 );
-        Property::instance()->setOrder( Property::instance()->row( id1 ), order0 );
+        Property::instance()->setTableOrder( Property::instance()->row( id0 ), order1 );
+        Property::instance()->setTableOrder( Property::instance()->row( id1 ), order0 );
 
-        Property::instance()->sort( Property::Order_, Qt::AscendingOrder );
+        Property::instance()->sort( Property::TableOrder, Qt::AscendingOrder );
         Property::instance()->select();
         this->updateView();
 
@@ -163,9 +163,8 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
         return values;
 
     if ( propertyId != Id::Invalid ) {
-        const Row row = Property::instance()->row( propertyId );
-        name = Property::instance()->name( row );
-        value = Property::instance()->stringValue( row );
+        name = Property::instance()->name( propertyId );
+        value = Property::instance()->propertyData( propertyId ).toString();
         mode = PropertyEditor::Edit;
     }
 
@@ -267,7 +266,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<Id>( static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).toInt());
+    const Id reagentId = static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -343,9 +342,8 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     if ( tagId == Id::Invalid )
         return;
 
-    const Row tagRow = Tag::instance()->row( tagId );
-    const Tag::Types type = Tag::instance()->type( tagRow );
-    const QString functionName( Tag::instance()->function( tagRow ));
+    const Tag::Types type = Tag::instance()->type( tagId );
+    const QString functionName( Tag::instance()->function( tagId ));
 
     if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
         auto paste = [ this, functionName, row ]() {
@@ -433,12 +431,10 @@ void PropertyDock::setSpecialWidgets() {
         if ( tagId == Id::Invalid || tagId == PixmapTag )
             continue;
 
-        const Row tagRow = Tag::instance()->row( tagId );
-        const Tag::Types type = Tag::instance()->type( tagRow );
-
+        const Tag::Types type = Tag::instance()->type( tagId );
         if ( type == Tag::NFPA || type == Tag::GHS ) {
-            const QModelIndex index( Property::instance()->index( y, Property::Value ));
-            const QStringList parms( Property::instance()->valueData( row ).toString().split( " " ));
+            const QModelIndex index( Property::instance()->index( y, Property::PropertyData ));
+            const QStringList parms( Property::instance()->propertyData( row ).toString().split( " " ));
             QWidget *widget( this->ui->propertyView->indexWidget( index ));
             bool hasWidget = widget != nullptr;
 
@@ -471,7 +467,7 @@ void PropertyDock::on_editPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<Id>( static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).toInt());
+    const Id reagentId = static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -487,9 +483,9 @@ void PropertyDock::on_editPropButton_clicked() {
 
     // set new value
     this->ui->propertyView->setUpdatesEnabled( false );
-    const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Property::instance()->tagId( propertyRow ), propertyId ));
+    const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Property::instance()->tagId( propertyId ), propertyId ));
     if ( !values.second.isNull())
-        Property::instance()->setStringValue( propertyRow, values.second.toString());
+        Property::instance()->setPropertyData( propertyRow, values.second.toString());
 
     // update view
     this->updateView();

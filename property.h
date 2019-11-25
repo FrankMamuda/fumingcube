@@ -49,10 +49,10 @@ public:
         NoField = -1,
         ID,
         Name,
-        TagID,
-        Value,
-        ReagentID,
-        Order_,
+        TagId,
+        PropertyData,
+        ReagentId,
+        TableOrder,
 
         // count (DO NOT REMOVE)
         Count
@@ -68,79 +68,19 @@ public:
     Row add( const QString &name = QString(), const Id &tagId = Id::Invalid,
              const QVariant &value = QVariant(), const Id &reagentId = Id::Invalid );
 
-    /**
-     * @brief id
-     * @param row
-     * @return
-     */
-    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
+    // initialize field setters and getters
+    INITIALIZE_FIELD( Id,       ID,           id )
+    INITIALIZE_FIELD( QString,  Name,         name )
+    INITIALIZE_FIELD( Id,       TagId,        tagId )
+    INITIALIZE_FIELD( QVariant, PropertyData, propertyData )
+    INITIALIZE_FIELD( Id,       ReagentId,    reagentId )
+    INITIALIZE_FIELD( int,      TableOrder,   tableOrder )
 
-    /**
-     * @brief name
-     * @param row
-     * @return
-     */
-    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
-
-    /**
-     * @brief tag
-     * @param row
-     * @return
-     */
-    Id tagId( const Row &row ) const { return static_cast<Id>( this->value( row, TagID ).toInt()); }
-
-    /**
-     * @brief parentId
-     * @param row
-     * @return
-     */
-    Id reagentId( const Row &row ) const { return static_cast<Id>( this->value( row, ReagentID ).toInt()); }
-
-    /**
-     * @brief valueData
-     * @param row
-     * @return
-     */
-    QVariant valueData( const Row &row ) const { return this->value( row, Value ); }
-
-    /**
-     * @brief stringValue
-     * @param row
-     * @return
-     */
-    QString stringValue( const Row &row ) const { return this->value( row, Value ).toString(); }
-
-    /**
-    * @brief order
-    * @param row
-    * @return
-    */
-   int order( const Row &row ) const { return this->value( row, Order_ ).toInt(); }
+protected:
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 public slots:
     void removeOrphanedEntries() override;
-
-    /**
-     * @brief setName
-     * @param row
-     * @param name
-     */
-    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
-
-    /**
-     * @brief setOrder
-     * @param row
-     * @param position
-     */
-    void setOrder( const Row &row, const int &position ) { this->setValue( row, Order_, position ); }
-
-    /**
-     * @brief setStringValue
-     * @param row
-     * @param value
-     */
-    void setStringValue( const Row &row, const QString &value ) { this->setValue( row, Value, value ); }
-
 
 private:
     explicit Property();

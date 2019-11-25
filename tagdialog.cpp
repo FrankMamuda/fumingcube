@@ -169,7 +169,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                 Tag::instance()->setMinValue( row, this->ui->minEdit->text());
                 Tag::instance()->setMaxValue( row, this->ui->maxEdit->text());
                 Tag::instance()->setDefaultValue( row, this->ui->valueEdit->text());
-                Tag::instance()->setPrecison( row, this->ui->precisionSpin->value());
+                Tag::instance()->setPrecision( row, this->ui->precisionSpin->value());
                 Tag::instance()->setFunction( row, this->ui->functionEdit->text());
                 Tag::instance()->setScale( row, this->ui->scaleSpin->value());
             } else if ( this->mode() == Add ) {
@@ -279,10 +279,10 @@ void TagDialog::on_actionEdit_triggered() {
     this->ui->typeCombo->setCurrentIndex( static_cast<int>( Tag::instance()->type( row )));
     this->ui->nameEdit->setText( Tag::instance()->name( row ));
     this->ui->unitsEdit->setHtml( TagDialog::captureBody( Tag::instance()->units( row )).replace( " ","&nbsp;" ));
-    this->ui->minEdit->setText( Tag::instance()->min( row ).toString());
-    this->ui->maxEdit->setText( Tag::instance()->max( row ).toString());
+    this->ui->minEdit->setText( Tag::instance()->minValue( row ).toString());
+    this->ui->maxEdit->setText( Tag::instance()->maxValue( row ).toString());
     this->ui->valueEdit->setText( Tag::instance()->defaultValue( row ).toString());
-    this->ui->precisionSpin->setValue( Tag::instance()->precison( row ));
+    this->ui->precisionSpin->setValue( Tag::instance()->precision( row ));
     this->ui->functionEdit->setText( Tag::instance()->function( row ));
     this->ui->scaleSpin->setValue( Tag::instance()->scale( row ));
 }

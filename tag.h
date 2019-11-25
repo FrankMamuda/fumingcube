@@ -42,9 +42,9 @@ public:
         Name,
         Type,
         Units,
-        Min,
-        Max,
-        Value,
+        MinValue,
+        MaxValue,
+        DefaultValue,
         Precision,
         Function,
         Scale,
@@ -74,94 +74,21 @@ public:
     ~Tag() override = default;
     Row add( const QString &name, const Types &type = Text, const QString &units = QString(), const QVariant &min = QVariant(), const QVariant &max = QVariant(), const QVariant &value = QVariant(), const int precision = 0, const QString &function = QString(), const qreal scale = 1.0 );
 
-    /**
-     * @brief id
-     * @param row
-     * @return
-     */
-    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
-
-    /**
-     * @brief name
-     * @param row
-     * @return
-     */
-    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
-
-    /**
-     * @brief units
-     * @param row
-     * @return
-     */
-    QString units( const Row &row ) const { return this->value( row, Units ).toString(); }
-
-    /**
-     * @brief type
-     * @param row
-     * @return
-     */
-    Types type( const Row &row ) const { return static_cast<Types>( this->value( row, Type ).toInt()); }
-
-    /**
-     * @brief precison
-     * @param row
-     * @return
-     */
-    int precison( const Row &row ) const { return this->value( row, Precision ).toInt(); }
-
-    /**
-     * @brief min
-     * @param row
-     * @return
-     */
-    QVariant min( const Row &row ) const { return this->value( row, Min ); }
-
-    /**
-     * @brief max
-     * @param row
-     * @return
-     */
-    QVariant max( const Row &row ) const { return this->value( row, Max ); }
-
-    /**
-     * @brief defaultValue
-     * @param row
-     * @return
-     */
-    QVariant defaultValue( const Row &row ) const { return this->value( row, Value ); }
-
-    /**
-     * @brief function
-     * @param row
-     * @return
-     */
-    QString function( const Row &row ) const { return this->value( row, Function ).toString(); }
-
-    /**
-     * @brief scale
-     * @param row
-     * @return
-     */
-    qreal scale( const Row &row ) const { return this->value( row, Scale ).toDouble(); }
+    // initialize field setters and getters
+    INITIALIZE_FIELD( Id,       ID,           id )
+    INITIALIZE_FIELD( QString,  Name,         name )
+    INITIALIZE_FIELD( Types,    Type,         type )
+    INITIALIZE_FIELD( QString,  Units,        units )
+    INITIALIZE_FIELD( int,      Precision,    precision )
+    INITIALIZE_FIELD( QVariant, MinValue,     minValue )
+    INITIALIZE_FIELD( QVariant, MaxValue,     maxValue )
+    INITIALIZE_FIELD( QVariant, DefaultValue, defaultValue )
+    INITIALIZE_FIELD( QString,  Function,     function )
+    INITIALIZE_FIELD( qreal,    Scale,        scale )
 
 public slots:
     void removeOrphanedEntries() override;
     void populate();
-
-    /**
-     * @brief setName
-     * @param row
-     * @param name
-     */
-    void setName( const Row &row, const QString &name ) { this->setValue( row, Name, name ); }
-    void setType( const Row &row, const Types &type ) { this->setValue( row, Type, type ); }
-    void setUnits( const Row &row, const QString &units ) { this->setValue( row, Units, units ); }
-    void setMinValue( const Row &row, const QVariant &value ) { this->setValue( row, Min, value ); }
-    void setMaxValue( const Row &row, const QVariant &value ) { this->setValue( row, Max, value ); }
-    void setDefaultValue( const Row &row, const QVariant &value ) { this->setValue( row, Value, value ); }
-    void setPrecison( const Row &row, const int precision ) { this->setValue( row, Precision, precision ); }
-    void setFunction( const Row &row, const QString &function ) { this->setValue( row, Function, function ); }
-    void setScale( const Row &row, const qreal &scale ) { this->setValue( row, Scale, scale ); }
 
 private:
     explicit Tag();

@@ -168,18 +168,18 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
 
     // retrieve data from model
     const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-    const Id reagentId = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-    const Id parentId = static_cast<Id>( item->data( TreeItem::ParentId ).toInt());
+    const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+    const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
 
     // apply sql filter
     Property::instance()->setFilter( QString( "( %1=%2 ) or ( %1=%3 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
-                                     .arg( Property::instance()->fieldName( Property::ReagentID ))   // 1
+                                     .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
                                      .arg( static_cast<int>( reagentId ))                            // 2
                                      .arg( static_cast<int>( parentId ))                             // 3
-                                     .arg( Property::instance()->fieldName( Property::TagID ))       // 4
+                                     .arg( Property::instance()->fieldName( Property::TagId ))       // 4
                                      .arg( Property::instance()->tableName())                        // 5
                                      );
-    Property::instance()->sort( Property::Order_, Qt::AscendingOrder );
+    Property::instance()->sort( Property::TableOrder, Qt::AscendingOrder );
     Property::instance()->select();
 
 
@@ -244,7 +244,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
     const QModelIndex index( this->ui->reagentView->currentIndex());
     if ( index.isValid()) {
         const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-        const Id parentId = static_cast<Id>( item->data( TreeItem::ParentId ).toInt());
+        const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->data( TreeItem::Name ).toString() : item->parent()->data( TreeItem::Name ).toString());
 
         menu.addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( TreeItem::Id ).toInt()) : parentId  ));
@@ -275,10 +275,10 @@ void ReagentDock::on_removeButton_clicked() {
 
     // construct a menu
     QMenu menu;
-    if ( static_cast<Id>( item->data( TreeItem::ParentId ).toInt()) == Id::Invalid ) {
+    if ( item->data( TreeItem::ParentId ).value<Id>() == Id::Invalid ) {
         // remove reagent and batches
         menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
-            const Id reagentId = static_cast<Id>( item->data( TreeItem::Id ).toInt());
+            const Id reagentId = item->data( TreeItem::Id ).value<Id>();
             const Row reagentRow = Reagent::instance()->row( reagentId );
             if ( reagentRow == Row::Invalid )
                 return;
@@ -301,8 +301,8 @@ void ReagentDock::on_removeButton_clicked() {
     } else {
         // remove batch
         menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
-            const Id reagentId = static_cast<Id>( item->data( TreeItem::Id ).toInt());
-            const Id parentId = static_cast<Id>( item->data( TreeItem::ParentId ).toInt());
+            const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+            const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
 
             const Row row = Reagent::instance()->row( reagentId );
             if ( row != Row::Invalid ) {
@@ -331,15 +331,12 @@ void ReagentDock::restoreIndex() {
     // get id list from variable
     const Id id( Variable::instance()->value<Id>( "reagentDock/selection" ));
     if ( id != Id::Invalid ) {
-        const Row row = Reagent::instance()->row( id );
-        if ( row != Row::Invalid ) {
-            const Id parentId( Reagent::instance()->parentId( row ));
-            if ( parentId != Id::Invalid )
-                this->expand( this->model->find( parentId ));
+        const Id parentId( Reagent::instance()->parentId( id ));
+        if ( parentId != Id::Invalid )
+            this->expand( this->model->find( parentId ));
 
-            this->select( this->model->find( Reagent::instance()->id( row )));
-            return;
-        }
+        this->select( this->model->find( id ));
+        return;
     }
 
     this->select( QModelIndex());
@@ -393,7 +390,7 @@ void ReagentDock::on_editButton_clicked() {
 
     // get current item
     const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-    const Id reagentId = static_cast<Id>( item->data( TreeItem::Id ).toInt());
+    const Id reagentId = item->data( TreeItem::Id ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -401,9 +398,9 @@ void ReagentDock::on_editButton_clicked() {
     if ( reagentRow == Row::Invalid )
         return;
 
-    const Id parentId = static_cast<Id>( item->data( TreeItem::ParentId ).toInt());
-    const QString previousName( Reagent::instance()->name( reagentRow ));
-    const QString previousAlias( Reagent::instance()->alias( reagentRow ));
+    const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+    const QString previousName( Reagent::instance()->name( reagentId ));
+    const QString previousAlias( Reagent::instance()->alias( reagentId ));
 
     bool ok;
     if ( parentId != Id::Invalid ) {

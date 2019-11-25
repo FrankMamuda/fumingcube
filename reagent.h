@@ -39,7 +39,7 @@ public:
         ID,
         Name,
         Alias,
-        ParentID,
+        ParentId,
 
         // count (DO NOT REMOVE)
         Count
@@ -53,44 +53,16 @@ public:
     static Reagent *instance() { static Reagent *reagent( new Reagent()); return reagent; }
     ~Reagent() override = default;
     Row add( const QString &name , const QString &alias, const Id &parentId = Id::Invalid );
-
-    /**
-     * @brief id
-     * @param row
-     * @return
-     */
-    Id id( const Row &row ) const { return static_cast<Id>( this->value( row, ID ).toInt()); }
-
-    /**
-     * @brief name
-     * @param row
-     * @return
-     */
-    QString name( const Row &row ) const { return this->value( row, Name ).toString(); }
-
-    /**
-     * @brief alias
-     * @param row
-     * @return
-     */
-    QString alias( const Row &row ) const { return this->value( row, Alias ).toString(); }
-
-    /**
-     * @brief parentId
-     * @param row
-     * @return
-     */
-    Id parentId( const Row &row ) const { return static_cast<Id>( this->value( row, ParentID ).toInt()); }
-
     QList<Row> children( const Row &row ) const;
+
+    // initialize field setters and getters
+    INITIALIZE_FIELD( Id,      ID,       id )
+    INITIALIZE_FIELD( QString, Name,     name )
+    INITIALIZE_FIELD( QString, Alias,    alias )
+    INITIALIZE_FIELD( Id,      ParentId, parentId )
 
 public slots:
     void removeOrphanedEntries() override;
-
-    // setters
-    FIELD_SETTER( QString, Name )
-    FIELD_SETTER( QString, Alias )
-    FIELD_SETTER( QString, ParentID )
 
 private:
     explicit Reagent();

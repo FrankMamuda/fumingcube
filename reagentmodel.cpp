@@ -128,7 +128,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
     // go through reagents and their batches
     for ( int y = 0; y < Reagent::instance()->count(); y++ ) {
         const Row row = Reagent::instance()->row( y );
-        const Id parentId = static_cast<Id>( Reagent::instance()->parentId( row ));
+        const Id parentId = Reagent::instance()->parentId( row );
 
         // add top level reagents first
         if ( parentId != Id::Invalid )
@@ -136,7 +136,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
 
         const QString reagentName( Reagent::instance()->name( row ));
         const QString alias( Reagent::instance()->alias( row ));
-        const Id reagentId = static_cast<Id>( Reagent::instance()->id( row ));
+        const Id reagentId = Reagent::instance()->id( row );
         bool found = false;
 
         // make a new reagent treeItem
@@ -146,7 +146,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
         const QList<Row>children( Reagent::instance()->children( row ));
         foreach ( const Row &child, children ) {
             const QString childName( Reagent::instance()->name( child ));
-            const Id childId = static_cast<Id>( Reagent::instance()->id( child ));
+            const Id childId = Reagent::instance()->id( child );
 
             // apply search filter if any
             if ( !filter.isEmpty() && !childName.contains( filter, Qt::CaseInsensitive ))
@@ -193,7 +193,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
  */
 QModelIndex ReagentModel::find( const Id &id ) const {
     foreach ( const TreeItem *item, this->itemIndexes.keys()) {
-        if ( static_cast<Id>( item->data( TreeItem::Id ).toInt()) == id )
+        if ( item->data( TreeItem::Id ).value<Id>() == id )
             return this->itemIndexes[const_cast<TreeItem*>( item )];
     }
 

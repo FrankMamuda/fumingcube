@@ -116,3 +116,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+win32:INCLUDEPATH += C:/OpenSSL-Win64/include/openssl
+win32:LIBS += -LC:/OpenSSL-Win64 -lssl32 -leay32
+

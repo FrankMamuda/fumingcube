@@ -36,11 +36,10 @@
 PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString &defaultValue ) : QDialog( parent ), ui( new Ui::PropertyDialog ), tag( tagId ) {
     this->ui->setupUi( this );
 
-    const Row row = Tag::instance()->row( tagId );
-    if ( row == Row::Invalid )
+    if ( tagId == Id::Invalid )
         return;
 
-    const Tag::Types type = Tag::instance()->type( row );
+    const Tag::Types type = Tag::instance()->type( tagId );
     switch ( type ) {
     case Tag::Integer:
     case Tag::Real:
@@ -49,18 +48,18 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         const QRegularExpression pattern( type == Tag::Integer ? "-?\\d+" : "-?\\d*(?:[,|\\.]\\d*)?" );
         QRegularExpressionValidator *validator( new QRegularExpressionValidator( pattern, this ));
         this->ui->textEdit->setValidator( validator );
-        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( row ).toString() : defaultValue );
+        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
         this->ui->textEdit->setAlignment( Qt::AlignRight );
-        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, row, type ]( const QString &text ) {
+        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, tagId, type ]( const QString &text ) {
             bool ok;
 
-            const QString minStr( Tag::instance()->min( row ).toString());
-            const QString maxStr( Tag::instance()->max( row ).toString());
+            const QString minStr( Tag::instance()->minValue( tagId ).toString());
+            const QString maxStr( Tag::instance()->maxValue( tagId ).toString());
 
             if ( type == Tag::Integer ) {
                 const int value = text.toInt( &ok );
-                const int min = minStr.isEmpty() ? std::numeric_limits<int>::min() : Tag::instance()->min( row ).toInt();
-                const int max = maxStr.isEmpty() ? std::numeric_limits<int>::max() :Tag::instance()->max( row ).toInt();
+                const int min = minStr.isEmpty() ? std::numeric_limits<int>::min() : Tag::instance()->minValue( tagId ).toInt();
+                const int max = maxStr.isEmpty() ? std::numeric_limits<int>::max() :Tag::instance()->maxValue( tagId ).toInt();
 
                 if ( value < min )
                     ok = false;
@@ -68,8 +67,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
                     ok = false;
             } else {
                 const qreal value = QString( text ).replace( ",", "." ).toDouble( &ok );
-                const qreal min = minStr.isEmpty() ? std::numeric_limits<qreal>::min() : Tag::instance()->min( row ).toDouble();
-                const qreal max = maxStr.isEmpty() ? std::numeric_limits<qreal>::max() :Tag::instance()->max( row ).toDouble();
+                const qreal min = minStr.isEmpty() ? std::numeric_limits<qreal>::min() : Tag::instance()->minValue( tagId ).toDouble();
+                const qreal max = maxStr.isEmpty() ? std::numeric_limits<qreal>::max() :Tag::instance()->maxValue( tagId ).toDouble();
 
                 if ( value < min )
                     ok = false;
@@ -103,9 +102,9 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         return;
     }
 
-    this->setWindowTitle(( defaultValue.isEmpty() ? this->tr( "Add" ) : this->tr( "Edit" )) + QString( " '%1'" ).arg( Tag::instance()->name( row )));
-    this->ui->nameLabel->setText( Tag::instance()->name( row ));
-    this->ui->unitsLabel->setText( Tag::instance()->units( row ));
+    this->setWindowTitle(( defaultValue.isEmpty() ? this->tr( "Add" ) : this->tr( "Edit" )) + QString( " '%1'" ).arg( Tag::instance()->name( tagId )));
+    this->ui->nameLabel->setText( Tag::instance()->name( tagId ));
+    this->ui->unitsLabel->setText( Tag::instance()->units( tagId ));
     this->ui->unitsLabel->setTextFormat( Qt::RichText );
 
     if ( !defaultValue.isEmpty())
@@ -127,11 +126,10 @@ PropertyDialog::~PropertyDialog() {
  * @return
  */
 QVariant PropertyDialog::value() const {
-    const Row row = Tag::instance()->row( this->tag );
-    if ( row == Row::Invalid )
+    if ( this->tag == Id::Invalid )
         return QVariant();
 
-    switch ( Tag::instance()->type( row )) {
+    switch ( Tag::instance()->type( this->tag )) {
     case Tag::Text:
         return this->ui->textEdit->text();
 
