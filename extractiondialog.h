@@ -36,7 +36,6 @@ class ExtractionModel;
  */
 namespace Ui {
 class ExtractionDialog;
-//static const QString PatternWiki( "<tr>.*?(?=<td>)<td>(.*?(?=<\\/td>)).*?(?=<td>)<td>(.*?(?=<\\/td>))" );
 }
 
 /**
@@ -44,21 +43,33 @@ class ExtractionDialog;
  */
 class ExtractionDialog : public QDialog {
     Q_OBJECT
-    Q_PROPERTY( Id reagentId READ reagentId WRITE setReagentId )
 
 public:
-    explicit ExtractionDialog( QWidget *parent = nullptr );
-    ~ExtractionDialog();
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+    ~ExtractionDialog() override;
     Id reagentId() const { return this->m_reagentId; }
+    QString path() const { return this->m_path; }
+    QString cache() const { return this->m_cache; }
+
+    enum RequestTypes {
+        NoType = -1,
+        CIDRequest,
+        DataRequest
+    };
 
 public slots:
-    void setReagentId( const Id &id = Id::Invalid );
-    void requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
+    void readData( const QByteArray &uncompressed );
+
+private slots:
+    void on_extractButton_clicked();
 
 private:
     Ui::ExtractionDialog *ui;
     ExtractionModel *model = nullptr;
-    QStringList properties;
-    QStringList values;
     Id m_reagentId = Id::Invalid;
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QNetworkRequest request;
+    QStringList cidList;
+    QString m_path;
+    QString m_cache;
 };

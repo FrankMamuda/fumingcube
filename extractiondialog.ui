@@ -14,8 +14,47 @@
    <string>Property extraction</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="parmsGroup">
+     <property name="title">
+      <string>Parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="nameEdit">
+        <property name="placeholderText">
+         <string>type reagent name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QPushButton" name="extractButton">
+        <property name="text">
+         <string>Get CID and retrieve properties</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="cidGoup">
+     <property name="title">
+      <string>CID</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="cidEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupPropertoes">
+    <widget class="QGroupBox" name="propsGroup">
      <property name="title">
       <string>Extracted properties</string>
      </property>
@@ -41,52 +80,6 @@
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupParms">
-     <property name="title">
-      <string>Parameters</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="1">
-       <widget class="QComboBox" name="sourceCombo">
-        <item>
-         <property name="text">
-          <string>Wikipedia</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelSource">
-        <property name="text">
-         <string>Source:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelURL">
-        <property name="text">
-         <string>URL:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="urlEdit">
-        <property name="placeholderText">
-         <string>paste reagent URL here</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QPushButton" name="extractButton">
-        <property name="text">
-         <string>Begin extraction</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
   </layout>

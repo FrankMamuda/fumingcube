@@ -27,10 +27,10 @@
 #include "table.h"
 
 /**
- * @brief The EventTable namespace
+ * @brief The Script_ namespace
  */
 namespace Script_ {
-const static unsigned int API = 0;
+const static unsigned int API = 1;
 }
 
 /**

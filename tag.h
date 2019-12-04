@@ -48,6 +48,7 @@ public:
         Precision,
         Function,
         Scale,
+        Script,
 
         // count (DO NOT REMOVE)
         Count
@@ -72,7 +73,11 @@ public:
      */
     static Tag *instance() { static Tag *i( new Tag()); return i; }
     ~Tag() override = default;
-    Row add( const QString &name, const Types &type = Text, const QString &units = QString(), const QVariant &min = QVariant(), const QVariant &max = QVariant(), const QVariant &value = QVariant(), const int precision = 0, const QString &function = QString(), const qreal scale = 1.0 );
+    Row add( const QString &name, const Types &type = Text, const QString &units = QString(),
+             const QVariant &min = QVariant(), const QVariant &max = QVariant(),
+             const QVariant &value = QVariant(), const int precision = 0,
+             const QString &function = QString(), const qreal scale = 1.0,
+             const QVariant &script = QVariant());
 
     // initialize field setters and getters
     INITIALIZE_FIELD( Id,       ID,           id )
@@ -85,6 +90,7 @@ public:
     INITIALIZE_FIELD( QVariant, DefaultValue, defaultValue )
     INITIALIZE_FIELD( QString,  Function,     function )
     INITIALIZE_FIELD( qreal,    Scale,        scale )
+    INITIALIZE_FIELD( QVariant, Script,       script )
 
 public slots:
     void removeOrphanedEntries() override;

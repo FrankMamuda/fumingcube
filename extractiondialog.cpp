@@ -25,173 +25,285 @@
 #include "reagent.h"
 #include "textedit.h"
 #include "ui_extractiondialog.h"
-
-//
-// TODO: validate URL!!!!
-//
+#include <QCryptographicHash>
+#include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QStringListModel>
+#include "tag.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
-ExtractionDialog::ExtractionDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::ExtractionDialog ),
-    model( new ExtractionModel( this )) {
+ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     this->ui->setupUi( this );
 
-    // connect network manager
-    this->connect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
+    // make cache dir
+    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
+    const QDir dir( this->path());
+    if ( !dir.exists()) {
+        dir.mkpath( dir.absolutePath());
+        if ( !dir.exists())
+            return;
+    }
 
-    // connect wiki extraction action
-    this->connect( this->ui->extractButton, &QPushButton::clicked, [ this ]() {
-        if ( this->ui->urlEdit->text().isEmpty()) {
-            qCritical() << this->tr( "no url specified" );
+    this->ui->nameEdit->setText( Reagent::instance()->name( reagentId ));
+    auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
+    this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
+    checkName();
+
+    this->manager->connect( this->manager, &QNetworkAccessManager::finished, [ this ]( QNetworkReply *reply ) {
+        if ( reply->error()) {
+            this->ui->cidEdit->setText( this->tr( "Error: could not get a valid CID" ));
             return;
         }
 
-        NetworkManager::instance()->execute( this->ui->urlEdit->text(), NetworkManager::Properties );
-    } );
+        switch ( reply->request().attribute( QNetworkRequest::User ).toInt()) {
+        case CIDRequest:
+        {
+            this->cidList << QString( reply->readAll()).split( "\n" );
+            if ( this->cidList.isEmpty())
+                return;
 
-    // connect buttonBox
-    this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this ]() {
-        if ( this->reagentId() == Id::Invalid ) {
-            qCritical() << this->tr( "invalid reagent" );
-            return;
+            const QString cid = this->cidList.first();
+            this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
+            this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid )));
+            this->request.setAttribute( QNetworkRequest::User, DataRequest );
+            this->manager->get( this->request );
         }
+            break;
 
-        foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedIndexes()) {
-            const int row = index.row();
-            if ( row < 0 || row >= this->properties.count())
-                continue;
+        case DataRequest:
+        {
+            const QByteArray data( reply->readAll());
+            const QByteArray compressedData( qCompress( data ));
+            QFile file( this->cache());
+            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+                file.write( compressedData.constData(), compressedData.length());
+                file.close();
+            }
 
-            // NOTE: ugly, but works
-            const QString header( "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head></head><body style=\"font-family:'Times New Roman'; font-size:11pt; font-weight:400; font-style:normal;\">\n<p>" );
-            const QString footer( "</p></body></html>" );
-            const QString name( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->properties.at( row )).arg( footer )));
-            const QString html( TextEdit::stripHTML( QString( "%1%2%3" ).arg( header ).arg( this->values.at( row )).arg( footer )));
-
-            Property::instance()->add( name, Id::Invalid, html.toUtf8().constData(), this->reagentId());
+            this->readData( data );
         }
-    } );
-
-    // set model
-    this->ui->propertyView->setModel( this->model );
+            break;
+        }
+    }
+    );
 }
 
 /**
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
-    this->disconnect( this->ui->extractButton, &QPushButton::clicked, this, nullptr );
-    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
-    this->disconnect( NetworkManager::instance(), SIGNAL( finished( QString, NetworkManager::Type, QVariant, QByteArray )), this, SLOT( requestFinished( QString, NetworkManager::Type, QVariant, QByteArray )));
+    delete this->manager;
     delete this->ui;
-    delete this->model;
 }
 
 /**
- * @brief ExtractionDialog::setTemplateId
- * @param id
+ * @brief ExtractionDialog::readData
+ * @param uncompressed
  */
-void ExtractionDialog::setReagentId( const Id &id ) {
-    // set id
-    this->m_reagentId = id;
+void ExtractionDialog::readData( const QByteArray &uncompressed ) {
+    /**
+     * @brief findTag finds a TOCHeading in json document
+     */
+    std::function<void( const QJsonValue &, const QString &heading, QList<QJsonArray> &matches )> findTag;
+    findTag = [ &findTag ]( const QJsonValue &value, const QString &heading, QList<QJsonArray> &matches ) {
+        if ( value.isObject()) {
+            const QJsonObject object( value.toObject());
 
-    // set reagent url
-    if ( id != Id::Invalid ) {
-        Row row = Reagent::instance()->row( id );
-        if ( row == Row::Invalid )
-            return;
+            foreach ( const QString &key, object.keys()) {
+                const QJsonValue keyValue( object.value( key ));
 
-        const Id parentId = Reagent::instance()->parentId( row );
-        if ( parentId != Id::Invalid ) {
-            const Row parentRow = Reagent::instance()->row( parentId );
-            if ( parentRow != Row::Invalid )
-                row = parentRow;
+                if ( !QString::compare( key, "TOCHeading" )) {
+                    if ( !keyValue.isArray() && !keyValue.isObject()) {
+                        if ( !QString::compare( keyValue.toVariant().toString(), heading )) {
+                            if ( object.keys().contains( "Information" )) {
+                                const QJsonValue infoValue( object.value( "Information" ));
+                                if ( infoValue.isArray())
+                                    matches << infoValue.toArray();
+                            }
+                        }
+                    }
+                }
+
+                findTag( keyValue, heading, matches );
+            }
+        } else if ( value.isArray()) {
+            const QJsonArray array( value.toArray());
+
+            foreach ( const QJsonValue &arrayValue, array )
+                findTag( arrayValue, heading, matches );
+        }
+    };
+
+    /**
+     * @brief extractValues gets string or numberic values from json
+     */
+    auto extractValues = []( const QList<QJsonArray> &matches, const QString &name, const QString &pattern, QStringList &values ) {
+        foreach ( const QJsonArray &array, matches ) {
+            foreach ( const QJsonValue &info, array ) {
+                if ( info.isObject()) {
+                    const QJsonObject infoObject( info.toObject());
+
+                    if ( !name.isEmpty() && infoObject.keys().contains( "Name" )) {
+                        const QJsonValue nameValue( infoObject["Name"] );
+                        if ( !nameValue.isArray() && !nameValue.isObject()) {
+                            if ( QString::compare( nameValue.toString(), name ))
+                                continue;
+                        }
+                    }
+
+                    if ( infoObject.keys().contains( "Value" )) {
+                        const QJsonValue value( infoObject["Value"] );
+
+                        if ( value.isObject()) {
+                            const QJsonObject valueObject( value.toObject());
+                            QString units;
+                            if ( valueObject.keys().contains( "Unit" ))
+                                units = valueObject["Unit"].toVariant().toString();
+
+                            if ( valueObject.keys().contains( "Number" )) {
+                                const QJsonValue numberTag( valueObject["Number"] );
+                                if ( numberTag.isArray()) {
+                                    const QJsonArray numberArray( numberTag.toArray());
+                                    foreach ( const QJsonValue &number, numberArray )
+                                        values << QString( "%1 %2" ).arg( number.toDouble()).arg( qAsConst( units ));
+                                }
+                            } else if ( valueObject.keys().contains( "StringWithMarkup" )) {
+                                const QJsonValue stringTag( valueObject["StringWithMarkup"] );
+                                if ( stringTag.isArray()) {
+
+                                    const QJsonArray stringArray( stringTag.toArray());
+                                    foreach ( const QJsonValue &stringValue, stringArray ) {
+                                        if ( stringValue.isObject()) {
+                                            const QJsonObject stringObject( stringValue.toObject());
+                                            QStringList extra;
+                                            if ( stringObject.keys().contains( "Markup" )) {
+                                                const QJsonValue markupTag( stringObject["Markup"] );
+                                                if ( markupTag.isArray()) {
+                                                    const QJsonArray markupArray( markupTag.toArray());
+                                                    if ( markupArray.count()) {
+                                                        foreach ( const QJsonValue markupValue, markupArray ) {
+                                                            if ( markupValue.isObject()) {
+                                                                const QJsonObject markupObject( markupValue.toObject());
+
+                                                                if ( markupObject.keys().contains( "Type" )) {
+                                                                    const QJsonValue typeValue( markupObject["Type"] );
+                                                                    if ( !typeValue.isArray() && !typeValue.isObject()) {
+                                                                        if ( !QString::compare( typeValue.toString(), "PubChem Internal Link" )) {
+                                                                            continue;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                if ( markupObject.keys().contains( "Extra" )) {
+                                                                    const QJsonValue extraValue( markupObject["Extra"] );
+                                                                    if ( !extraValue.isArray() && !extraValue.isObject()) {
+                                                                        extra << extraValue.toString();
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if ( !extra.isEmpty()) {
+                                                values << extra.join( ", " );
+                                                continue;
+                                            }
+
+                                            if ( stringObject.keys().contains( "String" ))
+                                                values << QString( "%1" ).arg( stringObject["String"].toVariant().toString());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        this->ui->urlEdit->setText( QString( "https://en.wikipedia.org/wiki/%1" ).arg( Reagent::instance()->name( qAsConst( row ))).replace( " ", "_" ));
+        if ( !pattern.isEmpty()) {
+            const QRegularExpression re( pattern );
+            QStringList out;
+
+            int y = 0;
+            foreach ( const QString &value, values ) {
+                const QRegularExpressionMatch match( re.match( QString( value ).remove( QRegularExpression( "\\(USCG, \\d{4}\\)" )) ));
+                if ( match.hasMatch()) {
+                      const QString matched( match.captured( 1 ));
+                      out << matched.simplified();
+                }
+                y++;
+            }
+
+            values = out;
+        }
+
+        values.removeDuplicates();
+    };
+
+    const QJsonDocument document( QJsonDocument::fromJson( uncompressed ));
+    const QJsonValue value( document.isArray() ? QJsonValue( document.array()) : document.object());
+    auto getPropertyFromJson = [ value, findTag, extractValues ]( const QString &tagName, const QString &valueName = QString(), const QString &pattern = QString()) {
+        QList<QJsonArray> matches;
+        findTag( value, tagName, matches );
+        QStringList values;
+        extractValues( qAsConst( matches ), valueName, pattern, values );
+
+        return values;
+    };
+
+    QStringList properties;
+    for ( int y = 0; y < Tag::instance()->count(); y++ ) {
+        const QString script( Tag::instance()->script( static_cast<Row>( y )).toString());
+        if ( !script.isEmpty()) {
+            const QStringList args( script.split( ";" ));
+
+            if ( args.isEmpty())
+                continue;
+
+            const QString tagName( args.count() >= 1 ? args.at( 0 ) : "" );
+            const QString valueName( args.count() >= 2 ? args.at( 1 ) : "" );
+            const QString pattern( args.count() >= 3 ? args.at( 2 ) : "" );
+            const QStringList values( getPropertyFromJson( tagName, valueName, pattern ));
+
+            properties << Tag::instance()->name( static_cast<Row>( y )) + " " + values.join( " " );
+        }
     }
+
+    QStringListModel *model( new QStringListModel( properties ));
+    this->ui->propertyView->setModel( model );
 }
 
 /**
- * @brief ExtractionDialog::requestFinished
- * @param url
- * @param type
- * @param userData
- * @param data
- * @param error
+ * @brief ExtractionDialog::on_extractButton_clicked
  */
-void ExtractionDialog::requestFinished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data ) {
-    Q_UNUSED( url )
-    Q_UNUSED( userData )
-
-    /*if ( error ) {
-        qCritical() << this->tr( "error processing network request" );
+void ExtractionDialog::on_extractButton_clicked() {
+    this->m_cache = this->path() + "/" + QString( QCryptographicHash( QCryptographicHash::Md5 ).hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
+    if ( this->cache().isEmpty())
         return;
-    }*/
 
-    switch ( type ) {
-    case NetworkManager::Properties:
-    {
-        // clear previous entries
-        this->properties.clear();
-        this->values.clear();
+    if ( QFileInfo( this->cache()).exists()) {
+        this->ui->cidEdit->setText( this->tr( "Reading from cache" ));
 
-        auto extractFromWikipedia = [ this ]( const QString &buffer ) {
-            const QRegularExpression reTable( "(?:<table.+?(?=Identifiers))(.+?(?=Infobox&#160;references))", QRegularExpression::DotMatchesEverythingOption );
-            const QRegularExpressionMatch remTable( reTable.match( buffer ));
-            QString table( remTable.hasMatch() ? remTable.captured( 0 ) : "" );
-            QStringList plainList;
+        QFile file( this->cache());
+        if ( file.open( QIODevice::ReadOnly )) {
+            const QByteArray uncompressedData( qUncompress( file.readAll()));
+            this->readData( uncompressedData );
 
-            if ( table.isEmpty())
-                return QStringList();
+            file.close();
+        }
 
-            // strip html of useless tags
-            const QString stripped(
-                        table
-                        .replace( QRegularExpression( "((?:<\\/?(?:table|a|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" ), "" )
-                        .replace( QRegularExpression( "<sup.id=.+?(?=class=\\\"reference\\\").+?(?=\\/sup>)\\/sup>" ), "" )
-                        .replace( QRegularExpression( "<sup>&#160;Y<\\/sup>" ), "" )
-                        .replace( QRegularExpression( "style=.+?(?=>)" ), "" )
-                        .replace( "&#160;", " " )
-                        .replace( "&#x20;", " " )
-                        .replace( "\n", "#" )
-                        .replace( QRegularExpression( "InChI.+?(?=<)" ), "" )
-                        );
-
-            // match properties and their values
-            const QRegularExpression reProp( "<\\/tr>[\\s|#]{0,}<tr>[\\s|#]?<t\\w(?:\\sscope.+?(?=>)>|>)(.+?(?=<\\/t\\w>))<\\/t\\w>[\\s|#]{0,}<t.+?(?=>)>(.+?(?=<\\/t\\w>))<\\/t\\w>" );
-            QRegularExpressionMatchIterator i( reProp.globalMatch( stripped ));
-
-            // capture all unnecessary html tags
-            while ( i.hasNext()) {
-                const QRegularExpressionMatch match( i.next());
-
-                const QString property( match.captured( 1 ).replace( "#", "\n" ).simplified());
-                const QString value( match.captured( 2 ).replace( "#", "\n" ).simplified());
-                const QString plain( QString( property ).remove( QRegExp( "<[^>]*>" )));
-                const QString plainValue( QString( value ).remove( QRegExp( "<[^>]*>" )));
-
-                if ( plain.isEmpty() || !QString::compare( plain, "*" ) || !QString::compare( plain, "**" ) || plainValue.isEmpty())
-                    continue;
-
-                this->properties << property;
-                this->values << value;
-                plainList << plain;
-            }
-
-            return plainList;
-        };
-
-        this->model->reset( extractFromWikipedia( data ));
-    }
-        break;
-
-    case NetworkManager::BasicProperties:
-        break;
-
-    case NetworkManager::NoType:
-        qCritical() << this->tr( "unknown network request type" );
         return;
     }
+
+    this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
+    this->request.setAttribute( QNetworkRequest::User, CIDRequest );
+    this->manager->get( this->request );
 }

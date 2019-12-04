@@ -57,6 +57,9 @@
 //          CAS, MolecularWeight, formula (not much else)
 //     or parse https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/CID/JSON (CID=14798 for sodium hydroxide)
 //     for additional properties such as solubility, etc.
+//     https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/14798/JSON?heading=Molecular+Weight
+//   - for now we use built in property extractor from PubChem
+//     in the future this should be fully scripted (per tag) and from multiple sources
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list
@@ -66,6 +69,7 @@
 //   - add additional functions such as mol( mass, reagent ) which returns:
 //     mol = mass * assay( reagent ) / molarMass( reagent )
 //   - add any as batch name (a whildcard that chooses any batch with the property)
+//   - check API
 //
 //  misc:
 //   - store images (formulas) fullsize but rescale in property view

@@ -314,9 +314,8 @@ void PropertyDock::on_addPropButton_clicked() {
     } );
 
     // add an option to get properties from the internet
-    menu.addAction( this->tr( "Extract properties from Wikipedia" ), [ this, reagentId ]() {
-        ExtractionDialog ed( this );
-        ed.setReagentId( reagentId );
+    menu.addAction( this->tr( "Get properties from the internet" ), [ this, reagentId ]() {
+        ExtractionDialog ed( this, reagentId );
         ed.exec();
     } );
 
