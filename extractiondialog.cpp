@@ -365,7 +365,9 @@ void ExtractionDialog::on_extractButton_clicked() {
         return;
     }
 
-    this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
+
+    this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
+    //this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
     this->request.setAttribute( QNetworkRequest::User, CIDRequest );
     this->manager->get( this->request );
 }
@@ -390,7 +392,7 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
 
     auto parseGHS = []( const QStringList &list ) {
         QStringList parms;
-        foreach ( const QString &parm, list ) {
+        /*foreach ( const QString &parm, list ) {
             if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
                 parms << "GHS01";
             if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
@@ -409,7 +411,7 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 parms << "GHS08";
             if ( parm.contains( QRegularExpression( "[Ee]nvironmental\\s[Hh]azard" )))
                 parms << "GHS08";
-        }
+        }*/
         return qAsConst( parms );
     };
 
@@ -439,14 +441,14 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
         //this->label->setText( this->displayValues.first());
         //this->layout->addWidget( this->label );
         this->layout->addWidget( this->nfpa );
-        this->nfpa->update( displayValues.first().split( "-" ));
+    //    this->nfpa->update( displayValues.first().split( "-" ));
         break;
 
     case Tag::GHS:
         //this->label->setText( this->displayValues.first());
         //this->layout->addWidget( this->label );
         this->layout->addWidget( this->ghs );
-        this->ghs->update( parseGHS( this->propertyValues.first()));
+       //this->ghs->update( parseGHS( this->propertyValues.first()));
         break;
 
     case Tag::State:
@@ -477,11 +479,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 break;
 
             case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
+                //this->nfpa->update( this->propertyValues[this->position()] );
                 break;
 
             case Tag::GHS:
-                this->ghs->update( parseGHS( this->propertyValues.first()));
+                //.this->ghs->update( parseGHS( this->propertyValues.first()));
                 break;
 
             case Tag::State:
@@ -507,11 +509,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 break;
 
             case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
+                //this->nfpa->update( this->propertyValues[this->position()] );
                 break;
 
             case Tag::GHS:
-                this->ghs->update( parseGHS( this->propertyValues.first()));
+               // this->ghs->update( parseGHS( this->propertyValues.first()));
                 break;
 
             case Tag::State:

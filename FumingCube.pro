@@ -118,5 +118,4 @@ RESOURCES += \
     resources.qrc
 
 win32:INCLUDEPATH += C:/OpenSSL-Win64/include/openssl
-win32:LIBS += -LC:/OpenSSL-Win64 -lssl32 -leay32
-
+win32:LIBS += -LC:/OpenSSL-Win64/lib -llibeay32 -lssleay32
