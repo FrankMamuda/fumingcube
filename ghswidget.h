@@ -68,6 +68,7 @@ public slots:
         this->m_parameters = parms;
         this->repaint();
     }
+    void setLinear() { this->m_linear = true; }
 
 protected:
     void paintEvent( QPaintEvent * ) override {
@@ -94,6 +95,9 @@ protected:
      * @return
      */
     QSize sizeHint() const override {
+        if ( this->m_linear )
+            return QSize( this->scale, this->scale );
+
         const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
         if ( sectionSize == 0 )
             return QSize();
@@ -112,4 +116,5 @@ protected:
 private:
     QMap<QString, QPixmap> pictograms;
     mutable int m_iconsPerRow = 0;
+    bool m_linear = false;
 };

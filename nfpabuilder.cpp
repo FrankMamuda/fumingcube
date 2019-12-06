@@ -31,8 +31,8 @@ NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDi
 
     if ( parameters.count() == 4 ) {
         this->ui->nfpaWidget->update( parameters );
-        this->ui->flameSlider->setValue( parameters.at( 0 ).toInt());
-        this->ui->healthSlider->setValue( parameters.at( 1 ).toInt());
+        this->ui->healthSlider->setValue( parameters.at( 0 ).toInt());
+        this->ui->flameSlider->setValue( parameters.at( 1 ).toInt());
         this->ui->reactSlider->setValue( parameters.at( 2 ).toInt());
 
         const QString hazard( parameters.at( 3 ));
@@ -111,8 +111,8 @@ void NFPABuilder::updateNFPA() {
     }
 
     this->ui->nfpaWidget->update( QString( "%1 %2 %3 %4" )
-                                  .arg( this->ui->flameSlider->value())
                                   .arg( this->ui->healthSlider->value())
+                                  .arg( this->ui->flameSlider->value())
                                   .arg( this->ui->reactSlider->value())
                                   .arg( qAsConst( hazard )).split( " " )
                                   );

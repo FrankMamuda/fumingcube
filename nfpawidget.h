@@ -81,9 +81,9 @@ protected:
         // draw numbers
         // TODO: put this as a static member
         const QMap<int,qreal> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.35 }, { 4, this->scale * 0.22 } };
-        const QList<QRectF> rects( QList<QRectF>()<<
-                               QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
+        const QList<QRectF> rects( QList<QRectF>() <<
                                    QRectF( -vScale, -vScale * 0.5, vScale, vScale ) <<
+                                   QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
                                    QRectF( 0, -vScale * 0.5, vScale, vScale ) <<
                                    QRectF( -vScale * 0.5, 0, vScale, vScale )
                                );

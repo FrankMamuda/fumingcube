@@ -23,8 +23,14 @@
  * includes
  */
 #include <QDialog>
+#include <QLabel>
+#include <QLayout>
+#include <qtoolbutton.h>
 #include "networkmanager.h"
 #include "table.h"
+#include "tag.h"
+#include "ghswidget.h"
+#include "nfpawidget.h"
 
 //
 // classes
@@ -37,6 +43,42 @@ class ExtractionModel;
 namespace Ui {
 class ExtractionDialog;
 }
+
+/**
+ * @brief The LRButtons class
+ */
+class LRButtons : public QWidget {
+    Q_OBJECT
+
+public:
+    explicit LRButtons( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Tag::Types &type = Tag::Text );
+    ~LRButtons() override {
+        this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
+        this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
+
+        delete this->ghs;
+        delete this->nfpa;
+        delete this->label;
+        delete this->left;
+        delete this->right;
+        delete this->layout;
+    }
+
+    int position() const { return this->m_position; }
+
+private:
+    int m_position = -1;
+    QMap<int, QString> displayValues;
+    QMap<int, QStringList> propertyValues;
+    QLabel *label = new QLabel();
+    QToolButton *left = new QToolButton();
+    QToolButton *right = new QToolButton();
+    QHBoxLayout *layout = new QHBoxLayout();
+
+    // FIXME: don't initialize these if not needed
+    NFPAWidget *nfpa = new NFPAWidget();
+    GHSWidget *ghs = new GHSWidget();
+};
 
 /**
  * @brief The ExtractionDialog class
