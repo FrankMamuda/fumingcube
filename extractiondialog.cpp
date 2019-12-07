@@ -289,11 +289,20 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
                 }
 
                 if ( !out.contains( captured ) && !captured.isEmpty())
-                    out.append( captured );
+                    out.append( captured );          
             }
         } else {
             out << values;
         }
+
+
+        // de-prioritize imperial temperature units
+        std::sort( out.begin(), out.end(), []( const QStringList &l, const QStringList &r ) {
+            if ( l.isEmpty() || r.isEmpty())
+                return false;
+
+            return l.first().contains( "°F" ) < r.first().contains( "°F" );
+        } );
     };
 
     const QJsonDocument document( QJsonDocument::fromJson( uncompressed ));
