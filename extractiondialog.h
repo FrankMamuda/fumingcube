@@ -45,14 +45,14 @@ class ExtractionDialog;
 }
 
 /**
- * @brief The LRButtons class
+ * @brief The PropertyValueWidget class
  */
-class LRButtons : public QWidget {
+class PropertyValueWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit LRButtons( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Tag::Types &type = Tag::Text );
-    ~LRButtons() override {
+    explicit PropertyValueWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Id &tagId = Id::Invalid );
+    ~PropertyValueWidget() override {
         this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
         this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
 
@@ -65,6 +65,35 @@ public:
     }
 
     int position() const { return this->m_position; }
+    Id tagId() const { return this->m_tagId; }
+
+    static QStringList parseGHS( const QStringList &list ) {
+        QStringList parms;
+        foreach ( const QString &parm, list ) {
+            if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
+                parms << "GHS01";
+            if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
+                parms << "GHS02";
+            if ( parm.contains( QRegularExpression( "[Oo]xidizing" )))
+                parms << "GHS03";
+            if ( parm.contains( QRegularExpression( "[Cc]ompressed\\s[Gg]as" )))
+                parms << "GHS04";
+            if ( parm.contains( QRegularExpression( "[Cc]orrosive" )))
+                parms << "GHS05";
+            if ( parm.contains( QRegularExpression( "[Tt]oxic" )))
+                parms << "GHS06";
+            if ( parm.contains( QRegularExpression( "[Hh]armful" )) || parm.contains( QRegularExpression( "[Ii]rritant" )))
+                parms << "GHS07";
+            if ( parm.contains( QRegularExpression( "[Hh]ealth\\s[Hh]azard" )))
+                parms << "GHS08";
+            if ( parm.contains( QRegularExpression( "[Ee]nvironmental\\s[Hh]azard" )))
+                parms << "GHS09";
+        }
+        return qAsConst( parms );
+    }
+
+public slots:
+    void add( const Id &id );
 
 private:
     int m_position = -1;
@@ -78,6 +107,8 @@ private:
     // FIXME: don't initialize these if not needed
     NFPAWidget *nfpa = new NFPAWidget();
     GHSWidget *ghs = new GHSWidget();
+
+    Id m_tagId = Id::Invalid;
 };
 
 /**

@@ -41,6 +41,7 @@
  */
 ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     this->ui->setupUi( this );
+    this->ui->propertyView->verticalHeader()->hide();
 
     // make cache dir
     this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
@@ -55,6 +56,24 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
     this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();
+
+    auto addProperties = [ this ]( bool all = false ) {
+        if ( all )
+            this->ui->propertyView->selectAll();
+
+
+        foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedRows()) {
+            const int row = index.row();
+            PropertyValueWidget *widget( qobject_cast<PropertyValueWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
+            if ( widget != nullptr )
+                widget->add( this->reagentId());
+        }
+
+        this->accept();
+    };
+
+    this->ui->addAllButton->connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
+    this->ui->addSelectedButton->connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
 
     this->manager->connect( this->manager, &QNetworkAccessManager::finished, [ this ]( QNetworkReply *reply ) {
         if ( reply->error()) {
@@ -99,6 +118,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
+    this->manager->disconnect( this->manager, &QNetworkAccessManager::finished, this, nullptr );
+
     delete this->manager;
     delete this->ui;
 }
@@ -243,15 +264,13 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
             foreach ( const QString &value, values ) {
                 QStringList captured;
 
-                const QString stripped( QString( value ).remove( QRegularExpression( "\\(USCG, \\d{4}\\)" )));
+                const QString stripped( QString( value ).remove( QRegularExpression( "\\(\\w+, \\d{4}\\)" )));
                 auto matcher = [ &captured, stripped, re, global, value ]( const QRegularExpressionMatch &match ) {
                     if ( match.hasMatch()) {
                         int k = 0;
 
-                        if ( global ) {
-                            // captured << value;
+                        if ( global )
                             k = 1;
-                        }
 
                         for ( ; k < match.capturedTexts().count(); k++ ) {
                             const QString matched( match.captured( k ).simplified());
@@ -261,7 +280,7 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
                 };
 
                 if ( global ) {
-                    QRegularExpressionMatchIterator i( re.globalMatch( QString( value ).remove( QRegularExpression( "\\(USCG, \\d{4}\\)" )) ));
+                    QRegularExpressionMatchIterator i( re.globalMatch( stripped ));
                     captured << "";
                     while ( i.hasNext())
                         matcher( i.next());
@@ -288,7 +307,6 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
         return values;
     };
 
-    QStringList properties;
     int rows = 0;
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const Row row = static_cast<Row>( y );
@@ -304,43 +322,28 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
             const QString valueName( args.count() >= 2 ? args.at( 1 ) : "" );
             const QString pattern( args.count() >= 3 ? args.at( 2 ) : "" );
             const bool global( args.count() >= 4 ? args.at( 3 ).toInt() : false );
-            const QList<QStringList> values( getPropertyFromJson( tagName, valueName, pattern, global ));
 
+            const QList<QStringList> values( getPropertyFromJson( tagName, valueName, pattern, global ));
             if ( values.isEmpty())
                 continue;
 
-            /* QStringList displayValues;
-            foreach ( const QStringList &list, values ) {
-                if ( list.isEmpty())
-                    continue;
+           /* if ( Tag::instance()->type( row ) == Tag::GHS ) {
+                qDebug() << values << global;
 
-                displayValues << list.first();
             }*/
 
-            //properties << Tag::instance()->name( static_cast<Row>( y )) + ": " + qAsConst( out );
             this->ui->propertyView->setRowCount( rows + 1 );
-            // this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( Tag::instance()->name( static_cast<Row>( y ))));
 
-            LRButtons *group( new LRButtons( nullptr, values, Tag::instance()->type( row )));
+            PropertyValueWidget *group( new PropertyValueWidget( nullptr, values, Tag::instance()->id( row )));
             this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( Tag::instance()->name( row )));
             this->ui->propertyView->setCellWidget( rows, 1, group );
 
-            // FIXME: bad sizeHint on GHSWidget
-            //if ( Tag::instance()->type( row ) == Tag::GHS )
-            //    this->ui->propertyView->setRowHeight( rows, GHSWidget::scale );
-
-            qDebug() << Tag::instance()->name( row );
             rows++;
         }
     }
 
     this->ui->propertyView->resizeRowsToContents();
-    this->ui->propertyView->resizeColumnsToContents();
-   // this->ui->propertyView->resizeRowsToContents();
-
-
-    //QStringListModel *model( new QStringListModel( properties ));
-    //this->ui->propertyView->setModel( model );
+    //this->ui->propertyView->resizeColumnsToContents();
 }
 
 /**
@@ -373,11 +376,18 @@ void ExtractionDialog::on_extractButton_clicked() {
 }
 
 /**
- * @brief LRButtons::LRButtons
+ * @brief PropertyValueWidget::PropertyValueWidget
  * @param parent
  * @param values
+ * @param type
  */
-LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const Tag::Types &type ) : QWidget( parent ) {
+PropertyValueWidget::PropertyValueWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget( parent ) {
+    this->m_tagId = tagId;
+    if ( this->tagId() == Id::Invalid )
+        return;
+
+    const Tag::Types &type = Tag::instance()->type( tagId );
+
     this->left->setIcon( QIcon( ":/icons/left" ));
     this->right->setIcon( QIcon( ":/icons/right" ));
     this->left->setIconSize( QSize( 8, 16 ));
@@ -385,35 +395,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
     this->layout->setContentsMargins( 0, 0, 0, 0 );
     this->layout->setSpacing( 0 );
 
+
     if ( values.isEmpty())
         return;
 
     this->ghs->setLinear();
-
-    auto parseGHS = []( const QStringList &list ) {
-        QStringList parms;
-        /*foreach ( const QString &parm, list ) {
-            if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
-                parms << "GHS01";
-            if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
-                parms << "GHS02";
-            if ( parm.contains( QRegularExpression( "[Oo]xidizing" )))
-                parms << "GHS03";
-            if ( parm.contains( QRegularExpression( "[Cc]ompressed\\s[Gg]as" )))
-                parms << "GHS04";
-            if ( parm.contains( QRegularExpression( "[Cc]orrosive" )))
-                parms << "GHS05";
-            if ( parm.contains( QRegularExpression( "[Tt]oxic" )))
-                parms << "GHS06";
-            if ( parm.contains( QRegularExpression( "[Hh]armful" )) || parm.contains( QRegularExpression( "[Ii]rritant" )))
-                parms << "GHS07";
-            if ( parm.contains( QRegularExpression( "[Hh]ealth\\s[Hh]azard" )))
-                parms << "GHS08";
-            if ( parm.contains( QRegularExpression( "[Ee]nvironmental\\s[Hh]azard" )))
-                parms << "GHS08";
-        }*/
-        return qAsConst( parms );
-    };
 
     int index = 0;
     for ( int y = 0; y < values.count(); y++ ) {
@@ -425,6 +411,9 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
         this->propertyValues[index] = valueList;
         index++;
     }
+
+    if ( displayValues.isEmpty() || propertyValues.isEmpty())
+        return;
 
     switch ( type ) {
     case Tag::Text:
@@ -438,17 +427,14 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
         break;
 
     case Tag::NFPA:
-        //this->label->setText( this->displayValues.first());
-        //this->layout->addWidget( this->label );
         this->layout->addWidget( this->nfpa );
-    //    this->nfpa->update( displayValues.first().split( "-" ));
+        this->nfpa->setScale( 16 );
+        this->nfpa->update( propertyValues.first());
         break;
 
     case Tag::GHS:
-        //this->label->setText( this->displayValues.first());
-        //this->layout->addWidget( this->label );
         this->layout->addWidget( this->ghs );
-       //this->ghs->update( parseGHS( this->propertyValues.first()));
+        this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues.first()));
         break;
 
     case Tag::State:
@@ -458,10 +444,10 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
 
     this->m_position = 0;
 
-    if ( this->displayValues.count() > 2 ) {
+    if ( this->displayValues.count() >= 2 ) {
         this->layout->addWidget( this->left );
         this->layout->addWidget( this->right );
-        this->left->connect( this->left, &QToolButton::pressed, [ this, type, parseGHS ]() {
+        this->left->connect( this->left, &QToolButton::pressed, [ this, type ]() {
             if ( this->position() == -1 )
                 return;
 
@@ -479,11 +465,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 break;
 
             case Tag::NFPA:
-                //this->nfpa->update( this->propertyValues[this->position()] );
+                this->nfpa->update( this->propertyValues[this->position()] );
                 break;
 
             case Tag::GHS:
-                //.this->ghs->update( parseGHS( this->propertyValues.first()));
+                this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ));
                 break;
 
             case Tag::State:
@@ -491,11 +477,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 return;
             }
         } );
-        this->right->connect( this->right, &QToolButton::pressed, [ this, type, parseGHS ]() {
+        this->right->connect( this->right, &QToolButton::pressed, [ this, type ]() {
             if ( this->position() == -1 )
                 return;
 
-            if ( this->position() + 1 < this->displayValues.count() - 1 )
+            if ( this->position() + 1 < this->displayValues.count())
                 this->m_position++;
             else
                 this->m_position = 0;
@@ -509,11 +495,11 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
                 break;
 
             case Tag::NFPA:
-                //this->nfpa->update( this->propertyValues[this->position()] );
+                this->nfpa->update( this->propertyValues[this->position()] );
                 break;
 
             case Tag::GHS:
-               // this->ghs->update( parseGHS( this->propertyValues.first()));
+                this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ));
                 break;
 
             case Tag::State:
@@ -525,3 +511,33 @@ LRButtons::LRButtons( QWidget *parent, const QList<QStringList> &values, const T
 
     this->setLayout( this->layout );
 }
+
+/**
+ * @brief PropertyValueWidget::add
+ */
+void PropertyValueWidget::add( const Id &id ) {
+    if ( id == Id::Invalid )
+        return;
+
+    switch ( Tag::instance()->type( this->tagId())) {
+    case Tag::Text:
+    case Tag::Integer:
+    case Tag::Real:
+    case Tag::CAS:
+        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].first(), id );
+        break;
+
+    case Tag::NFPA:
+        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].join( " " ), id );
+        break;
+
+    case Tag::GHS:
+        Property::instance()->add( QString(), this->tagId(), PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ).join( " " ), id );
+        break;
+
+    case Tag::State:
+    case Tag::NoType:
+        return;
+    }
+}
+

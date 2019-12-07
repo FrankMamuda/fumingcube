@@ -317,6 +317,7 @@ void PropertyDock::on_addPropButton_clicked() {
     menu.addAction( this->tr( "Get properties from the internet" ), [ this, reagentId ]() {
         ExtractionDialog ed( this, reagentId );
         ed.exec();
+        this->updateView();
     } );
 
     // display the menu

@@ -172,7 +172,7 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
     const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
 
     // apply sql filter
-    Property::instance()->setFilter( QString( "( %1=%2 ) or ( %1=%3 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
+    Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 ) or ( %1=%3 and %1>-1 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
                                      .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
                                      .arg( static_cast<int>( reagentId ))                            // 2
                                      .arg( static_cast<int>( parentId ))                             // 3

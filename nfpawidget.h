@@ -34,11 +34,12 @@
  */
 class NFPAWidget final : public PropertyWidget {
 public:
-    static constexpr const qreal scale = 32;
+    //static constexpr const qreal defaultScale = 32;
     explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyWidget( parent, parms ) {
         this->update( parms );
     }
-    QSize size() const { return this->sizeHint(); }
+    //QSize size() const { return this->sizeHint(); }
+    int scale() const { return this->m_scale; }
 
 public slots:
     void update( const QStringList &parms ) override {
@@ -49,9 +50,11 @@ public slots:
         this->repaint();
     }
 
+    void setScale( int scale = 32 ) { this->m_scale = scale; }
+
 protected:
     void paintEvent( QPaintEvent * ) override {
-        const qreal vScale = qSqrt( 2 * ( this->scale * this->scale ));
+        const qreal vScale = qSqrt( 2 * ( this->scale() * this->scale()));
 
         // translate painter and rotate it by 45 degrees
         QPainter painter( this );
@@ -61,18 +64,18 @@ protected:
         // draw rects
         painter.setPen( QPen( Qt::black, 1 ));
         painter.setBrush( QColor::fromRgb( 255, 102, 102 ));
-        painter.drawRect( QRectF( -this->scale, -this->scale, this->scale, this->scale ));
+        painter.drawRect( QRectF( -this->scale(), -this->scale(), this->scale(), this->scale() ));
         painter.setBrush( Qt::white );
-        painter.drawRect( QRectF( 0,      0,      this->scale, this->scale ));
+        painter.drawRect( QRectF( 0,      0,      this->scale(), this->scale() ));
         painter.setBrush( QColor::fromRgb( 102, 145, 255 ));
-        painter.drawRect( QRectF( -this->scale, 0,      this->scale, this->scale ));
+        painter.drawRect( QRectF( -this->scale(), 0,      this->scale(), this->scale() ));
         painter.setBrush( QColor::fromRgb( 252, 255, 102 ));
-        painter.drawRect( QRectF( 0,      -this->scale, this->scale, this->scale ));
+        painter.drawRect( QRectF( 0,      -this->scale(), this->scale(), this->scale() ));
 
         // draw outer grid
         painter.setBrush( Qt::transparent );
         painter.setPen( QPen( Qt::black, 1.2 ));
-        painter.drawRect( QRectF( -this->scale, -this->scale, this->scale * 2, this->scale * 2 ));
+        painter.drawRect( QRectF( -this->scale(), -this->scale(), this->scale() * 2, this->scale() * 2 ));
 
         // reset transformations
         painter.resetTransform();
@@ -80,7 +83,7 @@ protected:
 
         // draw numbers
         // TODO: put this as a static member
-        const QMap<int,qreal> scales { { 0, 0 }, { 1, this->scale * 0.5 }, { 2, this->scale * 0.42 }, { 3, this->scale * 0.35 }, { 4, this->scale * 0.22 } };
+        const QMap<int,qreal> scales { { 0, 0 }, { 1, this->scale() * 0.5 }, { 2, this->scale() * 0.42 }, { 3, this->scale() * 0.35 }, { 4, this->scale() * 0.22 } };
         const QList<QRectF> rects( QList<QRectF>() <<
                                    QRectF( -vScale, -vScale * 0.5, vScale, vScale ) <<
                                    QRectF( -vScale * 0.5, -vScale, vScale, vScale ) <<
@@ -97,7 +100,7 @@ protected:
                 if ( !QString::compare( this->parameters().at( y ), "W" ))
                     font.setStrikeOut( true );
 
-                font.setPointSize(( y == 3 ) ? static_cast<int>( scales[parm.length()] ) : static_cast<int>( this->scale * 0.5 ));
+                font.setPointSize(( y == 3 ) ? static_cast<int>( scales[parm.length()] ) : static_cast<int>( this->scale() * 0.5 ));
                 painter.setFont( font );
             }
 
@@ -111,7 +114,10 @@ protected:
      * @return
      */
     QSize sizeHint() const override {
-        const qreal vScale = sqrt( 2 * ( this->scale * this->scale ));
+        const qreal vScale = sqrt( 2 * ( this->scale() * this->scale() ));
         return QSizeF( vScale * 2, vScale * 2 ).toSize();
     }
+
+private:
+    int m_scale = 32;
 };

@@ -61,6 +61,7 @@
 //     https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
 //  - for now we use built in property extractor from PubChem
 //     in the future this should be fully scripted (per tag) and from multiple sources
+//  - fix negative values from extraction (melting point, etc.)
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list

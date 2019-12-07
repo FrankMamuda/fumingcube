@@ -95,8 +95,10 @@ protected:
      * @return
      */
     QSize sizeHint() const override {
-        if ( this->m_linear )
-            return QSize( this->scale, this->scale );
+        if ( this->m_linear ) {
+            this->m_iconsPerRow = 9;
+            return QSize( this->scale * this->parameters().count(), this->scale );
+        }
 
         const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
         if ( sectionSize == 0 )
@@ -111,6 +113,14 @@ protected:
             height += this->scale;
 
         return QSize( this->parameters().count() * this->scale, height );
+    }
+
+    /**
+     * @brief minimumSizeHint
+     * @return
+     */
+    QSize minimumSizeHint() const override {
+        return this->sizeHint();
     }
 
 private:
