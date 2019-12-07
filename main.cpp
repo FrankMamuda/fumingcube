@@ -29,6 +29,7 @@
 #include "property.h"
 #include "tag.h"
 #include "script.h"
+#include "reagentdock.h"
 #ifdef Q_OS_LINUX
 #include "reagentdock.h"
 #include "propertydock.h"
@@ -206,6 +207,9 @@ int main( int argc, char *argv[] ) {
     ReagentDock::instance()->setVisible( ReagentDock::instance()->isVisible());
     PropertyDock::instance()->setVisible( PropertyDock::instance()->isVisible());
 #endif
+
+    // restore last reagent selection
+    ReagentDock::instance()->restoreIndex();
 
     return a.exec();
 }

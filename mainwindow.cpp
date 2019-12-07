@@ -59,10 +59,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
-
-    // resture last reagent selection
-    // FIXME: broken for now
-    ReagentDock::instance()->restoreIndex();
 }
 
 /**

@@ -515,3 +515,39 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     // enable updates
     this->ui->propertyView->setUpdatesEnabled( true );
 }
+
+/**
+ * @brief PropertyDock::on_propertyView_doubleClicked
+ * @param index
+ */
+void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
+    if ( !index.isValid())
+        return;
+
+    const Row row = Property::instance()->row( index );
+    const Id tagId = Property::instance()->tagId( row );
+    if ( tagId == Id::Invalid )
+        return;
+
+    const Tag::Types type = Tag::instance()->type( tagId );
+    const QString functionName( Tag::instance()->function( tagId ));
+
+    if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
+            QString parents;
+
+            const Id reagentId = Property::instance()->reagentId( row );
+            if ( reagentId == Id::Invalid )
+                return;
+
+            const Id parentId = Reagent::instance()->parentId( reagentId );
+            if ( parentId != Id::Invalid ) {
+                parents = QString( "\"%1\", \"%2\"" ).arg( Reagent::instance()->alias( parentId )).arg( Reagent::instance()->name( reagentId ));
+                qDebug() << "has parent";
+            } else {
+                parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
+            }
+
+            QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
+            calc->setText( calc->text().append( QString( " %1( %2 )" ).arg( functionName ).arg( qAsConst( parents ))));
+    }
+}
