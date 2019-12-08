@@ -292,7 +292,8 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
                     out.append( captured );
             }
         } else {
-            out << values;
+            foreach ( const QString &value, values )
+                out << ( QStringList() << value << value );
         }
 
 

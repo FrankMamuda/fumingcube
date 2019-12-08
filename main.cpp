@@ -199,17 +199,28 @@ int main( int argc, char *argv[] ) {
         return 0;
     }
 
-    // set icon theme
-    QIcon::setThemeName( "light" );
+    bool darkMode = false;
+
 
 #ifdef Q_OS_WIN
-#if 0
     if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool()) {
-        QIcon::setThemeName( "dark" );
+        darkMode = true;
+        // TODO: apply dark palette for windows
+    }
+#else
+    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 ) {
+        darkMode = true;
+
+#ifdef Q_OS_LINUX
+        // TODO: apply dark palette for linux (macOS sets dark mode natively)
+#endif
     }
 #endif
-#endif
 
+    // set icon theme
+    QIcon::setThemeName( darkMode ? "dark" : "light" );
+
+    // show main window
     MainWindow::instance()->show();
     MainWindow::instance()->scrollToBottom();
 
