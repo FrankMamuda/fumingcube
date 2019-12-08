@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Property extraction</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="extract"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="3" column="0" colspan="4">
     <widget class="QGroupBox" name="propsGroup">
@@ -83,6 +86,10 @@
         <property name="text">
          <string>Get CID and retrieve properties</string>
         </property>
+        <property name="icon">
+         <iconset theme="extract">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
        </widget>
       </item>
      </layout>
@@ -109,8 +116,8 @@
         <string>Add all</string>
        </property>
        <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+        <iconset theme="add">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -120,8 +127,8 @@
         <string>Add selected</string>
        </property>
        <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/icons/star</normaloff>:/icons/star</iconset>
+        <iconset theme="star">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -131,8 +138,8 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/icons/close</normaloff>:/icons/close</iconset>
+        <iconset theme="close">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -140,9 +147,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>cancelButton</sender>

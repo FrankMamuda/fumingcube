@@ -11,8 +11,7 @@
    </rect>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/reagent</normaloff>:/icons/reagent</iconset>
+   <iconset theme="reagent"/>
   </property>
   <property name="allowedAreas">
    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -51,8 +50,8 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/find</normaloff>:/icons/find</iconset>
+       <iconset theme="find">
+        <normaloff>.</normaloff>.</iconset>
       </property>
      </widget>
     </item>
@@ -62,16 +61,16 @@
     <item row="2" column="1">
      <widget class="QToolButton" name="addButton">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+       <iconset theme="add">
+        <normaloff>.</normaloff>.</iconset>
       </property>
      </widget>
     </item>
     <item row="2" column="3">
      <widget class="QToolButton" name="removeButton">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+       <iconset theme="remove">
+        <normaloff>.</normaloff>.</iconset>
       </property>
      </widget>
     </item>
@@ -97,16 +96,14 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
+       <iconset theme="edit">
+        <normaloff>.</normaloff>.</iconset>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

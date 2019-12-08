@@ -14,8 +14,7 @@
    <string>Property editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/property</normaloff>:/icons/property</iconset>
+   <iconset theme="property"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -61,7 +60,7 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="TextEdit" name="name" native="true">
+             <widget class="TextEdit" name="name">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -80,12 +79,12 @@
               <property name="inputMethodHints">
                <set>Qt::ImhNone</set>
               </property>
-              <property name="html" stdset="0">
+              <property name="html">
                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -105,7 +104,7 @@ p, li { white-space: pre-wrap; }
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <widget class="TextEdit" name="value" native="true">
+             <widget class="TextEdit" name="value">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -120,7 +119,7 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
-        <widget class="QDialogButtonBox" name="buttonBox">
+        <widget class="ButtonBox" name="buttonBox">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -267,8 +266,7 @@ p, li { white-space: pre-wrap; }
      </action>
      <action name="actionColour">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/colour</normaloff>:/icons/colour</iconset>
+       <iconset theme="colour"/>
       </property>
       <property name="text">
        <string>C</string>
@@ -279,8 +277,7 @@ p, li { white-space: pre-wrap; }
      </action>
      <action name="actionImage">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/image</normaloff>:/icons/image</iconset>
+       <iconset theme="image"/>
       </property>
       <property name="text">
        <string>Image</string>
@@ -294,8 +291,7 @@ p, li { white-space: pre-wrap; }
        <bool>true</bool>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/clean</normaloff>:/icons/clean</iconset>
+       <iconset theme="clean"/>
       </property>
       <property name="text">
        <string>Clean HTML</string>
@@ -303,8 +299,7 @@ p, li { white-space: pre-wrap; }
      </action>
      <action name="actionGHS">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/hazard</normaloff>:/icons/hazard</iconset>
+       <iconset theme="hazard"/>
       </property>
       <property name="text">
        <string>GHS</string>
@@ -316,30 +311,20 @@ p, li { white-space: pre-wrap; }
     </widget>
    </item>
   </layout>
-  <action name="actionadad">
-   <property name="text">
-    <string>adad</string>
-   </property>
-   <property name="toolTip">
-    <string>dad</string>
-   </property>
-  </action>
-  <action name="action3131231">
-   <property name="text">
-    <string>3131231</string>
-   </property>
-  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonBox</class>
+   <extends>QDialogButtonBox</extends>
+   <header>buttonbox.h</header>
+  </customwidget>
   <customwidget>
    <class>TextEdit</class>
    <extends>QTextEdit</extends>
    <header>textedit.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

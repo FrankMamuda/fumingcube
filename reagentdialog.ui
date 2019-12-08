@@ -7,15 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>111</height>
+    <height>113</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Add</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/reagent</normaloff>:/icons/reagent</iconset>
+   <iconset theme="reagent"/>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="1" column="0">
@@ -39,7 +38,7 @@
     <widget class="QLineEdit" name="aliasEdit"/>
    </item>
    <item row="5" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="ButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -50,9 +49,14 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonBox</class>
+   <extends>QDialogButtonBox</extends>
+   <header>buttonbox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Insert image</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="image"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QFrame" name="frame">

@@ -115,7 +115,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    resources.qrc
+    resources.qrc \
+    dark.qrc \
+    light.qrc
 
 win32:INCLUDEPATH += C:/OpenSSL-Win64/include/openssl
 win32:LIBS += -LC:/OpenSSL-Win64/lib -llibeay32 -lssleay32

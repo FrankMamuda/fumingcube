@@ -14,8 +14,7 @@
    <string>Tag editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/clean</normaloff>:/icons/clean</iconset>
+   <iconset theme="clean"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -100,7 +99,7 @@
             <widget class="QLineEdit" name="functionEdit"/>
            </item>
            <item row="3" column="3">
-            <widget class="TextEdit" name="unitsEdit" native="true">
+            <widget class="TextEdit" name="unitsEdit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -244,8 +243,7 @@
           <string>Close</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
-           <normaloff>:/icons/close</normaloff>:/icons/close</iconset>
+          <iconset theme="close"/>
          </property>
         </widget>
        </item>
@@ -314,8 +312,7 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+    <iconset theme="add"/>
    </property>
    <property name="text">
     <string>Add</string>
@@ -323,8 +320,7 @@
   </action>
   <action name="actionRemove">
    <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+    <iconset theme="remove"/>
    </property>
    <property name="text">
     <string>Remove</string>
@@ -332,8 +328,7 @@
   </action>
   <action name="actionEdit">
    <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
+    <iconset theme="edit"/>
    </property>
    <property name="text">
     <string>Edit</string>
@@ -364,13 +359,11 @@
  <customwidgets>
   <customwidget>
    <class>TextEdit</class>
-   <extends>QWidget</extends>
+   <extends>QTextEdit</extends>
    <header>textedit.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>closeButton</sender>

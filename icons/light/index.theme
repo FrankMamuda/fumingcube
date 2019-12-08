@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=light
+Inherits=default
+Directories=16x16,scalable
+
+[16x16]
+Size=16
+Type=Fixed
+
+[scalable]
+Type=Scalable
+

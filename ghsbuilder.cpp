@@ -90,7 +90,7 @@ GHSBuilder::GHSBuilder( QWidget *parent, const QStringList &parameters ) : QDial
     this->setLayout( grid );
 
     // setup dialog
-    this->setWindowIcon( QIcon( ":/icons/hazard" ));
+    this->setWindowIcon( QIcon::fromTheme( "hazard" ));
     this->setWindowTitle( this->tr( "Select pictograms" ));
 }
 

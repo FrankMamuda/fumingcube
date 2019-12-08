@@ -41,6 +41,8 @@
 #include <QMessageBox>
 #include <QDesktopWidget>
 #include <QSharedMemory>
+#include <QSettings>
+#include <QStyleFactory>
 
 //
 // TODO:
@@ -196,6 +198,17 @@ int main( int argc, char *argv[] ) {
         QApplication::quit();
         return 0;
     }
+
+    // set icon theme
+    QIcon::setThemeName( "light" );
+
+#ifdef Q_OS_WIN
+#if 0
+    if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool()) {
+        QIcon::setThemeName( "dark" );
+    }
+#endif
+#endif
 
     MainWindow::instance()->show();
     MainWindow::instance()->scrollToBottom();

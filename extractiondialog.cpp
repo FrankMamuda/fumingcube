@@ -289,7 +289,7 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
                 }
 
                 if ( !out.contains( captured ) && !captured.isEmpty())
-                    out.append( captured );          
+                    out.append( captured );
             }
         } else {
             out << values;
@@ -397,8 +397,8 @@ PropertyValueWidget::PropertyValueWidget( QWidget *parent, const QList<QStringLi
 
     const Tag::Types &type = Tag::instance()->type( tagId );
 
-    this->left->setIcon( QIcon( ":/icons/left" ));
-    this->right->setIcon( QIcon( ":/icons/right" ));
+    this->left->setIcon( QIcon::fromTheme( "left" ));
+    this->right->setIcon( QIcon::fromTheme( "right" ));
     this->left->setIconSize( QSize( 8, 16 ));
     this->right->setIconSize( QSize( 8, 16 ));
     this->layout->setContentsMargins( 0, 0, 0, 0 );

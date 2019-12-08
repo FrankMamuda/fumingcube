@@ -14,8 +14,7 @@
    <string>NFPA 704</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/hazard</normaloff>:/icons/hazard</iconset>
+   <iconset theme="hazard"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="4" column="0" colspan="4">
@@ -165,9 +164,7 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

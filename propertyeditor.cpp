@@ -404,7 +404,7 @@ void PropertyEditor::fontChanged( const QFont &font ) {
  * @param colour
  */
 void PropertyEditor::colourChanged( const QColor &colour ) {
-    QPixmap pixmap( ":/icons/colour" );
+    QPixmap pixmap( QIcon::fromTheme( "colour" ).pixmap( 16, 16 ));
     const QBitmap mask( pixmap.createMaskFromColor( Qt::transparent, Qt::MaskInColor ));
 
     pixmap.fill( colour );

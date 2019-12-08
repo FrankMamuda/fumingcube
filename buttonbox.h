@@ -44,8 +44,8 @@ public slots:
         QPushButton *cc( this->button( QDialogButtonBox::Cancel ));
 
         if ( ok != nullptr && cc != nullptr ) {
-            ok->setIcon( QIcon( ":/icons/accept" ));
-            cc->setIcon( QIcon( ":/icons/remove" ));
+            ok->setIcon( QIcon::fromTheme( "accept" ));
+            cc->setIcon( QIcon::fromTheme( "remove" ));
         }
     }
 };

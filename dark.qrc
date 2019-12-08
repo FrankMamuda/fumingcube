@@ -1,0 +1,47 @@
+<RCC>
+  <qresource prefix="/icons/dark">
+    <file alias="index.theme">icons/dark/index.theme</file>
+      <file alias="16x16/accept.png">icons/dark/16x16/accept.png</file>
+      <file alias="16x16/add.png">icons/dark/16x16/add.png</file>
+      <file alias="16x16/clean.png">icons/dark/16x16/clean.png</file>
+      <file alias="16x16/clear.png">icons/dark/16x16/clear.png</file>
+      <file alias="16x16/close.png">icons/dark/16x16/close.png</file>
+      <file alias="16x16/colour.png">icons/dark/16x16/colour.png</file>
+      <file alias="16x16/down.png">icons/dark/16x16/down.png</file>
+      <file alias="16x16/edit.png">icons/dark/16x16/edit.png</file>
+      <file alias="16x16/extract.png">icons/dark/16x16/extract.png</file>
+      <file alias="16x16/find.png">icons/dark/16x16/find.png</file>
+      <file alias="16x16/hazard.png">icons/dark/16x16/hazard.png</file>
+      <file alias="16x16/image.png">icons/dark/16x16/image.png</file>
+      <file alias="16x16/info.png">icons/dark/16x16/info.png</file>
+      <file alias="16x16/left.png">icons/dark/16x16/left.png</file>
+      <file alias="16x16/lock.png">icons/dark/16x16/lock.png</file>
+      <file alias="16x16/property.png">icons/dark/16x16/property.png</file>
+      <file alias="16x16/reagent.png">icons/dark/16x16/reagent.png</file>
+      <file alias="16x16/remove.png">icons/dark/16x16/remove.png</file>
+      <file alias="16x16/right.png">icons/dark/16x16/right.png</file>
+      <file alias="16x16/star.png">icons/dark/16x16/star.png</file>
+      <file alias="16x16/up.png">icons/dark/16x16/up.png</file>
+      <file alias="scalable/accept.svg">icons/dark/scalable/accept.svg</file>
+      <file alias="scalable/add.svg">icons/dark/scalable/add.svg</file>
+      <file alias="scalable/clean.svg">icons/dark/scalable/clean.svg</file>
+      <file alias="scalable/clear.svg">icons/dark/scalable/clear.svg</file>
+      <file alias="scalable/close.svg">icons/dark/scalable/close.svg</file>
+      <file alias="scalable/colour.svg">icons/dark/scalable/colour.svg</file>
+      <file alias="scalable/down.svg">icons/dark/scalable/down.svg</file>
+      <file alias="scalable/edit.svg">icons/dark/scalable/edit.svg</file>
+      <file alias="scalable/extract.svg">icons/dark/scalable/extract.svg</file>
+      <file alias="scalable/find.svg">icons/dark/scalable/find.svg</file>
+      <file alias="scalable/hazard.svg">icons/dark/scalable/hazard.svg</file>
+      <file alias="scalable/image.svg">icons/dark/scalable/image.svg</file>
+      <file alias="scalable/info.svg">icons/dark/scalable/info.svg</file>
+      <file alias="scalable/left.svg">icons/dark/scalable/left.svg</file>
+      <file alias="scalable/lock.svg">icons/dark/scalable/lock.svg</file>
+      <file alias="scalable/property.svg">icons/dark/scalable/property.svg</file>
+      <file alias="scalable/reagent.svg">icons/dark/scalable/reagent.svg</file>
+      <file alias="scalable/remove.svg">icons/dark/scalable/remove.svg</file>
+      <file alias="scalable/right.svg">icons/dark/scalable/right.svg</file>
+      <file alias="scalable/star.svg">icons/dark/scalable/star.svg</file>
+      <file alias="scalable/up.svg">icons/dark/scalable/up.svg</file>
+  </qresource>
+</RCC>

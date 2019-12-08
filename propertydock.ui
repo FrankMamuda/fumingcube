@@ -11,8 +11,7 @@
    </rect>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/property</normaloff>:/icons/property</iconset>
+   <iconset theme="property"/>
   </property>
   <property name="allowedAreas">
    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -28,16 +27,14 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
+       <iconset theme="up"/>
       </property>
      </widget>
     </item>
     <item row="1" column="3">
      <widget class="QToolButton" name="removePropButton">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+       <iconset theme="remove"/>
       </property>
      </widget>
     </item>
@@ -50,8 +47,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/edit</normaloff>:/icons/edit</iconset>
+       <iconset theme="edit"/>
       </property>
      </widget>
     </item>
@@ -86,7 +82,7 @@
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
       <attribute name="horizontalHeaderVisible">
-       <bool>true</bool>
+       <bool>false</bool>
       </attribute>
       <attribute name="horizontalHeaderStretchLastSection">
        <bool>true</bool>
@@ -99,8 +95,7 @@
     <item row="1" column="1">
      <widget class="QToolButton" name="addPropButton">
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+       <iconset theme="add"/>
       </property>
      </widget>
     </item>
@@ -110,8 +105,7 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
+       <iconset theme="down"/>
       </property>
      </widget>
     </item>
@@ -138,8 +132,6 @@
    <header>propertyview.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

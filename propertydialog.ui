@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="property"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0" colspan="3">
     <layout class="QHBoxLayout" name="buttonLayout">
@@ -20,6 +23,9 @@
       <widget class="QPushButton" name="advancedButton">
        <property name="text">
         <string>Advanced</string>
+       </property>
+       <property name="icon">
+        <iconset theme="star"/>
        </property>
       </widget>
      </item>
