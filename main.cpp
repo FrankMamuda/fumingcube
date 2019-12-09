@@ -57,6 +57,11 @@
 //     in the future this should be fully scripted (per tag) and from multiple sources
 //  - add structural formula support (extraction) https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
 //
+//  extraction:
+//  - the current search URL is not exactly reliable
+//    we must first search for the exact name, and then for synonyms
+//    try butane (resolves to 1,4-butanediol)
+//
 //  completion:
 //   - complete batch from selected reagent, not the whole list
 //   - complete function( "CURSOR to function( "CURSOR"

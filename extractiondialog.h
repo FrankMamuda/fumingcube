@@ -25,6 +25,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QLayout>
+#include <QMutex>
 #include <qtoolbutton.h>
 #include "networkmanager.h"
 #include "table.h"
@@ -82,4 +83,5 @@ private:
     QString m_path;
     QString m_cache;
     QList<QWidget*> widgetList;
+    mutable QMutex mutex;
 };

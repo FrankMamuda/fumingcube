@@ -39,6 +39,8 @@
 #include "tag.h"
 
 // FIXME: crash on multiple requests
+//        probably a race condition
+//
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
@@ -177,6 +179,8 @@ ExtractionDialog::~ExtractionDialog() {
  * @return
  */
 int ExtractionDialog::readData( const QByteArray &uncompressed ) {
+    QMutexLocker lock( &this->mutex );
+
     qDeleteAll( this->widgetList );
 
     // get cid
@@ -374,7 +378,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
         return values;
     };
 
-    int rows = 0;
+    int rows = this->ui->propertyView->rowCount();
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const Row row = static_cast<Row>( y );
 
@@ -412,7 +416,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
     }
 
     this->ui->propertyView->resizeRowsToContents();
-    //this->ui->propertyView->resizeColumnsToContents();
+    this->ui->propertyView->resizeColumnsToContents();
     return qAsConst( cid );
 }
 
@@ -420,7 +424,9 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
  * @brief ExtractionDialog::readFormula
  * @param data
  */
-void ExtractionDialog::readFormula( const QByteArray &data ) {
+void ExtractionDialog::readFormula( const QByteArray &data ) {    
+    QMutexLocker lock( &this->mutex );
+
     // FIXME: ugly code
     auto autoCropPixmap = []( const QPixmap &pixmap ) {
         const QImage image( pixmap.toImage());
@@ -514,7 +520,9 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
     label->setFixedSize( cropped.width(), cropped.height());
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
     this->ui->propertyView->setCellWidget( rows, 1, label );
-    this->widgetList << label;
+
+    // JUST NO: FIXME: this will be deleted immediately in readData
+   // this->widgetList << label;
 
     this->ui->propertyView->resizeRowToContents( rows );
 }
