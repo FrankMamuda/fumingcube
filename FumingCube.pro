@@ -43,6 +43,7 @@ SOURCES += \
     propertydock.cpp \
     propertyeditor.cpp \
     propertyview.cpp \
+    propertywidget.cpp \
     reagentdialog.cpp \
     reagentdock.cpp \
     reagentmodel.cpp \
@@ -78,6 +79,7 @@ HEADERS += \
     propertydock.h \
     propertyeditor.h \
     propertyview.h \
+    propertyviewwidget.h \
     propertywidget.h \
     reagentdialog.h \
     reagentdock.h \

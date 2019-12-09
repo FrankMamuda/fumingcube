@@ -22,7 +22,9 @@
 #include "syntaxhighlighter.h"
 #include <QRegularExpression>
 #include "tag.h"
+#include "variable.h"
 #include <QSqlQuery>
+#include <QApplication>
 
 /**
  * @brief SyntaxHighlighter::SyntaxHighlighter
@@ -36,7 +38,7 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
                 .arg( Tag::instance()->fieldName( Tag::Function ))
                 .arg( Tag::instance()->tableName()));
     while ( query.next())
-        this->keywords << query.value( 1 ).toString();
+        this->keywords << qAsConst( query ).value( 1 ).toString();
 }
 
 /**
@@ -44,100 +46,60 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
  * @param text
  */
 void SyntaxHighlighter::highlightBlock( const QString &text ) {
-    {
-        QTextCharFormat myClassFormat;
-        myClassFormat.setFontWeight( QFont::Bold );
-        myClassFormat.setForeground( QColor::fromRgb( 0, 0, 128 ));
+    const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
+    const QColor number( darkMode ? QColor::fromRgb( /*138, 96, 44*/ 102, 163, 52 ) : QColor::fromRgb( 0, 0, 128 ));
+    const QColor op( qApp->palette().color( QPalette::Text ));
+    const QColor keyword( darkMode ? QColor::fromRgb( 69, 198, 214 ) : QColor::fromRgb( 0, 103, 124 ));
+    const QColor string( darkMode ? QColor::fromRgb( 214, 149, 69 ) : QColor::fromRgb( 0, 128, 0 ));
+    const QColor error( darkMode ? QColor::fromRgb( 214, 86, 69 ) : QColor::fromRgb( 255, 0, 0 ));
+    const QColor undefined( Qt::darkYellow );
 
-        QRegularExpression expression("\\d");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            this->setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
-        }
-    }
+    /**
+     * @brief The SyntaxHighlighterOption struct
+     */
+    struct SyntaxHighlighterOption {
+        SyntaxHighlighterOption(
+                    QString e,
+                    QColor c,
+                    bool b = false,
+                    bool u = false,
+                    bool i = false ) : expression( QRegularExpression( e )), colour( c ), bold( b ), underline( u ), italic( i ) {}
+        QRegularExpression expression;
+        QColor colour;
+        bool bold;
+        bool underline;
+        bool italic;
+    };
 
-    {
-        QTextCharFormat myClassFormat;
-        //myClassFormat.setFontWeight(QFont::Bold);
-        myClassFormat.setForeground(Qt::black);
+    // add types
+    QList<SyntaxHighlighterOption> options = {
+        { "\\d+\\.?\\d*",               number,     true        },
+        { "\\/|\\*|\\+|\\-[^\\w]",      op                      },
+        { "\"[\\w\\s\\d\\-]+\"",        string,     true        },
+        { "\\w+Error.+",                error,      true, true  },
+        { "\\bReference\\s'.+'\\s.+",   error,      true        },
+        { "\\bundefined\\b(?!\")",      undefined               }
+    };
 
-        QRegularExpression expression("\\/|\\*|\\+|\\-");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
-        }
-    }
+    // add keywords
+    foreach ( const QString &k, qAsConst( this->keywords ))
+        options << SyntaxHighlighterOption( k, keyword );
 
-    {
-        QTextCharFormat myClassFormat;
-        //myClassFormat.setFontWeight(QFont::Bold);
-        myClassFormat.setForeground( QColor::fromRgb( 0, 103, 124 ));
+    // set options
+    foreach ( const SyntaxHighlighterOption &option, qAsConst( options )) {
+        QTextCharFormat format;
 
-        for (const QString &keyword : qAsConst( this->keywords )) {
-            QRegularExpressionMatchIterator matchIterator = QRegularExpression( keyword ).globalMatch( text );
-            while ( matchIterator.hasNext()) {
-                QRegularExpressionMatch match = matchIterator.next();
-                setFormat(match.capturedStart(), match.capturedLength(), myClassFormat );
-            }
-        }
-    }
+        if ( option.bold )
+            format.setFontWeight( QFont::Bold );
 
-    {
-        QTextCharFormat myClassFormat;
-        myClassFormat.setFontWeight( QFont::Bold );
-        myClassFormat.setForeground( QColor::fromRgb( 0, 128, 0 ));
+        format.setFontItalic( option.italic );
+        format.setFontUnderline( option.underline );
+        format.setForeground( option.colour );
 
-        QRegularExpression expression("\"[\\w\\s]+\"");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
-        }
-    }
-
-    {
-        QTextCharFormat myClassFormat;
-        myClassFormat.setFontWeight( QFont::Bold );
-        myClassFormat.setForeground( Qt::red );
-
-        QRegularExpression expression("\\w+Error.+");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
-        }
-    }
-
-    {
-        QTextCharFormat myClassFormat;
-        myClassFormat.setFontWeight( QFont::Bold );
-        myClassFormat.setForeground( Qt::red );
-
-        QRegularExpression expression("\\bReference\\s'.+'\\s.+");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
-        }
-    }
-    {
-        QTextCharFormat myClassFormat;
-        //myClassFormat.setFontWeight( QFont::Bold );
-        myClassFormat.setForeground( Qt::darkYellow );
-
-        QRegularExpression expression("\\bundefined\\b");
-        QRegularExpressionMatchIterator i = expression.globalMatch(text);
-        while (i.hasNext())
-        {
-            QRegularExpressionMatch match = i.next();
-            setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
+        QRegularExpressionMatchIterator matchIterator( option.expression.globalMatch( text ));
+        while ( matchIterator.hasNext()) {
+            const QRegularExpressionMatch match( matchIterator.next());
+            this->setFormat( match.capturedStart(), match.capturedLength(), qAsConst( format ));
         }
     }
 }

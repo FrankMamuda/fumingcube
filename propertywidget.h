@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
  * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,21 +21,77 @@
 /*
  * includes
  */
-#include <QWidget>
+#include "table.h"
+#include <QToolButton>
+#include <QRegularExpression>
+#include <QVBoxLayout>
+#include <QLabel>
+#include "nfpawidget.h"
+#include "ghswidget.h"
 
 /**
- * @brief The PropertyWidget class
+ * @brief The PropertyValueWidget class
  */
 class PropertyWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PropertyWidget( QWidget *parent = nullptr, const QStringList & = QStringList()) : QWidget( parent ) {}
-    QStringList parameters() const { return this->m_parameters; }
+    explicit PropertyWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Id &tagId = Id::Invalid );
+    ~PropertyWidget() override {
+        this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
+        this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
+
+        delete this->ghs;
+        delete this->nfpa;
+        delete this->label;
+        delete this->left;
+        delete this->right;
+        delete this->layout;
+    }
+
+    int position() const { return this->m_position; }
+    Id tagId() const { return this->m_tagId; }
+
+    static QStringList parseGHS( const QStringList &list ) {
+        QStringList parms;
+        foreach ( const QString &parm, list ) {
+            if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
+                parms << "GHS01";
+            if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
+                parms << "GHS02";
+            if ( parm.contains( QRegularExpression( "[Oo]xidizing" )))
+                parms << "GHS03";
+            if ( parm.contains( QRegularExpression( "[Cc]ompressed\\s[Gg]as" )))
+                parms << "GHS04";
+            if ( parm.contains( QRegularExpression( "[Cc]orrosive" )))
+                parms << "GHS05";
+            if ( parm.contains( QRegularExpression( "[Tt]oxic" )))
+                parms << "GHS06";
+            if ( parm.contains( QRegularExpression( "[Hh]armful" )) || parm.contains( QRegularExpression( "[Ii]rritant" )))
+                parms << "GHS07";
+            if ( parm.contains( QRegularExpression( "[Hh]ealth\\s[Hh]azard" )))
+                parms << "GHS08";
+            if ( parm.contains( QRegularExpression( "[Ee]nvironmental\\s[Hh]azard" )))
+                parms << "GHS09";
+        }
+        return qAsConst( parms );
+    }
 
 public slots:
-    virtual void update( const QStringList &parms ) = 0;
+    void add( const Id &id );
 
-protected:
-    QStringList m_parameters;
+private:
+    int m_position = -1;
+    QMap<int, QString> displayValues;
+    QMap<int, QStringList> propertyValues;
+    QLabel *label = new QLabel();
+    QToolButton *left = new QToolButton();
+    QToolButton *right = new QToolButton();
+    QHBoxLayout *layout = new QHBoxLayout();
+
+    // FIXME: don't initialize these if not needed
+    NFPAWidget *nfpa = new NFPAWidget();
+    GHSWidget *ghs = new GHSWidget();
+
+    Id m_tagId = Id::Invalid;
 };

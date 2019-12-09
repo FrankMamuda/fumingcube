@@ -45,73 +45,6 @@ class ExtractionDialog;
 }
 
 /**
- * @brief The PropertyValueWidget class
- */
-class PropertyValueWidget : public QWidget {
-    Q_OBJECT
-
-public:
-    explicit PropertyValueWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Id &tagId = Id::Invalid );
-    ~PropertyValueWidget() override {
-        this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
-        this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
-
-        delete this->ghs;
-        delete this->nfpa;
-        delete this->label;
-        delete this->left;
-        delete this->right;
-        delete this->layout;
-    }
-
-    int position() const { return this->m_position; }
-    Id tagId() const { return this->m_tagId; }
-
-    static QStringList parseGHS( const QStringList &list ) {
-        QStringList parms;
-        foreach ( const QString &parm, list ) {
-            if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
-                parms << "GHS01";
-            if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
-                parms << "GHS02";
-            if ( parm.contains( QRegularExpression( "[Oo]xidizing" )))
-                parms << "GHS03";
-            if ( parm.contains( QRegularExpression( "[Cc]ompressed\\s[Gg]as" )))
-                parms << "GHS04";
-            if ( parm.contains( QRegularExpression( "[Cc]orrosive" )))
-                parms << "GHS05";
-            if ( parm.contains( QRegularExpression( "[Tt]oxic" )))
-                parms << "GHS06";
-            if ( parm.contains( QRegularExpression( "[Hh]armful" )) || parm.contains( QRegularExpression( "[Ii]rritant" )))
-                parms << "GHS07";
-            if ( parm.contains( QRegularExpression( "[Hh]ealth\\s[Hh]azard" )))
-                parms << "GHS08";
-            if ( parm.contains( QRegularExpression( "[Ee]nvironmental\\s[Hh]azard" )))
-                parms << "GHS09";
-        }
-        return qAsConst( parms );
-    }
-
-public slots:
-    void add( const Id &id );
-
-private:
-    int m_position = -1;
-    QMap<int, QString> displayValues;
-    QMap<int, QStringList> propertyValues;
-    QLabel *label = new QLabel();
-    QToolButton *left = new QToolButton();
-    QToolButton *right = new QToolButton();
-    QHBoxLayout *layout = new QHBoxLayout();
-
-    // FIXME: don't initialize these if not needed
-    NFPAWidget *nfpa = new NFPAWidget();
-    GHSWidget *ghs = new GHSWidget();
-
-    Id m_tagId = Id::Invalid;
-};
-
-/**
  * @brief The ExtractionDialog class
  */
 class ExtractionDialog : public QDialog {
@@ -127,11 +60,14 @@ public:
     enum RequestTypes {
         NoType = -1,
         CIDRequest,
-        DataRequest
+        DataRequest,
+        FormulaRequest
     };
 
 public slots:
-    void readData( const QByteArray &uncompressed );
+    int readData( const QByteArray &uncompressed );
+    void readFormula( const QByteArray &data );
+    void getFormula( const QString &cid );
 
 private slots:
     void on_extractButton_clicked();
@@ -145,4 +81,5 @@ private:
     QStringList cidList;
     QString m_path;
     QString m_cache;
+    QList<QWidget*> widgetList;
 };

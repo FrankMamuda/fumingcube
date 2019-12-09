@@ -197,6 +197,7 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
             return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) : values;
         }
 
+        case Tag::Formula:
         case Tag::NoType:
         case Tag::State:
             return values;
@@ -428,7 +429,11 @@ void PropertyDock::setSpecialWidgets() {
         const Row row = Property::instance()->row( y );
         const Id tagId = Property::instance()->tagId( row );
 
-        if ( tagId == Id::Invalid || tagId == PixmapTag )
+        bool pixmap = false;
+        if ( tagId != Id::Invalid )
+            pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
+        if ( tagId == Id::Invalid || pixmap )
             continue;
 
         const Tag::Types type = Tag::instance()->type( tagId );
@@ -438,7 +443,7 @@ void PropertyDock::setSpecialWidgets() {
             QWidget *widget( this->ui->propertyView->indexWidget( index ));
             bool hasWidget = widget != nullptr;
 
-            auto setWidget = [ this, index, hasWidget, parms ]( PropertyWidget *widget ) {
+            auto setWidget = [ this, index, hasWidget, parms ]( PropertyViewWidget *widget ) {
                 if ( hasWidget && widget != nullptr ) {
                     widget->update( parms );
                 } else {
@@ -506,8 +511,12 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     // less flickering with updates disabled
     this->ui->propertyView->setUpdatesEnabled( false );
 
+    bool pixmap = false;
+    if ( tagId != Id::Invalid )
+        pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
     // add property
-    Property::instance()->add(( tagId == Id::Invalid || tagId == PixmapTag ) ? name : "", tagId, value, reagentId );
+    Property::instance()->add(( tagId == Id::Invalid || pixmap ) ? name : "", tagId, value, reagentId );
 
     // clear document cache and resize view
     this->updateView();

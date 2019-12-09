@@ -27,15 +27,15 @@
 #include <QWidget>
 #include <QtMath>
 #include <QDebug>
-#include "propertywidget.h"
+#include "propertyviewwidget.h"
 
 /**
  * @brief The NFPAWidget class
  */
-class NFPAWidget final : public PropertyWidget {
+class NFPAWidget final : public PropertyViewWidget {
 public:
     //static constexpr const qreal defaultScale = 32;
-    explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyWidget( parent, parms ) {
+    explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyViewWidget( parent, parms ) {
         this->update( parms );
     }
     //QSize size() const { return this->sizeHint(); }

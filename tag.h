@@ -63,7 +63,8 @@ public:
         GHS,
         NFPA,
         CAS,
-        State
+        State,
+        Formula
     };
     Q_ENUM( Types )
 

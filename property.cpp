@@ -54,9 +54,13 @@ Row Property::add( const QString &name, const Id &tagId, const QVariant &value, 
         highestOrder = qMax( highestOrder, Property::instance()->tableOrder( static_cast<Row>( y )));
     highestOrder++;
 
+    bool pixmap = false;
+    if ( tagId != Id::Invalid )
+        pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
     // add the property
     return Table::add( QVariantList() << Database_::null <<
-                       (( tagId == Id::Invalid || tagId == PixmapTag ) ? name : QString()) <<
+                       (( tagId == Id::Invalid || pixmap ) ? name : QString()) <<
                        static_cast<int>( tagId ) <<
                        value.toByteArray() <<
                        static_cast<int>( reagentId ) <<

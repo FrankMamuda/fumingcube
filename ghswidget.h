@@ -22,7 +22,7 @@
 /*
  * includes
  */
-#include "propertywidget.h"
+#include "propertyviewwidget.h"
 #include <QIcon>
 #include <QPainter>
 #include <QWidget>
@@ -35,10 +35,10 @@
 /**
  * @brief The GHSWidget class
  */
-class GHSWidget final : public PropertyWidget {
+class GHSWidget final : public PropertyViewWidget {
 public:
     static constexpr const int scale = 48;
-    explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyWidget( parent, parms ) {
+    explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyViewWidget( parent, parms ) {
 
         // TODO: make these global to be shared
         this->pictograms["GHS07"] = QIcon( ":/pictograms/GHS07" ).pixmap( this->scale, this->scale );

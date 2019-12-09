@@ -97,6 +97,7 @@ void Tag::populate() {
     this->add( this->tr( "Basicity (pKb)" ),       Real, "",                               -100.0,    100.0,   0.0, 2, "pKb"                 );
     this->add( this->tr( "Producer" ));
     this->add( this->tr( "Supplier" ));
-    this->add( this->tr( "Physical Description" ), Text, "",                                    0,        0,     0, 0, "",                 0,
+    this->add( this->tr( "Structural formula" ),   Formula );
+    this->add( this->tr( "Physical description" ), Text, "",                                    0,        0,     0, 0, "",                 0,
                QStringList() << "Physical Description" << "Physical Description" );
 }

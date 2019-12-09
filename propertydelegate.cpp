@@ -52,8 +52,12 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     // create a new document
     QTextDocument *document( new QTextDocument());
 
+    bool pixmap = false;
+    if ( tagId != Id::Invalid )
+        pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
     // special handling of pixmaps
-    if ( tagId == PixmapTag && index.column() == Property::PropertyData ) {
+    if ( pixmap && index.column() == Property::PropertyData ) {
         QPixmap pixmap;
         pixmap.loadFromData( data.toByteArray());
 
@@ -65,7 +69,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     } else {
         QString html;
 
-        if ( tagId == Id::Invalid || tagId == PixmapTag ) {
+        if ( tagId == Id::Invalid || pixmap ) {
             // custom properties however do display their names
             html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
         } else {

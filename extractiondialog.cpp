@@ -25,6 +25,7 @@
 #include "reagent.h"
 #include "textedit.h"
 #include "ui_extractiondialog.h"
+#include <QBuffer>
 #include <QButtonGroup>
 #include <QCryptographicHash>
 #include <QDir>
@@ -34,6 +35,10 @@
 #include <QStringListModel>
 #include <QToolButton>
 #include "tag.h"
+#include "propertywidget.h"
+#include "tag.h"
+
+// FIXME: crash on multiple requests
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
@@ -64,9 +69,35 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 
         foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedRows()) {
             const int row = index.row();
-            PropertyValueWidget *widget( qobject_cast<PropertyValueWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
+            PropertyWidget *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
             if ( widget != nullptr )
                 widget->add( this->reagentId());
+            else {
+                QLabel *label( qobject_cast<QLabel *>( this->ui->propertyView->cellWidget( row, 1 )));
+                if ( label != nullptr ) {
+                    Row row = Row::Invalid;
+
+                    const QPixmap pixmap( *label->pixmap());
+                    if ( pixmap.isNull() || this->reagentId() == Id::Invalid )
+                        return;
+
+                    for ( int y = 0; y < Tag::instance()->count(); y++ ) {
+                        const Row r = static_cast<Row>( y );
+                        if ( Tag::instance()->type( r ) == Tag::Formula ) {
+                            row = r;
+                            break;
+                        }
+                    }
+
+                    if ( row != Row::Invalid ) {
+                        QByteArray bytes;
+                        QBuffer buffer( &bytes );
+                        buffer.open( QIODevice::WriteOnly );
+                        pixmap.save( &buffer, "PNG" );
+                        Property::instance()->add( this->tr( "Structural formula" ), Tag::instance()->id( row ), bytes, this->reagentId());
+                    }
+                }
+            }
         }
 
         this->accept();
@@ -88,11 +119,13 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
             if ( this->cidList.isEmpty())
                 return;
 
-            const QString cid = this->cidList.first();
+            const QString cid( this->cidList.first());
             this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
             this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid )));
             this->request.setAttribute( QNetworkRequest::User, DataRequest );
             this->manager->get( this->request );
+
+            this->getFormula( cid );
         }
             break;
 
@@ -109,6 +142,19 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
             this->readData( data );
         }
             break;
+
+        case FormulaRequest:
+        {
+            const QByteArray data( reply->readAll());
+            QFile file( this->cache() + ".png" );
+            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+                file.write( data.constData(), data.length());
+                file.close();
+            }
+
+            this->readFormula( data );
+        }
+            break;
         }
     }
     );
@@ -120,6 +166,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 ExtractionDialog::~ExtractionDialog() {
     this->manager->disconnect( this->manager, &QNetworkAccessManager::finished, this, nullptr );
 
+    qDeleteAll( this->widgetList );
     delete this->manager;
     delete this->ui;
 }
@@ -127,8 +174,18 @@ ExtractionDialog::~ExtractionDialog() {
 /**
  * @brief ExtractionDialog::readData
  * @param uncompressed
+ * @return
  */
-void ExtractionDialog::readData( const QByteArray &uncompressed ) {
+int ExtractionDialog::readData( const QByteArray &uncompressed ) {
+    qDeleteAll( this->widgetList );
+
+    // get cid
+    int cid = -1;
+    const QRegularExpression re( "\"RecordNumber\":\\s(\\d+)" );
+    const QRegularExpressionMatch match( re.match( QString( uncompressed.constData())));
+    if ( match.hasMatch())
+        cid = match.captured( 1 ).toInt();
+
     /**
      * @brief findTag finds a TOCHeading in json document
      */
@@ -344,9 +401,11 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
 
             this->ui->propertyView->setRowCount( rows + 1 );
 
-            PropertyValueWidget *group( new PropertyValueWidget( nullptr, values, Tag::instance()->id( row )));
+            // TODO: delete items
+            PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
             this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( Tag::instance()->name( row )));
             this->ui->propertyView->setCellWidget( rows, 1, group );
+            this->widgetList << group;
 
             rows++;
         }
@@ -354,6 +413,134 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) {
 
     this->ui->propertyView->resizeRowsToContents();
     //this->ui->propertyView->resizeColumnsToContents();
+    return qAsConst( cid );
+}
+
+/**
+ * @brief ExtractionDialog::readFormula
+ * @param data
+ */
+void ExtractionDialog::readFormula( const QByteArray &data ) {
+    // FIXME: ugly code
+    auto autoCropPixmap = []( const QPixmap &pixmap ) {
+        const QImage image( pixmap.toImage());
+        const QColor key( QColor::fromRgb( 245, 245, 245, 255 ));
+
+        // check left
+        int left = 0, right = 0, top = 0, bottom = 0;
+        for ( int x = 0; x < image.width(); x++ ) {
+            bool found = false;
+
+            for ( int y = 0; y < image.height(); y++ ) {
+                if ( image.pixelColor( x, y ) != key ) {
+                    left = x;
+                    found = true;
+                    break;
+                }
+            }
+            if ( found )
+                break;
+        }
+
+        // check right
+        for ( int x = image.width() - 1; x >= 0; x-- ) {
+            bool found = false;
+
+            for ( int y = 0; y < image.height(); y++ ) {
+                if ( image.pixelColor( x, y ) != key ) {
+                    right = x;
+                    found = true;
+                    break;
+                }
+            }
+            if ( found )
+                break;
+        }
+
+        // find bottom
+        for ( int y = image.height() - 1; y >= 0; y-- ) {
+            bool found = false;
+
+            for ( int x = 0; x < image.width(); x++ ) {
+                if ( image.pixelColor( x, y ) != key ) {
+                    bottom = y;
+                    found = true;
+                    break;
+                }
+            }
+            if ( found )
+                break;
+        }
+
+        // find bottom
+        for ( int y = 0; y < image.height(); y++ ) {
+            bool found = false;
+
+            for ( int x = 0; x < image.width(); x++ ) {
+                if ( image.pixelColor( x, y ) != key ) {
+                    top = y;
+                    found = true;
+                    break;
+                }
+            }
+            if ( found )
+                break;
+        }
+
+        QImage cropped( image.copy( QRect( left, top, right - left + 1, bottom - top + 1 )));
+        for ( int x = 0; x < cropped.width(); x++ ) {
+            for ( int y = 0; y < cropped.height(); y++ ) {
+                if ( cropped.pixelColor( x, y ) == key ) {
+                    cropped.setPixelColor( x, y, QColor::fromRgb( 255, 255, 255, 0 ));
+                }
+            }
+        }
+
+        return QPixmap::fromImage( qAsConst( cropped ));
+    };
+
+    const int rows = this->ui->propertyView->rowCount();
+    this->ui->propertyView->setRowCount( rows + 1 );
+    QLabel *label( new QLabel());
+    QPixmap pixmap;
+    if ( !pixmap.loadFromData( data ))
+        return;
+
+    if ( pixmap.isNull())
+        return;
+
+    const QPixmap cropped( autoCropPixmap( qAsConst( pixmap )));
+    label->setPixmap( cropped );
+    label->setFixedSize( cropped.width(), cropped.height());
+    this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
+    this->ui->propertyView->setCellWidget( rows, 1, label );
+    this->widgetList << label;
+
+    this->ui->propertyView->resizeRowToContents( rows );
+}
+
+/**
+ * @brief ExtractionDialog::getFormula
+ * @param cid
+ */
+void ExtractionDialog::getFormula( const QString &cid ) {
+    // get formula
+    if ( QFileInfo( this->cache() + ".png" ).exists()) {
+        qDebug() << "formula from cache";
+
+        QFile file( this->cache() + ".png" );
+        if ( file.open( QIODevice::ReadOnly )) {
+            this->readFormula( file.readAll());
+            file.close();
+            return;
+        }
+    }
+
+    if ( !cid.isEmpty()) {
+        this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid )));
+        this->request.setAttribute( QNetworkRequest::User, FormulaRequest );
+        this->manager->get( this->request );
+    }
 }
 
 /**
@@ -370,7 +557,10 @@ void ExtractionDialog::on_extractButton_clicked() {
         QFile file( this->cache());
         if ( file.open( QIODevice::ReadOnly )) {
             const QByteArray uncompressedData( qUncompress( file.readAll()));
-            this->readData( uncompressedData );
+            const int cid = this->readData( uncompressedData );
+
+            if  ( cid != -1 )
+                this->getFormula( QString::number( cid ));
 
             file.close();
         }
@@ -378,176 +568,8 @@ void ExtractionDialog::on_extractButton_clicked() {
         return;
     }
 
-
+    // get data
     this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
-    //this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
     this->request.setAttribute( QNetworkRequest::User, CIDRequest );
     this->manager->get( this->request );
 }
-
-/**
- * @brief PropertyValueWidget::PropertyValueWidget
- * @param parent
- * @param values
- * @param type
- */
-PropertyValueWidget::PropertyValueWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget( parent ) {
-    this->m_tagId = tagId;
-    if ( this->tagId() == Id::Invalid )
-        return;
-
-    const Tag::Types &type = Tag::instance()->type( tagId );
-
-    this->left->setIcon( QIcon::fromTheme( "left" ));
-    this->right->setIcon( QIcon::fromTheme( "right" ));
-    this->left->setIconSize( QSize( 8, 16 ));
-    this->right->setIconSize( QSize( 8, 16 ));
-    this->layout->setContentsMargins( 0, 0, 0, 0 );
-    this->layout->setSpacing( 0 );
-
-
-    if ( values.isEmpty())
-        return;
-
-    this->ghs->setLinear();
-
-    int index = 0;
-    for ( int y = 0; y < values.count(); y++ ) {
-        QStringList valueList( values.at( y ));
-        if ( valueList.count() < 2 )
-            continue;
-
-        this->displayValues[index] = valueList.takeFirst();
-        this->propertyValues[index] = valueList;
-        index++;
-    }
-
-    if ( displayValues.isEmpty() || propertyValues.isEmpty())
-        return;
-
-    switch ( type ) {
-    case Tag::Text:
-    case Tag::Integer:
-    case Tag::Real:
-    case Tag::CAS:
-        this->label->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
-        this->label->setWordWrap( true );
-        this->label->setText( this->displayValues.first());
-        this->layout->addWidget( this->label );
-        break;
-
-    case Tag::NFPA:
-        this->layout->addWidget( this->nfpa );
-        this->nfpa->setScale( 16 );
-        this->nfpa->update( propertyValues.first());
-        break;
-
-    case Tag::GHS:
-        this->layout->addWidget( this->ghs );
-        this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues.first()));
-        break;
-
-    case Tag::State:
-    case Tag::NoType:
-        return;
-    }
-
-    this->m_position = 0;
-
-    if ( this->displayValues.count() >= 2 ) {
-        this->layout->addWidget( this->left );
-        this->layout->addWidget( this->right );
-        this->left->connect( this->left, &QToolButton::pressed, [ this, type ]() {
-            if ( this->position() == -1 )
-                return;
-
-            if ( this->position() - 1 >= 0 )
-                this->m_position--;
-            else
-                this->m_position = this->displayValues.count() - 1;
-
-            switch ( type ) {
-            case Tag::Text:
-            case Tag::Integer:
-            case Tag::Real:
-            case Tag::CAS:
-                this->label->setText( this->displayValues[this->position()] );
-                break;
-
-            case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
-                break;
-
-            case Tag::GHS:
-                this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ));
-                break;
-
-            case Tag::State:
-            case Tag::NoType:
-                return;
-            }
-        } );
-        this->right->connect( this->right, &QToolButton::pressed, [ this, type ]() {
-            if ( this->position() == -1 )
-                return;
-
-            if ( this->position() + 1 < this->displayValues.count())
-                this->m_position++;
-            else
-                this->m_position = 0;
-
-            switch ( type ) {
-            case Tag::Text:
-            case Tag::Integer:
-            case Tag::Real:
-            case Tag::CAS:
-                this->label->setText( this->displayValues[this->position()] );
-                break;
-
-            case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
-                break;
-
-            case Tag::GHS:
-                this->ghs->update( PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ));
-                break;
-
-            case Tag::State:
-            case Tag::NoType:
-                return;
-            }
-        } );
-    }
-
-    this->setLayout( this->layout );
-}
-
-/**
- * @brief PropertyValueWidget::add
- */
-void PropertyValueWidget::add( const Id &id ) {
-    if ( id == Id::Invalid )
-        return;
-
-    switch ( Tag::instance()->type( this->tagId())) {
-    case Tag::Text:
-    case Tag::Integer:
-    case Tag::Real:
-    case Tag::CAS:
-        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].first(), id );
-        break;
-
-    case Tag::NFPA:
-        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].join( " " ), id );
-        break;
-
-    case Tag::GHS:
-        Property::instance()->add( QString(), this->tagId(), PropertyValueWidget::parseGHS( this->propertyValues[this->position()] ).join( " " ), id );
-        break;
-
-    case Tag::State:
-    case Tag::NoType:
-        return;
-    }
-}
-

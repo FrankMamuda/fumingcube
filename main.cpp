@@ -53,18 +53,9 @@
 //   - groups, sorting
 //
 //  properties:
-//   - fix extraction and add support for propery mapping to tags
-//   - use pubchem.ncbi.nlm.nih.gov
-//     first get cid https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/sodium-hydroxide/cids/TXT
-//     then fetch properties https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/Sodium-hydroxide/property/MolecularWeight/TXT
-//          CAS, MolecularWeight, formula (not much else)
-//     or parse https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/CID/JSON (CID=14798 for sodium hydroxide)
-//     for additional properties such as solubility, etc.
-//     https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/14798/JSON?heading=Molecular+Weight
-//     https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
 //  - for now we use built in property extractor from PubChem
 //     in the future this should be fully scripted (per tag) and from multiple sources
-//  - fix negative values from extraction (melting point, etc.)
+//  - add structural formula support (extraction) https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list
@@ -75,6 +66,12 @@
 //     mol = mass * assay( reagent ) / molarMass( reagent )
 //   - add any as batch name (a whildcard that chooses any batch with the property)
 //   - check API
+//
+//  settings:
+//   - implement settings dialog and:
+//     - option to choose database path
+//     - option to switch dark/light theme
+//     - option to change syntax highlighter
 //
 //  misc:
 //   - store images (formulas) fullsize but rescale in property view
@@ -89,7 +86,6 @@
 //  future:
 //   - common reaction browser
 //   - molecule drawing (and search)
-//
 //
 
 /**
@@ -139,6 +135,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
+    Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
 
     // read configuration
     XMLTools::instance()->read();
@@ -200,25 +197,54 @@ int main( int argc, char *argv[] ) {
     }
 
     bool darkMode = false;
-
-
 #ifdef Q_OS_WIN
-    if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool()) {
+    if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool())
         darkMode = true;
-        // TODO: apply dark palette for windows
-    }
 #else
-    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 ) {
+    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
-
-#ifdef Q_OS_LINUX
-        // TODO: apply dark palette for linux (macOS sets dark mode natively)
 #endif
+
+#ifndef Q_OS_MACOS
+    // apply dark palette for linux and windows (macOS sets dark mode natively)
+    if ( darkMode ) {
+        // apply fusion style
+        // this does not look native, but is a good workaround for now
+        a.setStyle( QStyleFactory::create( "Fusion" ));
+
+        // apply dark palette for windows (taken from qt creator flat dark)
+        QPalette palette;
+        palette.setColor( QPalette::Background, QColor::fromRgb( 46, 47, 48, 255 ));
+        palette.setColor( QPalette::Window, QColor::fromRgb( 46, 47, 48, 255 ));
+        palette.setColor( QPalette::WindowText, QColor::fromRgb( 208, 208, 208, 255 ));
+        palette.setColor( QPalette::Base, QColor::fromRgb( 46, 47, 48, 255 ));
+        palette.setColor( QPalette::AlternateBase, QColor::fromRgb( 53, 54, 55, 255 ));
+        palette.setColor( QPalette::Button, QColor::fromRgb( 64, 66, 68, 255 ));
+        palette.setColor( QPalette::BrightText, QColor::fromRgb( 255, 51, 51, 255 ));
+        palette.setColor( QPalette::Text, QColor::fromRgb( 208, 208, 208, 255 ));
+        palette.setColor( QPalette::ButtonText, QColor::fromRgb( 208, 208, 208, 255 ));
+        palette.setColor( QPalette::ToolTipBase, QColor::fromRgb( 0, 0, 0, 102 ));
+        palette.setColor( QPalette::Highlight, QColor::fromRgb( 96, 96, 96, 196 )); // a more gray-ish highlight than the default black
+        palette.setColor( QPalette::Dark, QColor::fromRgb( 64, 66, 68, 255 ));
+        palette.setColor( QPalette::HighlightedText, Qt::white );
+        palette.setColor( QPalette::ToolTipText, QColor::fromRgb( 208, 208, 208, 255 ));
+        palette.setColor( QPalette::Link, QColor::fromRgb( 0, 122, 244, 255 ));
+        palette.setColor( QPalette::LinkVisited, QColor::fromRgb( 165, 122, 255, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::ButtonText, QColor::fromRgb( 164, 166, 168, 96 ));
+        palette.setColor( QPalette::Disabled, QPalette::Window, QColor::fromRgb( 68, 68, 68, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::WindowText, QColor::fromRgb( 164, 166, 168, 96 ));
+        palette.setColor( QPalette::Disabled, QPalette::Base, QColor::fromRgb( 68, 68, 68, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 164, 166, 168, 96 ));
+        palette.setColor( QPalette::Disabled, QPalette::HighlightedText, Qt::white );
+        a.setPalette( qAsConst( palette ));
     }
 #endif
 
     // set icon theme
     QIcon::setThemeName( darkMode ? "dark" : "light" );
+
+    // store variable
+    Variable::instance()->setEnabled( "darkMode", darkMode );
 
     // show main window
     MainWindow::instance()->show();
