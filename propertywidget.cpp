@@ -29,25 +29,16 @@
  * @param values
  * @param tagId
  */
-PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget( parent ) {
-    this->m_tagId = tagId;
+PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget( parent ), m_tagId( tagId ) {
     if ( this->tagId() == Id::Invalid )
         return;
 
     const Tag::Types &type = Tag::instance()->type( tagId );
-
-    this->left->setIcon( QIcon::fromTheme( "left" ));
-    this->right->setIcon( QIcon::fromTheme( "right" ));
-    this->left->setIconSize( QSize( 8, 16 ));
-    this->right->setIconSize( QSize( 8, 16 ));
     this->layout->setContentsMargins( 0, 0, 0, 0 );
     this->layout->setSpacing( 0 );
 
-
     if ( values.isEmpty())
         return;
-
-    this->ghs->setLinear();
 
     int index = 0;
     for ( int y = 0; y < values.count(); y++ ) {
@@ -68,21 +59,22 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
     case Tag::Integer:
     case Tag::Real:
     case Tag::CAS:
+        this->label = new QLabel( this->displayValues.first());
         this->label->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
         this->label->setWordWrap( true );
-        this->label->setText( this->displayValues.first());
         this->layout->addWidget( this->label );
         break;
 
     case Tag::NFPA:
+        this->nfpa = new NFPAWidget( nullptr, propertyValues.first());
         this->layout->addWidget( this->nfpa );
         this->nfpa->setScale( 16 );
-        this->nfpa->update( propertyValues.first());
         break;
 
     case Tag::GHS:
+        this->ghs = new GHSWidget( nullptr, PropertyWidget::parseGHS( this->propertyValues.first()));
+        this->ghs->setLinear();
         this->layout->addWidget( this->ghs );
-        this->ghs->update( PropertyWidget::parseGHS( this->propertyValues.first()));
         break;
 
     case Tag::Formula:
@@ -94,6 +86,12 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
     this->m_position = 0;
 
     if ( this->displayValues.count() >= 2 ) {
+        this->left = new QToolButton();
+        this->right = new QToolButton();
+        this->left->setIcon( QIcon::fromTheme( "left" ));
+        this->right->setIcon( QIcon::fromTheme( "right" ));
+        this->left->setIconSize( QSize( 8, 16 ));
+        this->right->setIconSize( QSize( 8, 16 ));
         this->layout->addWidget( this->left );
         this->layout->addWidget( this->right );
         this->left->connect( this->left, &QToolButton::pressed, [ this, type ]() {
@@ -161,6 +159,38 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
     }
 
     this->setLayout( this->layout );
+}
+
+/**
+ * @brief PropertyWidget::PropertyWidget
+ * @param parent
+ * @param pixmap
+ * @param tagId
+ */
+PropertyWidget::PropertyWidget( QWidget *parent, const QPixmap &pixmap ) : QWidget( parent ), m_pixmap( pixmap ) {
+    if ( pixmap.isNull())
+        return;
+
+    this->label = new QLabel();
+    this->label->setPixmap( pixmap );
+    this->label->setFixedSize( pixmap.width(), pixmap.height());
+    this->layout->addWidget( label );
+    this->setLayout( this->layout );
+}
+
+/**
+ * @brief PropertyWidget::~PropertyWidget
+ */
+PropertyWidget::~PropertyWidget() {
+    if ( this->left != nullptr ) this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
+    if ( this->right != nullptr ) this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
+
+    if ( this->ghs != nullptr ) delete this->ghs;
+    if ( this->nfpa != nullptr ) delete this->nfpa;
+    if ( this->label != nullptr ) delete this->label;
+    if ( this->left != nullptr ) delete this->left;
+    if ( this->right != nullptr ) delete this->right;
+    delete this->layout;
 }
 
 /**

@@ -71,6 +71,7 @@
 //     mol = mass * assay( reagent ) / molarMass( reagent )
 //   - add any as batch name (a whildcard that chooses any batch with the property)
 //   - check API
+//   - aliases like (COCl)2 throw error
 //
 //  settings:
 //   - implement settings dialog and:
@@ -209,6 +210,7 @@ int main( int argc, char *argv[] ) {
     if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
 #endif
+    //darkMode = true;
 
 #ifndef Q_OS_MACOS
     // apply dark palette for linux and windows (macOS sets dark mode natively)

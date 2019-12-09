@@ -72,14 +72,12 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
         foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedRows()) {
             const int row = index.row();
             PropertyWidget *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
-            if ( widget != nullptr )
-                widget->add( this->reagentId());
-            else {
-                QLabel *label( qobject_cast<QLabel *>( this->ui->propertyView->cellWidget( row, 1 )));
-                if ( label != nullptr ) {
+            if ( widget != nullptr ) {
+                if ( widget->tagId() != Id::Invalid ) {
+                    widget->add( this->reagentId());
+                } else {
                     Row row = Row::Invalid;
-
-                    const QPixmap pixmap( *label->pixmap());
+                    const QPixmap pixmap( widget->pixmap());
                     if ( pixmap.isNull() || this->reagentId() == Id::Invalid )
                         return;
 
@@ -168,7 +166,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 ExtractionDialog::~ExtractionDialog() {
     this->manager->disconnect( this->manager, &QNetworkAccessManager::finished, this, nullptr );
 
-    qDeleteAll( this->widgetList );
+    //qDeleteAll( this->widgetList );
     delete this->manager;
     delete this->ui;
 }
@@ -180,8 +178,6 @@ ExtractionDialog::~ExtractionDialog() {
  */
 int ExtractionDialog::readData( const QByteArray &uncompressed ) {
     QMutexLocker lock( &this->mutex );
-
-    qDeleteAll( this->widgetList );
 
     // get cid
     int cid = -1;
@@ -378,7 +374,8 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
         return values;
     };
 
-    int rows = this->ui->propertyView->rowCount();
+    QMap<QString, PropertyWidget*>propList;
+
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const Row row = static_cast<Row>( y );
 
@@ -398,21 +395,26 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
             if ( values.isEmpty())
                 continue;
 
-           /* if ( Tag::instance()->type( row ) == Tag::GHS ) {
+            /* if ( Tag::instance()->type( row ) == Tag::GHS ) {
                 qDebug() << values << global;
 
             }*/
 
-            this->ui->propertyView->setRowCount( rows + 1 );
 
-            // TODO: delete items
             PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
-            this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( Tag::instance()->name( row )));
-            this->ui->propertyView->setCellWidget( rows, 1, group );
-            this->widgetList << group;
-
-            rows++;
+            propList[Tag::instance()->name( row )] = group;
+            //this->widgetList << group;
         }
+    }
+
+
+    // TODO: delete items
+    int row = this->ui->propertyView->rowCount();
+    this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propList.keys().count());
+    foreach ( const QString &name, propList.keys()) {
+        this->ui->propertyView->setItem( row, 0, new QTableWidgetItem( name ));
+        this->ui->propertyView->setCellWidget( row, 1, propList[name] );
+        row++;
     }
 
     this->ui->propertyView->resizeRowsToContents();
@@ -494,6 +496,7 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
         }
 
         QImage cropped( image.copy( QRect( left, top, right - left + 1, bottom - top + 1 )));
+        //cropped = cropped.convertToFormat( QImage::Format_ARGB32 ); does not look good
         for ( int x = 0; x < cropped.width(); x++ ) {
             for ( int y = 0; y < cropped.height(); y++ ) {
                 if ( cropped.pixelColor( x, y ) == key ) {
@@ -507,7 +510,6 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
 
     const int rows = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( rows + 1 );
-    QLabel *label( new QLabel());
     QPixmap pixmap;
     if ( !pixmap.loadFromData( data ))
         return;
@@ -516,14 +518,8 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
         return;
 
     const QPixmap cropped( autoCropPixmap( qAsConst( pixmap )));
-    label->setPixmap( cropped );
-    label->setFixedSize( cropped.width(), cropped.height());
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
-    this->ui->propertyView->setCellWidget( rows, 1, label );
-
-    // JUST NO: FIXME: this will be deleted immediately in readData
-   // this->widgetList << label;
-
+    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );
 }
 
@@ -534,8 +530,6 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
 void ExtractionDialog::getFormula( const QString &cid ) {
     // get formula
     if ( QFileInfo( this->cache() + ".png" ).exists()) {
-        qDebug() << "formula from cache";
-
         QFile file( this->cache() + ".png" );
         if ( file.open( QIODevice::ReadOnly )) {
             this->readFormula( file.readAll());
@@ -555,6 +549,10 @@ void ExtractionDialog::getFormula( const QString &cid ) {
  * @brief ExtractionDialog::on_extractButton_clicked
  */
 void ExtractionDialog::on_extractButton_clicked() {
+    this->ui->propertyView->clear();
+    this->ui->propertyView->setRowCount( 0 );
+    this->ui->propertyView->setColumnCount( 2 );
+
     this->m_cache = this->path() + "/" + QString( QCryptographicHash( QCryptographicHash::Md5 ).hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
     if ( this->cache().isEmpty())
         return;

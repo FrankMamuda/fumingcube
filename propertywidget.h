@@ -37,17 +37,8 @@ class PropertyWidget : public QWidget {
 
 public:
     explicit PropertyWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Id &tagId = Id::Invalid );
-    ~PropertyWidget() override {
-        this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
-        this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
-
-        delete this->ghs;
-        delete this->nfpa;
-        delete this->label;
-        delete this->left;
-        delete this->right;
-        delete this->layout;
-    }
+    PropertyWidget( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap());
+    ~PropertyWidget() override;
 
     int position() const { return this->m_position; }
     Id tagId() const { return this->m_tagId; }
@@ -77,6 +68,8 @@ public:
         return qAsConst( parms );
     }
 
+    QPixmap pixmap() const { return this->m_pixmap; }
+
 public slots:
     void add( const Id &id );
 
@@ -84,14 +77,13 @@ private:
     int m_position = -1;
     QMap<int, QString> displayValues;
     QMap<int, QStringList> propertyValues;
-    QLabel *label = new QLabel();
-    QToolButton *left = new QToolButton();
-    QToolButton *right = new QToolButton();
+    QLabel *label = nullptr;
+    QToolButton *left = nullptr;
+    QToolButton *right = nullptr;
     QHBoxLayout *layout = new QHBoxLayout();
-
-    // FIXME: don't initialize these if not needed
-    NFPAWidget *nfpa = new NFPAWidget();
-    GHSWidget *ghs = new GHSWidget();
+    NFPAWidget *nfpa = nullptr;
+    GHSWidget *ghs = nullptr;
+    QPixmap m_pixmap;
 
     Id m_tagId = Id::Invalid;
 };

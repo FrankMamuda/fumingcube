@@ -82,6 +82,5 @@ private:
     QStringList cidList;
     QString m_path;
     QString m_cache;
-    QList<QWidget*> widgetList;
     mutable QMutex mutex;
 };
