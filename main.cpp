@@ -207,7 +207,7 @@ int main( int argc, char *argv[] ) {
     if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool())
         darkMode = true;
 #else
-    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
+    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) > 128 )
         darkMode = true;
 #endif
     //darkMode = true;
