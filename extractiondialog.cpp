@@ -38,10 +38,6 @@
 #include "propertywidget.h"
 #include "tag.h"
 
-// FIXME: crash on multiple requests
-//        probably a race condition
-//
-
 /**
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent

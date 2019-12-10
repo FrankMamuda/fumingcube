@@ -28,6 +28,7 @@
 #include "script.h"
 #include "tag.h"
 #include "tagdialog.h"
+#include "settingsdialog.h"
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
@@ -147,4 +148,11 @@ void MainWindow::closeEvent( QCloseEvent *event ) {
     Variable::instance()->setValue( "mainWindow/geometry", MainWindow::instance()->saveGeometry().toBase64());
     Variable::instance()->setValue( "mainWindow/state", MainWindow::instance()->saveState().toBase64());
     QMainWindow::closeEvent( event );
+}
+
+/**
+ * @brief MainWindow::on_actionSettings_triggered
+ */
+void MainWindow::on_actionSettings_triggered() {
+    SettingsDialog().exec();
 }

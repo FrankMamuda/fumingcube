@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2018-2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,20 +21,26 @@
 /*
  * includes
  */
-#include <QSyntaxHighlighter>
+#include <QDialog>
 
 /**
- * @brief The SyntaxHilighter class
+ * @brief The Ui namespace
  */
-class SyntaxHighlighter : public QSyntaxHighlighter {
+namespace Ui {
+class SettingsDialog;
+}
+
+/**
+ * @brief The SettingsDialog class
+ */
+class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SyntaxHighlighter( QTextDocument *parent );
-
-protected:
-    void highlightBlock( const QString &text ) override;
+    explicit SettingsDialog( QWidget *parent = nullptr );
+    ~SettingsDialog();
 
 private:
-    QStringList keywords;
+    QStringList variables;
+    Ui::SettingsDialog *ui;
 };

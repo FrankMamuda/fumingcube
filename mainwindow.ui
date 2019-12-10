@@ -14,7 +14,8 @@
    <string>FumingCube</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="reagent"/>
+   <iconset theme="reagent">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3" columnstretch="0">
@@ -49,7 +50,7 @@
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Main ToolBar</string>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -79,6 +80,7 @@
    <addaction name="actionProperties"/>
    <addaction name="actionTags"/>
    <addaction name="actionClear"/>
+   <addaction name="actionSettings"/>
   </widget>
   <action name="actionReagents">
    <property name="checkable">
@@ -120,6 +122,14 @@
    </property>
    <property name="text">
     <string>Tags</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset theme="settings"/>
+   </property>
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

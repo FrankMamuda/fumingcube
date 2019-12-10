@@ -48,6 +48,7 @@ SOURCES += \
     reagentdock.cpp \
     reagentmodel.cpp \
     script.cpp \
+    settingsdialog.cpp \
     syntaxhighlighter.cpp \
     table.cpp \
     tag.cpp \
@@ -85,6 +86,7 @@ HEADERS += \
     reagentdock.h \
     reagentmodel.h \
     script.h \
+    settingsdialog.h \
     syntaxhighlighter.h \
     table.h \
     tag.h \
@@ -109,6 +111,7 @@ FORMS += \
         propertyeditor.ui \
         reagentdialog.ui \
         reagentdock.ui \
+        settingsdialog.ui \
         tagdialog.ui
 
 # Default rules for deployment.

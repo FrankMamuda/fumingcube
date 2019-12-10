@@ -119,5 +119,5 @@ protected:
     }
 
 private:
-    int m_scale = 32;
+    int m_scale = 24;
 };

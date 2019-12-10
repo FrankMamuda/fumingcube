@@ -51,16 +51,36 @@
 //   - richtext for names?
 //   - multiple aliases?
 //   - groups, sorting
+//     Groups with drag and drop (reagents can be in multiple groups)
+//      Inorganic reagents
+//          \_Sodium hydroxide
+//      Bases
+//          \_Sodium hydroxide
+//   - alias vs reference name
 //
 //  properties:
 //  - for now we use built in property extractor from PubChem
 //     in the future this should be fully scripted (per tag) and from multiple sources
 //  - add structural formula support (extraction) https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
+//  - cannot edit textual properties
+//  - paste reference should be done at the cursor
+//  - analysis number - analysis id?
+//  - filter in dock
+//  - icons in "add property" menu
+//  - solubility data as a property
 //
 //  extraction:
 //  - the current search URL is not exactly reliable
 //    we must first search for the exact name, and then for synonyms
 //    try butane (resolves to 1,4-butanediol)
+//  - first search by exact name, if it returns no matches - search for
+//    alike structures and present a cid list to choose from
+//  - property extraction must use reagent name not batch name
+//  - there must be an option to clear PubChem cache
+//    if the wrong record was fetched, a proper one cannot be
+//    fetched from the internet, since the app will use a cached
+//    version by default
+//    (OR FIND another way to store cached files)
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list
@@ -72,12 +92,19 @@
 //   - add any as batch name (a whildcard that chooses any batch with the property)
 //   - check API
 //   - aliases like (COCl)2 throw error
+//   - Names with commas don't work (commas are replaced in calculator)
+//     ReferenceError: batch "2.6-X190110" is not defined
+//
+//  syntax highlighter:
+//   - problems with:
+//     "Lot: A00000000"
+//     "A-AAA-AA.1-11-11"
+//     "2,6-A1111111"
+//     (COCl)2
 //
 //  settings:
 //   - implement settings dialog and:
-//     - option to choose database path
-//     - option to switch dark/light theme
-//     - option to change syntax highlighter
+//     - option to change syntax highlighter (and font size)
 //
 //  misc:
 //   - store images (formulas) fullsize but rescale in property view
@@ -85,6 +112,7 @@
 //     this however causes a performance penalty while resizing property
 //     view. one option would be to use a precached image or sacrifice quality
 //     with fast transform
+//   - application icon for macOS and windows
 //
 //  variable:
 //   - automatically store QByteArray as base64
@@ -142,6 +170,8 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
     Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
+    Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
 
     // read configuration
     XMLTools::instance()->read();
@@ -204,13 +234,20 @@ int main( int argc, char *argv[] ) {
 
     bool darkMode = false;
 #ifdef Q_OS_WIN
-    if ( !QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ).toBool())
+    const QVariant key( QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
+    if ( key.isValid() && !key.toBool())
         darkMode = true;
 #else
     if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) > 128 )
         darkMode = true;
 #endif
-    //darkMode = true;
+    if ( Variable::instance()->isEnabled( "overrideTheme" )) {
+        const QString theme( Variable::instance()->string( "theme" ));
+        if ( !QString::compare( theme, "light" ))
+            darkMode = false;
+        else if ( !QString::compare( theme, "dark" ))
+            darkMode = true;
+    }
 
 #ifndef Q_OS_MACOS
     // apply dark palette for linux and windows (macOS sets dark mode natively)

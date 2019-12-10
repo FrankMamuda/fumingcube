@@ -22,6 +22,7 @@
       <file alias="16x16/right.png">icons/dark/16x16/right.png</file>
       <file alias="16x16/star.png">icons/dark/16x16/star.png</file>
       <file alias="16x16/up.png">icons/dark/16x16/up.png</file>
+      <file alias="16x16/settings.png">icons/dark/16x16/settings.png</file>
       <file alias="scalable/accept.svg">icons/dark/scalable/accept.svg</file>
       <file alias="scalable/add.svg">icons/dark/scalable/add.svg</file>
       <file alias="scalable/clean.svg">icons/dark/scalable/clean.svg</file>
@@ -43,5 +44,6 @@
       <file alias="scalable/right.svg">icons/dark/scalable/right.svg</file>
       <file alias="scalable/star.svg">icons/dark/scalable/star.svg</file>
       <file alias="scalable/up.svg">icons/dark/scalable/up.svg</file>
+	  <file alias="scalable/settings.svg">icons/dark/scalable/settings.svg</file>
   </qresource>
 </RCC>
