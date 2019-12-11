@@ -56,15 +56,11 @@
 //          \_Sodium hydroxide
 //      Bases
 //          \_Sodium hydroxide
-//   - alias vs reference name
 //
 //  properties:
 //  - for now we use built in property extractor from PubChem
 //     in the future this should be fully scripted (per tag) and from multiple sources
-//  - add structural formula support (extraction) https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14798/PNG
 //  - cannot edit textual properties
-//  - paste reference should be done at the cursor
-//  - analysis number - analysis id?
 //  - filter in dock
 //  - icons in "add property" menu
 //  - solubility data as a property
@@ -75,7 +71,6 @@
 //    try butane (resolves to 1,4-butanediol)
 //  - first search by exact name, if it returns no matches - search for
 //    alike structures and present a cid list to choose from
-//  - property extraction must use reagent name not batch name
 //  - there must be an option to clear PubChem cache
 //    if the wrong record was fetched, a proper one cannot be
 //    fetched from the internet, since the app will use a cached
@@ -91,16 +86,6 @@
 //     mol = mass * assay( reagent ) / molarMass( reagent )
 //   - add any as batch name (a whildcard that chooses any batch with the property)
 //   - check API
-//   - aliases like (COCl)2 throw error
-//   - Names with commas don't work (commas are replaced in calculator)
-//     ReferenceError: batch "2.6-X190110" is not defined
-//
-//  syntax highlighter:
-//   - problems with:
-//     "Lot: A00000000"
-//     "A-AAA-AA.1-11-11"
-//     "2,6-A1111111"
-//     (COCl)2
 //
 //  settings:
 //   - implement settings dialog and:
@@ -162,9 +147,9 @@ int main( int argc, char *argv[] ) {
 
     // set variable defaults
     Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
-    Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
-    Variable::instance()->add( "propertyNameColumnSize", 128, Var::Flag::Hidden );
-    Variable::instance()->add( "system/consoleHistory", "", Var::Flag::ReadOnly );
+    //Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
+    Variable::instance()->add( "propertyNameColumnSize", 128, Var::Flag::Hidden ); // // TODO: do we even need this now?
+    Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "calculator/history", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
@@ -249,15 +234,15 @@ int main( int argc, char *argv[] ) {
             darkMode = true;
     }
 
-#ifndef Q_OS_MACOS
-    // apply dark palette for linux and windows (macOS sets dark mode natively)
-    if ( darkMode ) {
-        // apply fusion style
-        // this does not look native, but is a good workaround for now
-        a.setStyle( QStyleFactory::create( "Fusion" ));
+    QPalette palette;
+    // apply fusion style
+    // this does not look native, but is a good workaround for now
+    a.setStyle( QStyleFactory::create( "Fusion" ));
 
-        // apply dark palette for windows (taken from qt creator flat dark)
-        QPalette palette;
+    // TODO: sort this out
+    // apply dark palette (macOS sets theme natively, so it might not need palette change?)
+    if ( darkMode ) {
+        // apply dark palette (taken from qt creator flat dark)
         palette.setColor( QPalette::Background, QColor::fromRgb( 46, 47, 48, 255 ));
         palette.setColor( QPalette::Window, QColor::fromRgb( 46, 47, 48, 255 ));
         palette.setColor( QPalette::WindowText, QColor::fromRgb( 208, 208, 208, 255 ));
@@ -281,8 +266,32 @@ int main( int argc, char *argv[] ) {
         palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 164, 166, 168, 96 ));
         palette.setColor( QPalette::Disabled, QPalette::HighlightedText, Qt::white );
         a.setPalette( qAsConst( palette ));
+    } else {
+        // apply dark palette (taken from default win10 theme)
+        palette.setColor( QPalette::Background, QColor::fromRgb( 240, 240, 240, 255 ));
+        palette.setColor( QPalette::Window, QColor::fromRgb( 240, 240, 240, 255 ));
+        palette.setColor( QPalette::WindowText, QColor::fromRgb( 0, 0, 0, 255 ));
+        palette.setColor( QPalette::Base, QColor::fromRgb( 255, 255, 255, 255 ));
+        palette.setColor( QPalette::AlternateBase, QColor::fromRgb( 246, 246, 246, 255 ));
+        palette.setColor( QPalette::Button, QColor::fromRgb( 240, 240, 240, 255 ));
+        palette.setColor( QPalette::BrightText, QColor::fromRgb( 255, 255, 255, 255 ));
+        palette.setColor( QPalette::Text, QColor::fromRgb( 0, 0, 0, 255 ));
+        palette.setColor( QPalette::ButtonText, QColor::fromRgb( 0, 0, 0, 255 ));
+        palette.setColor( QPalette::ToolTipBase, QColor::fromRgb( 255, 255, 220, 255 ));
+        palette.setColor( QPalette::Highlight, QColor::fromRgb( 0, 120, 215, 255 ));
+        palette.setColor( QPalette::Dark, QColor::fromRgb( 160, 160, 160, 255 ));
+        palette.setColor( QPalette::HighlightedText, QColor::fromRgb( 255, 255, 255, 255 ));
+        palette.setColor( QPalette::ToolTipText, QColor::fromRgb( 0, 0, 0, 255 ));
+        palette.setColor( QPalette::Link, QColor::fromRgb( 0, 0, 255, 255 ));
+        palette.setColor( QPalette::LinkVisited, QColor::fromRgb( 255, 0, 255, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::ButtonText, QColor::fromRgb( 120, 120, 120, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::Window, QColor::fromRgb( 240, 240, 240, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::WindowText, QColor::fromRgb( 120, 120, 120, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::Base, QColor::fromRgb( 240, 240, 240, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 120, 120, 120, 255 ));
+        palette.setColor( QPalette::Disabled, QPalette::HighlightedText, QColor::fromRgb( 255, 255, 255, 255 ));
+        a.setPalette( qAsConst( palette ));
     }
-#endif
 
     // set icon theme
     QIcon::setThemeName( darkMode ? "dark" : "light" );

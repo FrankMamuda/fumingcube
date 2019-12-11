@@ -7,14 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>113</height>
+    <height>111</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Add</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="reagent"/>
+   <iconset theme="reagent">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="1" column="0">
@@ -25,17 +26,25 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QLineEdit" name="nameEdit"/>
+    <widget class="QLineEdit" name="nameEdit">
+     <property name="placeholderText">
+      <string>Type a reagent name</string>
+     </property>
+    </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="aliasLabel">
      <property name="text">
-      <string>Alias (short name)</string>
+      <string>Reference</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QLineEdit" name="aliasEdit"/>
+    <widget class="QLineEdit" name="aliasEdit">
+     <property name="placeholderText">
+      <string>Type a unique reference (calculator)</string>
+     </property>
+    </widget>
    </item>
    <item row="5" column="0" colspan="2">
     <widget class="ButtonBox" name="buttonBox">

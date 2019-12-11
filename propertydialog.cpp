@@ -84,6 +84,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
 
     case Tag::CAS:
     {
+        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
         this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this ]( const QString &text ) {
             const QRegularExpression pattern( "\\d{2,7}-\\d{2}-\\d{1}" );
 
@@ -95,6 +96,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         break;
 
     case Tag::Text:
+        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
         break;
 
     default:
@@ -107,7 +109,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
     this->ui->unitsLabel->setText( Tag::instance()->units( tagId ));
     this->ui->unitsLabel->setTextFormat( Qt::RichText );
 
-    if ( !defaultValue.isEmpty())
+    if ( !defaultValue.isEmpty() && type != Tag::Text )
         this->ui->advancedButton->hide();
 
     // focus on input dialog

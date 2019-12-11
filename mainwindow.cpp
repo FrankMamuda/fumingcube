@@ -56,7 +56,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->ui->calcView->setFont( qAsConst( font ));
 
     // resture previous calculations
-    this->ui->calcView->setText( Variable::instance()->string( "calculator/history" ));
+    this->ui->calcView->setText( Variable::uncompressedString( Variable::instance()->string( "calculator/history" )));
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
@@ -111,7 +111,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
  */
 void MainWindow::saveHistory() {
     // save calculator view history
-    Variable::instance()->setString( "calculator/history", this->ui->calcView->toPlainText());
+    Variable::instance()->setString( "calculator/history", Variable::compressedString( this->ui->calcView->toPlainText()));
 
     // save expression editor hidtory
     this->ui->calcEdit->saveHistory();

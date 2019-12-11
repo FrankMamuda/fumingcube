@@ -70,7 +70,7 @@ void Tag::populate() {
                QStringList() << "Density" << QString() << "(\\d+(?:\\.\\d+)?)(?!\\)$)(\\sg\\/[\\w|\\d]+)?" );
     this->add( this->tr( "Assay" ),                Real, this->tr( "&percnt;" ),              0.0,   110.0, 100.0,  3, "assay",         0.01 );
     this->add( this->tr( "State" ),                State );
-    this->add( this->tr( "Analysis number" ));
+    this->add( this->tr( "Analysis id" ));
     this->add( this->tr( "Loss on drying" ),       Real, this->tr( "&percnt;" ),              0.0,   1000.0,  0.0,  2, "lossOnDrying",  0.01 );
     this->add( this->tr( "HPLC purity" ),          Real, this->tr( "&percnt;" ),              0.0,    110.0, 100.0, 2, "HPLC",          0.01 );
     this->add( this->tr( "GC purity" ),            Real, this->tr( "&percnt;" ),              0.0,    110.0, 100.0, 2, "GC",            0.01 );
@@ -84,7 +84,7 @@ void Tag::populate() {
                QStringList() << "Melting Point" << QString() << "(-?(?:\\d+,)?(?:\\d+.)?\\d+\\s?(?!\\)$))(°?[CFK])?" );
     this->add( this->tr( "Flash point" ),          Real, this->tr( "&deg;C" ),            -273.15,       "",  50.0, 1, "flashPoint",    1.00,
                QStringList() << "Flash Point" << QString() << "(-?(?:\\d+,)?(?:\\d+.)?\\d+\\s?(?!\\)$))(°?[CFK])?)" );
-    this->add( this->tr( "CAS number" ),           CAS,  "",                                  1.0,     10.0,  1.00, 0, "",              1.00,
+    this->add( this->tr( "CAS number" ),           CAS,  "",                                   "",       "",    "", 0, "",              1.00,
                QStringList() << "CAS" << QString() << "(\\d+-\\d+-\\d+)" );
     this->add( this->tr( "Viscosity" ),            Real, this->tr( "&nbsp;mPa·s" ),            "",       "",  1.00, 3, "viscosity",     1.00 );
     this->add( this->tr( "Reftractive index" ),    Real, "",                                  1.0,     10.0,  1.00, 3, "",              1.00,

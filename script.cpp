@@ -67,7 +67,7 @@ QJSValue Script::evaluate( const QString &script ) {
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
         //  2) replace comma decimal separator with a dot
         //  3) simplify string to remove trailing whitespace and newline
-        const QString processed( QString( script ).replace( QRegularExpression( QString( "(%1)\\s*\\(").arg( functions.join( "|" ))), "JS.getProperty( \"\\1\"," ).replace( QRegularExpression("(\\d+),(\\d+)"),"\\1.\\2" ).simplified());
+        const QString processed( QString( script ).replace( QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"").arg( functions.join( "|" ))), "JS.getProperty( \"\\1\", \"" ).replace( QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)"), "\\1.\\2" ).simplified());
 
         // evalute script
         result = this->engine.evaluate( processed );

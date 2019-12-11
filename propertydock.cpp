@@ -169,12 +169,17 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
     }
 
     if ( tagId != Id::Invalid ) {
-        switch ( Tag::instance()->type( Tag::instance()->row( tagId ))) {
+        const Tag::Types type = Tag::instance()->type( Tag::instance()->row( tagId ));
+        switch ( type ) {
         case Tag::CAS:
         case Tag::Text:
         case Tag::Integer:
         case Tag::Real:
         {
+            // goto rich text editor
+            if ( type == Tag::Text && Qt::mightBeRichText( qAsConst( value )))
+                break;
+
             PropertyDialog pd( PropertyDock::instance(), tagId, qAsConst( value ));
             int result = pd.exec();
             if ( result == QDialog::Accepted )
@@ -210,7 +215,7 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
 
         QTextEdit ed;
         ed.setText( name );
-        if ( ed.toPlainText().isEmpty()) {
+        if ( ed.toPlainText().isEmpty() && tagId == Id::Invalid ) {
             QMessageBox::warning( PropertyDock::instance(), this->tr( "Cannot add property" ), this->tr( "Property missing name" ));
             return values;
         }
@@ -316,7 +321,9 @@ void PropertyDock::on_addPropButton_clicked() {
 
     // add an option to get properties from the internet
     menu.addAction( this->tr( "Get properties from the internet" ), [ this, reagentId ]() {
-        ExtractionDialog ed( this, reagentId );
+        const Id parentId = Reagent::instance()->parentId( reagentId );
+
+        ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
         ed.exec();
         this->updateView();
     } );
@@ -542,21 +549,25 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
     const QString functionName( Tag::instance()->function( tagId ));
 
     if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
-            QString parents;
+        QString parents;
 
-            const Id reagentId = Property::instance()->reagentId( row );
-            if ( reagentId == Id::Invalid )
-                return;
+        const Id reagentId = Property::instance()->reagentId( row );
+        if ( reagentId == Id::Invalid )
+            return;
 
-            const Id parentId = Reagent::instance()->parentId( reagentId );
-            if ( parentId != Id::Invalid ) {
-                parents = QString( "\"%1\", \"%2\"" ).arg( Reagent::instance()->alias( parentId )).arg( Reagent::instance()->name( reagentId ));
-                qDebug() << "has parent";
-            } else {
-                parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
-            }
+        const Id parentId = Reagent::instance()->parentId( reagentId );
+        if ( parentId != Id::Invalid ) {
+            parents = QString( "\"%1\", \"%2\"" ).arg( Reagent::instance()->alias( parentId )).arg( Reagent::instance()->name( reagentId ));
+            qDebug() << "has parent";
+        } else {
+            parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
+        }
 
-            QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
-            calc->setText( calc->text().append( QString( " %1( %2 )" ).arg( functionName ).arg( qAsConst( parents ))));
+        QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
+        const QString comleted( QString( "%1( %2 )" ).arg( functionName ).arg( qAsConst( parents )));
+        if ( calc->text().isEmpty())
+            calc->setText( comleted );
+        else
+            calc->insert( " " + comleted );
     }
 }
