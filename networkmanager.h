@@ -37,8 +37,12 @@ class NetworkManager: public QObject {
 public:
     enum Type {
         NoType = -1,
-        BasicProperties,
-        Properties
+        CIDRequest,
+        CIDRequestSimilar,
+        DataRequest,
+        FormulaRequest,
+        FormulaRequestBrowser,
+        IUPACName
     };
     Q_ENUM( Type )
 
@@ -55,6 +59,7 @@ signals:
      * @param data
      */
     void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &url, NetworkManager::Type type, const QString &errorString );
 
 public slots:
     void execute( const QString &url, Type type, const QVariant &userData = QVariant());

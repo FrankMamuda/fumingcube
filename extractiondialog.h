@@ -65,19 +65,23 @@ public:
         FormulaRequest
     };
 
-public slots:
     int readData( const QByteArray &uncompressed );
+
+public slots:
+    void replyReceived( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &, NetworkManager::Type, const QString & );
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );
 
 private slots:
     void on_extractButton_clicked();
+    void on_clearCacheButton_clicked();
+    void generateCacheName();
 
 private:
     Ui::ExtractionDialog *ui;
     ExtractionModel *model = nullptr;
     Id m_reagentId = Id::Invalid;
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkRequest request;
     QStringList cidList;
     QString m_path;

@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
  * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,31 +23,20 @@
  */
 #include <QDialog>
 
-/**
- * @brief The Ui namespace
- */
 namespace Ui {
-class ImageUtils;
-static const int MaxImageSize = 512;
+class StructureBrowser;
 }
 
 /**
- * @brief The ImageUtils class
+ * @brief The StructureBrowser class
  */
-class ImageUtils : public QDialog {
+class StructureBrowser : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0 );
-    ~ImageUtils();
-    QPixmap pixmap;
-
-    static QPixmap autoCropPixmap( const QPixmap &pixmap, const QColor &key = QColor::fromRgb( 255, 255, 255, 255 ));
-
-signals:
-    void accepted( const QPixmap &pixmap );
+    explicit StructureBrowser( QWidget *parent = nullptr );
+    ~StructureBrowser();
 
 private:
-    Ui::ImageUtils *ui;
-    QSize size;
+    Ui::StructureBrowser *ui;
 };

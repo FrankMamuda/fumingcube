@@ -14,7 +14,8 @@
    <string>Property extraction</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="extract"/>
+   <iconset theme="extract">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="3" column="0" colspan="4">
@@ -62,6 +63,16 @@
        <widget class="QLineEdit" name="cidEdit">
         <property name="readOnly">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearCacheButton">
+        <property name="text">
+         <string>Clear cache</string>
+        </property>
+        <property name="icon">
+         <iconset theme="clear"/>
         </property>
        </widget>
       </item>

@@ -49,6 +49,7 @@ SOURCES += \
     reagentmodel.cpp \
     script.cpp \
     settingsdialog.cpp \
+    structurebrowser.cpp \
     syntaxhighlighter.cpp \
     table.cpp \
     tag.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     reagentmodel.h \
     script.h \
     settingsdialog.h \
+    structurebrowser.h \
     syntaxhighlighter.h \
     table.h \
     tag.h \
@@ -112,6 +114,7 @@ FORMS += \
         reagentdialog.ui \
         reagentdock.ui \
         settingsdialog.ui \
+        structurebrowser.ui \
         tagdialog.ui
 
 # Default rules for deployment.

@@ -106,3 +106,86 @@ ImageUtils::~ImageUtils() {
     this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
     delete this->ui;
 }
+
+/**
+ * @brief ImageUtils::autoCropPixmap
+ * @param pixmap
+ * @param key
+ * @return
+ */
+QPixmap ImageUtils::autoCropPixmap(const QPixmap &pixmap, const QColor &key ) {
+    const QImage image( pixmap.toImage());
+
+    // check left
+    int left = 0, right = 0, top = 0, bottom = 0;
+    for ( int x = 0; x < image.width(); x++ ) {
+        bool found = false;
+
+        for ( int y = 0; y < image.height(); y++ ) {
+            if ( image.pixelColor( x, y ) != key ) {
+                left = x;
+                found = true;
+                break;
+            }
+        }
+        if ( found )
+            break;
+    }
+
+    // check right
+    for ( int x = image.width() - 1; x >= 0; x-- ) {
+        bool found = false;
+
+        for ( int y = 0; y < image.height(); y++ ) {
+            if ( image.pixelColor( x, y ) != key ) {
+                right = x;
+                found = true;
+                break;
+            }
+        }
+        if ( found )
+            break;
+    }
+
+    // find bottom
+    for ( int y = image.height() - 1; y >= 0; y-- ) {
+        bool found = false;
+
+        for ( int x = 0; x < image.width(); x++ ) {
+            if ( image.pixelColor( x, y ) != key ) {
+                bottom = y;
+                found = true;
+                break;
+            }
+        }
+        if ( found )
+            break;
+    }
+
+    // find bottom
+    for ( int y = 0; y < image.height(); y++ ) {
+        bool found = false;
+
+        for ( int x = 0; x < image.width(); x++ ) {
+            if ( image.pixelColor( x, y ) != key ) {
+                top = y;
+                found = true;
+                break;
+            }
+        }
+        if ( found )
+            break;
+    }
+
+    QImage cropped( image.copy( QRect( left, top, right - left + 1, bottom - top + 1 )));
+    //cropped = cropped.convertToFormat( QImage::Format_ARGB32 ); does not look good
+    for ( int x = 0; x < cropped.width(); x++ ) {
+        for ( int y = 0; y < cropped.height(); y++ ) {
+            if ( cropped.pixelColor( x, y ) == key ) {
+                cropped.setPixelColor( x, y, QColor::fromRgb( 255, 255, 255, 0 ));
+            }
+        }
+    }
+
+    return QPixmap::fromImage( qAsConst( cropped ));
+}

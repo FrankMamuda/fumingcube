@@ -37,6 +37,7 @@
 #include "tag.h"
 #include "propertywidget.h"
 #include "tag.h"
+#include "imageutils.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
@@ -45,6 +46,8 @@
 ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     this->ui->setupUi( this );
     this->ui->propertyView->verticalHeader()->hide();
+
+    this->connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )));
 
     // make cache dir
     this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
@@ -63,7 +66,6 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     auto addProperties = [ this ]( bool all = false ) {
         if ( all )
             this->ui->propertyView->selectAll();
-
 
         foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedRows()) {
             const int row = index.row();
@@ -101,69 +103,14 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 
     this->ui->addAllButton->connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
     this->ui->addSelectedButton->connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
-
-    this->manager->connect( this->manager, &QNetworkAccessManager::finished, [ this ]( QNetworkReply *reply ) {
-        if ( reply->error()) {
-            this->ui->cidEdit->setText( this->tr( "Error: could not get a valid CID" ));
-            return;
-        }
-
-        switch ( reply->request().attribute( QNetworkRequest::User ).toInt()) {
-        case CIDRequest:
-        {
-            this->cidList << QString( reply->readAll()).split( "\n" );
-            if ( this->cidList.isEmpty())
-                return;
-
-            const QString cid( this->cidList.first());
-            this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
-            this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid )));
-            this->request.setAttribute( QNetworkRequest::User, DataRequest );
-            this->manager->get( this->request );
-
-            this->getFormula( cid );
-        }
-            break;
-
-        case DataRequest:
-        {
-            const QByteArray data( reply->readAll());
-            const QByteArray compressedData( qCompress( data ));
-            QFile file( this->cache());
-            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-                file.write( compressedData.constData(), compressedData.length());
-                file.close();
-            }
-
-            this->readData( data );
-        }
-            break;
-
-        case FormulaRequest:
-        {
-            const QByteArray data( reply->readAll());
-            QFile file( this->cache() + ".png" );
-            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-                file.write( data.constData(), data.length());
-                file.close();
-            }
-
-            this->readFormula( data );
-        }
-            break;
-        }
-    }
-    );
 }
 
 /**
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
-    this->manager->disconnect( this->manager, &QNetworkAccessManager::finished, this, nullptr );
-
-    //qDeleteAll( this->widgetList );
-    delete this->manager;
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )));
+    this->disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Type, const QString & )), this, SLOT( error( const QString &, NetworkManager::Type, const QString & )));
     delete this->ui;
 }
 
@@ -391,20 +338,12 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
             if ( values.isEmpty())
                 continue;
 
-            /* if ( Tag::instance()->type( row ) == Tag::GHS ) {
-                qDebug() << values << global;
-
-            }*/
-
-
             PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
             propList[Tag::instance()->name( row )] = group;
-            //this->widgetList << group;
         }
     }
 
 
-    // TODO: delete items
     int row = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propList.keys().count());
     foreach ( const QString &name, propList.keys()) {
@@ -425,85 +364,6 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) {
 void ExtractionDialog::readFormula( const QByteArray &data ) {    
     QMutexLocker lock( &this->mutex );
 
-    // FIXME: ugly code
-    auto autoCropPixmap = []( const QPixmap &pixmap ) {
-        const QImage image( pixmap.toImage());
-        const QColor key( QColor::fromRgb( 245, 245, 245, 255 ));
-
-        // check left
-        int left = 0, right = 0, top = 0, bottom = 0;
-        for ( int x = 0; x < image.width(); x++ ) {
-            bool found = false;
-
-            for ( int y = 0; y < image.height(); y++ ) {
-                if ( image.pixelColor( x, y ) != key ) {
-                    left = x;
-                    found = true;
-                    break;
-                }
-            }
-            if ( found )
-                break;
-        }
-
-        // check right
-        for ( int x = image.width() - 1; x >= 0; x-- ) {
-            bool found = false;
-
-            for ( int y = 0; y < image.height(); y++ ) {
-                if ( image.pixelColor( x, y ) != key ) {
-                    right = x;
-                    found = true;
-                    break;
-                }
-            }
-            if ( found )
-                break;
-        }
-
-        // find bottom
-        for ( int y = image.height() - 1; y >= 0; y-- ) {
-            bool found = false;
-
-            for ( int x = 0; x < image.width(); x++ ) {
-                if ( image.pixelColor( x, y ) != key ) {
-                    bottom = y;
-                    found = true;
-                    break;
-                }
-            }
-            if ( found )
-                break;
-        }
-
-        // find bottom
-        for ( int y = 0; y < image.height(); y++ ) {
-            bool found = false;
-
-            for ( int x = 0; x < image.width(); x++ ) {
-                if ( image.pixelColor( x, y ) != key ) {
-                    top = y;
-                    found = true;
-                    break;
-                }
-            }
-            if ( found )
-                break;
-        }
-
-        QImage cropped( image.copy( QRect( left, top, right - left + 1, bottom - top + 1 )));
-        //cropped = cropped.convertToFormat( QImage::Format_ARGB32 ); does not look good
-        for ( int x = 0; x < cropped.width(); x++ ) {
-            for ( int y = 0; y < cropped.height(); y++ ) {
-                if ( cropped.pixelColor( x, y ) == key ) {
-                    cropped.setPixelColor( x, y, QColor::fromRgb( 255, 255, 255, 0 ));
-                }
-            }
-        }
-
-        return QPixmap::fromImage( qAsConst( cropped ));
-    };
-
     const int rows = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( rows + 1 );
     QPixmap pixmap;
@@ -513,7 +373,7 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
     if ( pixmap.isNull())
         return;
 
-    const QPixmap cropped( autoCropPixmap( qAsConst( pixmap )));
+    const QPixmap cropped( ImageUtils::autoCropPixmap( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
     this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );
@@ -534,11 +394,8 @@ void ExtractionDialog::getFormula( const QString &cid ) {
         }
     }
 
-    if ( !cid.isEmpty()) {
-        this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid )));
-        this->request.setAttribute( QNetworkRequest::User, FormulaRequest );
-        this->manager->get( this->request );
-    }
+    if ( !cid.isEmpty())
+        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid ), NetworkManager::FormulaRequest );
 }
 
 /**
@@ -549,7 +406,7 @@ void ExtractionDialog::on_extractButton_clicked() {
     this->ui->propertyView->setRowCount( 0 );
     this->ui->propertyView->setColumnCount( 2 );
 
-    this->m_cache = this->path() + "/" + QString( QCryptographicHash( QCryptographicHash::Md5 ).hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
+    this->generateCacheName();
     if ( this->cache().isEmpty())
         return;
 
@@ -571,7 +428,119 @@ void ExtractionDialog::on_extractButton_clicked() {
     }
 
     // get data
-    this->request.setUrl( QUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" ))));
-    this->request.setAttribute( QNetworkRequest::User, CIDRequest );
-    this->manager->get( this->request );
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequest );
+}
+
+/**
+ * @brief ExtractionDialog::on_clearCacheButton_clicked
+ */
+void ExtractionDialog::on_clearCacheButton_clicked() {
+    if ( this->ui->nameEdit->text().isEmpty())
+        return;
+
+    this->generateCacheName();
+    if ( this->cache().isEmpty())
+        return;
+
+    const QFileInfo info( this->cache());
+    if ( !info.exists() || !info.isFile())
+        return;
+
+    QFile::remove( this->cache());
+}
+
+/**
+ * @brief ExtractionDialog::generateCacheName
+ */
+void ExtractionDialog::generateCacheName() {
+    this->m_cache = this->path() + "/" + QString( QCryptographicHash( QCryptographicHash::Md5 ).hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
+}
+
+/**
+ * @brief ExtractionDialog::replyReceived
+ * @param url
+ * @param type
+ * @param userData
+ * @param data
+ */
+void ExtractionDialog::replyReceived( const QString &, NetworkManager::Type type, const QVariant &, const QByteArray &data ) {
+    switch ( type ) {
+    case NetworkManager::CIDRequest:
+    {
+        this->cidList << QString( data ).split( "\n" );
+        if ( this->cidList.isEmpty())
+            return;
+
+        /*QFile file( this->cache() + ".cid" );
+        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+            file.write( data.constData(), data.length());
+            file.close();
+        }*/
+
+        const QString cid( this->cidList.first());
+        this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
+        NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
+        this->getFormula( cid );
+    }
+        break;
+
+    case NetworkManager::DataRequest:
+    {
+        const QByteArray compressedData( qCompress( data ));
+        QFile file( this->cache());
+        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+            file.write( compressedData.constData(), compressedData.length());
+            file.close();
+        }
+
+        this->readData( data );
+    }
+        break;
+
+    case NetworkManager::FormulaRequest:
+    {
+        QFile file( this->cache() + ".png" );
+        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+            file.write( data.constData(), data.length());
+            file.close();
+        }
+
+        this->readFormula( data );
+    }
+        break;
+
+    case NetworkManager::IUPACName:
+    case NetworkManager::NoType:
+    case NetworkManager::CIDRequestSimilar:
+    case NetworkManager::FormulaRequestBrowser:
+        break;
+    }
+}
+
+/**
+ * @brief ExtractionDialog::error
+ */
+void ExtractionDialog::error( const QString &, NetworkManager::Type type, const QString &errorMessage ) {
+    qDebug() << errorMessage;
+
+    switch ( type ) {
+    case NetworkManager::CIDRequest:
+        this->ui->cidEdit->setText( this->tr( "Could not get a valid CID" ));
+        break;
+
+    case NetworkManager::DataRequest:
+        this->ui->cidEdit->setText( this->tr( "Could retrive data associated with CID" ));
+        break;
+
+    case NetworkManager::FormulaRequest:
+        this->ui->cidEdit->setText( this->tr( "Could retrive formula associated with CID" ));
+        break;
+
+        // do not handle errors related to other classes
+    case NetworkManager::IUPACName:
+    case NetworkManager::NoType:
+    case NetworkManager::CIDRequestSimilar:
+    case NetworkManager::FormulaRequestBrowser:
+        break;
+    }
 }

@@ -75,7 +75,7 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
     QList<SyntaxHighlighterOption> options = {
         { "\\d+\\.?\\d*",               number,     true        },
         { "\\/|\\*|\\+|\\-[^\\w]",      op                      },
-        { "\".+\"",                     string,     true        },
+        { "\".+\"(\\s*,\\s*\".+\")?",   string,     true        },
         { "\\w+Error.+",                error,      true, true  },
         { "\\bReference\\s'.+'\\s.+",   error,      true        },
         { "\\bundefined\\b(?!\")",      undefined               }

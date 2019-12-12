@@ -32,25 +32,21 @@ void NetworkManager::execute( const QString &url, NetworkManager::Type type, con
     QNetworkRequest request;
 
     // add user data to request
-    request.setUrl( QUrl::fromEncoded( url.toLocal8Bit()));
+    request.setUrl( url );
     request.setAttribute( QNetworkRequest::User, static_cast<int>( type ));
     request.setAttribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 ), userData );
 
     // get reply
-    QNetworkReply *reply( this->manager.get( request ));
-
-    qDebug() << "execute";
+    QNetworkReply *reply( this->manager.get( qAsConst( request )));
 
     // handle replies
-    this->connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
+    reply->connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
         const Type type = static_cast<Type>( reply->request().attribute( QNetworkRequest::User ).toInt());
         const QVariant userData( reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 )));
 
         // abort on errors
         if ( reply->error()) {
-            qDebug() << "error" << reply->errorString();
-
-
+            emit this->error( reply->url().toString(), type, reply->errorString());
             reply->deleteLater();
             return;
         }
@@ -66,6 +62,5 @@ void NetworkManager::execute( const QString &url, NetworkManager::Type type, con
         // clean up
         reply->disconnect( reply, SIGNAL( finished()));
         reply->deleteLater();
-        reply = nullptr;
     } );
 }
