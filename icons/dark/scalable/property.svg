@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="31.678384"
-     inkscape:cx="-6.8181519"
+     inkscape:cx="-12.200371"
      inkscape:cy="2.5791348"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -68,19 +68,19 @@
      id="layer1"
      transform="translate(0,-292.76664)">
     <ellipse
-       style="opacity:1;fill:none;fill-opacity:0.47448982;stroke:#808080;stroke-width:0.26431474;stroke-opacity:1"
+       style="opacity:1;fill:none;fill-opacity:0.47448982;stroke:#c4c4c4;stroke-width:0.26431474;stroke-opacity:1"
        id="path824"
        cx="2.0881448"
        cy="294.88861"
        rx="1.3230509"
        ry="1.3200979" />
     <path
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:#808080;stroke-width:0.00565973;stroke-opacity:1"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:#c4c4c4;stroke-width:0.00565973;stroke-opacity:1"
        d="m 1.9523094,295.14789 v -0.66145 h 0.1322917 0.1322917 v 0.66145 0.66147 H 2.0846011 1.9523094 Z"
        id="path1417"
        inkscape:connector-curvature="0" />
     <path
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:#808080;stroke-width:0.00601318;stroke-opacity:1"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:#c4c4c4;stroke-width:0.00601318;stroke-opacity:1"
        d="m 1.9523094,294.08956 v -0.13229 H 2.084601 2.2168927 v 0.13229 0.1323 H 2.084601 1.9523094 Z"
        id="path1419"
        inkscape:connector-curvature="0" />

@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="32"
-     inkscape:cx="4.9922259"
+     inkscape:cx="-0.3358991"
      inkscape:cy="11.09241"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -68,23 +68,23 @@
      id="layer1"
      transform="translate(0,-292.76664)">
     <path
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.00446429;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:none;stroke-width:0.00446429;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        d="m 0.66190584,294.88331 v -1.18708 H 2.1147518 3.5675977 v 1.18708 1.18708 H 2.1147518 0.66190584 Z m 2.64583316,0 v -0.92723 H 2.1147518 0.92176445 v 0.92723 0.92722 H 2.1147518 3.307739 Z"
        id="path2816"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.32404709px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#c4c4c4;fill-opacity:1;stroke:none;stroke-width:0.32404709px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 1.3229167,295.41247 v -1.05833 h 0.79375 v 1.05833 z"
        id="path2828"
        inkscape:connector-curvature="0" />
     <circle
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="path2840"
        cx="2.6499674"
        cy="294.61871"
        r="0.26458332" />
     <rect
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="rect2842"
        width="0.52916664"
        height="0.26458332"

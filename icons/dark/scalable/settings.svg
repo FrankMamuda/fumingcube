@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    sodipodi:docname="settings.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   inkscape:export-filename="C:\Home\Development\fumingcube\icons\dark\16x16\settings.png"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   inkscape:export-filename="D:\Development\fumingcube\icons\dark\16x16\settings.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="32"
-     inkscape:cx="-0.6557572"
+     inkscape:cx="-5.9838822"
      inkscape:cy="13.657415"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -38,7 +38,7 @@
      showguides="true"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
-     inkscape:window-x="-8"
+     inkscape:window-x="1912"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      viewbox-width="4.23"
@@ -58,7 +58,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -68,21 +68,21 @@
      id="layer1"
      transform="translate(0,-292.76664)">
     <ellipse
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:#808080;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:#c4c4c4;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="path866"
        cx="2.1181488"
        cy="294.09027"
        rx="0.22261089"
        ry="0.22217806" />
     <ellipse
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:#808080;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:#c4c4c4;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="path866-4"
        cx="2.117902"
        cy="294.88354"
        rx="0.22261091"
        ry="0.22217806" />
     <ellipse
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:#808080;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:#c4c4c4;stroke-width:0.08405457;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="path866-4-1"
        cx="2.117902"
        cy="295.67722"

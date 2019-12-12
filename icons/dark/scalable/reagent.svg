@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="22.4"
-     inkscape:cx="-7.5515148"
-     inkscape:cy="2.1141345"
+     inkscape:cx="-8.4228496"
+     inkscape:cy="2.193488"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -68,18 +68,18 @@
      id="layer1"
      transform="translate(0,-292.76664)">
     <path
-       style="fill:none;stroke:#808080;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#c4c4c4;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 0.66611612,296.34088 H 3.5222656 l -0.2559321,-0.53953 -0.7481341,-1.57714 v -0.79375 H 2.7827827 1.4598661 1.7244494 v 0.79375 z"
        id="path835"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccccccc" />
     <path
-       style="fill:none;stroke:#808080;stroke-width:0.16500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#c4c4c4;stroke-width:0.16500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 1.4699824,294.81244 c 0,0 0.2088043,-0.17897 0.4510173,0 0.242213,0.17896 0.4602503,0 0.4602503,0 0,0 0.1578105,-0.19689 0.3165017,-0.13842"
        id="path1456"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:#808080;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:0.36138618"
+       style="fill:#c4c4c4;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:0.36138618"
        d="m 1.4699824,294.81244 -0.8038663,1.52844 h 2.8561495 l -0.8245139,-1.66686 -0.2231889,0.0286 -0.093313,0.10985 -0.2645834,0.0709 -0.1972563,-0.0685 -0.1771763,-0.0709 z"
        id="path1458"
        inkscape:connector-curvature="0" />

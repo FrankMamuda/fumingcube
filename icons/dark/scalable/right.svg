@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.919596"
-     inkscape:cx="-22.648873"
+     inkscape:cx="-44.177749"
      inkscape:cy="3.4324958"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -68,9 +68,12 @@
      id="layer1"
      transform="translate(0,-292.76664)">
     <path
-       style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.00835217;stroke-opacity:1"
+       style="opacity:1;fill:#c4c4c4;fill-opacity:1;stroke:none;stroke-width:0.00835217;stroke-opacity:1"
        d="m 1.392269,296.09459 0.0861,0.0915 0.0453,-0.0412 c 0.0502,-0.0457 0.10176,-0.0933 0.2625,-0.24272 0.0887,-0.0824 0.71099,-0.65477 1.0391,-0.95563 l 0.0774,-0.071 -0.0989,-0.0877 c -0.0936,-0.083 -0.92282,-0.83307 -1.17568,-1.0635 -0.1148,-0.10461 -0.15348,-0.13646 -0.15783,-0.12993 -10e-4,0.002 -0.0395,0.0441 -0.0852,0.094 l -0.083,0.0908 0.0301,0.0262 c 0.0166,0.0144 0.28712,0.25879 0.6012,0.5431 0.31409,0.28431 0.57415,0.51966 0.57791,0.523 0.005,0.005 -1.00318,0.94434 -1.1685,1.08866 -0.0203,0.0177 -0.0368,0.0346 -0.0367,0.0376 10e-5,0.003 0.0389,0.0466 0.0862,0.0969 z"
        id="path1423"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="D:\Development\fumingcube\icons\dark\16x16\path1423.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
 </svg>
