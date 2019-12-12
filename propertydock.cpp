@@ -564,10 +564,12 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         }
 
         QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
-        const QString comleted( QString( "%1( %2 )" ).arg( functionName ).arg( qAsConst( parents )));
+        const QString comleted( QString( "%1( %2 ) " ).arg( functionName ).arg( qAsConst( parents )));
         if ( calc->text().isEmpty())
             calc->setText( comleted );
         else
             calc->insert( " " + comleted );
+
+        calc->setFocus();
     }
 }

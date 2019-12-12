@@ -48,7 +48,7 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
 void SyntaxHighlighter::highlightBlock( const QString &text ) {
     const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
     const QColor number( darkMode ? QColor::fromRgb( /*138, 96, 44*/ 102, 163, 52 ) : QColor::fromRgb( 0, 0, 128 ));
-    const QColor op( qApp->palette().color( QPalette::Text ));
+    const QColor op( darkMode ? QColor::fromRgb( 214, 207, 154 ) : Qt::black );
     const QColor keyword( darkMode ? QColor::fromRgb( 69, 198, 214 ) : QColor::fromRgb( 0, 103, 124 ));
     const QColor string( darkMode ? QColor::fromRgb( 214, 149, 69 ) : QColor::fromRgb( 0, 128, 0 ));
     const QColor error( darkMode ? QColor::fromRgb( 214, 86, 69 ) : QColor::fromRgb( 255, 0, 0 ));
@@ -73,12 +73,14 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
 
     // add types
     QList<SyntaxHighlighterOption> options = {
-        { "\\d+\\.?\\d*",               number,     true        },
-        { "\\/|\\*|\\+|\\-[^\\w]",      op                      },
-        { "\".+\"(\\s*,\\s*\".+\")?",   string,     true        },
-        { "\\w+Error.+",                error,      true, true  },
-        { "\\bReference\\s'.+'\\s.+",   error,      true        },
-        { "\\bundefined\\b(?!\")",      undefined               }
+        { "\\w+",                           undefined               },
+        { "\\(|\\)",                        op                      },
+        { "\\d+\\.?\\d*",                   number,     true        },
+        { "\\/|\\*|\\+|\\-|\\=|\\,[^\\w]",  op                      },
+        { "\".+?(?=\")\"",                  string,     true        },
+        { "\\w+Error.+",                    error,      true, true  },
+        { "\\bReference\\s'.+'\\s.+",       error,      true        },
+        { "\\bundefined\\b(?!\")",          undefined               }
     };
 
     // add keywords
