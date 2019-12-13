@@ -311,6 +311,7 @@ void PropertyDock::on_addPropButton_clicked() {
             QBuffer buffer( &bytes );
             buffer.open( QIODevice::WriteOnly );
             QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
+            buffer.close();
 
             bool ok;
             const QString title( QInputDialog::getText( this, this->tr( "Set title" ), this->tr( "Title:" ), QLineEdit::Normal, "", &ok ));

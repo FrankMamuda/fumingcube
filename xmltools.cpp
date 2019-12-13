@@ -75,6 +75,7 @@ void XMLTools::read() {
                     buffer.open( QIODevice::ReadOnly );
                     QDataStream in( &buffer );
                     in >> value;
+                    buffer.close();
                 } else {
                     value = element.attribute( "value" );
                 }

@@ -44,4 +44,5 @@ private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
 
 private:
+    mutable QMap<QByteArray, QByteArray> cache;
 };

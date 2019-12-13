@@ -60,7 +60,6 @@
 //  properties:
 //  - for now we use built in property extractor from PubChem
 //     in the future this should be fully scripted (per tag) and from multiple sources
-//  - cannot edit textual properties
 //  - filter in dock
 //  - icons in "add property" menu
 //  - solubility data as a property
@@ -101,6 +100,7 @@
 //
 //  variable:
 //   - automatically store QByteArray as base64
+//   - and QStringList as proper compressed string
 //
 //  future:
 //   - common reaction browser

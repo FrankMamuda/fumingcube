@@ -63,6 +63,7 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
         // convert image to png internally
         buffer.open( QIODevice::WriteOnly );
         out.save( &buffer, "PNG" );
+        buffer.close();
 
         // insert in textEdit
         this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( out.width()).arg( out.height()).arg( bytes.toBase64().constData()));

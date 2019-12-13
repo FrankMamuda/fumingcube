@@ -25,6 +25,7 @@
 #include "textedit.h"
 #include "tag.h"
 #include "variable.h"
+#include "imageutils.h"
 //#include "nfpawidget.h"
 #include <QPainter>
 #include <QTextDocument>
@@ -33,6 +34,7 @@
 #include <QApplication>
 #include <QPalette>
 #include <QTableView>
+#include <QBuffer>
 #include "propertydock.h"
 
 /**
@@ -58,14 +60,33 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
     // special handling of pixmaps
     if ( pixmap && index.column() == Property::PropertyData ) {
-        QPixmap pixmap;
-        pixmap.loadFromData( data.toByteArray());
+        QByteArray pixmapData( data.toByteArray());
+        QPixmap propertyPixmap;
+        propertyPixmap.loadFromData( pixmapData );
+
+        // NOTE: experimental dark mode converter
+        const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
+        if ( darkMode && Tag::instance()->type( tagId ) == Tag::Formula ) {
+            if ( !this->cache.contains( pixmapData )) {
+                propertyPixmap = ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( propertyPixmap ));
+                QByteArray replacedData;
+                QBuffer buffer( &replacedData );
+                buffer.open( QIODevice::WriteOnly );
+                propertyPixmap.save( &buffer, "PNG" );
+                buffer.close();
+
+                this->cache[pixmapData] = replacedData;
+                pixmapData = replacedData;
+            } else {
+                pixmapData = this->cache[pixmapData];
+            }
+        }
 
         // scale pixmap to fit property view value column
-        const qreal aspect = static_cast<qreal>( pixmap.height()) / static_cast<qreal>( pixmap.width());
-        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width());
+        const qreal aspect = static_cast<qreal>( propertyPixmap.height()) / static_cast<qreal>( propertyPixmap.width());
+        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( 1 ), propertyPixmap.width());
         const int preferredHeight = static_cast<int>( preferredWidth * aspect );
-        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( data.toByteArray().toBase64().constData()));
+        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( pixmapData.toBase64().constData()));
     } else {
         QString html;
 

@@ -42,6 +42,7 @@ protected:
 public slots:
     void resizeToContents();
     void clearDocumentCache() { this->delegate->clearDocumentCache(); }
+
 private:
     PropertyDelegate *delegate = nullptr;
 };

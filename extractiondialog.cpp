@@ -92,6 +92,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
                         QBuffer buffer( &bytes );
                         buffer.open( QIODevice::WriteOnly );
                         pixmap.save( &buffer, "PNG" );
+                        buffer.close();
                         Property::instance()->add( this->tr( "Structural formula" ), Tag::instance()->id( row ), bytes, this->reagentId());
                     }
                 }

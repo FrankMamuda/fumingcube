@@ -43,7 +43,9 @@ public:
     ~ImageUtils();
     QPixmap pixmap;
 
-    static QPixmap autoCropPixmap( const QPixmap &pixmap, const QColor &key = QColor::fromRgb( 255, 255, 255, 255 ));
+    static QPixmap autoCropPixmap( const QPixmap &pixmap, const QColor &key = Qt::white );
+    static QPixmap brightenPixmap( const QPixmap &pixmap, const int factor = 150 );
+    static QPixmap invertPixmap( const QPixmap &pixmap );
 
 signals:
     void accepted( const QPixmap &pixmap );
