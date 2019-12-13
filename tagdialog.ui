@@ -7,14 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>556</width>
-    <height>583</height>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Tag editor</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="clean"/>
+   <iconset theme="clean">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -150,6 +151,16 @@
                <string>CAS</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>State (not implemented)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Structural formula</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="4" column="3">
@@ -243,7 +254,8 @@
           <string>Close</string>
          </property>
          <property name="icon">
-          <iconset theme="close"/>
+          <iconset theme="close">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
        </item>
@@ -312,7 +324,8 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset theme="add"/>
+    <iconset theme="add">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -320,7 +333,8 @@
   </action>
   <action name="actionRemove">
    <property name="icon">
-    <iconset theme="remove"/>
+    <iconset theme="remove">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Remove</string>
@@ -328,7 +342,8 @@
   </action>
   <action name="actionEdit">
    <property name="icon">
-    <iconset theme="edit"/>
+    <iconset theme="edit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Edit</string>

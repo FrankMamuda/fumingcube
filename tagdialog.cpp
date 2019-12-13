@@ -141,6 +141,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         case Tag::GHS:
         case Tag::NFPA:
         case Tag::Text:
+        case Tag::Formula:
             break;
         }
 
