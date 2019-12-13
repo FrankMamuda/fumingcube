@@ -223,7 +223,7 @@ int main( int argc, char *argv[] ) {
     if ( key.isValid() && !key.toBool())
         darkMode = true;
 #else
-    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) > 128 )
+    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
 #endif
     if ( Variable::instance()->isEnabled( "overrideTheme" )) {
@@ -266,6 +266,7 @@ int main( int argc, char *argv[] ) {
         palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 164, 166, 168, 96 ));
         palette.setColor( QPalette::Disabled, QPalette::HighlightedText, Qt::white );
         a.setPalette( qAsConst( palette ));
+
     } else {
         // apply dark palette (taken from default win10 theme)
         palette.setColor( QPalette::Background, QColor::fromRgb( 240, 240, 240, 255 ));
