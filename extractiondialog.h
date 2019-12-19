@@ -72,6 +72,7 @@ public slots:
     void error( const QString &, NetworkManager::Type, const QString & );
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );
+    void getSimilar( const QList<int> cidListInt );
 
 private slots:
     void on_extractButton_clicked();

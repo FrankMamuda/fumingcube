@@ -22,7 +22,11 @@
  * includes
  */
 #include <QDialog>
+#include "networkmanager.h"
 
+/**
+ * @brief The Ui namespace
+ */
 namespace Ui {
 class StructureBrowser;
 }
@@ -34,9 +38,39 @@ class StructureBrowser : public QDialog {
     Q_OBJECT
 
 public:
-    explicit StructureBrowser( QWidget *parent = nullptr );
+    explicit StructureBrowser( const QList<int> &cidList, QWidget *parent = nullptr );
     ~StructureBrowser();
+
+    enum StatusOption {
+        Idle          = 0x0,
+        FetchName     = 0x1,
+        FetchFormula  = 0x2,
+        Error         = 0x4
+    };
+    Q_DECLARE_FLAGS( Status, StatusOption )
+
+public slots:
+    void replyReceived( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &, NetworkManager::Type, const QString &errorString );
+    Status status() const { return this->m_status; }
+    int cid() const;
+
+private slots:
+    int index() const { return this->m_index; }
+    QString path() const { return this->m_path; }
+    void getInfo();
+    void getFormula( const int cid );
+    void getName( const int cid );
+    void readFormula( const QByteArray &data );
+    void setStatus( const Status &status ) { this->m_status = status; }
+    void buttonTest();
 
 private:
     Ui::StructureBrowser *ui;
+    QList<int> cidList;
+    int m_index = 0;
+    QString m_path;
+    Status m_status = Idle;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS( StructureBrowser::Status )

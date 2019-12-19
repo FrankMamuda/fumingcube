@@ -37,7 +37,7 @@ class NetworkManager: public QObject {
 public:
     enum Type {
         NoType = -1,
-        CIDRequest,
+        CIDRequestInitial,
         CIDRequestSimilar,
         DataRequest,
         FormulaRequest,
