@@ -532,6 +532,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Type type
             return;
         }
 
+        qDebug() << "WRITE SIM CID LIST";
         QFile file( this->cache() + ".cid" );
         if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
             file.write( data.constData(), data.length());
@@ -541,6 +542,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Type type
         QList<int> cidListInt;
         foreach ( const QString &cid, this->cidList )
             cidListInt << cid.toInt();
+        cidListInt.removeAll( 0 );
 
         qDebug() << "FROM NET CIDLISTSIM";
         this->getSimilar( qAsConst( cidListInt ));
@@ -600,6 +602,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Type type, const 
                     QList<int> cidListInt;
                     foreach ( const QString &cid, this->cidList )
                         cidListInt << cid.toInt();
+                    cidListInt.removeAll( 0 );
 
                     qDebug() << "FROM CACHE CIDLISTSIM";
                     this->getSimilar( qAsConst( cidListInt ));
@@ -608,7 +611,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Type type, const 
             }
 
             // intial failed to yield a list, proceed to similiar search
-            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
+            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
        }
             break;
 
