@@ -36,16 +36,20 @@
 
     as of now the first four steps are not implemented properly
     or at all, so there's lots of work to be done
+
+
+    er zijn enkele caching problemen, maar het ExtractionDialog
+    werkt
+    moeten een uniforme caching oplossing maken
 */
 
 /*
  * includes
  */
 #include "imageutils.h"
-#include "networkmanager.h"
 #include "structurebrowser.h"
 #include "ui_structurebrowser.h"
-
+#include "variable.h"
 #include <QDir>
 
 /**
@@ -209,7 +213,8 @@ void StructureBrowser::readFormula( const QByteArray &data ) {
         return;
 
     const QPixmap cropped( ImageUtils::autoCropPixmap( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
-    this->ui->formula->setPixmap( cropped );
+    const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
+    this->ui->formula->setPixmap( darkMode ? ImageUtils::invertPixmap( cropped ) : cropped );
 }
 
 /**
