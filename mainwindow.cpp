@@ -68,6 +68,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 MainWindow::~MainWindow() {
     // delete syntax highlighter
     delete this->highlighter;
+    delete this->m_theme;
 
     // delete docks
     delete ReagentDock::instance();

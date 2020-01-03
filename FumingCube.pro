@@ -55,6 +55,7 @@ SOURCES += \
     tag.cpp \
     tagdialog.cpp \
     textedit.cpp \
+    theme.cpp \
     variable.cpp \
     xmltools.cpp \
     reagent.cpp \
@@ -94,6 +95,7 @@ HEADERS += \
     tag.h \
     tagdialog.h \
     textedit.h \
+    theme.h \
     variable.h \
     variableentry.h \
     widget.h \

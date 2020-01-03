@@ -11,4 +11,8 @@
         <file alias="GHS03">pictograms/oxidizing.svg</file>
         <file alias="GHS06">pictograms/toxic.svg</file>
     </qresource>
+    <qresource prefix="/themes">
+        <file alias="dark.theme">themes/dark.theme</file>
+        <file alias="light.theme">themes/light.theme</file>
+    </qresource>
 </RCC>

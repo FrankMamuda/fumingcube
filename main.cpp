@@ -30,6 +30,7 @@
 #include "tag.h"
 #include "script.h"
 #include "reagentdock.h"
+#include "theme.h"
 #ifdef Q_OS_LINUX
 #include "reagentdock.h"
 #include "propertydock.h"
@@ -63,6 +64,7 @@
 //  - filter in dock
 //  - icons in "add property" menu
 //  - solubility data as a property
+//  - clear property dialog, when removing reagent
 //
 //  extraction:
 //  - the current search URL is not exactly reliable
@@ -97,6 +99,12 @@
 //     view. one option would be to use a precached image or sacrifice quality
 //     with fast transform
 //   - application icon for macOS and windows
+//   - fix crash on exit on win7:
+//     reproduce: open->add reagent->get properties->close main window
+//   - add built in database (used on first run) with demo reagents
+//     also append demo equation to calculator to show off app's features
+//   - store variables (for example F = molarMasss( "NaOH" )
+//     (not sure how to get a list of vars from globalObject, though)
 //
 //  variable:
 //   - automatically store QByteArray as base64
@@ -217,6 +225,7 @@ int main( int argc, char *argv[] ) {
         return 0;
     }
 
+    // detect dark mode
     bool darkMode = false;
 #ifdef Q_OS_WIN
     const QVariant key( QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
@@ -226,79 +235,25 @@ int main( int argc, char *argv[] ) {
     if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
 #endif
-    if ( Variable::instance()->isEnabled( "overrideTheme" )) {
-        const QString theme( Variable::instance()->string( "theme" ));
-        if ( !QString::compare( theme, "light" ))
-            darkMode = false;
-        else if ( !QString::compare( theme, "dark" ))
-            darkMode = true;
-    }
 
-    QPalette palette;
-    // apply fusion style
-    // this does not look native, but is a good workaround for now
-    a.setStyle( QStyleFactory::create( "Fusion" ));
-
-    // TODO: sort this out
-    // apply dark palette (macOS sets theme natively, so it might not need palette change?)
-    if ( darkMode ) {
-        // apply dark palette (taken from qt creator flat dark)
-        palette.setColor( QPalette::Background, QColor::fromRgb( 46, 47, 48, 255 ));
-        palette.setColor( QPalette::Window, QColor::fromRgb( 46, 47, 48, 255 ));
-        palette.setColor( QPalette::WindowText, QColor::fromRgb( 208, 208, 208, 255 ));
-        palette.setColor( QPalette::Base, QColor::fromRgb( 46, 47, 48, 255 ));
-        palette.setColor( QPalette::AlternateBase, QColor::fromRgb( 53, 54, 55, 255 ));
-        palette.setColor( QPalette::Button, QColor::fromRgb( 64, 66, 68, 255 ));
-        palette.setColor( QPalette::BrightText, QColor::fromRgb( 255, 51, 51, 255 ));
-        palette.setColor( QPalette::Text, QColor::fromRgb( 208, 208, 208, 255 ));
-        palette.setColor( QPalette::ButtonText, QColor::fromRgb( 208, 208, 208, 255 ));
-        palette.setColor( QPalette::ToolTipBase, QColor::fromRgb( 0, 0, 0, 102 ));
-        palette.setColor( QPalette::Highlight, QColor::fromRgb( 96, 96, 96, 196 )); // a more gray-ish highlight than the default black
-        palette.setColor( QPalette::Dark, QColor::fromRgb( 64, 66, 68, 255 ));
-        palette.setColor( QPalette::HighlightedText, Qt::white );
-        palette.setColor( QPalette::ToolTipText, QColor::fromRgb( 208, 208, 208, 255 ));
-        palette.setColor( QPalette::Link, QColor::fromRgb( 0, 122, 244, 255 ));
-        palette.setColor( QPalette::LinkVisited, QColor::fromRgb( 165, 122, 255, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::ButtonText, QColor::fromRgb( 164, 166, 168, 96 ));
-        palette.setColor( QPalette::Disabled, QPalette::Window, QColor::fromRgb( 68, 68, 68, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::WindowText, QColor::fromRgb( 164, 166, 168, 96 ));
-        palette.setColor( QPalette::Disabled, QPalette::Base, QColor::fromRgb( 68, 68, 68, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 164, 166, 168, 96 ));
-        palette.setColor( QPalette::Disabled, QPalette::HighlightedText, Qt::white );
-        a.setPalette( qAsConst( palette ));
-
-    } else {
-        // apply dark palette (taken from default win10 theme)
-        palette.setColor( QPalette::Background, QColor::fromRgb( 240, 240, 240, 255 ));
-        palette.setColor( QPalette::Window, QColor::fromRgb( 240, 240, 240, 255 ));
-        palette.setColor( QPalette::WindowText, QColor::fromRgb( 0, 0, 0, 255 ));
-        palette.setColor( QPalette::Base, QColor::fromRgb( 255, 255, 255, 255 ));
-        palette.setColor( QPalette::AlternateBase, QColor::fromRgb( 246, 246, 246, 255 ));
-        palette.setColor( QPalette::Button, QColor::fromRgb( 240, 240, 240, 255 ));
-        palette.setColor( QPalette::BrightText, QColor::fromRgb( 255, 255, 255, 255 ));
-        palette.setColor( QPalette::Text, QColor::fromRgb( 0, 0, 0, 255 ));
-        palette.setColor( QPalette::ButtonText, QColor::fromRgb( 0, 0, 0, 255 ));
-        palette.setColor( QPalette::ToolTipBase, QColor::fromRgb( 255, 255, 220, 255 ));
-        palette.setColor( QPalette::Highlight, QColor::fromRgb( 0, 120, 215, 255 ));
-        palette.setColor( QPalette::Dark, QColor::fromRgb( 160, 160, 160, 255 ));
-        palette.setColor( QPalette::HighlightedText, QColor::fromRgb( 255, 255, 255, 255 ));
-        palette.setColor( QPalette::ToolTipText, QColor::fromRgb( 0, 0, 0, 255 ));
-        palette.setColor( QPalette::Link, QColor::fromRgb( 0, 0, 255, 255 ));
-        palette.setColor( QPalette::LinkVisited, QColor::fromRgb( 255, 0, 255, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::ButtonText, QColor::fromRgb( 120, 120, 120, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::Window, QColor::fromRgb( 240, 240, 240, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::WindowText, QColor::fromRgb( 120, 120, 120, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::Base, QColor::fromRgb( 240, 240, 240, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::Text, QColor::fromRgb( 120, 120, 120, 255 ));
-        palette.setColor( QPalette::Disabled, QPalette::HighlightedText, QColor::fromRgb( 255, 255, 255, 255 ));
-        a.setPalette( qAsConst( palette ));
-    }
-
-    // set icon theme
+    // set default icon theme
     QIcon::setThemeName( darkMode ? "dark" : "light" );
 
-    // store variable
-    Variable::instance()->setEnabled( "darkMode", darkMode );
+    if ( Variable::instance()->isEnabled( "overrideTheme" )) {
+        // load theme from file
+        Theme *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::instance()->string( "theme" ))));
+
+        // override the variable
+        Variable::instance()->setEnabled( "darkMode", theme->isDark());
+
+        // override style and palette
+        a.setStyle( theme->style());
+        a.setPalette( theme->palette());
+
+        // override icon theme and syntax highlighter theme
+        QIcon::setThemeName( theme->isDark() ? "dark" : "light" );
+        MainWindow::instance()->setTheme( theme );
+    }
 
     // show main window
     MainWindow::instance()->show();

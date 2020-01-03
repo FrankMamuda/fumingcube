@@ -25,6 +25,7 @@
 #include "variable.h"
 #include <QSqlQuery>
 #include <QApplication>
+#include "mainwindow.h"
 
 /**
  * @brief SyntaxHighlighter::SyntaxHighlighter
@@ -46,13 +47,14 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
  * @param text
  */
 void SyntaxHighlighter::highlightBlock( const QString &text ) {
-    const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
-    const QColor number( darkMode ? QColor::fromRgb( /*138, 96, 44*/ 102, 163, 52 ) : QColor::fromRgb( 0, 0, 128 ));
-    const QColor op( darkMode ? QColor::fromRgb( 214, 207, 154 ) : Qt::black );
-    const QColor keyword( darkMode ? QColor::fromRgb( 69, 198, 214 ) : QColor::fromRgb( 0, 103, 124 ));
-    const QColor string( darkMode ? QColor::fromRgb( 214, 149, 69 ) : QColor::fromRgb( 0, 128, 0 ));
-    const QColor error( darkMode ? QColor::fromRgb( 214, 86, 69 ) : QColor::fromRgb( 255, 0, 0 ));
-    const QColor undefined( Qt::darkYellow );
+    const QColor number( MainWindow::instance()->theme()->syntaxColour( "Number" ));
+    const QColor op( MainWindow::instance()->theme()->syntaxColour( "Operator" ));
+    const QColor parenthesis( MainWindow::instance()->theme()->syntaxColour( "Parenthesis" ));
+    const QColor keyword( MainWindow::instance()->theme()->syntaxColour( "Keyword" ));
+    const QColor reference( MainWindow::instance()->theme()->syntaxColour( "Reference" ));
+    const QColor error( MainWindow::instance()->theme()->syntaxColour( "Error" ));
+    const QColor undefined( MainWindow::instance()->theme()->syntaxColour( "Undefined" ));
+    const QColor string( MainWindow::instance()->theme()->syntaxColour( "String" ));
 
     /**
      * @brief The SyntaxHighlighterOption struct
@@ -73,19 +75,18 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
 
     // add types
     QList<SyntaxHighlighterOption> options = {
-        { "\\w+",                           undefined               },
-        { "\\(|\\)",                        op                      },
+        { "\\w+",                           string                  },
+        { "\\(|\\)",                        parenthesis,            },
         { "\\d+\\.?\\d*",                   number,     true        },
         { "\\/|\\*|\\+|\\-|\\=|\\,[^\\w]",  op                      },
-        { "\".+?(?=\")\"",                  string,     true        },
+        { "\".+?(?=\")\"",                  reference,  true        },
         { "\\w+Error.+",                    error,      true, true  },
-        { "\\bReference\\s'.+'\\s.+",       error,      true        },
         { "\\bundefined\\b(?!\")",          undefined               }
     };
 
     // add keywords
     foreach ( const QString &k, qAsConst( this->keywords ))
-        options << SyntaxHighlighterOption( k, keyword );
+        options << SyntaxHighlighterOption( QString( "%1(?!\")" ).arg( k ), keyword );
 
     // set options
     foreach ( const SyntaxHighlighterOption &option, qAsConst( options )) {

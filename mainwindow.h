@@ -23,6 +23,7 @@
  */
 #include "syntaxhighlighter.h"
 #include "reagentmodel.h"
+#include "theme.h"
 #include <QLineEdit>
 #include <QMainWindow>
 
@@ -43,11 +44,13 @@ public:
     static MainWindow *instance() { static MainWindow *instance( new MainWindow()); return instance; }
     ~MainWindow() override;
     QLineEdit *calculatorWidget();
+    Theme *theme() const { return this->m_theme; }
 
 public slots:
     void appendToCalculator( const QString &line );
     void saveHistory();
     void scrollToBottom();
+    void setTheme( Theme *theme ) { this->m_theme = theme; }
 
 private slots:
     void on_actionClear_triggered();
@@ -61,4 +64,5 @@ private:
     explicit MainWindow( QWidget *parent = nullptr );
     Ui::MainWindow *ui;
     SyntaxHighlighter *highlighter;
+    Theme *m_theme = new Theme();
 };
