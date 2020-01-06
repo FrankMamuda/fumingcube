@@ -57,7 +57,6 @@ private slots:
     void on_removePropButton_clicked();
     void on_editPropButton_clicked();
     void addProperty( const QString &name, const QVariant &value, const Id &reagentId, const Id &tagId = Id::Invalid );
-
     void on_propertyView_doubleClicked(const QModelIndex &index);
 
 private:

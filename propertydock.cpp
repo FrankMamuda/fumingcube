@@ -41,6 +41,8 @@
 #include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
+#include <QClipboard>
+#include <QTimer>
 
 /**
  * @brief PropertyDock::PropertyDock
@@ -342,44 +344,46 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     if ( !this->ui->propertyView->currentIndex().isValid())
         return;
 
-    QMenu menu;
-    menu.addAction( this->tr( "Copy" ));
-    menu.addAction( this->tr( "Edit" ));
-
+    // get property and tag
     const Row row = Property::instance()->row( this->ui->propertyView->currentIndex());
     const Id tagId = Property::instance()->tagId( row );
-    if ( tagId == Id::Invalid )
-        return;
+    const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
-    const Tag::Types type = Tag::instance()->type( tagId );
-    const QString functionName( Tag::instance()->function( tagId ));
+    QMenu menu;
+    if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula ) {
+        menu.addAction( this->tr( "Copy" ), [ row, type ]() {
 
-    if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
-        auto paste = [ this, functionName, row ]() {
-            QStringList parents;
+            if ( type == Tag::Formula )
+                QGuiApplication::clipboard()->setImage( QImage::fromData( Property::instance()->propertyData( row ).toByteArray()));
+            else
+                QGuiApplication::clipboard()->setText( Property::instance()->propertyData( row ).toString());
+        } );
+    }
 
-            const Id reagentId = Property::instance()->reagentId( row );
-            if ( reagentId == Id::Invalid )
-                return;
+    if ( type != Tag::Formula && type != Tag::NoType )
+        menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()));
 
-            const Row reagentRow = Reagent::instance()->row( reagentId );
-            if ( reagentRow == Row::Invalid )
-                return;
+    if ( tagId != Id::Invalid ) {
+        const QString functionName( Tag::instance()->function( tagId ));
+        if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
+            auto paste = [ this, row, tagId ]() {
+                QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
+                const QString value( QString::number( Property::instance()->propertyData( row ).toReal() *  Tag::instance()->scale( tagId )));
+                if ( calc->text().isEmpty())
+                    calc->setText( value );
+                else
+                    calc->insert( " " + value );
 
-            const Id parentId = Reagent::instance()->parentId( reagentRow );
-            if ( parentId != Id::Invalid )
-                parents << QString( "\"%1\"" ).arg( Reagent::instance()->alias( Reagent::instance()->row( parentId )));
+                // must activate MainWindow first
+                MainWindow::instance()->activateWindow();
+                calc->setFocus();
+            };
 
-            parents << QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentRow ));
-
-            QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
-            calc->setText( calc->text().append( QString( " %1( %2 )" ).arg( functionName ).arg( parents.join( ", " ))));
-        };
-
-        // tag.
-        QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
-        subMenu2->addAction( this->tr( "Reference" ), paste );
-        subMenu2->addAction( this->tr( "Value" ));
+            // tag.
+            QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
+            subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } );
+            subMenu2->addAction( this->tr( "Value" ), paste );
+        }
     }
 
     menu.exec( this->ui->propertyView->mapToGlobal( pos ));
@@ -559,18 +563,20 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
             parents = QString( "\"%1\", \"%2\"" ).arg( Reagent::instance()->alias( parentId )).arg( Reagent::instance()->name( reagentId ));
-            qDebug() << "has parent";
+            //qDebug() << "has parent";
         } else {
             parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
         }
 
         QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
-        const QString comleted( QString( "%1( %2 ) " ).arg( functionName ).arg( qAsConst( parents )));
+        const QString completed( QString( "%1( %2 ) " ).arg( functionName ).arg( qAsConst( parents )));
         if ( calc->text().isEmpty())
-            calc->setText( comleted );
+            calc->setText( completed );
         else
-            calc->insert( " " + comleted );
+            calc->insert( " " + completed );
 
+        // must activate MainWindow first
+        MainWindow::instance()->activateWindow();
         calc->setFocus();
     }
 }
