@@ -14,8 +14,8 @@
    <string>FumingCube</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="reagent">
-    <normaloff>.</normaloff>.</iconset>
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/icon</normaloff>:/icons/icon</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3" columnstretch="0">
@@ -126,7 +126,8 @@
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset theme="settings"/>
+    <iconset theme="settings">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -141,6 +142,8 @@
    <header>calcedit.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

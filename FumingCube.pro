@@ -9,6 +9,7 @@ QT       += core gui sql xml qml
 win32:QT += winextras
 win32:LIBS += -lgdi32 -luser32
 win32:CONFIG += openssl-linked
+win32:RC_FILE = icon.rc
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

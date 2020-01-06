@@ -67,16 +67,7 @@
 //  - clear property dialog, when removing reagent
 //
 //  extraction:
-//  - the current search URL is not exactly reliable
-//    we must first search for the exact name, and then for synonyms
-//    try butane (resolves to 1,4-butanediol)
-//  - first search by exact name, if it returns no matches - search for
-//    alike structures and present a cid list to choose from
-//  - there must be an option to clear PubChem cache
-//    if the wrong record was fetched, a proper one cannot be
-//    fetched from the internet, since the app will use a cached
-//    version by default
-//    (OR FIND another way to store cached files)
+//  - unified caching solution (cidLists, images, etc.)
 //
 //  completion:
 //   - complete batch from selected reagent, not the whole list
@@ -98,7 +89,7 @@
 //     this however causes a performance penalty while resizing property
 //     view. one option would be to use a precached image or sacrifice quality
 //     with fast transform
-//   - application icon for macOS and windows
+//   - application icon for macOS
 //   - fix crash on exit on win7:
 //     reproduce: open->add reagent->get properties->close main window
 //   - add built in database (used on first run) with demo reagents
@@ -227,10 +218,16 @@ int main( int argc, char *argv[] ) {
 
     // detect dark mode
     bool darkMode = false;
+    bool darkModeWin10 = false;
 #ifdef Q_OS_WIN
     const QVariant key( QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
-    if ( key.isValid() && !key.toBool())
+    if ( key.isValid() && !key.toBool()) {
         darkMode = true;
+        darkModeWin10 = true;
+
+        if ( !Variable::instance()->isEnabled( "overrideTheme" ))
+            Variable::instance()->setString( "theme", "dark" );
+    }
 #else
     if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
@@ -239,7 +236,7 @@ int main( int argc, char *argv[] ) {
     // set default icon theme
     QIcon::setThemeName( darkMode ? "dark" : "light" );
 
-    if ( Variable::instance()->isEnabled( "overrideTheme" )) {
+    if ( Variable::instance()->isEnabled( "overrideTheme" ) || darkModeWin10 ) {
         // load theme from file
         Theme *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::instance()->string( "theme" ))));
 

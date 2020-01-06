@@ -1,5 +1,7 @@
 <RCC>
-    <qresource prefix="/icons"/>
+    <qresource prefix="/icons">
+        <file alias="icon">icons/icon.png</file>
+    </qresource>
     <qresource prefix="/pictograms">
         <file alias="GHS04">pictograms/compressed.svg</file>
         <file alias="GHS05">pictograms/corrosive.svg</file>
