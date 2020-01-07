@@ -38,4 +38,5 @@ QVariant Cache::data( const Cache::Types &type, const QString &key ) const {
     Q_UNUSED( key )
 
     // STUB
+    return QVariant();
 }

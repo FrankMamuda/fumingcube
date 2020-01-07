@@ -66,9 +66,13 @@ properties:
  - solubility data as a property
  - gray out properties (with a tag) that have been already set
  - script editing in tag dialog
+ - must remove orphaned properties on tag removal
+ - must remove table 'tag' from inital database since it is recreated anyway
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
+ - revamp structure browser
+ - display a warning, when a similar structure is returned (no exact match)
 
 completion:
  - fix reagent completion (does not work as indended)
