@@ -17,4 +17,8 @@
         <file alias="dark.theme">themes/dark.theme</file>
         <file alias="light.theme">themes/light.theme</file>
     </qresource>
+    <qresource prefix="/initial">
+        <file alias="calculator_history">initial/calculator_history</file>
+        <file alias="database.db">initial/database.db</file>
+    </qresource>
 </RCC>

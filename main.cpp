@@ -51,8 +51,7 @@
 reagents:
  - richtext for names?
  - multiple aliases?
- - groups, sorting
- - groups with drag and drop (reagents can be in multiple groups)
+ - groups and sorting (with drag and drop; reagents can be in multiple groups)
    Inorganic reagents
         \_Sodium hydroxide
    Bases
@@ -66,6 +65,7 @@ properties:
  - icons in "add property" menu
  - solubility data as a property
  - gray out properties (with a tag) that have been already set
+ - script editing in tag dialog
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -96,8 +96,6 @@ misc:
  - application icon for macOS
  - fix crash on exit on win7:
    reproduce: open->add reagent->get properties->close main window
- - add built-in database (used on first run) with demo reagents
-   also append demo equation to calculator to show off app's features
  - store variables (for example F = molarMasss( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate
@@ -149,11 +147,19 @@ int main( int argc, char *argv[] ) {
     qRegisterMetaType<Row>();
     qRegisterMetaType<Table::Roles>();
 
+    // read initial history
+    QFile file( ":/initial/calculator_history" );
+    QString history;
+    if ( file.open( QIODevice::ReadOnly )) {
+        history = Variable::compressedString( file.readAll());
+        file.close();
+    }
+
     // set variable defaults
     Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
     //Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
     Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
-    Variable::instance()->add( "calculator/history", "", Var::Flag::ReadOnly );
+    Variable::instance()->add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
@@ -187,6 +193,10 @@ int main( int argc, char *argv[] ) {
                                          + QDateTime::currentDateTime()
                                          .toString( "yyyyMMdd_hhmmss" ) +
                                          ".db" );
+
+        // copy built-in demo version
+        QFile::copy( ":/initial/database.db", Variable::instance()->string( "databasePath" ));
+
         QFile::remove( apiFileName );
     }
 

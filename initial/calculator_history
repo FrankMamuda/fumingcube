@@ -1,0 +1,22 @@
+/*
+Welcome to Fuming Cube
+
+This application simplifies various calculations performed performed by chemists.
+A list of common reagents and their properties can be easily created and used in the calculator.
+Reagent properties can be easily fetched from the internet and used as references.
+
+Here, try this example,
+*/
+
+5.0 * assay( "NaOH", "demo" ) / molarMass( "NaOH" ) 
+= 0.12475935695177139
+
+/*
+where we get mol from 5 grams of Sodium hydroxide.
+Calculator resolves references to assay and molar mass automatically.
+
+You can also write functions and references manually (autocomplete them with TAB).
+Or alternatively, paste references by double-clicking in the property window.
+
+Best of luck!
+*/

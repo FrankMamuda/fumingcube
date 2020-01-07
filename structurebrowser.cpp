@@ -66,8 +66,8 @@ StructureBrowser::StructureBrowser( const QList<int> &list, QWidget *parent ) : 
         this->getInfo();
     } );
 
-    this->connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )));
-    this->connect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Type, const QString & )), this, SLOT( error( const QString &, NetworkManager::Type, const QString & )));
+    this->connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+    this->connect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
     this->getInfo();
 }
@@ -76,8 +76,8 @@ StructureBrowser::StructureBrowser( const QList<int> &list, QWidget *parent ) : 
  * @brief StructureBrowser::~StructureBrowser
  */
 StructureBrowser::~StructureBrowser() {
-    this->disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Type, const QVariant &, const QByteArray & )));
-    this->disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Type, const QString & )), this, SLOT( error( const QString &, NetworkManager::Type, const QString & )));
+    this->disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+    this->disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
     delete this->ui;
 }
 
