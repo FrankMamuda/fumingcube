@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Armands Aleksejevs
+ * Copyright (C) 2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,26 @@
  *
  */
 
-#pragma once
-
 /*
  * includes
  */
-#include <QSyntaxHighlighter>
+#include "cache.h"
 
 /**
- * @brief The SyntaxHighlighter class
+ * @brief Cache::Cache
  */
-class SyntaxHighlighter : public QSyntaxHighlighter {
-    Q_OBJECT
+Cache::Cache() {
+}
 
-public:
-    explicit SyntaxHighlighter( QTextDocument *parent );
+/**
+ * @brief Cache::data
+ * @param type
+ * @param key
+ * @return
+ */
+QVariant Cache::data( const Cache::Types &type, const QString &key ) const {
+    Q_UNUSED( type )
+    Q_UNUSED( key )
 
-protected:
-    void highlightBlock( const QString &text ) override;
-
-private:
-    QStringList keywords;
-};
+    // STUB
+}

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,6 @@
  * includes
  */
 #include "propertyviewwidget.h"
-#include <QIcon>
-#include <QPainter>
-#include <QWidget>
-#include <QtMath>
-#include <QMap>
-#include <QDebug>
-#include <QRegularExpression>
 #include "propertydock.h"
 
 /**
@@ -38,27 +31,7 @@
 class GHSWidget final : public PropertyViewWidget {
 public:
     static constexpr const int scale = 48;
-    explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList()) : PropertyViewWidget( parent, parms ) {
-
-        // TODO: make these global to be shared
-        this->pictograms["GHS07"] = QIcon( ":/pictograms/GHS07" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS02"] = QIcon( ":/pictograms/GHS02" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS06"] = QIcon( ":/pictograms/GHS06" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS05"] = QIcon( ":/pictograms/GHS05" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS09"] = QIcon( ":/pictograms/GHS09" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS08"] = QIcon( ":/pictograms/GHS08" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS01"] = QIcon( ":/pictograms/GHS01" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS03"] = QIcon( ":/pictograms/GHS03" ).pixmap( this->scale, this->scale );
-        this->pictograms["GHS04"] = QIcon( ":/pictograms/GHS04" ).pixmap( this->scale, this->scale );
-
-        this->update( parms );
-
-        foreach ( const QString &key, this->pictograms.keys()) {
-            if ( !this->parameters().contains( key ))
-                this->parameters().removeAll( key );
-        }
-    }
-
+    explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
     int iconsPerRow() const { return this->m_iconsPerRow; }
 
 public slots:
@@ -71,60 +44,21 @@ public slots:
     void setLinear() { this->m_linear = true; }
 
 protected:
-    void paintEvent( QPaintEvent * ) override {
-        QPainter painter( this );
-        int xOffset = 0;
-        int yOffset = 0;
-        int index = 0;
-
-        foreach ( const QString &name, this->parameters()) {
-            const QPixmap pixmap( this->pictograms[name] );
-            if ( xOffset >= this->iconsPerRow() * this->scale ) {
-                xOffset = 0;
-                yOffset += this->scale;
-            }
-
-            painter.drawPixmap( xOffset, yOffset, this->scale, this->scale, pixmap );
-            xOffset += this->scale;
-            index++;
-        }
-    }
+    void paintEvent( QPaintEvent * ) override;
 
     /**
      * @brief sizeHint
      * @return
      */
-    QSize sizeHint() const override {
-        if ( this->m_linear ) {
-            this->m_iconsPerRow = 9;
-            return QSize( this->scale * this->parameters().count(), this->scale );
-        }
-
-        const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
-        if ( sectionSize == 0 )
-            return QSize();
-
-        this->m_iconsPerRow = qMax( 1, ( sectionSize - ( sectionSize % this->scale )) / this->scale );
-        const int numIcons = this->parameters().count();
-        const int rows = ( numIcons - ( numIcons % this->iconsPerRow())) / this->iconsPerRow() + ( numIcons % this->iconsPerRow() > 0 ? 1 : 0 );
-
-        int height = this->scale;
-        for ( int y = 1; y < rows; y++ )
-            height += this->scale;
-
-        return QSize( this->parameters().count() * this->scale, height );
-    }
+    QSize sizeHint() const override;
 
     /**
      * @brief minimumSizeHint
      * @return
      */
-    QSize minimumSizeHint() const override {
-        return this->sizeHint();
-    }
+    QSize minimumSizeHint() const override { return this->sizeHint(); }
 
 private:
-    QMap<QString, QPixmap> pictograms;
     mutable int m_iconsPerRow = 0;
     bool m_linear = false;
 };

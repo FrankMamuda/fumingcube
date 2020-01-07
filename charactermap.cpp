@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  * @brief CharacterMap::CharacterMap
  * @param parent
  */
-CharacterMap::CharacterMap( QWidget *parent ) : QDialog( parent ), blockId( QPair<int,int>( -1, -1 )) {
+CharacterMap::CharacterMap( QWidget *parent ) : QDialog( parent ), blockId( qMakePair( -1, -1 )) {
     // this->size
     this->setWindowFlags( this->windowFlags() | Qt::Tool );
     this->setWindowTitle( this->tr( "Character selector" ));
@@ -68,9 +68,9 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
             const int hBlock = y % blocks;
             const int vBlock = qFloor( y / blocks );
 
-            // draw hilight rect
+            // draw highlight rect
             const QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize );
-            if ( this->blockId == QPair<int,int>( hBlock, vBlock ))
+            if ( this->blockId == qMakePair( hBlock, vBlock ))
                 painter.fillRect( rect, QColor::fromRgb( 255, 0, 0, 128 ));
 
             // draw character
@@ -89,7 +89,7 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
     int y;
 
     // reset block id
-    this->blockId = QPair<int,int>( -1, -1 );
+    this->blockId = qMakePair( -1, -1 );
 
     // insert char on mouse press
     if ( event->button() == Qt::LeftButton ) {
@@ -105,7 +105,7 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
             if ( QRect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize ).contains( event->pos())) {
 
                 // set blockId, repaint the widget and insert character in the parent widget
-                this->blockId = QPair<int,int>( hBlock, vBlock );
+                this->blockId = qMakePair( hBlock, vBlock );
                 this->repaint();
                 emit this->characterSelected( QString::fromUtf8( this->characters.at( y ).toUtf8().data()));
             }

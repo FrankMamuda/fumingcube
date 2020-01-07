@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
  */
 NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDialog( parent ), ui( new Ui::NFPABuilder ) {
     this->ui->setupUi( this );
-
-    qDebug() << parameters;
 
     if ( parameters.count() >= 3 ) {
         this->ui->nfpaWidget->update( parameters );

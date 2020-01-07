@@ -81,6 +81,7 @@
    <addaction name="actionTags"/>
    <addaction name="actionClear"/>
    <addaction name="actionSettings"/>
+   <addaction name="actionAbout"/>
   </widget>
   <action name="actionReagents">
    <property name="checkable">
@@ -131,6 +132,14 @@
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset theme="info"/>
+   </property>
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

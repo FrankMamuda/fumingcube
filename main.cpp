@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,66 +45,72 @@
 #include <QSettings>
 #include <QStyleFactory>
 
-//
-// TODO:
-//
-//  reagents:
-//   - richtext for names?
-//   - multiple aliases?
-//   - groups, sorting
-//     Groups with drag and drop (reagents can be in multiple groups)
-//      Inorganic reagents
-//          \_Sodium hydroxide
-//      Bases
-//          \_Sodium hydroxide
-//
-//  properties:
-//  - for now we use built in property extractor from PubChem
-//     in the future this should be fully scripted (per tag) and from multiple sources
-//  - filter in dock
-//  - icons in "add property" menu
-//  - solubility data as a property
-//  - clear property dialog, when removing reagent
-//
-//  extraction:
-//  - unified caching solution (cidLists, images, etc.)
-//
-//  completion:
-//   - complete batch from selected reagent, not the whole list
-//   - complete function( "CURSOR to function( "CURSOR"
-//
-//  scripting:
-//   - add additional functions such as mol( mass, reagent ) which returns:
-//     mol = mass * assay( reagent ) / molarMass( reagent )
-//   - add any as batch name (a whildcard that chooses any batch with the property)
-//   - check API
-//
-//  settings:
-//   - implement settings dialog and:
-//     - option to change syntax highlighter (and font size)
-//
-//  misc:
-//   - store images (formulas) fullsize but rescale in property view
-//     this could be used for special props (add custom property -> image )
-//     this however causes a performance penalty while resizing property
-//     view. one option would be to use a precached image or sacrifice quality
-//     with fast transform
-//   - application icon for macOS
-//   - fix crash on exit on win7:
-//     reproduce: open->add reagent->get properties->close main window
-//   - add built in database (used on first run) with demo reagents
-//     also append demo equation to calculator to show off app's features
-//   - store variables (for example F = molarMasss( "NaOH" )
-//     (not sure how to get a list of vars from globalObject, though)
-//
-//  variable:
-//   - automatically store QByteArray as base64
-//   - and QStringList as proper compressed string
-//
-//  future:
-//   - common reaction browser
-//   - molecule drawing (and search)
-//
+/*
+ TODO:
+
+reagents:
+ - richtext for names?
+ - multiple aliases?
+ - groups, sorting
+ - groups with drag and drop (reagents can be in multiple groups)
+   Inorganic reagents
+        \_Sodium hydroxide
+   Bases
+        \_Sodium hydroxide
+
+properties:
+ - for now we use built in property extractor from PubChem
+   in the future this should be fully scripted (per tag) and from multiple
+   sources
+ - filter in dock
+ - icons in "add property" menu
+ - solubility data as a property
+ - gray out properties (with a tag) that have been already set
+
+extraction:
+ - unified caching solution (cidLists, images, etc.) (in progress)
+
+completion:
+ - fix reagent completion (does not work as indended)
+ - complete batch from selected reagent, not the whole list
+ - complete function( "CURSOR to function( "CURSOR"
+
+scripting:
+ - add additional functions such as mol( mass, reagent ) which returns:
+   mol = mass * assay( reagent ) / molarMass( reagent )
+ - add any as batch name (a whildcard that chooses any batch with the
+   property)
+ - check API
+ - implement ans (history), Avogadro constant, etc.
+
+settings:
+ - implement settings dialog and:
+ - option to change syntax highlighter (and font size) (partially supported)
+
+misc:
+ - store images (formulas) fullsize but rescale in property view
+   this could be used for special props (add custom property -> image )
+   this however causes a performance penalty while resizing property
+   view. one option would be to use a precached image or sacrifice quality
+   with fast transform
+ - application icon for macOS
+ - fix crash on exit on win7:
+   reproduce: open->add reagent->get properties->close main window
+ - add built-in database (used on first run) with demo reagents
+   also append demo equation to calculator to show off app's features
+ - store variables (for example F = molarMasss( "NaOH" )
+   (not sure how to get a list of vars from globalObject, though)
+ - unify text editor toolbars (in tagedit and propertyedit) as a separate
+   class
+
+variable:
+ - automatically store QByteArray as base64
+ - and QStringList as proper compressed string
+
+future:
+ - common reaction browser
+ - molecule drawing (and search)
+*/
 
 /**
  * @brief main
@@ -142,12 +148,10 @@ int main( int argc, char *argv[] ) {
     qRegisterMetaType<Id>();
     qRegisterMetaType<Row>();
     qRegisterMetaType<Table::Roles>();
-    qRegisterMetaType<QList<QList<qreal> >>( "QList<QList<qreal> >");
 
     // set variable defaults
     Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
     //Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
-    Variable::instance()->add( "propertyNameColumnSize", 128, Var::Flag::Hidden ); // // TODO: do we even need this now?
     Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "calculator/history", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );

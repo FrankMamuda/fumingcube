@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ private slots:
     void on_removePropButton_clicked();
     void on_editPropButton_clicked();
     void addProperty( const QString &name, const QVariant &value, const Id &reagentId, const Id &tagId = Id::Invalid );
-    void on_propertyView_doubleClicked(const QModelIndex &index);
+    void on_propertyView_doubleClicked( const QModelIndex &index );
 
 private:
     explicit PropertyDock( QWidget *parent = nullptr );

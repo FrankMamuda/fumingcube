@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include <QtWin>
 #include <QWinMime>
 #endif
+#include "property.h"
 #include "propertydock.h"
 
 /**
@@ -117,8 +118,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( this->isSimpleEditor())
         return;
 
-    QMimeDatabase db;
-
     // insert as plain text if required
     /*if ( this->pastePlainText()) {
         this->insertPlainText( source->text());
@@ -145,7 +144,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         if ( image.isNull())
             image = qvariant_cast<QImage>( source->imageData());
 
-        const int sectionSize = PropertyDock::instance()->sectionSize( 1 );
+        const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
         this->insertPixmap( QPixmap::fromImage( qAsConst( image )), qMin( sectionSize, image.width()));
         return;
     }
@@ -239,7 +238,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // check droped items for images
     foreach ( const QUrl &url, source->urls()) {
-        if ( db.mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
+        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
             QPixmap pixmap;
 
             pixmap.load( url.toLocalFile());

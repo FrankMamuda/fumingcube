@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  * @param type
  * @param userData
  */
-void NetworkManager::execute( const QString &url, NetworkManager::Type type, const QVariant &userData ) {
+void NetworkManager::execute( const QString &url, NetworkManager::Types type, const QVariant &userData ) {
     QNetworkRequest request;
 
     // add user data to request
@@ -41,7 +41,7 @@ void NetworkManager::execute( const QString &url, NetworkManager::Type type, con
 
     // handle replies
     reply->connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
-        const Type type = static_cast<Type>( reply->request().attribute( QNetworkRequest::User ).toInt());
+        const Types type = static_cast<Types>( reply->request().attribute( QNetworkRequest::User ).toInt());
         const QVariant userData( reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 )));
 
         // abort on errors

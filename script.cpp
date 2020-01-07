@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 Script::Script() {
     // add database related tables to the engine
     this->engine.globalObject().setProperty( "JS", this->engine.newQObject( this ));
-    // TODO: IMPLEMENT ans (history), Avogadro constant, etc.
 }
 
 /**

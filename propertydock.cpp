@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -241,13 +241,7 @@ PropertyDock::~PropertyDock() {
  * @return
  */
 int PropertyDock::sectionSize( int column ) const {
-    const int sectionSize = Variable::instance()->integer( "propertyNameColumnSize" );
-    if ( column == 0 )
-        return sectionSize;
-    else if ( column == 1 )
-        return this->ui->propertyView->viewport()->width() - sectionSize;
-
-    return 0;//this->ui->propertyView->columnWidth( column );
+    return this->ui->propertyView->columnWidth( column );
 }
 
 /**
@@ -312,7 +306,7 @@ void PropertyDock::on_addPropButton_clicked() {
             QByteArray bytes;
             QBuffer buffer( &bytes );
             buffer.open( QIODevice::WriteOnly );
-            QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( 1 ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
+            QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
             buffer.close();
 
             bool ok;

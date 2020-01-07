@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,8 @@ const static QMap<QString, QString> reagentAliases {
     { "Perchloric acid", "HClO4" },
     { "Phosphoric acid", "H3PO4" },
     { "Orthophosphoric acid", "H3PO4" },
-    { "Phosphorus pentachloride", "P2O5" },
+    { "Phosphorus pentachloride", "PCl5" },
+    { "Phosphorus pentoxide", "P2O5" },
     { "Phosphorus tribromide", "PBr3" },
     { "Phosphorus trichloride", "PCl3" },
     { "Phosphoryl chloride", "POCl3" },
@@ -167,8 +168,5 @@ QString ReagentDialog::alias() const {
  * @param text
  */
 void ReagentDialog::on_nameEdit_textChanged( const QString &text ) {
-    if ( reagentAliases.keys().contains( text ))
-        this->ui->aliasEdit->setText( reagentAliases[text] );
-    else
-        this->ui->aliasEdit->setText( QString( text ).remove( ' ' ));
+    this->ui->aliasEdit->setText( reagentAliases.keys().contains( text ) ? reagentAliases[text] : QString( text ).remove( ' ' ));
 }

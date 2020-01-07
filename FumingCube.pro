@@ -30,15 +30,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    about.cpp \
+    cache.cpp \
     charactermap.cpp \
     extractiondialog.cpp \
     ghsbuilder.cpp \
+    ghswidget.cpp \
     imageutils.cpp \
     main.cpp \
     mainwindow.cpp \
     database.cpp \
     networkmanager.cpp \
     nfpabuilder.cpp \
+    nfpawidget.cpp \
     propertydelegate.cpp \
     propertydialog.cpp \
     propertydock.cpp \
@@ -64,12 +68,15 @@ SOURCES += \
     calcedit.cpp
 
 HEADERS += \
+    about.h \
     buttonbox.h \
+    cache.h \
     charactermap.h \
     dockwidget.h \
     extractiondialog.h \
     extractionmodel.h \
     ghsbuilder.h \
+    ghspictograms.h \
     ghswidget.h \
     imageutils.h \
     mainwindow.h \
@@ -107,6 +114,7 @@ HEADERS += \
     calcedit.h
 
 FORMS += \
+        about.ui \
         extractiondialog.ui \
         imageutils.ui \
         mainwindow.ui \

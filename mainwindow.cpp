@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "tag.h"
 #include "tagdialog.h"
 #include "settingsdialog.h"
+#include "about.h"
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
@@ -156,4 +157,11 @@ void MainWindow::closeEvent( QCloseEvent *event ) {
  */
 void MainWindow::on_actionSettings_triggered() {
     SettingsDialog().exec();
+}
+
+/**
+ * @brief MainWindow::on_actionAbout_triggered
+ */
+void MainWindow::on_actionAbout_triggered() {
+    About( this ).exec();
 }

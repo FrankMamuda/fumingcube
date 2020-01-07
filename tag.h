@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,9 @@
  */
 #include "table.h"
 
+/**
+ * @brief PixmapTag
+ */
 constexpr const static Id PixmapTag = static_cast<Id>( -2 );
 
 /**

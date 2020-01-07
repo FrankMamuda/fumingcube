@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,7 +123,7 @@ ExtractionDialog::~ExtractionDialog() {
  * @param uncompressed
  * @return
  */
-int ExtractionDialog::readData( const QByteArray &uncompressed ) {
+int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
     QMutexLocker lock( &this->mutex );
 
     // get cid
@@ -485,7 +486,7 @@ void ExtractionDialog::generateCacheName() {
  * @param userData
  * @param data
  */
-void ExtractionDialog::replyReceived( const QString &, NetworkManager::Type type, const QVariant &, const QByteArray &data ) {
+void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
     switch ( type ) {
     case NetworkManager::CIDRequestInitial:
     {
@@ -584,7 +585,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Type type
 /**
  * @brief ExtractionDialog::error
  */
-void ExtractionDialog::error( const QString &, NetworkManager::Type type, const QString &errorMessage ) {
+void ExtractionDialog::error( const QString &, NetworkManager::Types type, const QString &errorMessage ) {
     qDebug() << errorMessage;
 
     switch ( type ) {

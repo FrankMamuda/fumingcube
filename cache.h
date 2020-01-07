@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Armands Aleksejevs
+ * Copyright (C) 2019 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,20 +21,22 @@
 /*
  * includes
  */
-#include <QSyntaxHighlighter>
+#include <QObject>
+#include <QVariant>
 
 /**
- * @brief The SyntaxHighlighter class
+ * @brief The Cache class
  */
-class SyntaxHighlighter : public QSyntaxHighlighter {
-    Q_OBJECT
-
+class Cache : public QObject {
 public:
-    explicit SyntaxHighlighter( QTextDocument *parent );
+    enum Types {
+        NoType = -1,
+    };
+    Q_ENUM( Types )
 
-protected:
-    void highlightBlock( const QString &text ) override;
+    static Cache *instance() { static Cache *instance( new Cache()); return instance; }
+    QVariant data( const Types &type, const QString &key ) const;
 
 private:
-    QStringList keywords;
+    explicit Cache();
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ public:
     explicit StructureBrowser( const QList<int> &cidList, QWidget *parent = nullptr );
     ~StructureBrowser();
 
+    /**
+     * @brief The StatusOption enum
+     */
     enum StatusOption {
         Idle          = 0x0,
         FetchName     = 0x1,
@@ -50,18 +53,37 @@ public:
     Q_DECLARE_FLAGS( Status, StatusOption )
 
 public slots:
-    void replyReceived( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Type, const QString &errorString );
+    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &, NetworkManager::Types, const QString &errorString );
+
+    /**
+     * @brief status
+     * @return
+     */
     Status status() const { return this->m_status; }
     int cid() const;
 
 private slots:
+    /**
+     * @brief index
+     * @return
+     */
     int index() const { return this->m_index; }
+
+    /**
+     * @brief path
+     * @return
+     */
     QString path() const { return this->m_path; }
     void getInfo();
     void getFormula( const int cid );
     void getName( const int cid );
     void readFormula( const QByteArray &data );
+
+    /**
+     * @brief setStatus
+     * @param status
+     */
     void setStatus( const Status &status ) { this->m_status = status; }
     void buttonTest();
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
         // scale pixmap to fit property view value column
         const qreal aspect = static_cast<qreal>( propertyPixmap.height()) / static_cast<qreal>( propertyPixmap.width());
-        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( 1 ), propertyPixmap.width());
+        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), propertyPixmap.width());
         const int preferredHeight = static_cast<int>( preferredWidth * aspect );
         document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( pixmapData.toBase64().constData()));
     } else {
@@ -118,11 +118,11 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
     const QTableView *view( qobject_cast<QTableView*>( this->parent()));
 
-    // draw custom selection hilight
+    // draw custom selection highlight
     if ( option.state & QStyle::State_Selected ) {
-        QColor hilight( qApp->palette().highlight().color());
-        hilight.setAlpha( 128 );
-        painter->fillRect( option.rect, QBrush( qAsConst( hilight )));
+        QColor highlight( qApp->palette().highlight().color());
+        highlight.setAlpha( 128 );
+        painter->fillRect( option.rect, QBrush( qAsConst( highlight )));
     }
 
     // don't draw anything else if a custom widget is used

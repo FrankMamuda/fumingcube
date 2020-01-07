@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ class NetworkManager: public QObject {
     Q_OBJECT
 
 public:
-    enum Type {
+    enum Types {
         NoType = -1,
         CIDRequestInitial,
         CIDRequestSimilar,
@@ -44,7 +44,7 @@ public:
         FormulaRequestBrowser,
         IUPACName
     };
-    Q_ENUM( Type )
+    Q_ENUM( Types )
 
     /**
      * @brief instance
@@ -58,11 +58,11 @@ signals:
      * @param url
      * @param data
      */
-    void finished( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &url, NetworkManager::Type type, const QString &errorString );
+    void finished( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &url, NetworkManager::Types type, const QString &errorString );
 
 public slots:
-    void execute( const QString &url, Type type, const QVariant &userData = QVariant());
+    void execute( const QString &url, Types type, const QVariant &userData = QVariant());
 
 private:
     /**

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,22 +54,41 @@ class ExtractionDialog : public QDialog {
 public:
     explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
     ~ExtractionDialog() override;
+
+    /**
+     * @brief reagentId
+     * @return
+     */
     Id reagentId() const { return this->m_reagentId; }
+
+    /**
+     * @brief path
+     * @return
+     */
     QString path() const { return this->m_path; }
+
+    /**
+     * @brief cache
+     * @return
+     */
     QString cache() const { return this->m_cache; }
 
+    /**
+     * @brief The RequestTypes enum
+     */
     enum RequestTypes {
         NoType = -1,
         CIDRequest,
         DataRequest,
         FormulaRequest
     };
+    Q_ENUM( RequestTypes )
 
-    int readData( const QByteArray &uncompressed );
+    int readData( const QByteArray &uncompressed ) const;
 
 public slots:
-    void replyReceived( const QString &url, NetworkManager::Type type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Type, const QString & );
+    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &, NetworkManager::Types, const QString & );
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );
     void getSimilar( const QList<int> cidListInt );

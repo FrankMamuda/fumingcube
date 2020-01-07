@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2019 Factory #12
  * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,46 +23,24 @@
  * includes
  */
 #include <QDialog>
-#include <QTextCharFormat>
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-class TagDialog;
+class About;
 }
 
 /**
- * @brief The TagDialog class
+ * @brief The About class
  */
-class TagDialog : public QDialog {
+class About final : public QDialog {
     Q_OBJECT
 
 public:
-    explicit TagDialog( QWidget *parent = nullptr );
-    ~TagDialog() override;
-    enum Modes {
-        NoMode = -1,
-        Add,
-        Edit
-    };
-    Q_ENUM( Modes )
-    Modes mode() const { return this->m_mode; }
-    static QString captureBody( const QString &input );
-
-private slots:
-    void on_actionAdd_triggered();
-    void on_actionRemove_triggered();
-    void on_actionEdit_triggered();
-    void clear();
-    void setMode( const Modes &mode = NoMode ) { this->m_mode = mode; }
-    void mergeFormat( const QTextCharFormat &format );
-
-protected:
-    bool eventFilter( QObject *object, QEvent *event ) override;
+    explicit About( QWidget *parent = nullptr );
+    ~About();
 
 private:
-    Ui::TagDialog *ui;
-    Modes m_mode = NoMode;
+    Ui::About *ui;
 };
-

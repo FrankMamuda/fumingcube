@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,10 +43,8 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
         if ( oldWidth == newWidth )
             return;
 
-        if ( column == Property::Name ) {
-            Variable::instance()->setInteger( "propertyNameColumnSize", newWidth );
+        if ( column == Property::Name )
             this->resizeToContents();
-        }
     } );
 
     this->horizontalHeader()->show();
@@ -67,6 +65,5 @@ void PropertyView::resizeEvent( QResizeEvent *event ) {
  */
 void PropertyView::resizeToContents() {
     PropertyDock::instance()->clearDocumentCache();
-    this->setColumnWidth( Property::Name, Variable::instance()->integer( "propertyNameColumnSize" ));
     this->resizeRowsToContents();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,6 @@
  */
 
 /*
-    1) we send a CIDRequest to get an exact structure match
-       however it often fails (Sodium bicarbonate for example)
-    2) we send a CIDRequestSimilar to get related compounds
-       it often returns a long list of partial matches, and in
-       many cases our desired compound is not the first item on
-       the list
-    3) in this case we open a StructureBrowser and offer the
-       user to choose between multiple compounds, and to do that:
-    4) we send a IUPACName request (to get a name) and
-       FormulaRequestBrowser (to get a formula)
-       user can now either select the first entry or go to the
-       next one, and so on.
-       (we can also pre-cache formulas in this step)
-    5) when the required compound cid is found, we finally send
-       a DataRequest and a FormulaRequest (if needed) and
-       continue to extract properties as usual
-
-    as of now the first four steps are not implemented properly
-    or at all, so there's lots of work to be done
-
-
     er zijn enkele caching problemen, maar het ExtractionDialog
     werkt
     moeten een uniforme caching oplossing maken
@@ -109,7 +88,7 @@ StructureBrowser::~StructureBrowser() {
  * @param userData
  * @param data
  */
-void StructureBrowser::replyReceived( const QString &, NetworkManager::Type type, const QVariant &, const QByteArray &data ) {
+void StructureBrowser::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
     const QString cache( this->path() + "/" + QString::number( this->cidList.at( this->index())));
 
     switch ( type ) {
@@ -237,7 +216,7 @@ void StructureBrowser::buttonTest() {
 /**
  * @brief StructureBrowser::error
  */
-void StructureBrowser::error( const QString &, NetworkManager::Type, const QString &errorString ) {
+void StructureBrowser::error( const QString &, NetworkManager::Types, const QString &errorString ) {
     this->setStatus( Error );
     this->ui->name->setText( this->tr( "Error" ));
     this->ui->formula->setText( errorString );

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <QMenu>
 #include <QStandardItem>
 #include <QListWidgetItem>
+#include "ghspictograms.h"
 #include "charactermap.h"
 
 //
@@ -78,12 +79,12 @@ QString PropertyEditor::value() const {
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
-PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( mode ), characterMap( new CharacterMap( this )) {
+PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( mode ) {
     // set up ui
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
-    QListWidget w;
+    const QListWidget w;
     const QFont font( QApplication::font( &w ));
 
     // we don't currently need this
@@ -92,18 +93,6 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
     // fix tab issues
     this->ui->name->installEventFilter( this );
     this->ui->name->setSimpleEditor( true );
-
-    // load pictograms for manual addition
-    //   although these are handled automatically (just like NFPA widget)
-    this->pictograms["Harmful"]            = QIcon( ":/pictograms/GHS07" );
-    this->pictograms["Flammable"]          = QIcon( ":/pictograms/GHS02" );
-    this->pictograms["Toxic"]              = QIcon( ":/pictograms/GHS06" );
-    this->pictograms["Corrosive"]          = QIcon( ":/pictograms/GHS05" );
-    this->pictograms["Environment hazard"] = QIcon( ":/pictograms/GHS09" );
-    this->pictograms["Health hazard"]      = QIcon( ":/pictograms/GHS08" );
-    this->pictograms["Explosive"]          = QIcon( ":/pictograms/GHS01" );
-    this->pictograms["Oxidizing"]          = QIcon( ":/pictograms/GHS03" );
-    this->pictograms["Compressed gas"]     = QIcon( ":/pictograms/GHS04" );
 
     // set font toolbar below other buttons
     this->ui->mainWindow->insertToolBarBreak( this->ui->fontToolBar );
@@ -255,15 +244,16 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
 #else
     this->ui->actionCharacterMap->setText( "\u212b" );
 #endif
+
     this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
+        CharacterMap cm( this );
 
-        // TODO: remove from private member?
-        this->characterMap->exec();
-    } );
+        // add character map action
+        this->connect( &cm, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
+            this->activeEditor->insertPlainText( character );
+        } );
 
-    // add character map action
-    this->connect( this->characterMap, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
-        this->activeEditor->insertPlainText( character );
+        cm.exec();
     } );
 
     // set up image selector action
@@ -283,10 +273,10 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
     this->connect( this->ui->actionGHS, &QAction::triggered, [ this ]() {
         QMenu *menu( new QMenu());
 
-        foreach ( const QString &ghs, this->pictograms.keys()) {
-            const QIcon icon( this->pictograms[ghs] );
-            menu->addAction( icon, ghs, [ this, icon ]() {
-                const QPixmap pixmap( icon.pixmap( this->GHSPictogramScale, this->GHSPictogramScale ));
+        foreach ( const QString &key, GHSHazards::Hazards.keys()) {
+            const QIcon icon( GHSPictograms::icon( key ));
+            menu->addAction( icon, GHSHazards::Hazards[key], [ this, key ]() {
+                const QPixmap pixmap( GHSPictograms::pixmap( key, 48 ));
                 if ( !pixmap.isNull())
                     this->activeEditor->insertPixmap( pixmap );
             } );
@@ -344,12 +334,10 @@ PropertyEditor::~PropertyEditor() {
     this->disconnect( this->ui->comboFont, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
     this->disconnect( this->ui->comboSize, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
     this->disconnect( this->ui->actionCharacterMap, &QAction::triggered, this, nullptr );
-    this->disconnect( this->characterMap, &CharacterMap::characterSelected, this, nullptr );
     this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionGHS, &QAction::triggered, this, nullptr );
     this->disconnect( this->ui->actionCleanHTML, &QAction::toggled, this, nullptr );
 
-    delete this->characterMap;
     delete this->ui;
 }
 

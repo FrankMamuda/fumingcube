@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2013-2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,8 +70,6 @@ Variable::~Variable() {
  * @param method
  */
 void Variable::bind( const QString &key, const QObject *receiver, const char *method ) {
-    QPair<QObject*, int> slot;
-
     if ( key.isEmpty())
         return;
 
@@ -80,15 +78,9 @@ void Variable::bind( const QString &key, const QObject *receiver, const char *me
     if ( code != 1 )
         return;
 
-    // get method name
+    // create an object/method pair and add pair to slotList
     ++method;
-
-    // create an object/method pair
-    slot.first = const_cast<QObject*>( receiver );
-    slot.second = receiver->metaObject()->indexOfSlot( QMetaObject::normalizedSignature( qPrintable( method )));
-
-    // add pair to slotList
-    this->slotList[key] = slot;
+    this->slotList[key] = qMakePair( const_cast<QObject*>( receiver ), receiver->metaObject()->indexOfSlot( QMetaObject::normalizedSignature( qPrintable( method ))));
 }
 
 /**

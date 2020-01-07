@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2019 Factory #12
  * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +17,28 @@
  *
  */
 
-#pragma once
-
 /*
  * includes
  */
-#include <QSyntaxHighlighter>
+#include <QMessageBox>
+#include "about.h"
+#include "ui_about.h"
 
 /**
- * @brief The SyntaxHighlighter class
+ * @brief About::About
+ * @param parent
  */
-class SyntaxHighlighter : public QSyntaxHighlighter {
-    Q_OBJECT
+About::About( QWidget *parent ) : QDialog( parent ), ui( new Ui::About ) {
+    this->ui->setupUi( this );
+    this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() { this->close(); } );
+    this->connect( this->ui->qtButton, &QPushButton::clicked, [ this ]() { QMessageBox::aboutQt( this ); } );
+}
 
-public:
-    explicit SyntaxHighlighter( QTextDocument *parent );
-
-protected:
-    void highlightBlock( const QString &text ) override;
-
-private:
-    QStringList keywords;
-};
+/**
+ * @brief About::~About
+ */
+About::~About() {
+    this->disconnect( this->ui->closeButton, SIGNAL( clicked()));
+    this->disconnect( this->ui->qtButton, SIGNAL( clicked()));
+    delete this->ui;
+}
