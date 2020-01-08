@@ -190,6 +190,7 @@ int main( int argc, char *argv[] ) {
             delete Database::instance();
 
         delete Variable::instance();
+        delete MainWindow::instance();
     } );
 
     // check for previous crashes
@@ -204,6 +205,7 @@ int main( int argc, char *argv[] ) {
 
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::instance()->string( "databasePath" ));
+        QFile( Variable::instance()->string( "databasePath" )).setPermissions( QFileDevice::ReadOwner | QFileDevice::WriteOwner );
 
         QFile::remove( apiFileName );
     }

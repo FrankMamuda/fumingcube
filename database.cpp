@@ -93,6 +93,8 @@ Database::Database( QObject *parent ) : QObject( parent ) {
 
         if ( !file.exists())
             qFatal( QT_TR_NOOP_UTF8( "unable to create database file" ));
+
+        file.setPermissions( QFileDevice::ReadOwner | QFileDevice::WriteOwner );
     }
 
     // announce

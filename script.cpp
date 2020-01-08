@@ -20,6 +20,8 @@
 /*
  * includes
  */
+#include "main.h"
+#include "main.h"
 #include "mainwindow.h"
 #include "reagent.h"
 #include "script.h"
@@ -32,6 +34,9 @@
  * @brief Script::Script
  */
 Script::Script() {
+    // add to garbage collector
+    GarbageMan::instance()->add( this );
+
     // add database related tables to the engine
     this->engine.globalObject().setProperty( "JS", this->engine.newQObject( this ));
 }

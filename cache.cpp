@@ -20,11 +20,14 @@
  * includes
  */
 #include "cache.h"
+#include "main.h"
 
 /**
  * @brief Cache::Cache
  */
 Cache::Cache() {
+    // add to garbage collector
+    GarbageMan::instance()->add( this );
 }
 
 /**
