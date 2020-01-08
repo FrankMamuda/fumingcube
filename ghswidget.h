@@ -29,10 +29,12 @@
  * @brief The GHSWidget class
  */
 class GHSWidget final : public PropertyViewWidget {
+    Q_OBJECT
+
 public:
-    static constexpr const int scale = 48;
     explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
     int iconsPerRow() const { return this->m_iconsPerRow; }
+    static const int scale;
 
 public slots:
     void update( const QStringList &parms ) override {

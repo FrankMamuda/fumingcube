@@ -26,6 +26,11 @@
 #include "property.h"
 
 /**
+ * @brief GHSWidget::scale
+ */
+constexpr const int GHSWidget::scale = 48;
+
+/**
  * @brief GHSWidget::GHSWidget
  * @param parent
  * @param parms
@@ -49,14 +54,14 @@ void GHSWidget::paintEvent( QPaintEvent * ) {
     int index = 0;
 
     foreach ( const QString &key, this->parameters()) {
-        const QPixmap pixmap( GHSPictograms::pixmap( key, scale ));
-        if ( xOffset >= this->iconsPerRow() * this->scale ) {
+        const QPixmap pixmap( GHSPictograms::pixmap( key, GHSWidget::scale ));
+        if ( xOffset >= this->iconsPerRow() * GHSWidget::scale ) {
             xOffset = 0;
-            yOffset += this->scale;
+            yOffset += GHSWidget::scale;
         }
 
-        painter.drawPixmap( qAsConst( xOffset ), qAsConst( yOffset ), this->scale, this->scale, pixmap );
-        xOffset += this->scale;
+        painter.drawPixmap( qAsConst( xOffset ), qAsConst( yOffset ), GHSWidget::scale, GHSWidget::scale, pixmap );
+        xOffset += GHSWidget::scale;
         index++;
     }
 }
@@ -68,20 +73,20 @@ void GHSWidget::paintEvent( QPaintEvent * ) {
 QSize GHSWidget::sizeHint() const {
     if ( this->m_linear ) {
         this->m_iconsPerRow = 9;
-        return QSize( this->scale * this->parameters().count(), this->scale );
+        return QSize( GHSWidget::scale * this->parameters().count(), GHSWidget::scale );
     }
 
     const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
     if ( sectionSize == 0 )
         return QSize();
 
-    this->m_iconsPerRow = qMax( 1, ( sectionSize - ( sectionSize % this->scale )) / this->scale );
+    this->m_iconsPerRow = qMax( 1, ( sectionSize - ( sectionSize % GHSWidget::scale )) / GHSWidget::scale );
     const int numIcons = this->parameters().count();
     const int rows = ( numIcons - ( numIcons % this->iconsPerRow())) / this->iconsPerRow() + ( numIcons % this->iconsPerRow() > 0 ? 1 : 0 );
 
-    int height = this->scale;
+    int height = GHSWidget::scale;
     for ( int y = 1; y < rows; y++ )
-        height += this->scale;
+        height += GHSWidget::scale;
 
-    return QSize( this->parameters().count() * this->scale, qAsConst( height ));
+    return QSize( this->parameters().count() * GHSWidget::scale, qAsConst( height ));
 }

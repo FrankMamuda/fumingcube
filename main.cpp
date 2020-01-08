@@ -68,11 +68,13 @@ properties:
  - script editing in tag dialog
  - must remove orphaned properties on tag removal
  - must remove table 'tag' from inital database since it is recreated anyway
+ - allow replacement of Formula property
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - revamp structure browser
  - display a warning, when a similar structure is returned (no exact match)
+ - remove duplicates from structure browser
 
 completion:
  - fix reagent completion (does not work as indended)
@@ -86,6 +88,7 @@ scripting:
    property)
  - check API
  - implement ans (history), Avogadro constant, etc.
+ - fix ** comments in syntax highlighter
 
 settings:
  - implement settings dialog and:
@@ -112,6 +115,7 @@ variable:
 future:
  - common reaction browser
  - molecule drawing (and search)
+ - tables (make custom tables reagents and select properties)
 */
 
 /**

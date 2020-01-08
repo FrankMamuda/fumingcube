@@ -83,12 +83,12 @@ Database::Database( QObject *parent ) : QObject( parent ) {
     QFile file( Variable::instance()->string( "databasePath" ));
     if ( !file.exists()) {
         if ( QFile::copy( ":/initial/database.db", Variable::instance()->string( "databasePath" ))) {
-            qCDebug( Database_::Debug ) << this->tr( "using built-in database" ) << '"' << Variable::instance()->string( "databasePath" ) << '"';
+            qCDebug( Database_::Debug ) << this->tr( "using built-in database" ) << Variable::instance()->string( "databasePath" );
         } else {
             // this should never happen, but just in case
             file.open( QFile::WriteOnly );
             file.close();
-            qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" ) << '"' << Variable::instance()->string( "databasePath" ) << '"';
+            qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" ) << Variable::instance()->string( "databasePath" );
         }
 
         if ( !file.exists())
