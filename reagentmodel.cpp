@@ -125,6 +125,12 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
     // make a list of matches (for search)
     QList<Id> total;
 
+    // sort here
+    // FIXME: broken
+   // Reagent::instance()->setSort( Reagent::Name, Qt::AscendingOrder );
+    //Reagent::instance()->select();
+   // Reagent::instance()->sort( Reagent::Name, Qt::AscendingOrder );
+
     // go through reagents and their batches
     for ( int y = 0; y < Reagent::instance()->count(); y++ ) {
         const Row row = Reagent::instance()->row( y );

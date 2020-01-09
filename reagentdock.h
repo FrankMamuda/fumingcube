@@ -23,6 +23,7 @@
  */
 #include "reagentmodel.h"
 #include "dockwidget.h"
+#include <QShortcut>
 
 /**
  * @brief The Ui namespace
@@ -67,4 +68,5 @@ private:
     QMainWindow *m_windowParent = nullptr;
     QList<Id> matches;
     Id currentMatch;
+    QShortcut *shortcut;
 };

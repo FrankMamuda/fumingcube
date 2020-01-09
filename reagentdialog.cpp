@@ -21,6 +21,7 @@
  */
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
+#include "variable.h"
 
 /*
  * Reagent alias map
@@ -137,12 +138,19 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
 
     if ( !alias.isEmpty())
         this->ui->aliasEdit->setText( alias );
+
+    // bind property button
+    this->variables << Variable::instance()->bind( "fetchPropertiesOnAddition", this->ui->propertyCheck );
 }
 
 /**
  * @brief ReagentDialog::~ReagentDialog
  */
-ReagentDialog::~ReagentDialog() {
+ReagentDialog::~ReagentDialog() {    
+    // unbind vars
+    foreach ( const QString &key, this->variables )
+        Variable::instance()->unbind( key );
+
     delete this->completer;
     delete this->ui;
 }

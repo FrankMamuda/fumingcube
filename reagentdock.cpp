@@ -33,6 +33,7 @@
 #include "variable.h"
 #include "propertydock.h"
 #include "reagentdialog.h"
+#include "extractiondialog.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -43,7 +44,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     this->ui->setupUi( this );
 
     // set a model to treeview
-    this->ui->reagentView->setModel( model );
+    this->ui->reagentView->setModel( this->model );
 
     // disable the remove button (and enable it only when a reagent is clicked upon)
     this->ui->removeButton->setEnabled( false );
@@ -106,6 +107,11 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
             this->ui->searchEdit->hide();
         }
     } );
+
+    this->shortcut = new QShortcut( QKeySequence( this->tr( "Ctrl+F", "Find" )), this );
+    this->shortcut->connect( this->shortcut, &QShortcut::activated, [ this ]() {
+        this->on_buttonFind_clicked();
+    } );
 }
 
 /**
@@ -113,6 +119,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
  */
 ReagentDock::~ReagentDock() {
     delete this->model;
+    delete this->shortcut;
     delete ui;
 }
 
@@ -229,7 +236,16 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                 if ( parentId != Id::Invalid )
                     this->expand( this->model->find( parentId ));
 
-                this->select( this->model->find( Reagent::instance()->id( row )));
+                Reagent::instance()->select();
+                const Id reagentId = Reagent::instance()->id( row );
+                this->select( this->model->find( reagentId ));
+
+                // open extraction dialog if this feature is enabled
+                if ( Variable::instance()->isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
+                    ExtractionDialog ed( this, reagentId );
+                    ed.exec();
+                    PropertyDock::instance()->updateView();
+                }
             } else {
                 QMessageBox::warning( this,  this->tr( "Cannot add reagent" ), ( parentId != Id::Invalid ?  this->tr( "Batch" ) : this->tr( "Reagent" )) + this->tr( " name is empty" ));
                 return;
@@ -263,59 +279,86 @@ void ReagentDock::on_addButton_clicked() {
  * @brief ReagentDock::on_removeButton_clicked
  */
 void ReagentDock::on_removeButton_clicked() {
-    // get current index
-    const QModelIndex index( this->ui->reagentView->currentIndex());
-    if ( !index.isValid())
-        return;
-
-    // get current item
-    const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-
-    // construct a menu
     QMenu menu;
-    if ( item->data( TreeItem::ParentId ).value<Id>() == Id::Invalid ) {
-        // remove reagent and batches
-        menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
-            const Id reagentId = item->data( TreeItem::Id ).value<Id>();
-            const Row reagentRow = Reagent::instance()->row( reagentId );
-            if ( reagentRow == Row::Invalid )
-                return;
+    const QModelIndexList list( this->ui->reagentView->selectionModel()->selectedRows());
 
-            // remove batches
+    /**
+     * removeReagentsAndBatches lambda
+     */
+    auto removeReagentsAndBatches = [ this ]( const TreeItem *item ) {
+        const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+        const Row reagentRow = Reagent::instance()->row( reagentId );
+        if ( reagentRow == Row::Invalid )
+            return;
+
+        // remove batches
+        if ( Reagent::instance()->parentId( reagentRow ) == Id::Invalid ) {
             const QList<Row>children( Reagent::instance()->children( reagentRow ));
             foreach ( const Row &batchRow, children )
                 Reagent::instance()->remove( batchRow );
+        }
 
-            // remove reagent
-            Reagent::instance()->remove( reagentRow );
+        // remove reagent
+        Reagent::instance()->remove( reagentRow );
 
-            // remove orphans just in case
-            Reagent::instance()->removeOrphanedEntries();
-            Property::instance()->removeOrphanedEntries();
+        // remove orphans just in case
+        Reagent::instance()->removeOrphanedEntries();
+        Property::instance()->removeOrphanedEntries();
+    };
+
+    if ( list.count() > 1 ) {
+        // remove reagent and batches
+        menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
+            foreach ( const QModelIndex &index, list ) {
+                const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
+                if ( item != nullptr )
+                    removeReagentsAndBatches( item );
+            }
 
             // reset model
             this->reset();
+
+            return;
         } );
     } else {
-        // remove batch
-        menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
-            const Id reagentId = item->data( TreeItem::Id ).value<Id>();
-            const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+        // get current index
+        const QModelIndex index( this->ui->reagentView->currentIndex());
+        if ( !index.isValid())
+            return;
 
-            const Row row = Reagent::instance()->row( reagentId );
-            if ( row != Row::Invalid ) {
-                Reagent::instance()->remove( row );
+        // get current item
+        const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
 
-                // remove orphans just in case
-                Reagent::instance()->removeOrphanedEntries();
-                Property::instance()->removeOrphanedEntries();
+        // construct a menu
+        if ( item->data( TreeItem::ParentId ).value<Id>() == Id::Invalid ) {
+            // remove reagent and batches
+            menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->data( TreeItem::Name ).toString()), [ this, item, removeReagentsAndBatches ]() {
+                removeReagentsAndBatches( item );
 
-                // reexpand parent reagent
-                // unfortunately we have to repaint to restore index cache
+                // reset model
                 this->reset();
-                this->expand( this->model->find( parentId ));
-            }
-        } );
+            } );
+        } else {
+            // remove batch
+            menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
+                const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+                const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+
+                const Row row = Reagent::instance()->row( reagentId );
+                if ( row != Row::Invalid ) {
+                    Reagent::instance()->remove( row );
+
+                    // remove orphans just in case
+                    Reagent::instance()->removeOrphanedEntries();
+                    Property::instance()->removeOrphanedEntries();
+
+                    // reexpand parent reagent
+                    // unfortunately we have to repaint to restore index cache
+                    this->reset();
+                    this->expand( this->model->find( parentId ));
+                }
+            } );
+        }
     }
 
     // display menu

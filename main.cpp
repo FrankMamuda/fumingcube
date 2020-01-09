@@ -56,6 +56,8 @@ reagents:
         \_Sodium hydroxide
    Bases
         \_Sodium hydroxide
+ - up down arrow in dock does not change index (is this the intended behaviour)
+ - sort alphabetically (currently broken)
 
 properties:
  - for now we use built in property extractor from PubChem
@@ -70,12 +72,16 @@ properties:
  - must remove table 'tag' from inital database since it is recreated anyway
  - allow replacement of Formula property
  - state property
+ - fetch 'other names' such as IUPAC name
+ - add multiline edit option in textual properties (tagged, not custom)
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - revamp structure browser
  - display a warning, when a similar structure is returned (no exact match)
  - remove duplicates from structure browser
+ - if one CID -> do not open structure browser
+ - tag selection for extraction (user might not need all tags)
 
 completion:
  - fix reagent completion (does not work as indended)
@@ -93,7 +99,6 @@ scripting:
  - clickable calculator references (opens corresponding reagent)
 
 settings:
- - implement settings dialog and:
  - option to change syntax highlighter (and font size) (partially supported)
 
 misc:
@@ -174,6 +179,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::instance()->add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
 
     // read configuration
     XMLTools::instance()->read();

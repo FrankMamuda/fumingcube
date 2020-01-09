@@ -73,7 +73,6 @@ SettingsDialog::~SettingsDialog() {
     // unbind vars
     foreach ( const QString &key, this->variables )
         Variable::instance()->unbind( key );
-    this->variables.clear();
 
     delete this->ui;
 }
