@@ -138,5 +138,6 @@ RESOURCES += \
     dark.qrc \
     light.qrc
 
-win32:INCLUDEPATH += C:/OpenSSL-Win64/include/openssl
-win32:LIBS += -LC:/OpenSSL-Win64/lib -llibeay32 -lssleay32
+# NOTE: using libs from https://bintray.com/vszakats/generic/openssl
+win32:INCLUDEPATH += C:/openssl-win64/include/openssl
+win32:LIBS += -LC:/openssl-win64/lib -lcrypto -lssl

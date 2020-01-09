@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
         <file alias="icon">icons/icon.png</file>
+        <file alias="icon_128">icons/icon_128.png</file>
     </qresource>
     <qresource prefix="/pictograms">
         <file alias="GHS04">pictograms/compressed.svg</file>

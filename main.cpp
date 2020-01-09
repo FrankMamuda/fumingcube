@@ -69,6 +69,7 @@ properties:
  - must remove orphaned properties on tag removal
  - must remove table 'tag' from inital database since it is recreated anyway
  - allow replacement of Formula property
+ - state property
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -89,6 +90,7 @@ scripting:
  - check API
  - implement ans (history), Avogadro constant, etc.
  - fix ** comments in syntax highlighter
+ - clickable calculator references (opens corresponding reagent)
 
 settings:
  - implement settings dialog and:
@@ -101,8 +103,6 @@ misc:
    view. one option would be to use a precached image or sacrifice quality
    with fast transform
  - application icon for macOS
- - fix crash on exit on win7:
-   reproduce: open->add reagent->get properties->close main window
  - store variables (for example F = molarMasss( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate
