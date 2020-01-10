@@ -70,7 +70,6 @@ properties:
  - gray out properties (with a tag) that have been already set
  - script editing in tag dialog
  - must remove orphaned properties on tag removal
- - must remove table 'tag' from inital database since it is recreated anyway
  - allow replacement of Formula property
  - state property
  - fetch 'other names' such as IUPAC name
@@ -109,7 +108,6 @@ misc:
    this however causes a performance penalty while resizing property
    view. one option would be to use a precached image or sacrifice quality
    with fast transform
- - application icon for macOS
  - store variables (for example F = molarMasss( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate

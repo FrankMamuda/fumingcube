@@ -23,6 +23,10 @@
 #include <QMessageBox>
 #include "about.h"
 #include "ui_about.h"
+#ifdef Q_OS_MAC
+#include <QDebug>
+#endif
+
 
 /**
  * @brief About::About
@@ -32,6 +36,18 @@ About::About( QWidget *parent ) : QDialog( parent ), ui( new Ui::About ) {
     this->ui->setupUi( this );
     this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() { this->close(); } );
     this->connect( this->ui->qtButton, &QPushButton::clicked, [ this ]() { QMessageBox::aboutQt( this ); } );
+
+#ifndef Q_OS_WIN
+    QString text( this->ui->textBrowser->toHtml());
+    QTextEdit te;
+    text.replace( "MS Shell Dlg 2", te.font().family());
+#ifdef Q_OS_MAC
+    text.replace( "font-size:10pt", "font-size:12pt" );
+    text.replace( "font-size:8.25pt", "font-size:10pt" );
+    text.replace( "font-size:13pt", "font-size:15pt" );
+    this->ui->textBrowser->setHtml( text );
+#endif
+#endif
 }
 
 /**
