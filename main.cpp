@@ -58,6 +58,7 @@ reagents:
         \_Sodium hydroxide
  - up down arrow in dock does not change index (is this the intended behaviour)
  - sort alphabetically (currently broken)
+ - fix ctrl-f (does not clear filter when search is turned off)
 
 properties:
  - for now we use built in property extractor from PubChem
@@ -74,6 +75,7 @@ properties:
  - state property
  - fetch 'other names' such as IUPAC name
  - add multiline edit option in textual properties (tagged, not custom)
+ - decimal separator for copy actions
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
