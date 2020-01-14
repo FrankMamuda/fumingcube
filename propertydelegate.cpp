@@ -165,7 +165,14 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
         } else {
             // properties with built-in tags don't use property names, but rather tag names
             const QString units( Tag::instance()->units( tagId ));
-            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML( data.toString() + units )));
+
+            QString stringData( data.toString());
+            if ( tagId != Id::Invalid ) {
+                if ( Tag::instance()->type( tagId ) == Tag::Real )
+                    stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" )));
+            }
+
+            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML( qAsConst( stringData ) + units )));
         }
 
         document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( qAsConst( html )));

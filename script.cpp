@@ -36,7 +36,9 @@
  */
 Script::Script() {
     // add to garbage collector
-    GarbageMan::instance()->add( this );
+    // FIXME: this is broken
+    //         pure virtual method called
+    //GarbageMan::instance()->add( this );
 
     // add database related tables to the engine
     this->engine.globalObject().setProperty( "JS", this->engine.newQObject( this ));

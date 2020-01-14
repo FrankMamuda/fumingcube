@@ -74,7 +74,6 @@ properties:
  - state property
  - fetch 'other names' such as IUPAC name
  - add multiline edit option in textual properties (tagged, not custom)
- - decimal separator for copy actions
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -88,7 +87,7 @@ completion:
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:
    mol = mass * assay( reagent ) / molarMass( reagent )
- - add any as batch name (a whildcard that chooses any batch with the
+ - add 'any' as batch name (a whildcard that chooses any batch with the
    property)
  - check API
  - implement ans (history), Avogadro constant, etc.
@@ -106,7 +105,7 @@ misc:
  - unify text editor toolbars (in tagedit and propertyedit) as a separate
    class
 
-variable:
+variables:
  - automatically store QByteArray as base64
  - and QStringList as proper compressed string
 
@@ -174,6 +173,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
 
     // read configuration
     XMLTools::instance()->read();

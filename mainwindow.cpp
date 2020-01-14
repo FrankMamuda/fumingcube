@@ -97,12 +97,15 @@ void MainWindow::appendToCalculator( const QString &line ) {
         return;
 
     // evaluate expression
-    const QJSValue result( Script::instance()->evaluate( QString( line )));
+    const QJSValue result( Script::instance()->evaluate( line ));
     const QString string( result.toString());
 
     // output either error or result
-    if ( !string.isEmpty())
-        this->ui->calcView->append( line + "\n" + ( !result.isError() ? "= " : "" ) + string + "\n" );
+    if ( !string.isEmpty()) {
+        // TODO: implement this!
+        this->ui->calcView->append( QString( line ).replace( QRegularExpression( "\"(\\w+)\"" ), "<a href=\"WORD\" > \"\\1\" </a>" ));
+        this->ui->calcView->append( ( !result.isError() ? "= " : "" ) + string + "\n" );
+    }
 
     // ensure the result is visible
     this->scrollToBottom();

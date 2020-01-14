@@ -65,6 +65,11 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
     this->variables << Variable::instance()->bind( "databasePath", this->ui->pathEdit );
     this->variables << Variable::instance()->bind( "theme", this->ui->themeCombo );
     this->variables << Variable::instance()->bind( "alwaysOnTop", this->ui->onTopCheck );
+
+    // setup decimal separator comboBox
+    this->ui->decimalSepCombo->model()->setData( this->ui->decimalSepCombo->model()->index( 0, 0 ), ".", Qt::UserRole );
+    this->ui->decimalSepCombo->model()->setData( this->ui->decimalSepCombo->model()->index( 1, 0 ), ",", Qt::UserRole );
+    this->variables << Variable::instance()->bind( "decimalSeparator", this->ui->decimalSepCombo );
 }
 
 /**

@@ -287,8 +287,9 @@ CalcEdit::CalcEdit( QWidget *parent ) : QLineEdit( parent ) {
     this->history = Variable::uncompressedString( Variable::instance()->string( "calculator/commands" )).split( ";" );
 
     this->connect( this, &QLineEdit::returnPressed, [ this ]( ) {
-        MainWindow::instance()->appendToCalculator( this->text());
-        this->add( this->text());
+        const QString st( this->text().simplified());
+        MainWindow::instance()->appendToCalculator( st );
+        this->add( st );
 
         // set min offset
         this->reset();

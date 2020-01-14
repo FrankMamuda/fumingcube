@@ -360,11 +360,14 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     QMenu menu;
     if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula ) {
         menu.addAction( this->tr( "Copy" ), [ row, type ]() {
+            const QVariant data( Property::instance()->propertyData( row ));
 
             if ( type == Tag::Formula )
-                QGuiApplication::clipboard()->setImage( QImage::fromData( Property::instance()->propertyData( row ).toByteArray()));
+                QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
+            else if ( type == Tag::Real )
+                QGuiApplication::clipboard()->setText( data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" ))));
             else
-                QGuiApplication::clipboard()->setText( Property::instance()->propertyData( row ).toString());
+                QGuiApplication::clipboard()->setText( data.toString());
         } );
     }
 

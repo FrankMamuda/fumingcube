@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>334</width>
-    <height>121</height>
+    <width>359</width>
+    <height>149</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,6 +83,31 @@
       <string>Always on top (on restart)</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="separatorLayout">
+     <item>
+      <widget class="QLabel" name="decimalSepLabel">
+       <property name="text">
+        <string>Decimal separator</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="decimalSepCombo">
+       <item>
+        <property name="text">
+         <string>dot (.)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>comma (,)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QPushButton" name="closeButton">
