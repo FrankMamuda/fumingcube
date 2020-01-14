@@ -275,6 +275,15 @@ void PropertyDock::on_addPropButton_clicked() {
     // get reagent name
     const QString reagentName( Reagent::instance()->name( Reagent::instance()->row( reagentId )));
 
+    // get all tags that have already been set
+    QList<Id> tags;
+    for ( int y = 0; y < Property::instance()->count(); y++ ) {
+        const Row row = Property::instance()->row( y );
+        const Id tagId = Property::instance()->tagId( row );
+        if ( tagId != Id::Invalid )
+            tags << tagId;
+    }
+
     // add built-in properties to menu
     QMenu menu;
     QMenu *subMenu( menu.addMenu( this->tr( "Add property" )));
@@ -282,10 +291,14 @@ void PropertyDock::on_addPropButton_clicked() {
         const Row tagRow = Tag::instance()->row( y );
         const Id tagId = Tag::instance()->id( tagRow );
 
+        if ( tags.contains( tagId ))
+             continue;
+
         subMenu->addAction( Tag::instance()->name( tagRow ), [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
             this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
         } );
+        //action->setDisabled( tags.contains( tagId ));
     }
 
     // add an option to add custom properties

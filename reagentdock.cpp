@@ -110,7 +110,12 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
     this->shortcut = new QShortcut( QKeySequence( this->tr( "Ctrl+F", "Find" )), this );
     this->shortcut->connect( this->shortcut, &QShortcut::activated, [ this ]() {
-        this->on_buttonFind_clicked();
+        if ( !this->ui->searchEdit->isVisible())
+            this->on_buttonFind_clicked();
+        else {
+            this->ui->searchEdit->setText( "" );
+            this->ui->searchEdit->hide();
+        }
     } );
 }
 
@@ -288,7 +293,7 @@ void ReagentDock::on_removeButton_clicked() {
     /**
      * removeReagentsAndBatches lambda
      */
-    auto removeReagentsAndBatches = [ this ]( const TreeItem *item ) {
+    auto removeReagentsAndBatches = []( const TreeItem *item ) {
         const Id reagentId = item->data( TreeItem::Id ).value<Id>();
         const Row reagentRow = Reagent::instance()->row( reagentId );
         if ( reagentRow == Row::Invalid )

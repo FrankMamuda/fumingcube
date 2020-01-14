@@ -407,7 +407,7 @@ void ExtractionDialog::getFormula( const QString &cid ) {
  * @param cidListInt
  */
 void ExtractionDialog::getSimilar( const QList<int> cidListInt ) {
-    StructureBrowser sb( cidListInt );
+    StructureBrowser sb( cidListInt, this );
     if ( sb.exec() != QDialog::Accepted )
         return;
 
@@ -493,29 +493,6 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         this->cidList << QString( data ).split( "\n" );
         if ( this->cidList.isEmpty()) {
             return;
-
-#if 0
-            // get formula
-            if ( QFileInfo( this->cache() + ".cid" ).exists()) {
-                QFile file( this->cache() + ".cid" );
-                if ( file.open( QIODevice::ReadOnly )) {
-                    this->cidList = QString( file.readAll()).split( "\n" );
-                    file.close();
-
-                    QList<int> cidListInt;
-                    foreach ( const QString &cid, this->cidList )
-                        cidListInt << cid.toInt();
-
-                    qDebug() << "FROM CACHE CIDLISTSIM";
-                    this->getSimilar( qAsConst( cidListInt ));
-                    return;
-                }
-            }
-
-            // intial failed to yield a list, proceed to similiar search
-            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
-            return;
-#endif
         }
 
         const QString cid( this->cidList.first());
@@ -544,9 +521,14 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         foreach ( const QString &cid, this->cidList )
             cidListInt << cid.toInt();
         cidListInt.removeAll( 0 );
+        std::sort( cidListInt.begin(), cidListInt.end());
+        cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
         qDebug() << "FROM NET CIDLISTSIM";
-        this->getSimilar( qAsConst( cidListInt ));
+        if ( cidListInt.count() == 1 )
+            this->getFormula( QString::number( cidListInt.first()));
+        else
+            this->getSimilar( qAsConst( cidListInt ));
     }
         break;
 
@@ -604,9 +586,15 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     foreach ( const QString &cid, this->cidList )
                         cidListInt << cid.toInt();
                     cidListInt.removeAll( 0 );
+                    std::sort( cidListInt.begin(), cidListInt.end());
+                    cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
                     qDebug() << "FROM CACHE CIDLISTSIM";
-                    this->getSimilar( qAsConst( cidListInt ));
+                    if ( cidListInt.count() == 1 )
+                        this->getFormula( QString::number( cidListInt.first()));
+                    else
+                        this->getSimilar( qAsConst( cidListInt ));
+
                     return;
                 }
             }

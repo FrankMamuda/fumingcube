@@ -58,7 +58,6 @@ reagents:
         \_Sodium hydroxide
  - up down arrow in dock does not change index (is this the intended behaviour)
  - sort alphabetically (currently broken)
- - fix ctrl-f (does not clear filter when search is turned off)
  - option to duplicate reagent?
  - renaming should restore index
  - better yet -> store all opened nodes
@@ -70,7 +69,6 @@ properties:
  - filter in dock
  - icons in "add property" menu
  - solubility data as a property
- - gray out properties (with a tag) that have been already set
  - script editing in tag dialog
  - must remove orphaned properties on tag removal
  - state property
@@ -80,10 +78,6 @@ properties:
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
- - revamp structure browser
- - display a warning, when a similar structure is returned (no exact match)
- - remove duplicates from structure browser
- - if one CID -> do not open structure browser
  - tag selection for extraction (user might not need all tags)
 
 completion:
