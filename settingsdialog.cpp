@@ -64,6 +64,7 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
     this->variables << Variable::instance()->bind( "overrideTheme", this->ui->overrideCheck );
     this->variables << Variable::instance()->bind( "databasePath", this->ui->pathEdit );
     this->variables << Variable::instance()->bind( "theme", this->ui->themeCombo );
+    this->variables << Variable::instance()->bind( "alwaysOnTop", this->ui->onTopCheck );
 }
 
 /**

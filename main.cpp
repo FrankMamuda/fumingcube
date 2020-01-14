@@ -179,6 +179,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::instance()->add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
 
     // read configuration
     XMLTools::instance()->read();
@@ -282,6 +283,7 @@ int main( int argc, char *argv[] ) {
     }
 
     // show main window
+    MainWindow::instance()->setWindowFlag( Qt::WindowStaysOnTopHint, Variable::instance()->isEnabled( "alwaysOnTop" ));
     MainWindow::instance()->show();
     MainWindow::instance()->scrollToBottom();
 

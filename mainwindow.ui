@@ -136,7 +136,8 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset theme="info"/>
+    <iconset theme="info">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>About</string>

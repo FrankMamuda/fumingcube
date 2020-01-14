@@ -7,14 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>334</width>
-    <height>97</height>
+    <height>121</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="settings"/>
+   <iconset theme="settings">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -77,6 +78,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="onTopCheck">
+     <property name="text">
+      <string>Always on top (on restart)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="closeButton">
      <property name="toolTip">
       <string>Close the settings dialog</string>
@@ -85,7 +93,8 @@
       <string>Close</string>
      </property>
      <property name="icon">
-      <iconset theme="close"/>
+      <iconset theme="close">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
    </item>

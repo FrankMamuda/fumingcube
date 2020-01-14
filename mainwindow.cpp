@@ -156,7 +156,7 @@ void MainWindow::closeEvent( QCloseEvent *event ) {
  * @brief MainWindow::on_actionSettings_triggered
  */
 void MainWindow::on_actionSettings_triggered() {
-    SettingsDialog().exec();
+    SettingsDialog( this ).exec();
 }
 
 /**
@@ -165,3 +165,4 @@ void MainWindow::on_actionSettings_triggered() {
 void MainWindow::on_actionAbout_triggered() {
     About( this ).exec();
 }
+
