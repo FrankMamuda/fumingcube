@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  * @param parent
  * @param px
  */
-ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &preferredWidth ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
+ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &preferredWidth, bool view ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
     QPixmap scaledPixmap( pixmap );
 
     if ( preferredWidth > 0 )
@@ -53,6 +53,15 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &prefe
     this->ui->pixmapLabel->setPixmap( scaledPixmap );
     this->ui->pixmapLabel->setFixedSize( scaledPixmap.width(), scaledPixmap.height());
     this->layout()->setSizeConstraint( QLayout::SetFixedSize );
+
+    if ( view ) {
+        this->ui->sizeSlider->hide();
+        this->ui->labelScale->hide();
+        this->ui->percentLabel->hide();
+        this->ui->buttonBox->setStandardButtons( QDialogButtonBox::Close );
+        this->setWindowTitle( "" );
+        return;
+    }
 
     // setup scaling slider as lambda
     auto scalePixmap = [ this, scaledPixmap ]( int value ) {

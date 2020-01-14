@@ -23,6 +23,7 @@
 #include "main.h"
 #include "main.h"
 #include "mainwindow.h"
+#include "property.h"
 #include "reagent.h"
 #include "script.h"
 #include "tag.h"

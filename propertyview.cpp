@@ -24,6 +24,7 @@
 #include <QHeaderView>
 #include "property.h"
 #include "propertydock.h"
+#include "tag.h"
 
 /**
  * @brief PropertyView::PropertyView
@@ -43,12 +44,44 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
         if ( oldWidth == newWidth )
             return;
 
+        this->resizeTimer.start( 200 );
+        this->m_resizeInProgress = true;
         if ( column == Property::Name )
             this->resizeToContents();
     } );
 
     this->horizontalHeader()->show();
-    //this->resizeToContents();
+    //this->resizeRowsToContents();
+
+    // setup timer
+    this->resizeTimer.setSingleShot( true );
+    this->resizeTimer.connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
+        this->m_resizeInProgress = false;
+
+        // what this does is:
+        //   0) runs when column resize has been finished (200 msec)
+        //   1) finds all formulas or other pixmaps
+        //   2) removes them from document cache
+        //   3) forces propertyView to resize, thus recreating missing documents
+        //      a) here pixmaps are rescaled if required and stored into pixmap cache
+        //      b) loaded from pixmap cache and displayed
+        // all this is done to resolve performace issues in handling large pixmaps
+        for ( int y = 0; y < Property::instance()->count(); y++ ) {
+            const Row row = Property::instance()->row( y );
+            const Id tagId = Property::instance()->tagId( row );
+            const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag ) : false;
+
+            if ( !pixmapTag )
+                continue;
+
+            const QModelIndex index( Property::instance()->index( y, Property::PropertyData ));
+            if ( this->delegate->documentMap.contains( index ))
+                this->delegate->documentMap.remove( index );
+
+            this->update( index );
+        }
+        this->resizeRowsToContents();
+    } );
 }
 
 /**

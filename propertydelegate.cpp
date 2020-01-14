@@ -26,6 +26,11 @@
 #include "tag.h"
 #include "variable.h"
 #include "imageutils.h"
+#include "cache.h"
+#include "reagent.h"
+#include "reagentmodel.h"
+#include "reagentdock.h"
+#include "propertyview.h"
 //#include "nfpawidget.h"
 #include <QPainter>
 #include <QTextDocument>
@@ -41,7 +46,7 @@
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
-void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {
+void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {    
     // reuse document from cache if any
     if ( this->documentMap.contains( index ) || !index.isValid())
         return;
@@ -50,47 +55,111 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     const Row row = Property::instance()->row( index );
     const QVariant data( Property::instance()->propertyData( row ));
     const Id tagId = Property::instance()->tagId( row );
+    const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag ) : false;
+    const PropertyView *view( qobject_cast<PropertyView*>( this->parent()));
 
     // create a new document
     QTextDocument *document( new QTextDocument());
 
-    bool pixmap = false;
-    if ( tagId != Id::Invalid )
-        pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
-
     // special handling of pixmaps
-    if ( pixmap && index.column() == Property::PropertyData ) {
-        QByteArray pixmapData( data.toByteArray());
-        QPixmap propertyPixmap;
-        propertyPixmap.loadFromData( pixmapData );
+    if ( pixmapTag && index.column() == Property::PropertyData ) {
+        if ( !view->isResizeInProgress()) {
+            QSize scaledSize;
+            QByteArray pixmapData;
 
-        // NOTE: experimental dark mode converter
-        const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
-        if ( darkMode && Tag::instance()->type( tagId ) == Tag::Formula ) {
-            if ( !this->cache.contains( pixmapData )) {
-                propertyPixmap = ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( propertyPixmap ));
-                QByteArray replacedData;
-                QBuffer buffer( &replacedData );
-                buffer.open( QIODevice::WriteOnly );
-                propertyPixmap.save( &buffer, "PNG" );
-                buffer.close();
+            auto setupPixmap = [ this, data, tagId, &scaledSize, &pixmapData ]() {
+                // get pixmap data and calculate a quick checksum for cache access
+                const QByteArray storedData( data.toByteArray());
+                const quint32 checksum = Cache::checksum( storedData.constData(), static_cast<size_t>( storedData.length()));
 
-                this->cache[pixmapData] = replacedData;
-                pixmapData = replacedData;
-            } else {
-                pixmapData = this->cache[pixmapData];
-            }
+                // get sectionWidth (property value column width)
+                const int sectionWidth = PropertyDock::instance()->sectionSize( Property::PropertyData );
+
+                // get original pixmap width either by loading from widthCache or by loading pixmap
+                QSize originalSize;
+                QPixmap pixmap;
+                if ( this->sizeCache.contains( checksum )) {
+                    // get width from cache
+                    originalSize = this->sizeCache[checksum];
+                } else {
+                    if ( !pixmap.loadFromData( qAsConst( storedData )))
+                        return false;
+
+                    // get width from pixmap and store into cache
+                    originalSize = pixmap.size();
+                    this->sizeCache[checksum] = originalSize;
+                }
+
+                // calculate the preferred with (to fit property value column)
+                const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth : originalSize.width();
+                const int scaledHeight = static_cast<int>(( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) * static_cast<qreal>( originalSize.height()));
+                scaledSize = QSize( scaledWidth, scaledHeight );
+
+                // generateMipMap lambda - downscales, inverts and crops pixmap
+                auto generateMipMap = [ this, /*scaledWidth,*/ checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
+                    if ( pixmap.isNull()) {
+                        if ( !pixmap.loadFromData( qAsConst( storedData )))
+                            return false;
+                    }
+
+                    // invert and autocrop it if necessary
+                    if ( Tag::instance()->type( tagId ) == Tag::Formula ) {
+                        pixmap = ImageUtils::autoCropPixmap( qAsConst( pixmap ));
+                        if ( Variable::instance()->isEnabled( "darkMode" ))
+                            pixmap = ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( qAsConst( pixmap )));
+                    }
+
+                    // FAST downscale pixmap
+                    if ( scaledSize.width() * 2 < originalSize.width())
+                        pixmap = pixmap.scaled( QSize( scaledSize.width() * 2, scaledSize.height() * 2 ), Qt::IgnoreAspectRatio, Qt::FastTransformation );
+
+                    // downscale pixmap
+                    pixmap = pixmap.scaled( qAsConst( scaledSize ), Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
+                    //qDebug() << "RECACHE with size" << scaledWidth << "ORIGINAL" << originalSize.width();
+
+                    // convert it back to buffer
+                    QBuffer buffer( &pixmapData );
+                    buffer.open( QIODevice::WriteOnly );
+                    pixmap.save( &buffer, "PNG" );
+                    buffer.close();
+
+                    // insert data into the cache
+                    this->cache[checksum][scaledSize.width()] = pixmapData;
+                    return true;
+                };
+
+                // check for pre-cached pixmaps with this scaledWidth, if none are available - make them
+                if ( this->cache.contains( checksum )) {
+                    if ( this->cache[checksum].contains( scaledSize.width())) {
+                        pixmapData = this->cache[checksum][scaledSize.width()];
+                        //qDebug() << "CACHE PASS" << checksum;
+                    } else {
+                        if ( !generateMipMap())
+                            return false;
+                    }
+                } else {
+                    if ( !generateMipMap())
+                        return false;
+                }
+
+                if ( scaledSize.isEmpty())
+                    return false;
+
+                if ( pixmapData.isEmpty())
+                    return false;
+
+                return true;
+            };
+
+
+            // embed pixmap in html
+            if ( setupPixmap())
+                document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( scaledSize.width()).arg( scaledSize.height()).arg( pixmapData.toBase64().constData()));
         }
-
-        // scale pixmap to fit property view value column
-        const qreal aspect = static_cast<qreal>( propertyPixmap.height()) / static_cast<qreal>( propertyPixmap.width());
-        const int preferredWidth = qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), propertyPixmap.width());
-        const int preferredHeight = static_cast<int>( preferredWidth * aspect );
-        document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( preferredWidth ).arg( preferredHeight ).arg( pixmapData.toBase64().constData()));
     } else {
         QString html;
 
-        if ( tagId == Id::Invalid || pixmap ) {
+        if ( tagId == Id::Invalid || pixmapTag ) {
             // custom properties however do display their names
             html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
         } else {
@@ -102,7 +171,6 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
         document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( qAsConst( html )));
     }
 
-    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
     document->setDocumentMargin( 2 );
     document->setTextWidth( view != nullptr ? static_cast<int>( view->columnWidth( index.column())) : 128 );
     document->setTextWidth( document->idealWidth());
@@ -150,7 +218,16 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @param index
  * @return
  */
-QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
+QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {    
+    // prevents caching before the model initializes
+    const Row row = Property::instance()->row( index );
+    if ( row == Row::Invalid )
+        return QSize();
+
+    const Id reagentId = Variable::instance()->value<Id>( "reagentDock/selection" );
+    if ( reagentId == Id::Invalid || reagentId != Property::instance()->reagentId( row ))
+        return QSize();
+
     // setup html document
     this->setupDocument( index, item.font );
     if ( !this->documentMap.contains( index ))

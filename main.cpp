@@ -49,7 +49,7 @@
  TODO:
 
 reagents:
- - richtext for names?
+ - richtext for names (currently not feasible)
  - multiple aliases?
  - groups and sorting (with drag and drop; reagents can be in multiple groups)
    Inorganic reagents
@@ -59,6 +59,9 @@ reagents:
  - up down arrow in dock does not change index (is this the intended behaviour)
  - sort alphabetically (currently broken)
  - fix ctrl-f (does not clear filter when search is turned off)
+ - option to duplicate reagent?
+ - renaming should restore index
+ - better yet -> store all opened nodes
 
 properties:
  - for now we use built in property extractor from PubChem
@@ -70,7 +73,6 @@ properties:
  - gray out properties (with a tag) that have been already set
  - script editing in tag dialog
  - must remove orphaned properties on tag removal
- - allow replacement of Formula property
  - state property
  - fetch 'other names' such as IUPAC name
  - add multiline edit option in textual properties (tagged, not custom)
@@ -98,16 +100,13 @@ scripting:
  - implement ans (history), Avogadro constant, etc.
  - fix ** comments in syntax highlighter
  - clickable calculator references (opens corresponding reagent)
+ - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
+   in that order; useful when assay is not defined)
 
 settings:
  - option to change syntax highlighter (and font size) (partially supported)
 
 misc:
- - store images (formulas) fullsize but rescale in property view
-   this could be used for special props (add custom property -> image )
-   this however causes a performance penalty while resizing property
-   view. one option would be to use a precached image or sacrifice quality
-   with fast transform
  - store variables (for example F = molarMasss( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate

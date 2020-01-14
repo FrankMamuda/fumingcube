@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,5 +44,6 @@ private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
 
 private:
-    mutable QMap<QByteArray, QByteArray> cache;
+    mutable QMap<quint32, QMap<int, QByteArray>> cache;
+    mutable QMap<quint32, QSize> sizeCache;
 };

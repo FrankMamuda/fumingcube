@@ -43,3 +43,38 @@ QVariant Cache::data( const Cache::Types &type, const QString &key ) const {
     // STUB
     return QVariant();
 }
+
+/**
+ * @brief Cache::checksum
+ * @param data
+ * @param len
+ * @return
+ */
+quint32 Cache::checksum( const char *data, size_t len ) {
+    const quint32 m = 0x5bd1e995, r = 24;
+    quint32 h = 0, w;
+    const char *l = data + len;
+
+    while ( data + 4 <= l ) {
+        w = *( reinterpret_cast<const quint32*>( data ));
+        data += 4;
+        h += w;
+        h *= m;
+        h ^= ( h >> 16 );
+    }
+
+    switch ( l - data ) {
+    case 3:
+        h += static_cast<quint32>( data[2] << 16 );
+
+    case 2:
+        h += static_cast<quint32>( data[1] << 8 );
+
+    case 1:
+        h += static_cast<quint32>( data[0] );
+        h *= m;
+        h ^= ( h >> r );
+        break;
+    }
+    return h;
+}

@@ -36,6 +36,7 @@ public:
 
     static Cache *instance() { static Cache *instance( new Cache()); return instance; }
     QVariant data( const Types &type, const QString &key ) const;
+    static quint32 checksum( const char* data, size_t len );
 
 private:
     explicit Cache();

@@ -62,7 +62,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
         // update the match list
         this->matches = this->model->setupModelData( filter );
 
-        // if list empty, resert currentMatch and clear selection
+        // if list empty, reset currentMatch and clear selection
         if ( this->matches.isEmpty()) {
             this->currentMatch = Id::Invalid;
             this->select( QModelIndex());
@@ -164,10 +164,13 @@ bool ReagentDock::checkForDuplicates(const QString &name, const QString &alias, 
  * @param index
  */
 void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
+    //if ( this->ui->reagentView->currentIndex() == index )
+    //    return;
+
     // if reagent is invalid, display no properties
     if ( !index.isValid()) {
         Property::instance()->setFilter( "false" );
-        Variable::instance()->setValue<QVariantList>( "reagentDock/selection", QVariantList());
+        Variable::instance()->setInteger( "reagentDock/selection", -1 );
         return;
     }
 
@@ -175,6 +178,9 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
     const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
     const Id reagentId = item->data( TreeItem::Id ).value<Id>();
     const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+
+    // store last selection in a variabe
+    Variable::instance()->setInteger( "reagentDock/selection", static_cast<int>( reagentId ));
 
     // apply sql filter
     Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 ) or ( %1=%3 and %1>-1 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
@@ -190,9 +196,6 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
 
     // resize the property view to fit contents
     PropertyDock::instance()->updateView();
-
-    // store last selection in a variabe
-    Variable::instance()->setInteger( "reagentDock/selection", static_cast<int>( reagentId ));
 }
 
 /**

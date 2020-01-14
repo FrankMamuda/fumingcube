@@ -22,7 +22,6 @@
  * includes
  */
 #include "syntaxhighlighter.h"
-#include "reagentmodel.h"
 #include "theme.h"
 #include <QLineEdit>
 #include <QMainWindow>

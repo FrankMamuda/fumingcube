@@ -306,7 +306,8 @@ void PropertyDock::on_addPropButton_clicked() {
             QByteArray bytes;
             QBuffer buffer( &bytes );
             buffer.open( QIODevice::WriteOnly );
-            QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
+            //QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
+            QPixmap( pixmap ).save( &buffer, "PNG" );
             buffer.close();
 
             bool ok;
@@ -354,7 +355,39 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         } );
     }
 
-    if ( type != Tag::Formula && type != Tag::NoType )
+    if ( type == Tag::Formula || tagId == PixmapTag ) {
+        menu.addAction( this->tr( "View" ), [ this, row ]() {
+            QPixmap pixmap;
+
+            if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
+                ImageUtils iu( this, qAsConst( pixmap ), 0, true );
+                iu.setWindowFlags( Qt::Dialog | Qt::Tool );
+                iu.exec();
+            }
+        } );
+
+        menu.addAction( this->tr( "Replace" ), [ this, row ]() {
+            // FIXME: dup code
+            const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
+            if ( fileName.isEmpty())
+                return;
+
+            // load image
+            const QPixmap pixmap( fileName );
+            if ( !pixmap.isNull()) {
+                QByteArray bytes;
+                QBuffer buffer( &bytes );
+                buffer.open( QIODevice::WriteOnly );
+                QPixmap( pixmap ).save( &buffer, "PNG" );
+                buffer.close();
+
+                Property::instance()->setPropertyData( row, bytes );
+                this->updateView();
+            }
+        } );
+    }
+
+    if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
         menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()));
 
     if ( tagId != Id::Invalid ) {

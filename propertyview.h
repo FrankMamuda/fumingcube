@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
  * includes
  */
 #include "propertydelegate.h"
-
 #include <QObject>
 #include <QTableView>
+#include <QTimer>
 
 /**
  * @brief The PropertyView class
@@ -35,6 +35,7 @@ class PropertyView : public QTableView {
 public:
     PropertyView( QWidget *parent = nullptr );
     ~PropertyView() override { delete this->delegate; }
+    bool isResizeInProgress() const { return this->m_resizeInProgress; }
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;
@@ -45,4 +46,6 @@ public slots:
 
 private:
     PropertyDelegate *delegate = nullptr;
+    QTimer resizeTimer;
+    bool m_resizeInProgress = false;
 };
