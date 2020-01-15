@@ -64,11 +64,15 @@ QJSValue Script::evaluate( const QString &script ) {
     // the other option (mapping globalObject properties via wrapper function is
     // also not the preferred way, since we also have to track tag updates)
     if ( !result.isError()) {
+        // TODO: make a global static
         QStringList functions;
         QSqlQuery query;
         query.exec( QString( "select %1 from %2 where %1 not null" ).arg( Tag::instance()->fieldName( Tag::Function )) .arg( Tag::instance()->tableName()));
-        while ( query.next())
-            functions << query.value( 0 ).toString();
+        while ( query.next()) {
+            const QString functionName( query.value( 0 ).toString());
+            if ( !functionName.isEmpty())
+                functions << functionName;
+        }
 
         // do replacement magic:
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )

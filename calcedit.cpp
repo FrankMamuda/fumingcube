@@ -36,15 +36,18 @@
  */
 bool CalcEdit::completeCommand() {
     // NOTE: lots of duplicate code, but it works for now
-
+    // TODO: make a global static
     QStringList functions;
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %2 not null" )
                 .arg( Tag::instance()->fieldName( Tag::ID ))
                 .arg( Tag::instance()->fieldName( Tag::Function ))
                 .arg( Tag::instance()->tableName()));
-    while ( query.next())
-        functions << query.value( 1 ).toString();
+    while ( query.next()) {
+        const QString functionName( query.value( 1 ).toString());
+        if ( !functionName.isEmpty())
+            functions << functionName;
+    }
 
     const QString functionExpression( functions.join( "|" ));
     QString left( this->text().left( this->cursorPosition()));

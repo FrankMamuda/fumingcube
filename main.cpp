@@ -92,7 +92,6 @@ scripting:
  - check API
  - implement ans (history), Avogadro constant, etc.
  - fix ** comments in syntax highlighter
- - clickable calculator references (opens corresponding reagent)
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
    in that order; useful when assay is not defined)
 

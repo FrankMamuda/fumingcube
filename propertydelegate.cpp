@@ -125,6 +125,8 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                     // insert data into the cache
                     this->cache[checksum][scaledSize.width()] = pixmapData;
+                   // qDebug() << "TO CACHE";
+
                     return true;
                 };
 
@@ -232,7 +234,15 @@ QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModel
         return QSize();
 
     const Id reagentId = Variable::instance()->value<Id>( "reagentDock/selection" );
-    if ( reagentId == Id::Invalid || reagentId != Property::instance()->reagentId( row ))
+    const Id parentId = Reagent::instance()->parentId( reagentId );
+    const Id propertyParentId = Property::instance()->reagentId( row );
+    if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
+        return QSize();
+
+    if ( parentId == Id::Invalid && propertyParentId != reagentId )
+        return QSize();
+
+    if ( parentId != Id::Invalid && ( propertyParentId != reagentId && propertyParentId != parentId ))
         return QSize();
 
     // setup html document

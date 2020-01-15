@@ -50,6 +50,7 @@ public slots:
     void updateView();
     void clearDocumentCache();
     void setSpecialWidgets();
+    void setCurrentIndex( const QModelIndex &index );
 
 private slots:
     void on_addPropButton_clicked();

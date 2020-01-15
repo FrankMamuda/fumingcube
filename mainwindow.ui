@@ -34,7 +34,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QTextEdit" name="calcView">
+     <widget class="QTextBrowser" name="calcView">
       <property name="minimumSize">
        <size>
         <width>256</width>
@@ -45,7 +45,10 @@
        <bool>true</bool>
       </property>
       <property name="textInteractionFlags">
-       <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+       <set>Qt::TextBrowserInteraction</set>
+      </property>
+      <property name="openLinks">
+       <bool>false</bool>
       </property>
      </widget>
     </item>

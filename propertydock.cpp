@@ -520,6 +520,14 @@ void PropertyDock::setSpecialWidgets() {
 }
 
 /**
+ * @brief PropertyDock::setCurrentIndex
+ * @param index
+ */
+void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
+    this->ui->propertyView->setCurrentIndex( index );
+}
+
+/**
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
