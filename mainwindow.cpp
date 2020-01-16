@@ -33,6 +33,7 @@
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
+#include <QTimer>
 
 /**
  * @brief MainWindow::MainWindow
@@ -57,18 +58,24 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->ui->calcView->setFont( qAsConst( font ));
 
     // resture previous calculations
+    this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; }" );
     this->ui->calcView->setHtml( Variable::uncompressedString( Variable::instance()->string( "calculator/history" )));
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
 
-
-    this->ui->calcView->connect( this->ui->calcView, &QTextBrowser::anchorClicked, []( const QUrl &url ) {
+    this->ui->calcView->connect( this->ui->calcView, &QTextBrowser::anchorClicked, [ this ]( const QUrl &url ) {
         const QStringList args( url.toString().split( ";" ));
         if ( args.count() < 2 || args.count() > 3 )
             return;
 
-        // get all arguments - property name, reagent name and batch ma,e
+        // resuse result
+        if ( !QString::compare( args.first(), "ans" )) {
+            this->insertCommand( args.at( 1 ) + " " );
+            return;
+        }
+
+        // get all arguments - property name, reagent name and batch name
         const QString property( args.at( 0 ));
         const QString reagent( args.at( 1 ));
         const QString batch( args.count() == 3 ? args.at( 2 ) : "" );
@@ -115,6 +122,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
             return;
 
         PropertyDock::instance()->setCurrentIndex( index );
+
+        // add an option to paste reference to calculator
+        QMenu menu( this->ui->calcView );
+        menu.addAction( this->tr( "Paste" ), [ this, property, reagent, batch ]() {
+            this->insertCommand( QString( "%1( \"%2\"%3 )" ).arg( property ).arg( reagent ).arg( batch.isEmpty() ? "" : ", \"" + batch + "\"" ));
+        } );
+        QTimer::singleShot( 2000, &menu, SLOT( close()));
+        menu.exec( QCursor::pos());
     } );
 }
 
@@ -211,23 +226,38 @@ void MainWindow::appendToCalculator( const QString &line ) {
         // perform strring replacement
         int offset = 0;
         foreach ( const Match &match, matches ) {
-           const QString link( QString( "<a href=\"%1\" style=\"text-decoration:none;\">" ).arg( match.args ));
-           replacedLine.insert( match.start + offset, link );
-           offset += link.length();
-           replacedLine.insert( match.end + offset, "</a>" );
-           offset += 4;
+            const QString link( QString( "<a href=\"%1\">" ).arg( match.args ));
+            replacedLine.insert( match.start + offset, link );
+            offset += link.length();
+            replacedLine.insert( match.end + offset, "</a>" );
+            offset += 4;
         }
 
         // finally append the end result to the calculator
-        // NOTE: must be wrapped in <p></p>, otherwise rogue anchors appear (I don't have the slightest idea why)
-        //
-        if ( !result.isError())
-            this->ui->calcView->append( "<p style=\"margin: 0; padding: 0\">" + replacedLine + "</p>" );
-        this->ui->calcView->append(( !result.isError() ? "= " : "" ) + string + "\n" );
+        // NOTE: must be wrapped in <span></span>
+       // if ( !result.isError())
+        this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
+        this->ui->calcView->append( QString( "<span>" ) + ( !result.isError() ? "= " : "" ) + QString( "<a href=\"ans;%1\">%1<\a>" ).arg( string ) + "</span>" + "<br>" );
     }
 
     // ensure the result is visible
     this->scrollToBottom();
+}
+
+/**
+ * @brief MainWindow::insertCommand
+ * @param command
+ */
+void MainWindow::insertCommand( const QString &command ) {
+    QLineEdit *calc( this->ui->calcEdit );
+    if ( calc->text().isEmpty())
+        calc->setText( command );
+    else
+        calc->insert( " " + command );
+
+    // must activate MainWindow first
+    this->activateWindow();
+    calc->setFocus();
 }
 
 /**

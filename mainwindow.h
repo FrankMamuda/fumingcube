@@ -47,6 +47,7 @@ public:
 
 public slots:
     void appendToCalculator( const QString &line );
+    void insertCommand( const QString &command );
     void saveHistory();
     void scrollToBottom();
     void setTheme( Theme *theme ) { this->m_theme = theme; }

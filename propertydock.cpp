@@ -409,17 +409,10 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     if ( tagId != Id::Invalid ) {
         const QString functionName( Tag::instance()->function( tagId ));
         if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
-            auto paste = [ this, row, tagId ]() {
-                QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
+            auto paste = [ row, tagId ]() {
+                // paste
                 const QString value( QString::number( Property::instance()->propertyData( row ).toReal() *  Tag::instance()->scale( tagId )));
-                if ( calc->text().isEmpty())
-                    calc->setText( value );
-                else
-                    calc->insert( " " + value );
-
-                // must activate MainWindow first
-                MainWindow::instance()->activateWindow();
-                calc->setFocus();
+                MainWindow::instance()->insertCommand( value );
             };
 
             // tag.
@@ -619,15 +612,8 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
             parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
         }
 
-        QLineEdit *calc( qobject_cast<MainWindow*>( this->parentWidget())->calculatorWidget());
+        // paste
         const QString completed( QString( "%1( %2 ) " ).arg( functionName ).arg( qAsConst( parents )));
-        if ( calc->text().isEmpty())
-            calc->setText( completed );
-        else
-            calc->insert( " " + completed );
-
-        // must activate MainWindow first
-        MainWindow::instance()->activateWindow();
-        calc->setFocus();
+        MainWindow::instance()->insertCommand( completed );
     }
 }
