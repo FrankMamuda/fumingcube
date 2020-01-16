@@ -71,7 +71,7 @@ public:
     QString string( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<QString>( key, defaultValue ); }
 
     static QString compressedString( const QString &string ) { return qCompress( QByteArray( string.toUtf8().constData())).toBase64().constData(); }
-    static QString uncompressedString( const QString &string ) { return qUncompress( QByteArray::fromBase64( string.toUtf8().constData())).constData(); }
+    static QString uncompressedString( const QString &string ) { if ( string.isEmpty()) return QString(); return qUncompress( QByteArray::fromBase64( string.toUtf8().constData())).constData(); }
 
     template<typename T>
     void updateConnections( const QString &key, const T &value ) {

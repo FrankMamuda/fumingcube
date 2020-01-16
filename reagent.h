@@ -54,6 +54,7 @@ public:
     ~Reagent() override = default;
     Row add( const QString &name , const QString &alias, const Id &parentId = Id::Invalid );
     QList<Row> children( const Row &row ) const;
+    QList<Id> labelIds( const Row &row ) const;
 
     // initialize field setters and getters
     INITIALIZE_FIELD( Id,      ID,       id )

@@ -28,9 +28,11 @@
 #include "xmltools.h"
 #include "property.h"
 #include "label.h"
+#include "labelset.h"
 #include "tag.h"
 #include "script.h"
 #include "reagentdock.h"
+#include "labeldock.h"
 #include "theme.h"
 #include "reagentdock.h"
 #include "propertydock.h"
@@ -220,6 +222,7 @@ int main( int argc, char *argv[] ) {
         success &= Database::instance()->add( Property::instance());
         success &= Database::instance()->add( Tag::instance());
         success &= Database::instance()->add( Label::instance());
+        success &= Database::instance()->add( LabelSet::instance());
 
         if ( !Tag::instance()->count())
             Tag::instance()->populate();
@@ -291,14 +294,17 @@ int main( int argc, char *argv[] ) {
     // fixes issues with dockwidgets on linux
     ReagentDock::instance()->setFloating( ReagentDock::instance()->isFloating());
     PropertyDock::instance()->setFloating( PropertyDock::instance()->isFloating());
+    LabelDock::instance()->setFloating( ReagentDock::instance()->isFloating());
     ReagentDock::instance()->setVisible( ReagentDock::instance()->isVisible());
     PropertyDock::instance()->setVisible( PropertyDock::instance()->isVisible());
+    LabelDock::instance()->setVisible( PropertyDock::instance()->isVisible());
 #endif
 
     // set initial sizes
     if ( Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
-        MainWindow::instance()->resize( 1024, 512 );
-        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << PropertyDock::instance() << ReagentDock::instance(), QList<int>() << 256 << 256, Qt::Horizontal );
+        MainWindow::instance()->resize( 1024, 650 );
+        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << PropertyDock::instance() << ReagentDock::instance() << LabelDock::instance(), QList<int>() << 300 << 210 << 210, Qt::Horizontal );
+        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << LabelDock::instance(), QList<int>() << 96, Qt::Vertical );
     }
 
     // restore last reagent selection

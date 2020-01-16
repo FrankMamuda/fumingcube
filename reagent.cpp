@@ -22,6 +22,7 @@
 #include "reagent.h"
 #include "field.h"
 #include "database.h"
+#include "labelset.h"
 #include <QSqlQuery>
 
 /**
@@ -61,6 +62,33 @@ QList<Row> Reagent::children( const Row &row ) const {
     while ( query.next()) {
         const Id id = query.value( 0 ).value<Id>();
         list << this->row( id );
+    }
+
+    return list;
+}
+
+/**
+ * @brief Reagent::labelIds
+ * @param row
+ * @return
+ */
+QList<Id> Reagent::labelIds( const Row &row ) const {
+    QList<Id> list;
+
+    Id reagentId = this->id( row );
+    const Id parentId = this->parentId( row );
+    if ( parentId != Id::Invalid )
+        reagentId = parentId;
+
+    QSqlQuery query;
+    query.exec( QString( "select %1 from %2 where %3=%4" )
+                .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ))
+                .arg( LabelSet::instance()->tableName())
+                .arg( LabelSet::instance()->fieldName( LabelSet::ReagentId ))
+                .arg( static_cast<int>( qAsConst( reagentId ))));
+    while ( query.next()) {
+        const Id id = query.value( 0 ).value<Id>();
+        list << id;
     }
 
     return list;

@@ -23,6 +23,7 @@
 #include "ui_mainwindow.h"
 #include "propertydock.h"
 #include "reagentdock.h"
+#include "labeldock.h"
 #include "variable.h"
 #include "dockwidget.h"
 #include "script.h"
@@ -44,15 +45,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // restore geometry, state dock widgets (reagent and property)
     this->addDockWidget( Qt::LeftDockWidgetArea, ReagentDock::instance());
+    this->addDockWidget( Qt::LeftDockWidgetArea, LabelDock::instance());
     this->addDockWidget( Qt::RightDockWidgetArea, PropertyDock::instance());
     ReagentDock::instance()->setup( this->ui->actionReagents );
     PropertyDock::instance()->setup( this->ui->actionProperties );
+    LabelDock::instance()->setup( this->ui->actionLabels );
 
     if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
         this->restoreGeometry( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/geometry" )));
         this->restoreState( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/state" )));
         this->restoreDockWidget( ReagentDock::instance());
         this->restoreDockWidget( PropertyDock::instance());
+        this->restoreDockWidget( LabelDock::instance());
     }
 
     // slightly increase font in calculator view

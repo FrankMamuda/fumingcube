@@ -34,6 +34,8 @@
 #include "propertydock.h"
 #include "reagentdialog.h"
 #include "extractiondialog.h"
+#include "label.h"
+#include "labelset.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -271,6 +273,34 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
         menu.addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( TreeItem::Id ).toInt()) : parentId  ));
         menu.addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->data( TreeItem::Name ).toString()); } );
+
+        if ( parentId == Id::Invalid ) {
+            QMenu *labels( menu.addMenu( this->tr( "Labels" )));
+            for ( int y = 0; y < Label::instance()->count(); y++ ) {
+                const Row row = static_cast<Row>( y );
+                const Id menuLabelId = Label::instance()->id( row );
+                const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+
+                const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
+                bool hasLabel = false;
+                foreach ( const Id &labelId, labelIds ) {
+                    if ( labelId == menuLabelId ) {
+                        hasLabel = true;
+                        break;
+                    }
+                }
+
+                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ menuLabelId, reagentId, hasLabel ]() {
+                    if ( hasLabel )
+                        LabelSet::instance()->remove( menuLabelId, reagentId );
+                    else
+                        LabelSet::instance()->add( menuLabelId, reagentId );
+                } ));
+                action->setCheckable( true );
+                if ( hasLabel )
+                    action->setChecked( true );
+            }
+        }
     }
 
     menu.exec( this->mapToGlobal( pos ));

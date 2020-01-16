@@ -22,15 +22,13 @@
  * includes
  */
 #include "table.h"
-#include <QColor>
-#include <QPixmap>
 
 /**
- * @brief The Label class
+ * @brief The LabelSet class
  */
-class Label final : public Table {
+class LabelSet final : public Table {
     Q_OBJECT
-    Q_DISABLE_COPY( Label )
+    Q_DISABLE_COPY( LabelSet )
 
 public:
     /**
@@ -39,8 +37,8 @@ public:
     enum Fields {
         NoField = -1,
         ID,
-        Name,
-        Colour,
+        LabelId,
+        ReagentId,
 
         // count (DO NOT REMOVE)
         Count
@@ -51,26 +49,22 @@ public:
      * @brief instance
      * @return
      */
-    static Label *instance() { static Label *label( new Label()); return label; }
-    ~Label() override = default;
-    Row add( const QString &name, const QColor &colour = Qt::transparent );
+    static LabelSet *instance() { static LabelSet *labelSet( new LabelSet()); return labelSet; }
+    ~LabelSet() override = default;
+    Row add( const Id &labelId, const Id &reagentId );
+    void remove( const Id &labelId, const Id &reagentId );
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id,          ID,       id )
-    INITIALIZE_FIELD( QString,     Name,     name )
-    INITIALIZE_FIELD( QColor,      Colour,   colour )
-
-    QVariant data( const QModelIndex &index, int role ) const override;
-    QPixmap pixmap( const QColor &colour ) const;
+    INITIALIZE_FIELD( Id, ID,        id )
+    INITIALIZE_FIELD( Id,LabelId,   labelId )
+    INITIALIZE_FIELD( Id, ReagentId, reagentId )
 
 public slots:
     void removeOrphanedEntries() override;
-    void populate();
 
 private:
-    explicit Label();
-    mutable QMap<QString, QPixmap> cache;
+    explicit LabelSet();
 };
 
 // declare enums
-Q_DECLARE_METATYPE( Label::Fields )
+Q_DECLARE_METATYPE( LabelSet::Fields )

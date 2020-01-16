@@ -69,7 +69,8 @@ void Tag::populate() {
     this->add( this->tr( "Density" ),              Real, this->tr( "&nbsp;g/cm<sup>3</sup>" ), 0.001, 100.0,   1.0,  3, "density",       1.00,
                QStringList() << "Density" << QString() << "(\\d+(?:\\.\\d+)?)(?!\\)$)(\\sg\\/[\\w|\\d]+)?" );
     this->add( this->tr( "Assay" ),                Real, this->tr( "&percnt;" ),              0.0,   110.0, 100.0,  3, "assay",         0.01 );
-    // TODO: in the future this->add( this->tr( "State" ),                State );
+    // NOTE: cannot remove this right now without messing up the built-in database
+    this->add( this->tr( "State" ),                State );
     this->add( this->tr( "Analysis id" ));
     this->add( this->tr( "Loss on drying" ),       Real, this->tr( "&percnt;" ),              0.0,   1000.0,  0.0,  2, "lossOnDrying",  0.01 );
     this->add( this->tr( "HPLC purity" ),          Real, this->tr( "&percnt;" ),              0.0,    110.0, 100.0, 2, "HPLC",          0.01 );

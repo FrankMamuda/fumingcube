@@ -40,6 +40,8 @@ SOURCES += \
     ghswidget.cpp \
     imageutils.cpp \
     label.cpp \
+    labeldock.cpp \
+    labelset.cpp \
     main.cpp \
     mainwindow.cpp \
     database.cpp \
@@ -83,6 +85,8 @@ HEADERS += \
     ghswidget.h \
     imageutils.h \
     label.h \
+    labeldock.h \
+    labelset.h \
     mainwindow.h \
     database.h \
     field.h \
@@ -121,6 +125,7 @@ FORMS += \
         about.ui \
         extractiondialog.ui \
         imageutils.ui \
+        labeldock.ui \
         mainwindow.ui \
         nfpabuilder.ui \
         propertydialog.ui \

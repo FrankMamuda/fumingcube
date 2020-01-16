@@ -22,6 +22,8 @@
 #include "label.h"
 #include "field.h"
 #include "database.h"
+#include <QPixmap>
+#include <QPainter>
 #include <QSqlQuery>
 
 /**
@@ -43,6 +45,40 @@ Row Label::add( const QString &name, const QColor &colour ) {
 }
 
 /**
+ * @brief Label::data
+ * @param index
+ * @param role
+ * @return
+ */
+QVariant Label::data( const QModelIndex &index, int role ) const {
+    if ( role == Qt::DecorationRole ) {
+        const QColor colour( this->colour( static_cast<Row>( index.row())));
+        return this->pixmap( colour );
+    }
+
+    return Table::data( index, role );
+}
+
+/**
+ * @brief Label::pixmap
+ * @param colour
+ * @return
+ */
+QPixmap Label::pixmap( const QColor &colour ) const {
+    if ( this->cache.contains( colour.name()))
+        return this->cache[colour.name()];
+
+    QPixmap pixmap( 12, 8 );
+    pixmap.fill( Qt::transparent );
+    QPainter painter( &pixmap );
+    painter.setPen( Qt::transparent );
+    painter.setBrush( colour );// QColor::fromRgb( colour.red(), colour.green(), colour.blue(), 128 ));
+    painter.drawRoundedRect( QRect( 0, 0, 12, 8 ), 3, 3 );
+    this->cache[colour.name()] = pixmap;
+    return pixmap;
+}
+
+/**
  * @brief Label::removeOrphanedEntries
  */
 void Label::removeOrphanedEntries() {
@@ -53,7 +89,7 @@ void Label::removeOrphanedEntries() {
  * @brief Label::populate
  */
 void Label::populate() {
-    this->add( this->tr( "Base" ),    QColor::fromRgb( 255,   0,   0, 32 ));
-    this->add( this->tr( "Acid" ),    QColor::fromRgb( 0,   255,   0, 32 ));
-    this->add( this->tr( "Solvent" ), QColor::fromRgb( 0,     0, 255, 32 ));
+    this->add( this->tr( "Bases" ),    QColor::fromRgb( 255,   0,   0, 32 ));
+    this->add( this->tr( "Acids" ),    QColor::fromRgb( 0,   255,   0, 32 ));
+    this->add( this->tr( "Solvents" ), QColor::fromRgb( 0,     0, 255, 32 ));
 }
