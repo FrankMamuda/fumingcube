@@ -50,7 +50,7 @@ Q_DECLARE_METATYPE( Row )
 /*
  * FIELD macro generates a lowercase fieldName from field index (enum)
  */
-static const QMap<QVariant::Type,QString> _fieldTypes {{ QVariant::Int, "integer" }, { QVariant::Double, "real" }, { QVariant::String, "text" }, { QVariant::ByteArray, "blob" }};
+static const QMap<QVariant::Type,QString> _fieldTypes {{ QVariant::Int, "integer" }, { QVariant::Double, "real" }, { QVariant::String, "text" }, { QVariant::Color, "colour" }, { QVariant::ByteArray, "blob" }};
 #define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type]
 #define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type], true
 #define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QVariant::Int, "integer primary key", true, true

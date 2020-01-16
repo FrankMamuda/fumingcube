@@ -41,6 +41,7 @@ const static int null = 0;
 #else
 const static  __attribute__((unused)) int null = 0;
 #endif
+static const constexpr int API = 1;
 };
 
 /**

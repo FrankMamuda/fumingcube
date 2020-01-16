@@ -47,10 +47,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->addDockWidget( Qt::RightDockWidgetArea, PropertyDock::instance());
     ReagentDock::instance()->setup( this->ui->actionReagents );
     PropertyDock::instance()->setup( this->ui->actionProperties );
-    this->restoreGeometry( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/geometry" )));
-    this->restoreState( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/state" )));
-    this->restoreDockWidget( ReagentDock::instance());
-    this->restoreDockWidget( PropertyDock::instance());
+
+    if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
+        this->restoreGeometry( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/geometry" )));
+        this->restoreState( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/state" )));
+        this->restoreDockWidget( ReagentDock::instance());
+        this->restoreDockWidget( PropertyDock::instance());
+    }
 
     // slightly increase font in calculator view
     QFont font( this->ui->calcView->font());
@@ -59,7 +62,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // resture previous calculations
     this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; }" );
-    this->ui->calcView->setHtml( Variable::uncompressedString( Variable::instance()->string( "calculator/history" )));
+    this->ui->calcView->append( Variable::uncompressedString( Variable::instance()->string( "calculator/history" )));
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
@@ -150,11 +153,19 @@ MainWindow::~MainWindow() {
 }
 
 /**
+ * @brief MainWindow::commandWidget
+ * @return
+ */
+QLineEdit *MainWindow::commandWidget() {
+    return this->ui->calcEdit;
+}
+
+/**
  * @brief MainWindow::calculatorWidget
  * @return
  */
-QLineEdit *MainWindow::calculatorWidget() {
-    return this->ui->calcEdit;
+QTextBrowser *MainWindow::calculatorWidget() {
+    return this->ui->calcView;
 }
 
 /**

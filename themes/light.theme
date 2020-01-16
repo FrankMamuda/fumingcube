@@ -32,3 +32,4 @@ Reference=ff008000
 Undefined=ff808000
 Parenthesis=ff000000
 String=ff808000
+Comment=ff008000

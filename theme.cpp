@@ -179,6 +179,7 @@ void Theme::initializeSyntaxColours() {
     // set default syntax highlighter colours
     this->syntaxMap["Number"] = ( this->isDark() ? QColor::fromRgb( 102, 163, 52 ) : QColor::fromRgb( 0, 0, 128 ));
     this->syntaxMap["Operator"] = ( this->isDark() ? QColor::fromRgb( 214, 207, 154 ) : Qt::black );
+    this->syntaxMap["Comment"] = ( this->isDark() ? QColor::fromRgb( 168, 171, 176 ) : QColor::fromRgb( 0, 128, 0 ));
     this->syntaxMap["Parenthesis"] = this->syntaxMap["Operator"];
     this->syntaxMap["Keyword"] = ( this->isDark() ? QColor::fromRgb( 69, 198, 214 ) : QColor::fromRgb( 0, 103, 124 ));
     this->syntaxMap["Reference"] = ( this->isDark() ? QColor::fromRgb( 214, 149, 69 ) : QColor::fromRgb( 0, 128, 0 ));

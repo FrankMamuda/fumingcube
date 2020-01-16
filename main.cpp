@@ -27,14 +27,13 @@
 #include "variable.h"
 #include "xmltools.h"
 #include "property.h"
+#include "label.h"
 #include "tag.h"
 #include "script.h"
 #include "reagentdock.h"
 #include "theme.h"
-#ifdef Q_OS_LINUX
 #include "reagentdock.h"
 #include "propertydock.h"
-#endif
 #include <QApplication>
 #include <QDate>
 #include <QDir>
@@ -56,11 +55,16 @@ reagents:
         \_Sodium hydroxide
    Bases
         \_Sodium hydroxide
+ - or rather use labels
  - up down arrow in dock does not change index (is this the intended behaviour)
  - sort alphabetically (currently broken)
  - option to duplicate reagent?
  - renaming should restore index
  - better yet -> store all opened nodes
+
+database:
+ - check API
+ - crash on argument count mismatch
 
 properties:
  - for now we use built in property extractor from PubChem
@@ -91,7 +95,6 @@ scripting:
    property)
  - check API
  - implement ans (history), Avogadro constant, etc.
- - fix ** comments in syntax highlighter
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
    in that order; useful when assay is not defined)
 
@@ -216,9 +219,13 @@ int main( int argc, char *argv[] ) {
         success &= Database::instance()->add( Reagent::instance());
         success &= Database::instance()->add( Property::instance());
         success &= Database::instance()->add( Tag::instance());
+        success &= Database::instance()->add( Label::instance());
 
         if ( !Tag::instance()->count())
             Tag::instance()->populate();
+
+        if ( !Label::instance()->count())
+            Label::instance()->populate();
 
         return success;
     };
@@ -287,6 +294,12 @@ int main( int argc, char *argv[] ) {
     ReagentDock::instance()->setVisible( ReagentDock::instance()->isVisible());
     PropertyDock::instance()->setVisible( PropertyDock::instance()->isVisible());
 #endif
+
+    // set initial sizes
+    if ( Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
+        MainWindow::instance()->resize( 1024, 512 );
+        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << PropertyDock::instance() << ReagentDock::instance(), QList<int>() << 256 << 256, Qt::Horizontal );
+    }
 
     // restore last reagent selection
     ReagentDock::instance()->restoreIndex();

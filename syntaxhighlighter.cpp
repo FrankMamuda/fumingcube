@@ -49,6 +49,7 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
 void SyntaxHighlighter::highlightBlock( const QString &text ) {
     const QColor number( MainWindow::instance()->theme()->syntaxColour( "Number" ));
     const QColor op( MainWindow::instance()->theme()->syntaxColour( "Operator" ));
+    const QColor comment( MainWindow::instance()->theme()->syntaxColour( "Comment" ));
     const QColor parenthesis( MainWindow::instance()->theme()->syntaxColour( "Parenthesis" ));
     const QColor keyword( MainWindow::instance()->theme()->syntaxColour( "Keyword" ));
     const QColor reference( MainWindow::instance()->theme()->syntaxColour( "Reference" ));
@@ -81,7 +82,8 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
         { "\\/|\\*|\\+|\\-|\\=|\\,[^\\w]",  op                      },
         { "\".+?(?=\")\"",                  reference,  true        },
         { "\\w+Error.+",                    error,      true, true  },
-        { "\\bundefined\\b(?!\")",          undefined               }
+        { "\\bundefined\\b(?!\")",          undefined               },
+        { "\\/\\/.+",                       comment                 }
     };
 
     // add keywords
@@ -104,5 +106,28 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
             const QRegularExpressionMatch match( matchIterator.next());
             this->setFormat( match.capturedStart(), match.capturedLength(), qAsConst( format ));
         }
+    }
+
+    // handle multiline comments
+    const QRegularExpression startExpression( "/\\*" );
+    const QRegularExpression endExpression( "\\*/" );
+
+    this->setCurrentBlockState( 0 );
+    int startIndex = 0;
+    if ( this->previousBlockState() != 1 )
+        startIndex = text.indexOf( startExpression );
+
+    while ( startIndex >= 0 ) {
+        QRegularExpressionMatch endMatch;
+        const int endIndex = text.indexOf( endExpression, startIndex, &endMatch );
+        int commentLength;
+        if ( endIndex == -1 ) {
+            this->setCurrentBlockState(1);
+            commentLength = text.length() - startIndex;
+        } else {
+            commentLength = endIndex - startIndex + endMatch.capturedLength();
+        }
+        this->setFormat( startIndex, commentLength, comment );
+        startIndex = text.indexOf( startExpression, startIndex + commentLength );
     }
 }

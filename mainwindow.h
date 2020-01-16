@@ -25,6 +25,7 @@
 #include "theme.h"
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QTextBrowser>
 
 /**
  * @brief The Ui namespace
@@ -42,7 +43,8 @@ class MainWindow : public QMainWindow {
 public:
     static MainWindow *instance() { static MainWindow *instance( new MainWindow()); return instance; }
     ~MainWindow() override;
-    QLineEdit *calculatorWidget();
+    QLineEdit *commandWidget();
+    QTextBrowser *calculatorWidget();
     Theme *theme() const { return this->m_theme; }
 
 public slots:

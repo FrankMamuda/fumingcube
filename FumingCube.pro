@@ -39,6 +39,7 @@ SOURCES += \
     ghsbuilder.cpp \
     ghswidget.cpp \
     imageutils.cpp \
+    label.cpp \
     main.cpp \
     mainwindow.cpp \
     database.cpp \
@@ -81,6 +82,7 @@ HEADERS += \
     ghspictograms.h \
     ghswidget.h \
     imageutils.h \
+    label.h \
     mainwindow.h \
     database.h \
     field.h \
