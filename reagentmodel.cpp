@@ -22,6 +22,7 @@
 #include "reagentmodel.h"
 #include "reagent.h"
 #include "label.h"
+#include "labeldock.h"
 #include <QDebug>
 
 /**
@@ -101,6 +102,9 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         return item->text();
 
     if ( role == Qt::DecorationRole ) {
+        if ( !LabelDock::instance()->isVisible())
+            return QVariant();
+
         if ( !item->icon().isNull())
             return item->icon();
 
@@ -157,12 +161,6 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
 
     // make a list of matches (for search)
     QList<Id> total;
-
-    // sort here
-    // FIXME: broken
-   // Reagent::instance()->setSort( Reagent::Name, Qt::AscendingOrder );
-    //Reagent::instance()->select();
-   // Reagent::instance()->sort( Reagent::Name, Qt::AscendingOrder );
 
     // go through reagents and their batches
     for ( int y = 0; y < Reagent::instance()->count(); y++ ) {
@@ -221,11 +219,25 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
             }
         }
     }
+
     this->endResetModel();
 
     // reverse and return search results
     std::reverse( total.begin(), total.end());
     return total;
+}
+
+/**
+ * @brief ReagentModel::sort
+ * @param column
+ * @param order
+ */
+void ReagentModel::sort( int, Qt::SortOrder order ) {
+    if ( this->rootItem() == nullptr )
+        return;
+
+    emit this->layoutAboutToBeChanged();
+    this->rootItem()->sortChildren( 0, order );
 }
 
 /**
@@ -239,6 +251,18 @@ QModelIndex ReagentModel::find( const Id &id ) const {
         if ( item->data( ID ).value<Id>() == id )
             return this->itemIndexes[const_cast<QStandardItem*>( item )];
     }
+
+    return QModelIndex();
+}
+
+/**
+ * @brief ReagentModel::indexFromItem
+ * @param item
+ * @return
+ */
+QModelIndex ReagentModel::indexFromItem( QStandardItem *item ) const {
+    if ( this->itemIndexes.contains( item ))
+        return this->itemIndexes[item];
 
     return QModelIndex();
 }

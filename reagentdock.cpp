@@ -291,9 +291,10 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                 }
 
                 QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ this, menuLabelId, reagentId, hasLabel ]() {
-                    if ( hasLabel )
+                    if ( hasLabel ) {
                         LabelSet::instance()->remove( menuLabelId, reagentId );
-                    else
+                        LabelSet::instance()->removeOrphanedEntries();
+                    } else
                         LabelSet::instance()->add( menuLabelId, reagentId );
 
                     this->reset();
@@ -445,11 +446,35 @@ void ReagentDock::expand( const QModelIndex &index ) {
  * @brief ReagentDock::reset
  */
 void ReagentDock::reset() {
+    QList<Id> openNodes;
+    for ( int y = 0; y < this->model->rootItem()->rowCount(); y++ ) {
+        QStandardItem *item( this->model->rootItem()->child( y ));
+        const QModelIndex index( this->model->indexFromItem( item ));
+        if ( !index.isValid())
+            continue;
+
+        if ( this->ui->reagentView->isExpanded( index ))
+            openNodes << item->data( ReagentModel::ID ).value<Id>();
+    }
+
     this->model->setupModelData();
-    this->ui->reagentView->repaint();
 
     // clear selection
     this->select( QModelIndex());
+    this->model->sort( 0, Qt::AscendingOrder );
+
+    // force recreation on index cache
+    this->ui->reagentView->repaint();
+
+    for ( int y = 0; y < this->model->rootItem()->rowCount(); y++ ) {
+        QStandardItem *item( this->model->rootItem()->child( y ));
+        const QModelIndex index( this->model->indexFromItem( item ));
+        if ( !index.isValid())
+            continue;
+
+        if ( openNodes.contains( item->data( ReagentModel::ID ).value<Id>()))
+            this->ui->reagentView->expand( index );
+    }
 }
 
 /**

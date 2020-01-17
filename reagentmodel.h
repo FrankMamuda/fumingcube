@@ -61,6 +61,7 @@ public:
     QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
     QList<Id> setupModelData( const QString &filter = QString());
+    void sort( int column = 0, Qt::SortOrder order = Qt::AscendingOrder ) override;
 
     /**
      * @brief find
@@ -74,7 +75,8 @@ public:
      * @brief rootItem
      * @return
      */
-    QStandardItem *rootItem() const { return this->m_rootItem; }
+    QStandardItem *rootItem() const { return this->m_rootItem; }    
+    QModelIndex indexFromItem( QStandardItem *item ) const;
 
 private:
     QStandardItem *m_rootItem = nullptr;

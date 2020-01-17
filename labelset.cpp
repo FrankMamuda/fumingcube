@@ -22,6 +22,8 @@
 #include "labelset.h"
 #include "field.h"
 #include "database.h"
+#include "label.h"
+#include "reagent.h"
 
 #include <QSqlQuery>
 
@@ -62,5 +64,17 @@ void LabelSet::remove( const Id &labelId, const Id &reagentId ) {
  * @brief LabelSet::removeOrphanedEntries
  */
 void LabelSet::removeOrphanedEntries() {
-    // NOTE: STUB
+    // remove if label has been deleted
+    QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
+                      .arg( this->tableName())
+                      .arg( this->fieldName( LabelId ))
+                      .arg( Label::instance()->fieldName( Label::ID ))
+                      .arg( Label::instance()->tableName()));
+
+    // remove if reagent has been deleted
+    QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
+                      .arg( this->tableName())
+                      .arg( this->fieldName( ReagentId ))
+                      .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                      .arg( Reagent::instance()->tableName()));
 }

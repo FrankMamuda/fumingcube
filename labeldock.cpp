@@ -39,7 +39,7 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
     this->ui->labelView->setModel( Label::instance());
     this->ui->labelView->setModelColumn( Label::Name );
 
-    this->ui->allButton->connect( this->ui->allButton, &QPushButton::clicked, [ this ]() { this->ui->labelView->clearSelection(); } );
+    this->ui->allButton->connect( this->ui->allButton, &QPushButton::clicked, [ this ]() { this->setFilter(); } );
     this->ui->labelView->selectionModel()->connect( this->ui->labelView->selectionModel(), &QItemSelectionModel::selectionChanged, [ this ]( const QItemSelection &, const QItemSelection & ) {
         this->setFilter( this->ui->labelView->selectionModel()->selectedRows());
     } );
@@ -123,7 +123,8 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
         if ( row != Row::Invalid )
             Label::instance()->remove( row );
 
-        // TODO: remove orphans (reset reagents)
+        // remove orphans
+        LabelSet::instance()->removeOrphanedEntries();
     } );
     menu.addAction( QIcon::fromTheme( "edit" ), this->tr( "Edit label" ), [ this ]() {
         if ( !this->ui->labelView->currentIndex().isValid())

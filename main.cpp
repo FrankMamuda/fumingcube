@@ -53,10 +53,13 @@ reagents:
  - richtext for names (currently not feasible)
  - multiple aliases?
  - up down arrow in dock does not change index (is this the intended behaviour)
- - sort alphabetically (currently broken)
  - option to duplicate reagent?
- - renaming should restore index
-   or better yet -> store all opened nodes
+ - node restoration works, but needs improvement:
+   how about tracking all node expansions and close actions and store them
+   in a list. save that list to a variable and restore on startup
+   this way even selection labels would not mess up the open nodes
+   also add an option to close all nodes
+   search mode should avoid writing to nodes state however
 
 database:
  - check API
@@ -74,9 +77,6 @@ properties:
  - state property
  - fetch 'other names' such as IUPAC name
  - add multiline edit option in textual properties (tagged, not custom)
-
-labels:
- - must remove orphaned labelSets when removing labels
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -305,6 +305,7 @@ int main( int argc, char *argv[] ) {
     }
 
     // restore last reagent selection
+    ReagentDock::instance()->reset();
     ReagentDock::instance()->restoreIndex();
 
     return a.exec();
