@@ -79,6 +79,54 @@ QPixmap Label::pixmap( const QColor &colour ) const {
 }
 
 /**
+ * @brief Label::pixmap
+ * @param colour
+ * @return
+ */
+QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
+    if ( colourList.count() <= 1 )
+        return this->pixmap( colourList.isEmpty() ? QColor() : colourList.first());
+
+    QString name;
+    foreach ( const QColor &colour, colourList )
+        name.append( colour.name());
+
+    if ( this->cache.contains( qAsConst( name )))
+        return this->cache[qAsConst( name )];
+
+    QPixmap pixmap( 12, 8 );
+    pixmap.fill( Qt::transparent );
+    QPainter painter( &pixmap );
+    painter.setPen( Qt::transparent );
+
+    if ( colourList.count() > 4 ) {
+        QLinearGradient gradient( 0, 0, 12, 8 );
+        gradient.setColorAt( 0.0,       Qt::red );
+        gradient.setColorAt( 1.0 / 6.0, QColor( 255, 100, 0 ));
+        gradient.setColorAt( 2.0 / 6.0, Qt::yellow );
+        gradient.setColorAt( 3.0 / 6.0, Qt::green );
+        gradient.setColorAt( 4.0 / 6.0, Qt::cyan );
+        gradient.setColorAt( 5.0 / 6.0, Qt::blue );
+        gradient.setColorAt( 1.0,       Qt::magenta );
+        painter.setBrush( QBrush( gradient ));
+        painter.drawRoundedRect( QRect( 0, 0, 12, 8 ), 3, 3 );
+    } else {
+        const QMap<int,int> sizes { { 2, 6 }, { 3, 4 }, { 4, 3 } };
+
+        int offset = 0;
+        foreach ( const QColor &colour, colourList ) {
+            const int size = sizes[colourList.count()];
+            painter.setBrush( colour );
+            painter.drawRect( QRect( offset, 0, size, 8 ));
+            offset += size;
+        }
+    }
+
+    this->cache[name] = pixmap;
+    return pixmap;
+}
+
+/**
  * @brief Label::removeOrphanedEntries
  */
 void Label::removeOrphanedEntries() {
@@ -89,7 +137,7 @@ void Label::removeOrphanedEntries() {
  * @brief Label::populate
  */
 void Label::populate() {
-    this->add( this->tr( "Bases" ),    QColor::fromRgb( 255,   0,   0, 32 ));
-    this->add( this->tr( "Acids" ),    QColor::fromRgb( 0,   255,   0, 32 ));
-    this->add( this->tr( "Solvents" ), QColor::fromRgb( 0,     0, 255, 32 ));
+    this->add( this->tr( "Bases" ),    QColor::fromRgb( 218,  32,  32, 255/*32*/ ));
+    this->add( this->tr( "Acids" ),    QColor::fromRgb(  32,  218, 32, 255/*32*/ ));
+    this->add( this->tr( "Solvents" ), QColor::fromRgb(  32,   32, 218, 255/*32*/ ));
 }

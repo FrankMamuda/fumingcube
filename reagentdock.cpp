@@ -182,9 +182,9 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
     }
 
     // retrieve data from model
-    const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-    const Id reagentId = item->data( TreeItem::Id ).value<Id>();
-    const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+    const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+    const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
 
     // store last selection in a variabe
     Variable::instance()->setInteger( "reagentDock/selection", static_cast<int>( reagentId ));
@@ -267,19 +267,19 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
     const QModelIndex index( this->ui->reagentView->currentIndex());
     if ( index.isValid()) {
-        const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-        const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
-        const QString name(( parentId == Id::Invalid ) ? item->data( TreeItem::Name ).toString() : item->parent()->data( TreeItem::Name ).toString());
+        const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+        const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
+        const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
-        menu.addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( TreeItem::Id ).toInt()) : parentId  ));
-        menu.addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->data( TreeItem::Name ).toString()); } );
+        menu.addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( ReagentModel::ID ).toInt()) : parentId  ));
+        menu.addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } );
 
         if ( parentId == Id::Invalid ) {
             QMenu *labels( menu.addMenu( this->tr( "Labels" )));
             for ( int y = 0; y < Label::instance()->count(); y++ ) {
                 const Row row = static_cast<Row>( y );
                 const Id menuLabelId = Label::instance()->id( row );
-                const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+                const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
 
                 const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
                 bool hasLabel = false;
@@ -290,16 +290,18 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                     }
                 }
 
-                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ menuLabelId, reagentId, hasLabel ]() {
+                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ this, menuLabelId, reagentId, hasLabel ]() {
                     if ( hasLabel )
                         LabelSet::instance()->remove( menuLabelId, reagentId );
                     else
                         LabelSet::instance()->add( menuLabelId, reagentId );
+
+                    this->reset();
                 } ));
                 action->setCheckable( true );
                 if ( hasLabel )
                     action->setChecked( true );
-            }
+            }            
         }
     }
 
@@ -323,8 +325,8 @@ void ReagentDock::on_removeButton_clicked() {
     /**
      * removeReagentsAndBatches lambda
      */
-    auto removeReagentsAndBatches = []( const TreeItem *item ) {
-        const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+    auto removeReagentsAndBatches = []( const QStandardItem *item ) {
+        const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
         const Row reagentRow = Reagent::instance()->row( reagentId );
         if ( reagentRow == Row::Invalid )
             return;
@@ -348,7 +350,7 @@ void ReagentDock::on_removeButton_clicked() {
         // remove reagent and batches
         menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
             foreach ( const QModelIndex &index, list ) {
-                const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
+                const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
                 if ( item != nullptr )
                     removeReagentsAndBatches( item );
             }
@@ -365,12 +367,12 @@ void ReagentDock::on_removeButton_clicked() {
             return;
 
         // get current item
-        const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
+        const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
 
         // construct a menu
-        if ( item->data( TreeItem::ParentId ).value<Id>() == Id::Invalid ) {
+        if ( item->data( ReagentModel::ParentId ).value<Id>() == Id::Invalid ) {
             // remove reagent and batches
-            menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->data( TreeItem::Name ).toString()), [ this, item, removeReagentsAndBatches ]() {
+            menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->text()), [ this, item, removeReagentsAndBatches ]() {
                 removeReagentsAndBatches( item );
 
                 // reset model
@@ -378,9 +380,9 @@ void ReagentDock::on_removeButton_clicked() {
             } );
         } else {
             // remove batch
-            menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->data( TreeItem::Name ).toString()), [ this, item ]() {
-                const Id reagentId = item->data( TreeItem::Id ).value<Id>();
-                const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+            menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->text()), [ this, item ]() {
+                const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+                const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
 
                 const Row row = Reagent::instance()->row( reagentId );
                 if ( row != Row::Invalid ) {
@@ -471,8 +473,8 @@ void ReagentDock::on_editButton_clicked() {
         return;
 
     // get current item
-    const TreeItem *item( static_cast<TreeItem*>( index.internalPointer()));
-    const Id reagentId = item->data( TreeItem::Id ).value<Id>();
+    const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -480,7 +482,7 @@ void ReagentDock::on_editButton_clicked() {
     if ( reagentRow == Row::Invalid )
         return;
 
-    const Id parentId = item->data( TreeItem::ParentId ).value<Id>();
+    const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
     const QString previousName( Reagent::instance()->name( reagentId ));
     const QString previousAlias( Reagent::instance()->alias( reagentId ));
 

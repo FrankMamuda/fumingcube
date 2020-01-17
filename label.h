@@ -62,6 +62,7 @@ public:
 
     QVariant data( const QModelIndex &index, int role ) const override;
     QPixmap pixmap( const QColor &colour ) const;
+    QPixmap pixmap( const QList<QColor> &colourList ) const;
 
 public slots:
     void removeOrphanedEntries() override;

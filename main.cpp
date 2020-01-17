@@ -52,17 +52,11 @@
 reagents:
  - richtext for names (currently not feasible)
  - multiple aliases?
- - groups and sorting (with drag and drop; reagents can be in multiple groups)
-   Inorganic reagents
-        \_Sodium hydroxide
-   Bases
-        \_Sodium hydroxide
- - or rather use labels
  - up down arrow in dock does not change index (is this the intended behaviour)
  - sort alphabetically (currently broken)
  - option to duplicate reagent?
  - renaming should restore index
- - better yet -> store all opened nodes
+   or better yet -> store all opened nodes
 
 database:
  - check API
@@ -80,6 +74,9 @@ properties:
  - state property
  - fetch 'other names' such as IUPAC name
  - add multiline edit option in textual properties (tagged, not custom)
+
+labels:
+ - must remove orphaned labelSets when removing labels
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)

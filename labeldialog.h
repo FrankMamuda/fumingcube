@@ -21,35 +21,37 @@
 /*
  * includes
  */
-#include "dockwidget.h"
-#include <QModelIndexList>
-#include <QShortcut>
+#include <QDialog>
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-class LabelDock;
+class LabelDialog;
 }
 
 /**
- * @brief The LabelDock class
+ * @brief The LabelDialog class
  */
-class LabelDock final : public DockWidget {
+class LabelDialog : public QDialog {
     Q_OBJECT
-    Q_DISABLE_COPY( LabelDock )
 
 public:
-    static LabelDock *instance() { static LabelDock *labelDock( new LabelDock()); return labelDock; }
-    ~LabelDock() override;
+    explicit LabelDialog( QWidget *parent = nullptr );
+    ~LabelDialog();
+    QString name() const;
+
+    /**
+     * @brief colour
+     * @return
+     */
+    QColor colour() const { return this->m_colour; }
 
 public slots:
-    void setFilter( const QModelIndexList &list = QModelIndexList());
-
-private slots:
-    void on_labelView_customContextMenuRequested(const QPoint &pos);
+    void setName( const QString &name );
+    void setColour( const QColor &colour );
 
 private:
-    explicit LabelDock( QWidget *parent = nullptr );
-    Ui::LabelDock *ui;
+    Ui::LabelDialog *ui;
+    QColor m_colour;
 };

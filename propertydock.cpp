@@ -268,7 +268,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).value<Id>();
+    const Id reagentId = static_cast<QStandardItem*>( this->reagentIndex.internalPointer())->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -528,7 +528,7 @@ void PropertyDock::on_editPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<TreeItem*>( this->reagentIndex.internalPointer())->data( TreeItem::Id ).value<Id>();
+    const Id reagentId = static_cast<QStandardItem*>( this->reagentIndex.internalPointer())->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 

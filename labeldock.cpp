@@ -25,7 +25,9 @@
 #include "labeldock.h"
 #include "reagentdock.h"
 #include "ui_labeldock.h"
+#include "labeldialog.h"
 #include <QDebug>
+#include <QMenu>
 #include <QSqlQuery>
 
 /**
@@ -95,4 +97,51 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
     }
     Reagent::instance()->select();
     ReagentDock::instance()->reset();
+}
+
+/**
+ * @brief LabelDock::on_labelView_customContextMenuRequested
+ * @param pos
+ */
+void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
+    if ( this->ui->labelView->selectionModel()->selectedRows().count() > 1 )
+        return;
+
+    QMenu menu;
+    menu.addAction( QIcon::fromTheme( "add" ), this->tr( "Add new label" ), [ this ]() {
+        LabelDialog ld( this );
+        if ( ld.exec() == QDialog::Accepted ) {
+            Label::instance()->add( ld.name(), ld.colour());
+            ReagentDock::instance()->reset();
+        }
+    } );
+    menu.addAction( QIcon::fromTheme( "remove" ), this->tr( "Remove label" ), [ this ]() {
+        if ( !this->ui->labelView->currentIndex().isValid())
+            return;
+
+        const Row row = Label::instance()->row( this->ui->labelView->currentIndex());
+        if ( row != Row::Invalid )
+            Label::instance()->remove( row );
+
+        // TODO: remove orphans (reset reagents)
+    } );
+    menu.addAction( QIcon::fromTheme( "edit" ), this->tr( "Edit label" ), [ this ]() {
+        if ( !this->ui->labelView->currentIndex().isValid())
+            return;
+
+        const Row row = Label::instance()->row( this->ui->labelView->currentIndex());
+        if ( row != Row::Invalid ) {
+            LabelDialog ld( this );
+            ld.setName( Label::instance()->name( row ));
+            ld.setColour( Label::instance()->colour( row ));
+
+            if ( ld.exec() == QDialog::Accepted ) {
+                Label::instance()->setName( row, ld.name());
+                Label::instance()->setColour( row, ld.colour());
+                ReagentDock::instance()->reset();
+            }
+        }
+    } );
+
+    menu.exec( this->mapToGlobal( pos ));
 }
