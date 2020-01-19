@@ -71,7 +71,8 @@ SOURCES += \
     xmltools.cpp \
     reagent.cpp \
     property.cpp \
-    calcedit.cpp
+    calcedit.cpp \
+    nodehistory.cpp
 
 HEADERS += \
     about.h \
@@ -121,7 +122,8 @@ HEADERS += \
     main.h \
     reagent.h \
     property.h \
-    calcedit.h
+    calcedit.h \
+    nodehistory.h
 
 FORMS += \
         about.ui \

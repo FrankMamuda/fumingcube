@@ -16,40 +16,32 @@
  *
  */
 
-#pragma once
-
 /*
  * includes
  */
-#include "dockwidget.h"
-#include <QModelIndexList>
-#include <QShortcut>
+#include <QTreeView>
+#include "table.h"
 
 /**
- * @brief The Ui namespace
+ * @brief The NodeHistory class
  */
-namespace Ui {
-class LabelDock;
-}
-
-/**
- * @brief The LabelDock class
- */
-class LabelDock final : public DockWidget {
+class NodeHistory : public QObject {
     Q_OBJECT
-    Q_DISABLE_COPY( LabelDock )
 
 public:
-    static LabelDock *instance() { static LabelDock *labelDock( new LabelDock()); return labelDock; }
-    ~LabelDock() override;
+    NodeHistory( QTreeView *parent );
+    ~NodeHistory();
+    QTreeView *treeParent() const { return this->m_treeParent; }
+    bool isEnabled() const { return this->m_enabled; }
 
 public slots:
-    void setFilter( const QModelIndexList &list = QModelIndexList());
-
-private slots:
-    void on_labelView_customContextMenuRequested( const QPoint &pos );
+    void setEnabled( bool enabled = true ) { this->m_enabled = enabled; }
+    void restoreNodeState();
+    void saveHistory();
+    void loadHistory();
 
 private:
-    explicit LabelDock( QWidget *parent = nullptr );
-    Ui::LabelDock *ui;
+    QTreeView *m_treeParent;
+    bool m_enabled = true;
+    QList<Id> openNodes;
 };

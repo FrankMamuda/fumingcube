@@ -23,6 +23,7 @@
  */
 #include "reagentmodel.h"
 #include "dockwidget.h"
+#include "nodehistory.h"
 #include <QShortcut>
 
 /**
@@ -43,6 +44,7 @@ public:
     static ReagentDock *instance() { static ReagentDock *reagentDock( new ReagentDock()); return reagentDock; }
     ~ReagentDock() override;
     bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
+    Id indexFromId( const QModelIndex &index ) const;
 
 signals:
     void currentIndexChanged( const QModelIndex &index );
@@ -69,4 +71,5 @@ private:
     QList<Id> matches;
     Id currentMatch;
     QShortcut *shortcut;
+    NodeHistory *nodeHistory;
 };

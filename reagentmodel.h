@@ -29,7 +29,9 @@
 /**
  * @brief The ReagentModel class
  */
-class ReagentModel : public QAbstractItemModel {
+class ReagentModel : public QStandardItemModel {
+    Q_OBJECT
+
 public:
     enum Data {
         NoData = Qt::UserRole,
@@ -41,25 +43,20 @@ public:
      * @brief TreeModel
      * @param parent
      */
-    ReagentModel( QObject *parent = nullptr ) : QAbstractItemModel( parent ) { this->setupModelData(); }
+    ReagentModel( QObject *parent = nullptr ) : QStandardItemModel( parent ) { this->setupModelData(); }
 
     /**
      * @brief ~TreeModel
      */
-    ~ReagentModel() override { delete this->m_rootItem; }
-
-    int rowCount( const QModelIndex &parent = QModelIndex()) const override;
+    ~ReagentModel() override {}
 
     /**
      * @brief columnCount
      * @param parent
      * @return
      */
-    int columnCount( const QModelIndex & = QModelIndex()) const override;
-    QModelIndex index( int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent( const QModelIndex &child ) const override;
-    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
+    QVariant data( const QModelIndex &index, int role ) const;
     QList<Id> setupModelData( const QString &filter = QString());
     void sort( int column = 0, Qt::SortOrder order = Qt::AscendingOrder ) override;
 
@@ -70,15 +67,4 @@ public:
      * @return
      */
     QModelIndex find( const Id &id ) const;
-
-    /**
-     * @brief rootItem
-     * @return
-     */
-    QStandardItem *rootItem() const { return this->m_rootItem; }    
-    QModelIndex indexFromItem( QStandardItem *item ) const;
-
-private:
-    QStandardItem *m_rootItem = nullptr;
-    mutable QMap<QStandardItem*, QModelIndex> itemIndexes;
 };

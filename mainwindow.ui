@@ -84,10 +84,10 @@
    </attribute>
    <addaction name="actionReagents"/>
    <addaction name="actionProperties"/>
+   <addaction name="actionLabels"/>
    <addaction name="actionTags"/>
    <addaction name="actionClear"/>
    <addaction name="actionSettings"/>
-   <addaction name="actionLabels"/>
    <addaction name="actionAbout"/>
   </widget>
   <action name="actionReagents">
@@ -155,7 +155,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="edit"/>
+    <iconset theme="edit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Labels</string>

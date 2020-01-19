@@ -54,12 +54,8 @@ reagents:
  - multiple aliases?
  - up down arrow in dock does not change index (is this the intended behaviour)
  - option to duplicate reagent?
- - node restoration works, but needs improvement:
-   how about tracking all node expansions and close actions and store them
-   in a list. save that list to a variable and restore on startup
-   this way even selection labels would not mess up the open nodes
-   also add an option to close all nodes
-   search mode should avoid writing to nodes state however
+ - rewrite some redundant ReagentDock code (since NodeHistory was introduced)
+ - store selection in NodeHisotry
 
 database:
  - check API
@@ -169,6 +165,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
+    Variable::instance()->add( "reagentDock/openNodes", "", Var::Flag::Hidden );
     Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );

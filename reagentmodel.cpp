@@ -26,85 +26,26 @@
 #include <QDebug>
 
 /**
- * @brief ReagentModel::rowCount
- * @param parent
- * @return
- */
-int ReagentModel::rowCount( const QModelIndex &parent ) const {
-    if ( parent.column() > 0 || this->rootItem() == nullptr )
-        return 0;
-
-    return (( !parent.isValid()) ? this->rootItem() : static_cast<QStandardItem*>( parent.internalPointer()))->rowCount();
-}
-
-/**
- * @brief ReagentModel::columnCount
- * @return
- */
-int ReagentModel::columnCount( const QModelIndex & ) const {
-    return 1;
-}
-
-/**
- * @brief ReagentModel::index
- * @param row
- * @param column
- * @param parent
- * @return
- */
-QModelIndex ReagentModel::index( int row, int column, const QModelIndex &parent ) const {
-    if ( !this->hasIndex( row, column, parent ) || this->rootItem() == nullptr )
-        return QModelIndex();
-
-    // assign indexes to items (and store them in cache)
-    QStandardItem *childItem((( !parent.isValid()) ? this->rootItem() : static_cast<QStandardItem*>( parent.internalPointer()))->child( row ));
-    if ( childItem != nullptr ) {
-        if ( this->itemIndexes.contains( childItem ))
-            return this->itemIndexes[childItem];
-
-        const QModelIndex index( this->createIndex( row, column, childItem ));
-        //childItem->setIndex( index );
-        this->itemIndexes[childItem] = index;
-        return index;
-    }
-
-    return QModelIndex();
-}
-
-/**
- * @brief ReagentModel::parent
- * @param child
- * @return
- */
-QModelIndex ReagentModel::parent( const QModelIndex &child ) const {
-    if ( !child.isValid() || this->rootItem() == nullptr )
-        return QModelIndex();
-
-    QStandardItem *parentItem( static_cast<QStandardItem*>( child.internalPointer())->parent());
-    if ( parentItem == this->rootItem())
-        return QModelIndex();
-
-    return this->createIndex( parentItem->row(), 0, parentItem );
-}
-
-/**
- * @brief ReagentModel::data
- * @param index
+ * @brief ReagentModel::headerData
+ * @param section
+ * @param orientation
  * @param role
  * @return
  */
+QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int role ) const {
+    if ( section == 0 && role == Qt::DisplayRole && orientation == Qt::Horizontal )
+        return this->tr( "Reagents" );
+
+    return QVariant();
+}
+
 QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
-    if ( !index.isValid() || this->rootItem() == nullptr )
-        return QVariant();
+    if ( index.isValid() && role == Qt::DecorationRole ) {
 
-    QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
-    if ( role == Qt::DisplayRole )
-        return item->text();
-
-    if ( role == Qt::DecorationRole ) {
         if ( !LabelDock::instance()->isVisible())
             return QVariant();
 
+        QStandardItem *item( this->itemFromIndex( index ));
         if ( !item->icon().isNull())
             return item->icon();
 
@@ -124,21 +65,7 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         return item->icon();
     }
 
-    return QVariant();
-}
-
-/**
- * @brief ReagentModel::headerData
- * @param section
- * @param orientation
- * @param role
- * @return
- */
-QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int role ) const {
-    if ( section == 0 && role == Qt::DisplayRole && orientation == Qt::Horizontal )
-        return this->tr( "Reagents" );
-
-    return QVariant();
+    return QStandardItemModel::data( index, role );
 }
 
 /**
@@ -148,16 +75,9 @@ QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int
  */
 QList<Id> ReagentModel::setupModelData( const QString &filter ) {
     // clear index cache
-    this->itemIndexes.clear();
-
     this->beginResetModel();
 
-    // delete rootItem if any
-    if ( this->rootItem() != nullptr )
-        delete this->m_rootItem;
-
-    // make a new rootItem
-    this->m_rootItem = new QStandardItem();
+    this->clear();
 
     // make a list of matches (for search)
     QList<Id> total;
@@ -202,7 +122,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
 
         if ( found || filter.isEmpty()) {
             // add reagent to treeView
-            this->rootItem()->appendRow( reagent );
+            this->invisibleRootItem()->appendRow( reagent );
 
             // add reagent to search list
             if ( filter.isEmpty())
@@ -214,7 +134,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
             // apply filter to reagent
             if ( !filter.isEmpty() && reagentName.contains( filter, Qt::CaseInsensitive )) {
                 // add reagent to both treeView and search list
-                this->rootItem()->appendRow( reagent );
+                this->invisibleRootItem()->appendRow( reagent );
                 total.prepend( reagentId );
             }
         }
@@ -233,11 +153,8 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
  * @param order
  */
 void ReagentModel::sort( int, Qt::SortOrder order ) {
-    if ( this->rootItem() == nullptr )
-        return;
-
     emit this->layoutAboutToBeChanged();
-    this->rootItem()->sortChildren( 0, order );
+    this->invisibleRootItem()->sortChildren( 0, order );
 }
 
 /**
@@ -247,22 +164,19 @@ void ReagentModel::sort( int, Qt::SortOrder order ) {
  * @return
  */
 QModelIndex ReagentModel::find( const Id &id ) const {
-    foreach ( const QStandardItem *item, this->itemIndexes.keys()) {
-        if ( item->data( ID ).value<Id>() == id )
-            return this->itemIndexes[const_cast<QStandardItem*>( item )];
+    for ( int y = 0; y < this->invisibleRootItem()->rowCount(); y++ ) {
+        const QStandardItem *reagent( this->invisibleRootItem()->child( y ));
+        if ( reagent->data( ID ).value<Id>() == id ) {
+            return reagent->index();
+        } else {
+            for ( int k = 0; k < reagent->rowCount(); k++ ) {
+                const QStandardItem *batch( reagent->child( k )); {
+                    if ( batch->data( ID ).value<Id>() == id )
+                        return batch->index();
+                }
+            }
+        }
     }
-
-    return QModelIndex();
-}
-
-/**
- * @brief ReagentModel::indexFromItem
- * @param item
- * @return
- */
-QModelIndex ReagentModel::indexFromItem( QStandardItem *item ) const {
-    if ( this->itemIndexes.contains( item ))
-        return this->itemIndexes[item];
 
     return QModelIndex();
 }

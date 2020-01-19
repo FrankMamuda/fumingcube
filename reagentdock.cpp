@@ -47,6 +47,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
     // set a model to treeview
     this->ui->reagentView->setModel( this->model );
+    this->ui->reagentView->setRootIndex( this->model->invisibleRootItem()->index());
 
     // disable the remove button (and enable it only when a reagent is clicked upon)
     this->ui->removeButton->setEnabled( false );
@@ -119,12 +120,17 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
             this->ui->searchEdit->hide();
         }
     } );
+
+    //this->connect( this->ui->searchEdit, &QWidget::clo)
+
+    this->nodeHistory = new NodeHistory( this->ui->reagentView );
 }
 
 /**
  * @brief ReagentDock::~ReagentDock
  */
 ReagentDock::~ReagentDock() {
+    delete this->nodeHistory;
     delete this->model;
     delete this->shortcut;
     delete ui;
@@ -167,6 +173,19 @@ bool ReagentDock::checkForDuplicates(const QString &name, const QString &alias, 
 }
 
 /**
+ * @brief ReagentDock::indexFromId
+ * @param index
+ * @return
+ */
+Id ReagentDock::indexFromId( const QModelIndex &index ) const {
+   if ( !index.isValid())
+       return Id::Invalid;
+
+   const QStandardItem *item( this->model->itemFromIndex( index ));
+   return item->data( ReagentModel::ID ).value<Id>();
+}
+
+/**
  * @brief ReagentDock::on_reagentView_clicked
  * @param index
  */
@@ -182,7 +201,7 @@ void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
     }
 
     // retrieve data from model
-    const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+    const QStandardItem *item( this->model->itemFromIndex( index ));
     const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
     const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
 
@@ -267,7 +286,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
     const QModelIndex index( this->ui->reagentView->currentIndex());
     if ( index.isValid()) {
-        const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+        const QStandardItem *item( this->model->itemFromIndex( index ));
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
@@ -351,7 +370,7 @@ void ReagentDock::on_removeButton_clicked() {
         // remove reagent and batches
         menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
             foreach ( const QModelIndex &index, list ) {
-                const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+                const QStandardItem *item( this->model->itemFromIndex( index ));
                 if ( item != nullptr )
                     removeReagentsAndBatches( item );
             }
@@ -368,7 +387,7 @@ void ReagentDock::on_removeButton_clicked() {
             return;
 
         // get current item
-        const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+        const QStandardItem *item( this->model->itemFromIndex( index ));
 
         // construct a menu
         if ( item->data( ReagentModel::ParentId ).value<Id>() == Id::Invalid ) {
@@ -446,35 +465,14 @@ void ReagentDock::expand( const QModelIndex &index ) {
  * @brief ReagentDock::reset
  */
 void ReagentDock::reset() {
-    QList<Id> openNodes;
-    for ( int y = 0; y < this->model->rootItem()->rowCount(); y++ ) {
-        QStandardItem *item( this->model->rootItem()->child( y ));
-        const QModelIndex index( this->model->indexFromItem( item ));
-        if ( !index.isValid())
-            continue;
-
-        if ( this->ui->reagentView->isExpanded( index ))
-            openNodes << item->data( ReagentModel::ID ).value<Id>();
-    }
-
+    this->nodeHistory->setEnabled( false );
     this->model->setupModelData();
 
     // clear selection
     this->select( QModelIndex());
     this->model->sort( 0, Qt::AscendingOrder );
-
-    // force recreation on index cache
-    this->ui->reagentView->repaint();
-
-    for ( int y = 0; y < this->model->rootItem()->rowCount(); y++ ) {
-        QStandardItem *item( this->model->rootItem()->child( y ));
-        const QModelIndex index( this->model->indexFromItem( item ));
-        if ( !index.isValid())
-            continue;
-
-        if ( openNodes.contains( item->data( ReagentModel::ID ).value<Id>()))
-            this->ui->reagentView->expand( index );
-    }
+    this->nodeHistory->restoreNodeState();
+    this->restoreIndex();
 }
 
 /**
@@ -483,9 +481,13 @@ void ReagentDock::reset() {
 void ReagentDock::on_buttonFind_clicked() {
     const bool visible = this->ui->searchEdit->isVisible();
 
+    this->nodeHistory->setEnabled( visible );
     this->ui->searchEdit->setVisible( !visible );
-    if ( !visible )
+    if ( !visible ) {
         this->ui->searchEdit->setFocus();
+    } else {
+        this->reset();
+    }
 }
 
 /**
@@ -498,7 +500,7 @@ void ReagentDock::on_editButton_clicked() {
         return;
 
     // get current item
-    const QStandardItem *item( static_cast<QStandardItem*>( index.internalPointer()));
+    const QStandardItem *item( this->model->itemFromIndex( index ));
     const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;

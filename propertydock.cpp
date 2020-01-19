@@ -268,7 +268,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<QStandardItem*>( this->reagentIndex.internalPointer())->data( ReagentModel::ID ).value<Id>();
+    const Id reagentId = ReagentDock::instance()->indexFromId( this->reagentIndex );
     if ( reagentId == Id::Invalid )
         return;
 

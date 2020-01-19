@@ -39,7 +39,7 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
     this->ui->labelView->setModel( Label::instance());
     this->ui->labelView->setModelColumn( Label::Name );
 
-    this->ui->allButton->connect( this->ui->allButton, &QPushButton::clicked, [ this ]() { this->setFilter(); } );
+    this->ui->allButton->connect( this->ui->allButton, &QPushButton::clicked, [ this ]() { this->ui->labelView->setCurrentIndex( QModelIndex()); } );
     this->ui->labelView->selectionModel()->connect( this->ui->labelView->selectionModel(), &QItemSelectionModel::selectionChanged, [ this ]( const QItemSelection &, const QItemSelection & ) {
         this->setFilter( this->ui->labelView->selectionModel()->selectedRows());
     } );
