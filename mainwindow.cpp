@@ -103,7 +103,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // select reagent or batch
         Variable::instance()->setValue<int>( "reagentDock/selection", static_cast<int>( qAsConst( reagentId )));
-        ReagentDock::instance()->restoreIndex();
+        ReagentDock::instance()->view()->restoreIndex();
 
         // get property tagId
         const Id tagId = Script::instance()->getPropertyId( property );

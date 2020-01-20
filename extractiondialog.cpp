@@ -17,9 +17,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "extractiondialog.h"
 #include "extractionmodel.h"
 #include "property.h"

@@ -16,9 +16,9 @@
  *
  */
 
-//
-// includes
-//
+/*
+ * includes
+ */
 #include "label.h"
 #include "labelset.h"
 #include "reagent.h"
@@ -96,7 +96,7 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
         Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" ).arg( Reagent::instance()->tableName()).arg( Reagent::instance()->fieldName( Reagent::ID )).arg( reagentStatement ));
     }
     Reagent::instance()->select();
-    ReagentDock::instance()->reset();
+    ReagentDock::instance()->view()->updateView();
 }
 
 /**
@@ -112,7 +112,7 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
         LabelDialog ld( this );
         if ( ld.exec() == QDialog::Accepted ) {
             Label::instance()->add( ld.name(), ld.colour());
-            ReagentDock::instance()->reset();
+            ReagentDock::instance()->view()->updateView();
         }
     } );
     menu.addAction( QIcon::fromTheme( "remove" ), this->tr( "Remove label" ), [ this ]() {
@@ -139,7 +139,7 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
             if ( ld.exec() == QDialog::Accepted ) {
                 Label::instance()->setName( row, ld.name());
                 Label::instance()->setColour( row, ld.colour());
-                ReagentDock::instance()->reset();
+                ReagentDock::instance()->view()->updateView();
             }
         }
     } );

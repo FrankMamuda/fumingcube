@@ -36,7 +36,7 @@
      </spacer>
     </item>
     <item row="0" column="0" colspan="7">
-     <widget class="QTreeView" name="reagentView">
+     <widget class="ReagentView" name="reagentView">
       <property name="contextMenuPolicy">
        <enum>Qt::CustomContextMenu</enum>
       </property>
@@ -117,6 +117,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ReagentView</class>
+   <extends>QTreeView</extends>
+   <header>reagentview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

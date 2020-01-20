@@ -45,13 +45,9 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     // set up ui
     this->ui->setupUi( this );
 
-    // set a model to treeview
-    this->ui->reagentView->setModel( this->model );
-    this->ui->reagentView->setRootIndex( this->model->invisibleRootItem()->index());
-
     // disable the remove button (and enable it only when a reagent is clicked upon)
     this->ui->removeButton->setEnabled( false );
-    this->ui->reagentView->selectionModel()->connect( this->ui->reagentView->selectionModel(), &QItemSelectionModel::currentChanged, [ this ]( const QModelIndex &current, const QModelIndex & ) {
+    this->view()->selectionModel()->connect( this->view()->selectionModel(), &QItemSelectionModel::currentChanged, [ this ]( const QModelIndex &current, const QModelIndex & ) {
         this->ui->removeButton->setEnabled( current.isValid());
         this->ui->editButton->setEnabled( current.isValid());
         emit this->currentIndexChanged( current );
@@ -63,28 +59,28 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     // implement search
     this->ui->searchEdit->connect( this->ui->searchEdit, &QLineEdit::textChanged, [ this ]( const QString &filter ) {
         // update the match list
-        this->matches = this->model->setupModelData( filter );
+        this->matches = this->view()->model()->setupModelData( filter );
 
         // if list empty, reset currentMatch and clear selection
         if ( this->matches.isEmpty()) {
             this->currentMatch = Id::Invalid;
-            this->select( QModelIndex());
+            this->view()->selectReagent( QModelIndex());
             return;
         }
 
         // expand all nodes in search since we want to see all reagents and batches that match the search criteria
         if ( !filter.isEmpty())
-            this->ui->reagentView->expandAll();
+            this->view()->expandAll();
 
         if ( this->currentMatch == Id::Invalid || !this->matches.contains( this->currentMatch )) {
             // do this if:
             //   current match has not been set (first search)
             //   current match differs from the current filter
             this->currentMatch = this->matches.last();
-            this->select( this->model->find( this->currentMatch ));
+            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
         } else {
             // the previous item is the same, reselect it
-            this->select( this->model->find( this->currentMatch ));
+            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
         }
     } );
 
@@ -104,13 +100,14 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
             // set the new item
             this->currentMatch = this->matches.at( pos );
-            this->select( this->model->find( this->currentMatch ));
+            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
         } else {
             // if there is just one item left, hide the search box
             this->ui->searchEdit->hide();
         }
     } );
 
+    // add keyboard shortcut to reagent filter
     this->shortcut = new QShortcut( QKeySequence( this->tr( "Ctrl+F", "Find" )), this );
     this->shortcut->connect( this->shortcut, &QShortcut::activated, [ this ]() {
         if ( !this->ui->searchEdit->isVisible())
@@ -120,18 +117,12 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
             this->ui->searchEdit->hide();
         }
     } );
-
-    //this->connect( this->ui->searchEdit, &QWidget::clo)
-
-    this->nodeHistory = new NodeHistory( this->ui->reagentView );
 }
 
 /**
  * @brief ReagentDock::~ReagentDock
  */
 ReagentDock::~ReagentDock() {
-    delete this->nodeHistory;
-    delete this->model;
     delete this->shortcut;
     delete ui;
 }
@@ -173,55 +164,11 @@ bool ReagentDock::checkForDuplicates(const QString &name, const QString &alias, 
 }
 
 /**
- * @brief ReagentDock::indexFromId
- * @param index
+ * @brief ReagentDock::view
  * @return
  */
-Id ReagentDock::indexFromId( const QModelIndex &index ) const {
-   if ( !index.isValid())
-       return Id::Invalid;
-
-   const QStandardItem *item( this->model->itemFromIndex( index ));
-   return item->data( ReagentModel::ID ).value<Id>();
-}
-
-/**
- * @brief ReagentDock::on_reagentView_clicked
- * @param index
- */
-void ReagentDock::on_reagentView_clicked( const QModelIndex &index ) {
-    //if ( this->ui->reagentView->currentIndex() == index )
-    //    return;
-
-    // if reagent is invalid, display no properties
-    if ( !index.isValid()) {
-        Property::instance()->setFilter( "false" );
-        Variable::instance()->setInteger( "reagentDock/selection", -1 );
-        return;
-    }
-
-    // retrieve data from model
-    const QStandardItem *item( this->model->itemFromIndex( index ));
-    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
-    const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
-
-    // store last selection in a variabe
-    Variable::instance()->setInteger( "reagentDock/selection", static_cast<int>( reagentId ));
-
-    // apply sql filter
-    Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 ) or ( %1=%3 and %1>-1 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
-                                     .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
-                                     .arg( static_cast<int>( reagentId ))                            // 2
-                                     .arg( static_cast<int>( parentId ))                             // 3
-                                     .arg( Property::instance()->fieldName( Property::TagId ))       // 4
-                                     .arg( Property::instance()->tableName())                        // 5
-                                     );
-    Property::instance()->sort( Property::TableOrder, Qt::AscendingOrder );
-    Property::instance()->select();
-
-
-    // resize the property view to fit contents
-    PropertyDock::instance()->updateView();
+ReagentView *ReagentDock::view() const {
+    return this->ui->reagentView;
 }
 
 /**
@@ -258,16 +205,16 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                 if ( row == Row::Invalid )
                     return;
 
-                // reexpand parent reagent
-                // unfortunately we have to repaint to restore index cache
-                this->reset();
-
-                if ( parentId != Id::Invalid )
-                    this->expand( this->model->find( parentId ));
-
-                Reagent::instance()->select();
+                // get reagentId and add to treeView without resetting the model
                 const Id reagentId = Reagent::instance()->id( row );
-                this->select( this->model->find( reagentId ));
+                this->view()->model()->add( reagentId );
+
+                // expand parent reagent
+                if ( parentId != Id::Invalid )
+                    this->view()->expand( this->view()->indexFromId( parentId ));
+
+                // select the newly added reagent or batch
+                this->view()->selectReagent( this->view()->indexFromId( reagentId ));
 
                 // open extraction dialog if this feature is enabled
                 if ( Variable::instance()->isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
@@ -284,9 +231,9 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
     menu.addAction( this->tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ));
 
-    const QModelIndex index( this->ui->reagentView->currentIndex());
+    const QModelIndex index( this->view()->currentIndex());
     if ( index.isValid()) {
-        const QStandardItem *item( this->model->itemFromIndex( index ));
+        const QStandardItem *item( this->view()->itemFromIndex( index ));
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
@@ -309,19 +256,20 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                     }
                 }
 
-                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ this, menuLabelId, reagentId, hasLabel ]() {
+                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ item, menuLabelId, reagentId, hasLabel ]() {
                     if ( hasLabel ) {
                         LabelSet::instance()->remove( menuLabelId, reagentId );
                         LabelSet::instance()->removeOrphanedEntries();
                     } else
                         LabelSet::instance()->add( menuLabelId, reagentId );
 
-                    this->reset();
+                    // force icon reset without resetting the model
+                    const_cast<QStandardItem*>( item )->setIcon( QIcon());
                 } ));
                 action->setCheckable( true );
                 if ( hasLabel )
                     action->setChecked( true );
-            }            
+            }
         }
     }
 
@@ -339,13 +287,10 @@ void ReagentDock::on_addButton_clicked() {
  * @brief ReagentDock::on_removeButton_clicked
  */
 void ReagentDock::on_removeButton_clicked() {
-    QMenu menu;
-    const QModelIndexList list( this->ui->reagentView->selectionModel()->selectedRows());
-
     /**
      * removeReagentsAndBatches lambda
      */
-    auto removeReagentsAndBatches = []( const QStandardItem *item ) {
+    auto removeReagentsAndBatches = [ this ]( const QStandardItem *item ) {
         const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
         const Row reagentRow = Reagent::instance()->row( reagentId );
         if ( reagentRow == Row::Invalid )
@@ -364,115 +309,54 @@ void ReagentDock::on_removeButton_clicked() {
         // remove orphans just in case
         Reagent::instance()->removeOrphanedEntries();
         Property::instance()->removeOrphanedEntries();
+
+        // clear selection
+        this->view()->selectReagent();
     };
 
+    QMenu menu;
+    const QModelIndexList list( this->view()->selectionModel()->selectedRows());
+
+    // remove reagents and batches (list)
     if ( list.count() > 1 ) {
-        // remove reagent and batches
         menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
             foreach ( const QModelIndex &index, list ) {
-                const QStandardItem *item( this->model->itemFromIndex( index ));
+                const QStandardItem *item( this->view()->itemFromIndex( index ));
                 if ( item != nullptr )
                     removeReagentsAndBatches( item );
             }
 
-            // reset model
-            this->reset();
-
-            return;
+            // remove items without resetting model
+            this->view()->model()->remove( list );
         } );
     } else {
+        // remove just one entry
         // get current index
-        const QModelIndex index( this->ui->reagentView->currentIndex());
+        const QModelIndex index( this->view()->currentIndex());
         if ( !index.isValid())
             return;
 
         // get current item
-        const QStandardItem *item( this->model->itemFromIndex( index ));
+        // remove reagent and batches
+        const QStandardItem *item( this->view()->itemFromIndex( index ));
+        const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
+        menu.addAction( this->tr( parentId == Id::Invalid ?
+                                      "Remove reagent '%1' and its batches" :
+                                      "Remove batch '%1'"
+                                      ).arg( item->text()), [ this, item, index, parentId, removeReagentsAndBatches ]() {
+            removeReagentsAndBatches( item );
 
-        // construct a menu
-        if ( item->data( ReagentModel::ParentId ).value<Id>() == Id::Invalid ) {
-            // remove reagent and batches
-            menu.addAction( this->tr( "Remove reagent '%1' and its batches" ).arg( item->text()), [ this, item, removeReagentsAndBatches ]() {
-                removeReagentsAndBatches( item );
+            // remove items without resetting model
+            this->view()->model()->remove( index );
 
-                // reset model
-                this->reset();
-            } );
-        } else {
-            // remove batch
-            menu.addAction( this->tr( "Remove batch '%1'" ).arg( item->text()), [ this, item ]() {
-                const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
-                const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
-
-                const Row row = Reagent::instance()->row( reagentId );
-                if ( row != Row::Invalid ) {
-                    Reagent::instance()->remove( row );
-
-                    // remove orphans just in case
-                    Reagent::instance()->removeOrphanedEntries();
-                    Property::instance()->removeOrphanedEntries();
-
-                    // reexpand parent reagent
-                    // unfortunately we have to repaint to restore index cache
-                    this->reset();
-                    this->expand( this->model->find( parentId ));
-                }
-            } );
-        }
+            // reselect parent reagent item if any
+            if ( parentId != Id::Invalid )
+                this->view()->selectReagent( this->view()->indexFromId( parentId ));
+        } );
     }
 
     // display menu
     menu.exec( this->mapToGlobal( this->ui->removeButton->pos()));
-}
-
-/**
- * @brief ReagentDock::restoreIndex
- */
-void ReagentDock::restoreIndex() {
-    // get id list from variable
-    const Id id( Variable::instance()->value<Id>( "reagentDock/selection" ));
-    if ( id != Id::Invalid ) {
-        const Id parentId( Reagent::instance()->parentId( id ));
-        if ( parentId != Id::Invalid )
-            this->expand( this->model->find( parentId ));
-
-        this->select( this->model->find( id ));
-        return;
-    }
-
-    this->select( QModelIndex());
-}
-
-/**
- * @brief ReagentDock::select
- * @param index
- */
-void ReagentDock::select( const QModelIndex &index ) {
-    this->on_reagentView_clicked( index );
-    this->ui->reagentView->setCurrentIndex( index );
-}
-
-/**
- * @brief ReagentDock::expand
- * @param index
- */
-void ReagentDock::expand( const QModelIndex &index ) {
-    this->ui->reagentView->expand( index );
-    this->ui->reagentView->setCurrentIndex( index );
-}
-
-/**
- * @brief ReagentDock::reset
- */
-void ReagentDock::reset() {
-    this->nodeHistory->setEnabled( false );
-    this->model->setupModelData();
-
-    // clear selection
-    this->select( QModelIndex());
-    this->model->sort( 0, Qt::AscendingOrder );
-    this->nodeHistory->restoreNodeState();
-    this->restoreIndex();
 }
 
 /**
@@ -481,12 +365,12 @@ void ReagentDock::reset() {
 void ReagentDock::on_buttonFind_clicked() {
     const bool visible = this->ui->searchEdit->isVisible();
 
-    this->nodeHistory->setEnabled( visible );
+    this->view()->nodeHistory()->setEnabled( visible );
     this->ui->searchEdit->setVisible( !visible );
     if ( !visible ) {
         this->ui->searchEdit->setFocus();
     } else {
-        this->reset();
+        this->view()->updateView();
     }
 }
 
@@ -495,12 +379,12 @@ void ReagentDock::on_buttonFind_clicked() {
  */
 void ReagentDock::on_editButton_clicked() {
     // get current index
-    const QModelIndex index( this->ui->reagentView->currentIndex());
+    const QModelIndex index( this->view()->currentIndex());
     if ( !index.isValid())
         return;
 
     // get current item
-    const QStandardItem *item( this->model->itemFromIndex( index ));
+    const QStandardItem *item( this->view()->itemFromIndex( index ));
     const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
@@ -517,8 +401,12 @@ void ReagentDock::on_editButton_clicked() {
     if ( parentId != Id::Invalid ) {
         const QString name( QInputDialog::getText( this, this->tr( "Rename batch" ), this->tr( "Name:" ), QLineEdit::Normal, previousName, &ok ));
 
-        if ( !name.isEmpty())
+        if ( !name.isEmpty()) {
             Reagent::instance()->setName( reagentRow, name );
+
+            // rename without resetting the model
+            const_cast<QStandardItem*>( item )->setText( ReagentModel::generateName( name ));
+        }
     } else {
         ReagentDialog rd( this, previousName, previousAlias );
         ok = ( rd.exec() == QDialog::Accepted );
@@ -530,8 +418,8 @@ void ReagentDock::on_editButton_clicked() {
 
         Reagent::instance()->setName( reagentRow, name );
         Reagent::instance()->setAlias( reagentRow, alias );
-    }
 
-    this->reset();
-    this->restoreIndex();
+        // rename without resetting the model
+        const_cast<QStandardItem*>( item )->setText( ReagentModel::generateName( name, alias ));
+    }
 }

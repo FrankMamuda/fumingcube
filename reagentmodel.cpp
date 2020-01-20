@@ -39,13 +39,21 @@ QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
+/**
+ * @brief ReagentModel::data
+ * @param index
+ * @param role
+ * @return
+ */
 QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
     if ( index.isValid() && role == Qt::DecorationRole ) {
-
         if ( !LabelDock::instance()->isVisible())
             return QVariant();
 
         QStandardItem *item( this->itemFromIndex( index ));
+        if ( item->data( ReagentModel::ParentId ).value<Id>() != Id::Invalid )
+            return QVariant();
+
         if ( !item->icon().isNull())
             return item->icon();
 
@@ -97,7 +105,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
         bool found = false;
 
         // make a new reagent treeItem
-        QStandardItem *reagent( new QStandardItem( !QString::compare( reagentName, alias ) ? reagentName : QString( "%1 (%2)" ).arg( reagentName ).arg( alias )));
+        QStandardItem *reagent( new QStandardItem( ReagentModel::generateName( reagentName, alias )));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
 
@@ -112,10 +120,7 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
                 continue;
 
             // add batch to both treeView and search list
-            QStandardItem *batch( new QStandardItem( Reagent::instance()->name( child )));
-            batch->setData( static_cast<int>( childId ), ID );
-            batch->setData( static_cast<int>( reagentId ), ParentId );
-            reagent->appendRow( batch );
+            this->addItem( childId, reagentId, reagent );
             found = true;
             total << childId;
         }
@@ -153,6 +158,8 @@ QList<Id> ReagentModel::setupModelData( const QString &filter ) {
  * @param order
  */
 void ReagentModel::sort( int, Qt::SortOrder order ) {
+    // FIXME: are children sorted?
+
     emit this->layoutAboutToBeChanged();
     this->invisibleRootItem()->sortChildren( 0, order );
 }
@@ -163,7 +170,7 @@ void ReagentModel::sort( int, Qt::SortOrder order ) {
  * @param table
  * @return
  */
-QModelIndex ReagentModel::find( const Id &id ) const {
+QModelIndex ReagentModel::indexFromId( const Id &id ) const {
     for ( int y = 0; y < this->invisibleRootItem()->rowCount(); y++ ) {
         const QStandardItem *reagent( this->invisibleRootItem()->child( y ));
         if ( reagent->data( ID ).value<Id>() == id ) {
@@ -179,4 +186,81 @@ QModelIndex ReagentModel::find( const Id &id ) const {
     }
 
     return QModelIndex();
+}
+
+/**
+ * @brief ReagentModel::idFromIndex
+ * @param index
+ * @return
+ */
+Id ReagentModel::idFromIndex( const QModelIndex &index ) const {
+    if ( !index.isValid())
+        return Id::Invalid;
+
+    const QStandardItem *item( this->itemFromIndex( index ));
+    return item->data( ReagentModel::ID ).value<Id>();
+}
+
+/**
+ * @brief ReagentModel::generateName
+ * @param name
+ * @param alias
+ * @return
+ */
+QString ReagentModel::generateName( const QString &name, const QString &alias ) {
+    if ( alias.isEmpty())
+        return name;
+
+    return ( !QString::compare( name, alias ) ? name : QString( "%1 (%2)" ).arg( name ).arg( alias ));
+}
+
+/**
+ * @brief ReagentModel::add
+ * @param id
+ */
+void ReagentModel::add( const Id &id ) {
+    const Id parentId = Reagent::instance()->parentId( id );
+    if ( parentId != Id::Invalid ) {
+        const QModelIndex index( this->indexFromId( parentId ));
+        if ( !index.isValid())
+            return;
+
+        this->addItem( id, parentId, this->itemFromIndex( index ));
+    } else {
+        this->addItem( id, Id::Invalid, this->invisibleRootItem());
+    }
+
+    this->sort();
+}
+
+/**
+ * @brief ReagentModel::addItem
+ * @param id
+ * @param parentId
+ * @param parentItem
+ */
+void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
+    QStandardItem *item( new QStandardItem( Reagent::instance()->name( id )));
+    item->setData( static_cast<int>( id ), ID );
+    item->setData( static_cast<int>( parentId ), ParentId );
+    parentItem->appendRow( item );
+}
+
+/**
+ * @brief ReagentModel::remove
+ * @param list
+ */
+void ReagentModel::remove( const QModelIndexList &list ) {
+    // first build a list of QPersistentModelIndexes
+    QList<QPersistentModelIndex> pList;
+    foreach ( const QModelIndex &index, list ) {
+        if ( !index.isValid())
+            continue;
+
+        pList << QPersistentModelIndex( index );
+    }
+
+    // then delete items one by one
+    foreach ( const QPersistentModelIndex &index, qAsConst( pList ))
+        this->removeRow( index.row(), index.parent());
 }

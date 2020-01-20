@@ -15,9 +15,10 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  *
  */
-//
-// includes
-//
+
+/*
+ * includes
+ */
 #include "nodehistory.h"
 #include "reagentmodel.h"
 #include "variable.h"

@@ -268,7 +268,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = ReagentDock::instance()->indexFromId( this->reagentIndex );
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( this->reagentIndex );
     if ( reagentId == Id::Invalid )
         return;
 

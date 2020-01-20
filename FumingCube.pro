@@ -58,6 +58,7 @@ SOURCES += \
     reagentdialog.cpp \
     reagentdock.cpp \
     reagentmodel.cpp \
+    reagentview.cpp \
     script.cpp \
     settingsdialog.cpp \
     structurebrowser.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     reagentdialog.h \
     reagentdock.h \
     reagentmodel.h \
+    reagentview.h \
     script.h \
     settingsdialog.h \
     structurebrowser.h \

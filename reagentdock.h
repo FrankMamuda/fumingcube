@@ -24,6 +24,7 @@
 #include "reagentmodel.h"
 #include "dockwidget.h"
 #include "nodehistory.h"
+#include "reagentview.h"
 #include <QShortcut>
 
 /**
@@ -45,18 +46,12 @@ public:
     ~ReagentDock() override;
     bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
     Id indexFromId( const QModelIndex &index ) const;
+    ReagentView *view() const;
 
 signals:
     void currentIndexChanged( const QModelIndex &index );
 
-public slots:
-    void restoreIndex();
-    void select( const QModelIndex &index );
-    void expand( const QModelIndex &index );
-    void reset();
-
 private slots:
-    void on_reagentView_clicked( const QModelIndex &index );
     void on_reagentView_customContextMenuRequested( const QPoint &pos );
     void on_addButton_clicked();
     void on_removeButton_clicked();
@@ -66,10 +61,8 @@ private slots:
 private:
     explicit ReagentDock( QWidget *parent = nullptr );
     Ui::ReagentDock *ui;
-    ReagentModel *model = new ReagentModel();
     QMainWindow *m_windowParent = nullptr;
     QList<Id> matches;
     Id currentMatch;
     QShortcut *shortcut;
-    NodeHistory *nodeHistory;
 };

@@ -53,8 +53,7 @@ reagents:
  - richtext for names (currently not feasible)
  - multiple aliases?
  - up down arrow in dock does not change index (is this the intended behaviour)
- - option to duplicate reagent?
- - rewrite some redundant ReagentDock code (since NodeHistory was introduced)
+ - implement QSortFilterProxyModel (and remove redundant code)
  - store selection in NodeHisotry
 
 database:
@@ -302,8 +301,7 @@ int main( int argc, char *argv[] ) {
     }
 
     // restore last reagent selection
-    ReagentDock::instance()->reset();
-    ReagentDock::instance()->restoreIndex();
+    ReagentDock::instance()->view()->updateView();
 
     return a.exec();
 }
