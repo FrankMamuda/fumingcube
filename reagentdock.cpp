@@ -58,64 +58,57 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
     // implement search
     this->ui->searchEdit->connect( this->ui->searchEdit, &QLineEdit::textChanged, [ this ]( const QString &filter ) {
-        // update the match list
-        this->matches = this->view()->model()->setupModelData( filter );
+        this->view()->filterModel()->setFilterFixedString( filter );
 
-        // if list empty, reset currentMatch and clear selection
-        if ( this->matches.isEmpty()) {
-            this->currentMatch = Id::Invalid;
-            this->view()->selectReagent( QModelIndex());
-            return;
-        }
-
-        // expand all nodes in search since we want to see all reagents and batches that match the search criteria
         if ( !filter.isEmpty())
             this->view()->expandAll();
 
-        if ( this->currentMatch == Id::Invalid || !this->matches.contains( this->currentMatch )) {
-            // do this if:
-            //   current match has not been set (first search)
-            //   current match differs from the current filter
-            this->currentMatch = this->matches.last();
-            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
-        } else {
-            // the previous item is the same, reselect it
-            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
+        // previous selection is unavailable
+        const QModelIndex &previous( this->view()->selectionModel()->currentIndex());
+        const QModelIndexList list( this->view()->filterModel()->match( previous.isValid() ? previous : this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter, 2, Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
+        if ( !previous.isValid() && !list.isEmpty()) {
+            const QModelIndex nextIndex( list.first());
+            this->view()->selectionModel()->select( list.first(), QItemSelectionModel::ClearAndSelect );
+            this->view()->scrollTo( nextIndex );
+            return;
         }
     } );
 
     // implement going through found entries
     this->ui->searchEdit->connect( this->ui->searchEdit, &QLineEdit::returnPressed, [ this ]() {
+        const QString &filter( this->ui->searchEdit->text());
+
         // no filter - hide the search box
-        if ( this->ui->searchEdit->text().isEmpty()) {
-            this->ui->searchEdit->hide();
+        if ( filter.isEmpty()) {
+            this->on_buttonFind_clicked();
             return;
         }
 
-        if ( this->matches.count() >= 2 ) {
-            // advance or wrap around the match list
-            int pos = this->matches.indexOf( this->currentMatch ) + 1;
-            if ( pos > this->matches.count() - 1 )
-                pos = 0;
+        // previous selection is unavailable
+        const QModelIndexList selectedIndexes( this->view()->selectionModel()->selectedIndexes());
+        const QModelIndex &previousIndex( selectedIndexes.isEmpty() ? QModelIndex() : selectedIndexes.first());
+        const QModelIndexList list( this->view()->filterModel()->match( this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter, -1, Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
 
-            // set the new item
-            this->currentMatch = this->matches.at( pos );
-            this->view()->selectReagent( this->view()->indexFromId( this->currentMatch ));
-        } else {
-            // if there is just one item left, hide the search box
-            this->ui->searchEdit->hide();
+        // if we have more than two reagents, iterate over them
+        if ( list.count() < 2 ) {
+            // if there is only one, close the search
+            if ( list.count() == 1 )
+                this->on_buttonFind_clicked();
+
+            return;
         }
+
+        const int previous = list.indexOf( previousIndex );
+        const int next = ( previous >= list.count() - 1 ) ? 0 : previous + 1;
+        const QModelIndex nextIndex( list.at( next ));
+        this->view()->selectionModel()->select( nextIndex, QItemSelectionModel::ClearAndSelect );
+        this->view()->scrollTo( nextIndex );
     } );
 
     // add keyboard shortcut to reagent filter
     this->shortcut = new QShortcut( QKeySequence( this->tr( "Ctrl+F", "Find" )), this );
     this->shortcut->connect( this->shortcut, &QShortcut::activated, [ this ]() {
-        if ( !this->ui->searchEdit->isVisible())
-            this->on_buttonFind_clicked();
-        else {
-            this->ui->searchEdit->setText( "" );
-            this->ui->searchEdit->hide();
-        }
+        this->on_buttonFind_clicked();
     } );
 }
 
@@ -124,7 +117,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
  */
 ReagentDock::~ReagentDock() {
     delete this->shortcut;
-    delete ui;
+    delete this->ui;
 }
 
 /**
@@ -211,10 +204,10 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
                 // expand parent reagent
                 if ( parentId != Id::Invalid )
-                    this->view()->expand( this->view()->indexFromId( parentId ));
+                    this->view()->expand( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
 
                 // select the newly added reagent or batch
-                this->view()->selectReagent( this->view()->indexFromId( reagentId ));
+                this->view()->selectReagent( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
 
                 // open extraction dialog if this feature is enabled
                 if ( Variable::instance()->isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
@@ -231,7 +224,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
 
     menu.addAction( this->tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ));
 
-    const QModelIndex index( this->view()->currentIndex());
+    const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
     if ( index.isValid()) {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
@@ -320,19 +313,23 @@ void ReagentDock::on_removeButton_clicked() {
     // remove reagents and batches (list)
     if ( list.count() > 1 ) {
         menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
-            foreach ( const QModelIndex &index, list ) {
+            QModelIndexList sourceList;
+            foreach ( const QModelIndex &filter, list ) {
+                const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
+                sourceList << index;
+
                 const QStandardItem *item( this->view()->itemFromIndex( index ));
                 if ( item != nullptr )
                     removeReagentsAndBatches( item );
             }
 
             // remove items without resetting model
-            this->view()->model()->remove( list );
+            this->view()->model()->remove( qAsConst( sourceList ));
         } );
     } else {
         // remove just one entry
         // get current index
-        const QModelIndex index( this->view()->currentIndex());
+        const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
         if ( !index.isValid())
             return;
 
@@ -351,7 +348,7 @@ void ReagentDock::on_removeButton_clicked() {
 
             // reselect parent reagent item if any
             if ( parentId != Id::Invalid )
-                this->view()->selectReagent( this->view()->indexFromId( parentId ));
+                this->view()->selectReagent( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
         } );
     }
 
@@ -363,14 +360,28 @@ void ReagentDock::on_removeButton_clicked() {
  * @brief ReagentDock::on_buttonFind_clicked
  */
 void ReagentDock::on_buttonFind_clicked() {
-    const bool visible = this->ui->searchEdit->isVisible();
+    // toggle searchBox visibility
+    this->ui->searchEdit->setVisible( !this->ui->searchEdit->isVisible() );
 
-    this->view()->nodeHistory()->setEnabled( visible );
-    this->ui->searchEdit->setVisible( !visible );
-    if ( !visible ) {
+    if ( this->ui->searchEdit->isVisible()) {
+        // disable node history
+        this->view()->nodeHistory()->setEnabled( false );
+
+        // focus on the searchBox
         this->ui->searchEdit->setFocus();
+
+        // select the first reagent
+        this->view()->selectionModel()->clearSelection();
+        this->view()->selectionModel()->select( this->view()->filterModel()->index( 0, 0 ), QItemSelectionModel::Select );
     } else {
-        this->view()->updateView();
+        const QModelIndexList list( this->view()->selectionModel()->selectedIndexes());
+        if ( !list.isEmpty())
+            Variable::instance()->setValue( "reagentDock/selection", static_cast<int>( this->view()->idFromIndex( this->view()->filterModel()->mapToSource( list.first()))));
+
+        this->ui->searchEdit->clear();
+        this->view()->nodeHistory()->setEnabled( true );
+        this->view()->nodeHistory()->restoreNodeState();
+        this->view()->restoreIndex();
     }
 }
 
@@ -379,7 +390,7 @@ void ReagentDock::on_buttonFind_clicked() {
  */
 void ReagentDock::on_editButton_clicked() {
     // get current index
-    const QModelIndex index( this->view()->currentIndex());
+    const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
     if ( !index.isValid())
         return;
 

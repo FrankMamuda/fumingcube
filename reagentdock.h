@@ -45,7 +45,6 @@ public:
     static ReagentDock *instance() { static ReagentDock *reagentDock( new ReagentDock()); return reagentDock; }
     ~ReagentDock() override;
     bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
-    Id indexFromId( const QModelIndex &index ) const;
     ReagentView *view() const;
 
 signals:
@@ -61,8 +60,5 @@ private slots:
 private:
     explicit ReagentDock( QWidget *parent = nullptr );
     Ui::ReagentDock *ui;
-    QMainWindow *m_windowParent = nullptr;
-    QList<Id> matches;
-    Id currentMatch;
     QShortcut *shortcut;
 };

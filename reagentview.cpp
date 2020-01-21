@@ -23,7 +23,6 @@
 #include "propertydock.h"
 #include "reagentview.h"
 #include "reagent.h"
-#include <QSortFilterProxyModel>
 
 /**
  * @brief ReagentView::ReagentView
@@ -31,10 +30,11 @@
  */
 ReagentView::ReagentView( QWidget *parent) : QTreeView( parent ) {
     // set a model to treeview
-    //QSortFilterProxyModel *filterModel( new QSortFilterProxyModel());
-    //filterModel->setSourceModel( new ReagentModel());
-    //filterModel->setRecursiveFilteringEnabled( true );
-    this->setModel( new ReagentModel());
+    this->setModel( new QSortFilterProxyModel());
+    this->filterModel()->setSourceModel( new ReagentModel());
+    this->filterModel()->setRecursiveFilteringEnabled( true );
+    this->filterModel()->setSortCaseSensitivity( Qt::CaseInsensitive );
+    this->filterModel()->setFilterCaseSensitivity( Qt::CaseInsensitive );
     this->setRootIndex( this->model()->invisibleRootItem()->index());
 
     this->m_nodeHistory = new NodeHistory( this );
@@ -49,7 +49,7 @@ void ReagentView::updateView() {
     this->model()->setupModelData();
 
     // clear selection
-    this->model()->sort( 0, Qt::AscendingOrder );
+    this->filterModel()->sort( 0, Qt::AscendingOrder );
     this->nodeHistory()->restoreNodeState();
     this->restoreIndex();
 }
@@ -58,8 +58,10 @@ void ReagentView::updateView() {
  * @brief ReagentView::selectReagent
  * @param index
  */
-void ReagentView::selectReagent( const QModelIndex &index ) {
+void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
+    const QModelIndex &index( this->filterModel()->mapToSource( filterIndex ));
     this->setCurrentIndex( index );
+    this->selectionModel()->select( filterIndex, QItemSelectionModel::ClearAndSelect );
 
     // if reagent is invalid, display no properties
     if ( !index.isValid()) {
@@ -99,9 +101,11 @@ void ReagentView::restoreIndex() {
     if ( id != Id::Invalid ) {
         const Id parentId( Reagent::instance()->parentId( id ));
         if ( parentId != Id::Invalid )
-            this->expand( this->indexFromId( parentId ));
+            this->expand( this->filterModel()->mapFromSource( this->indexFromId( parentId )));
 
-        this->selectReagent( this->indexFromId( id ));
+        const QModelIndex index( this->filterModel()->mapFromSource( this->indexFromId( id )));
+        this->selectReagent( index );
+        this->scrollTo( index );
         return;
     }
 

@@ -21,6 +21,7 @@
  */
 #include "nodehistory.h"
 #include "reagentmodel.h"
+#include "reagentview.h"
 #include "variable.h"
 #include <QStandardItem>
 
@@ -32,15 +33,15 @@ NodeHistory::NodeHistory( QTreeView *parent ) : m_treeParent( parent ) {
     if ( parent == nullptr )
         return;
 
-    auto saveNodeState = [ this ]( const QModelIndex &index, bool expanded ) {
+    auto saveNodeState = [ this ]( const QModelIndex &filtered, bool expanded ) {
         if ( !this->isEnabled())
             return;
 
-        const QStandardItemModel *model( qobject_cast<QStandardItemModel*>( this->treeParent()->model()));
-        if ( model == nullptr )
+        const ReagentView *view( qobject_cast<ReagentView*>( this->treeParent()));
+        if ( view == nullptr )
             return;
 
-        const Id id = model->itemFromIndex( index )->data( ReagentModel::ID ).value<Id>();
+        const Id id = view->idFromIndex( view->filterModel()->mapToSource( filtered ));
         if ( id == Id::Invalid )
             return;
 
@@ -84,19 +85,22 @@ void NodeHistory::restoreNodeState() {
 
     this->setEnabled( false );
 
-    const QStandardItemModel *model( qobject_cast<QStandardItemModel*>( this->treeParent()->model()));
-    if ( model == nullptr )
+    ReagentView *view( qobject_cast<ReagentView*>( this->treeParent()));
+    if ( view == nullptr )
         return;
 
     this->treeParent()->collapseAll();
-    for ( int y = 0; y < model->invisibleRootItem()->rowCount(); y++ ) {
-        const QStandardItem *item( model->invisibleRootItem()->child( y ));
+    for ( int y = 0; y < view->model()->invisibleRootItem()->rowCount(); y++ ) {
+        const QStandardItem *item( view->model()->invisibleRootItem()->child( y ));
         const QModelIndex index( item->index());
         if ( !index.isValid())
             continue;
 
+        if ( view == nullptr )
+            return;
+
         if ( this->openNodes.contains( item->data( ReagentModel::ID ).value<Id>()))
-            this->treeParent()->expand( index );
+            view->expand( view->filterModel()->mapFromSource( index ));
     }
 
     this->setEnabled();

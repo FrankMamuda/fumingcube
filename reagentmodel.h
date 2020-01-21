@@ -57,8 +57,6 @@ public:
      */
     QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
     QVariant data( const QModelIndex &index, int role ) const override;
-    QList<Id> setupModelData( const QString &filter = QString());
-    void sort( int column = 0, Qt::SortOrder order = Qt::AscendingOrder ) override;
     QModelIndex indexFromId( const Id &id ) const;
     Id idFromIndex( const QModelIndex &index ) const;
     static QString generateName( const QString &name, const QString &alias = QString());
@@ -66,6 +64,7 @@ public:
 public slots:
     void add( const Id &id );
     void addItem( const Id &id, const Id &parentId, QStandardItem *parentItem );
+    void setupModelData();
 
     /**
      * @brief remove

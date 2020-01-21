@@ -50,10 +50,10 @@
  TODO:
 
 reagents:
- - richtext for names (currently not feasible)
+ - richtext for names (currently not feasible) (but we can use subscript
+   and superscript)
  - multiple aliases?
  - up down arrow in dock does not change index (is this the intended behaviour)
- - implement QSortFilterProxyModel (and remove redundant code)
  - store selection in NodeHisotry
 
 database:
@@ -100,6 +100,8 @@ misc:
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate
    class
+ - some widgets (QListView in TagEditor, QTextEdit in PropertyEditor) are
+   dark in light mode when windows theme set to dark
 
 variables:
  - automatically store QByteArray as base64

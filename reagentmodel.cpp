@@ -23,6 +23,7 @@
 #include "reagent.h"
 #include "label.h"
 #include "labeldock.h"
+#include "reagentdock.h"
 #include <QDebug>
 
 /**
@@ -78,90 +79,36 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
 
 /**
  * @brief ReagentModel::setupModelData
- * @param filter
  * @return
  */
-QList<Id> ReagentModel::setupModelData( const QString &filter ) {
+void ReagentModel::setupModelData() {
     // clear index cache
     this->beginResetModel();
-
     this->clear();
-
-    // make a list of matches (for search)
-    QList<Id> total;
 
     // go through reagents and their batches
     for ( int y = 0; y < Reagent::instance()->count(); y++ ) {
         const Row row = Reagent::instance()->row( y );
-        const Id parentId = Reagent::instance()->parentId( row );
 
-        // add top level reagents first
-        if ( parentId != Id::Invalid )
+        // add top level reagents first (skip batches)
+        if ( Reagent::instance()->parentId( row ) != Id::Invalid )
             continue;
 
-        const QString reagentName( Reagent::instance()->name( row ));
-        const QString alias( Reagent::instance()->alias( row ));
-        const Id reagentId = Reagent::instance()->id( row );
-        bool found = false;
-
         // make a new reagent treeItem
-        QStandardItem *reagent( new QStandardItem( ReagentModel::generateName( reagentName, alias )));
+        const Id reagentId = Reagent::instance()->id( row );
+        QStandardItem *reagent( new QStandardItem( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->alias( row ))));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
 
         // go through batches (children of the reagent)
-        const QList<Row>children( Reagent::instance()->children( row ));
-        foreach ( const Row &child, children ) {
-            const QString childName( Reagent::instance()->name( child ));
-            const Id childId = Reagent::instance()->id( child );
+        foreach ( const Row &child, Reagent::instance()->children( row ))
+            this->addItem( Reagent::instance()->id( child ), reagentId, reagent );
 
-            // apply search filter if any
-            if ( !filter.isEmpty() && !childName.contains( filter, Qt::CaseInsensitive ))
-                continue;
-
-            // add batch to both treeView and search list
-            this->addItem( childId, reagentId, reagent );
-            found = true;
-            total << childId;
-        }
-
-        if ( found || filter.isEmpty()) {
-            // add reagent to treeView
-            this->invisibleRootItem()->appendRow( reagent );
-
-            // add reagent to search list
-            if ( filter.isEmpty())
-                total << reagentId;
-            else if ( !filter.isEmpty() && reagentName.contains( filter, Qt::CaseInsensitive ))
-                total << reagentId;
-        } else {
-            // if no batches are found that match the filter
-            // apply filter to reagent
-            if ( !filter.isEmpty() && reagentName.contains( filter, Qt::CaseInsensitive )) {
-                // add reagent to both treeView and search list
-                this->invisibleRootItem()->appendRow( reagent );
-                total.prepend( reagentId );
-            }
-        }
+        // add reagent to treeView
+        this->invisibleRootItem()->appendRow( reagent );
     }
 
     this->endResetModel();
-
-    // reverse and return search results
-    std::reverse( total.begin(), total.end());
-    return total;
-}
-
-/**
- * @brief ReagentModel::sort
- * @param column
- * @param order
- */
-void ReagentModel::sort( int, Qt::SortOrder order ) {
-    // FIXME: are children sorted?
-
-    emit this->layoutAboutToBeChanged();
-    this->invisibleRootItem()->sortChildren( 0, order );
 }
 
 /**
@@ -230,7 +177,7 @@ void ReagentModel::add( const Id &id ) {
         this->addItem( id, Id::Invalid, this->invisibleRootItem());
     }
 
-    this->sort();
+    ReagentDock::instance()->view()->filterModel()->sort( 0, Qt::AscendingOrder );
 }
 
 /**

@@ -23,6 +23,7 @@
  */
 #include "nodehistory.h"
 #include "reagentmodel.h"
+#include <QSortFilterProxyModel>
 #include <QTreeView>
 
 /**
@@ -43,7 +44,13 @@ public:
      * @brief model
      * @return
      */
-    ReagentModel *model() const { return qobject_cast<ReagentModel*>( QTreeView::model()); }
+    ReagentModel *model() const { return qobject_cast<ReagentModel*>( this->filterModel()->sourceModel()); }
+
+    /**
+     * @brief filterModel
+     * @return
+     */
+    QSortFilterProxyModel *filterModel() const { return qobject_cast<QSortFilterProxyModel*>( QTreeView::model()); }
 
     /**
      * @brief nodeHistory
@@ -74,7 +81,7 @@ public:
 
 public slots:
     void updateView();
-    void selectReagent( const QModelIndex &index = QModelIndex());
+    void selectReagent( const QModelIndex &filterIndex = QModelIndex());
     //void openContextMenu( const QPoint &pos );
     void restoreIndex();
 
