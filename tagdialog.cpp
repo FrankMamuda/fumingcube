@@ -172,6 +172,8 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                 Tag::instance()->setPrecision( row, this->ui->precisionSpin->value());
                 Tag::instance()->setFunction( row, this->ui->functionEdit->text());
                 Tag::instance()->setScale( row, this->ui->scaleSpin->value());
+                Tag::instance()->setScript( row, this->ui->patternEdit->text());
+
             } else if ( this->mode() == Add ) {
                 Tag::instance()->add(
                             this->ui->nameEdit->text(),
@@ -182,7 +184,8 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                             this->ui->valueEdit->text(),
                             this->ui->precisionSpin->value(),
                             this->ui->functionEdit->text(),
-                            this->ui->scaleSpin->value()
+                            this->ui->scaleSpin->value(),
+                            this->ui->patternEdit->text()
                             );
             }
         }
@@ -285,6 +288,7 @@ void TagDialog::on_actionEdit_triggered() {
     this->ui->precisionSpin->setValue( Tag::instance()->precision( row ));
     this->ui->functionEdit->setText( Tag::instance()->function( row ));
     this->ui->scaleSpin->setValue( Tag::instance()->scale( row ));
+    this->ui->patternEdit->setText( Tag::instance()->script( row ).toString());
 }
 
 /**
@@ -300,6 +304,8 @@ void TagDialog::clear() {
     this->ui->functionEdit->clear();
     this->ui->scaleSpin->setValue( 1.0 );
     this->ui->typeCombo->setCurrentIndex( 0 );
+    this->ui->patternEdit->clear();
+
     this->setMode();
 }
 

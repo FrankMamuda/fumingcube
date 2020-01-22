@@ -76,6 +76,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
                     ok = false;
             }
 
+            // FIXME: is this compatible with dark mode?
             this->ui->textEdit->setStyleSheet( ok ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
             this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( ok );
         } );
@@ -90,13 +91,26 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
 
             QString simplified( text.simplified());
             int pos = 0;
+
+            // FIXME: is this compatible with dark mode?
             this->ui->textEdit->setStyleSheet(( QRegularExpressionValidator( pattern ).validate( simplified, pos ) == QValidator::Acceptable ) ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
         } );
     }
         break;
 
     case Tag::Text:
-        this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
+        this->ui->textEditMultiLine->setPlainText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
+        break;
+
+    case Tag::State:
+    {
+        bool ok;
+        int index = QString( defaultValue.isEmpty() ? "0" : defaultValue ).toInt( &ok );
+        if ( !ok )
+            index = 0;
+
+        this->ui->stateCombo->setCurrentIndex( qAsConst( index ));
+    }
         break;
 
     default:
@@ -113,7 +127,19 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         this->ui->advancedButton->hide();
 
     // focus on input dialog
-    this->ui->textEdit->setFocus();
+    if ( type == Tag::Text ) {
+        this->ui->stackedWidget->setCurrentIndex( 1 );
+        this->ui->textEditMultiLine->setFocus();
+        this->adjustSize();
+    } else if ( type == Tag::State ) {
+        this->ui->stackedWidget->setCurrentIndex( 2 );
+        this->ui->stateCombo->setFocus();
+    } else {
+        this->ui->stackedWidget->setCurrentIndex( 0 );
+        this->ui->textEdit->setFocus();
+    }
+
+    this->ui->textEditMultiLine->resize( this->ui->textEdit->size());
 }
 
 /**
@@ -133,7 +159,7 @@ QVariant PropertyDialog::value() const {
 
     switch ( Tag::instance()->type( this->tag )) {
     case Tag::Text:
-        return this->ui->textEdit->text();
+        return this->ui->textEditMultiLine->toPlainText();
 
     case Tag::CAS:
         return this->ui->textEdit->text().simplified();
@@ -143,6 +169,9 @@ QVariant PropertyDialog::value() const {
 
     case Tag::Integer:
         return this->ui->textEdit->text().toInt();
+
+    case Tag::State:
+        return this->ui->stateCombo->currentIndex();
 
     default:
         ;

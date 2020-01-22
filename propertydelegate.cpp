@@ -125,7 +125,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                     // insert data into the cache
                     this->cache[checksum][scaledSize.width()] = pixmapData;
-                   // qDebug() << "TO CACHE";
+                    // qDebug() << "TO CACHE";
 
                     return true;
                 };
@@ -170,8 +170,33 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
             QString stringData( data.toString());
             if ( tagId != Id::Invalid ) {
-                if ( Tag::instance()->type( tagId ) == Tag::Real )
+                const Tag::Types type =  Tag::instance()->type( tagId );
+                if ( type == Tag::Real )
                     stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" )));
+                else if ( type == Tag::State ) {
+                    bool ok;
+                    int index = stringData.toInt( &ok );
+
+                    if ( !ok )
+                        index = -1;
+
+                    switch ( index ) {
+                    case 0:
+                        stringData = this->tr( "Solid" );
+                        break;
+
+                    case 1:
+                        stringData = this->tr( "Liquid" );
+                        break;
+
+                    case 2:
+                        stringData = this->tr( "Gaseous" );
+                        break;
+
+                    default:
+                        stringData = this->tr( "Unknown" );
+                    }
+                }
             }
 
             html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML( qAsConst( stringData ) + units )));

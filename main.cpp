@@ -65,11 +65,8 @@ properties:
  - filter in dock
  - icons in "add property" menu
  - solubility data as a property
- - script editing in tag dialog
  - must remove orphaned properties on tag removal
- - state property
  - fetch 'other names' such as IUPAC name
- - add multiline edit option in textual properties (tagged, not custom)
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -85,7 +82,6 @@ scripting:
    mol = mass * assay( reagent ) / molarMass( reagent )
  - add 'any' as batch name (a whildcard that chooses any batch with the
    property)
- - check API
  - implement ans (history), Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
    in that order; useful when assay is not defined)

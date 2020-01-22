@@ -174,6 +174,7 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
         case Tag::Text:
         case Tag::Integer:
         case Tag::Real:
+        case Tag::State:
         {
             // goto rich text editor
             if ( type == Tag::Text && Qt::mightBeRichText( qAsConst( value )))
@@ -203,7 +204,6 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
 
         case Tag::Formula:
         case Tag::NoType:
-        case Tag::State:
             return values;
         }
     }

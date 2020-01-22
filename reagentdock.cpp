@@ -424,7 +424,7 @@ void ReagentDock::on_editButton_clicked() {
         const QString name( rd.name());
         const QString alias( rd.alias());
 
-        if ( !this->checkForDuplicates( name, alias, reagentId ) || name.isEmpty() || alias.isEmpty())
+        if ( !this->checkForDuplicates( name, alias, reagentId ) || name.isEmpty() || alias.isEmpty() || !ok )
             return;
 
         Reagent::instance()->setName( reagentRow, name );
