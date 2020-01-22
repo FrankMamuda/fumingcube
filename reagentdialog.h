@@ -43,9 +43,6 @@ public:
     QString name() const;
     QString alias() const;
 
-private slots:
-    void on_nameEdit_textChanged( const QString &text );
-
 private:
     Ui::ReagentDialog *ui;
     QCompleter *completer;

@@ -19,9 +19,12 @@
 /*
  * includes
  */
+#include "charactermap.h"
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
 #include "variable.h"
+
+#include <QRegularExpression>
 
 /*
  * Reagent alias map
@@ -141,6 +144,138 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
 
     // bind property button
     this->variables << Variable::instance()->bind( "fetchPropertiesOnAddition", this->ui->propertyCheck );
+
+    this->connect( this->ui->charButton, &QToolButton::pressed, [ this ]() {
+        CharacterMap cm( this );
+
+        // add character map action
+        this->connect( &cm, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
+            QLineEdit *editor = qobject_cast<QLineEdit*>( this->focusWidget());
+
+            if ( editor != this->ui->nameEdit )
+                return;
+
+            editor->insert( character );
+        } );
+
+        cm.exec();
+    } );
+
+    const QList<QChar> supList {
+        0x2070,
+        0x00b9,
+        0x00b2,
+        0x00b3,
+        0x2074,
+        0x2075,
+        0x2076,
+        0x2077,
+        0x2078,
+        0x2079
+    };
+
+    const QList<QChar> subList {
+        0x2080,
+        0x2081,
+        0x2082,
+        0x2083,
+        0x2084,
+        0x2085,
+        0x2086,
+        0x2087,
+        0x2088,
+        0x2089
+    };
+
+    auto subSupModifier = [ this ]( const QList<QChar> list ) {
+        QLineEdit *editor = qobject_cast<QLineEdit*>( this->focusWidget());
+        if ( editor != this->ui->nameEdit )
+            return;
+
+        const int cursorPos = editor->cursorPosition();
+        const int selectionStart = editor->selectionStart();
+
+        bool allDigits = true;
+
+
+        QString out;
+        foreach ( const QChar &ch, editor->selectedText()) {
+            if ( !ch.isDigit()) {
+                if ( list.contains( ch )) {
+                    out.append( QString::number( list.indexOf( ch )));
+                    continue;
+                }
+
+                allDigits = false;
+                break;
+            }
+
+            const int digit = QString( ch ).toInt();
+            out.append( list[digit] );
+        }
+        if ( !allDigits)
+            return ;
+
+        this->ui->nameEdit->setText( QString( editor->text()).replace( selectionStart, out.length(), qAsConst( out )));
+        this->ui->nameEdit->setCursorPosition( cursorPos );
+        this->ui->nameEdit->setSelection( selectionStart, out.length());
+    };
+
+    this->connect( this->ui->subButton, &QToolButton::pressed, std::bind( subSupModifier, subList ));
+    this->connect( this->ui->supButton, &QToolButton::pressed, std::bind( subSupModifier, supList ));
+
+    this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, [ this, supList, subList ]( const QString &text ) {
+        QString out( text );
+        QString out2( text );
+
+#if 0
+        const QLineEdit *n( this->ui->nameEdit );
+
+        if ( n->cursorPosition() > 1 && n->cursorPosition() == n->text().length()) {
+            //const QString prev( QString( n->text().at( n->cursorPosition() - 1 )).prepend(( n->cursorPosition() > 1 ) ? n->text().at( n->cursorPosition() - 2 ) : QChar()));
+            //const QString current( n->text().at( n->cursorPosition()));
+            //qDebug() << prev << prev.at( 0 ).isLetter() << current;
+
+            //QString out( text );
+
+            const QRegularExpression re( "(\\w)(\\d+)$" );
+            const QRegularExpressionMatch match( re.match( n->text()));
+            if ( match.hasMatch()) {
+
+                int index = match.capturedStart() + match.captured( 1 ).length();
+                foreach ( const QChar &ch, match.captured( 2 )) {
+                    qDebug() << index << QString( ch ).toInt() << supList[QString( ch ).toInt()];
+                    out2 = out2.replace( index, 1, subList[QString( ch ).toInt()] );
+                    index++;
+                }
+
+                qDebug() << "REPLACED" << out2;
+            }
+        }
+#endif
+
+        // replace back
+        foreach ( const QChar &ch, supList ) {
+            const int index = supList.indexOf( ch );
+            if ( index >= 0 )
+                out.replace( ch, QString::number( index ));
+        }
+
+        // replace back
+        foreach ( const QChar &ch, subList ) {
+            const int index = subList.indexOf( ch );
+            if ( index >= 0 )
+                out.replace( ch, QString::number( index ));
+        }
+
+#if 0
+        qDebug() << out2;
+        if ( QString::compare( n->text(), out2 ))
+            this->ui->nameEdit->setText( out2 );
+#endif
+
+        this->ui->aliasEdit->setText( reagentAliases.keys().contains( qAsConst( out )) ? reagentAliases[qAsConst( out )] : QString( qAsConst( out )).remove( ' ' ));
+    } );
 }
 
 /**
@@ -169,12 +304,4 @@ QString ReagentDialog::name() const {
  */
 QString ReagentDialog::alias() const {
     return this->ui->aliasEdit->text();
-}
-
-/**
- * @brief ReagentDialog::on_nameEdit_textChanged
- * @param text
- */
-void ReagentDialog::on_nameEdit_textChanged( const QString &text ) {
-    this->ui->aliasEdit->setText( reagentAliases.keys().contains( text ) ? reagentAliases[text] : QString( text ).remove( ' ' ));
 }

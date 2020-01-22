@@ -50,8 +50,6 @@
  TODO:
 
 reagents:
- - richtext for names (currently not feasible) (but we can use subscript
-   and superscript)
  - multiple aliases?
  - up down arrow in dock does not change index (is this the intended behaviour)
  - store selection in NodeHisotry

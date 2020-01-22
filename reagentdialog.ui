@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>134</height>
+    <width>336</width>
+    <height>118</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,51 +17,76 @@
    <iconset theme="reagent">
     <normaloff>.</normaloff>.</iconset>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <item row="1" column="0">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="nameLabel">
      <property name="text">
       <string>Reagent name</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="0" column="2">
     <widget class="QLineEdit" name="nameEdit">
      <property name="placeholderText">
       <string>Type a reagent name</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="1" column="0">
     <widget class="QLabel" name="aliasLabel">
      <property name="text">
       <string>Reference</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="1" column="2">
     <widget class="QLineEdit" name="aliasEdit">
      <property name="placeholderText">
       <string>Type a unique reference (calculator)</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="ButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="2">
+   <item row="2" column="0" colspan="3">
     <widget class="QCheckBox" name="propertyCheck">
      <property name="text">
       <string>Retrieve properties after addition</string>
      </property>
     </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QToolButton" name="subButton">
+       <property name="text">
+        <string>x₂</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="supButton">
+       <property name="text">
+        <string>x²</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="charButton">
+       <property name="text">
+        <string>Å</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

@@ -63,6 +63,5 @@ private slots:
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;
-    QModelIndex reagentIndex;
     QPair<QString, QVariant> getPropertyValue(const Id &reagentId, const Id &tagId = Id::Invalid, const Id &propertyId = Id::Invalid ) const;
 };

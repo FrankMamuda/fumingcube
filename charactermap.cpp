@@ -35,7 +35,7 @@ CharacterMap::CharacterMap( QWidget *parent ) : QDialog( parent ), blockId( qMak
     this->setWindowTitle( this->tr( "Character selector" ));
 
     // get character list
-    this->characters = CharacterNamespace::SpecialChars.split( ";" );
+    this->characters = CharacterNamespace::SpecialChars;
 }
 
 /**
@@ -74,7 +74,7 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
                 painter.fillRect( rect, QColor::fromRgb( 255, 0, 0, 128 ));
 
             // draw character
-            painter.drawText( rect, Qt::AlignCenter, QString::fromUtf8( this->characters.at( y ).toUtf8().data()));
+            painter.drawText( rect, Qt::AlignCenter, this->characters.at( y ));
         }
     }
 
@@ -107,7 +107,7 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
                 // set blockId, repaint the widget and insert character in the parent widget
                 this->blockId = qMakePair( hBlock, vBlock );
                 this->repaint();
-                emit this->characterSelected( QString::fromUtf8( this->characters.at( y ).toUtf8().data()));
+                emit this->characterSelected( this->characters.at( y ));
             }
         }
     }

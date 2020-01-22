@@ -60,7 +60,7 @@ void ReagentView::updateView() {
  */
 void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
     const QModelIndex &index( this->filterModel()->mapToSource( filterIndex ));
-    this->setCurrentIndex( index );
+    this->setCurrentIndex( filterIndex );
     this->selectionModel()->select( filterIndex, QItemSelectionModel::ClearAndSelect );
 
     // if reagent is invalid, display no properties
@@ -106,6 +106,7 @@ void ReagentView::restoreIndex() {
         const QModelIndex index( this->filterModel()->mapFromSource( this->indexFromId( id )));
         this->selectReagent( index );
         this->scrollTo( index );
+
         return;
     }
 

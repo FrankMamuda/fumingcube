@@ -71,10 +71,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
         buttonTest( current );
     } );
 
-    ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged, [ this ]( const QModelIndex &current ) {
-        this->reagentIndex = current;
-        this->ui->addPropButton->setEnabled( this->reagentIndex.isValid());
-    } );
+    ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged, [ this ]( const QModelIndex &current ) { this->ui->addPropButton->setEnabled( current.isValid()); } );
 
     // move up/down lambda
     auto move = [ this, buttonTest ]( bool up ) {
@@ -264,11 +261,11 @@ void PropertyDock::clearDocumentCache() {
  */
 void PropertyDock::on_addPropButton_clicked() {
     // check if reagent is valid
-    if ( !this->reagentIndex.isValid())
+    if ( !ReagentDock::instance()->view()->currentIndex().isValid())
         return;
 
     // get reagent id
-    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( this->reagentIndex );
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( ReagentDock::instance()->view()->filterModel()->mapToSource( ReagentDock::instance()->view()->currentIndex()));
     if ( reagentId == Id::Invalid )
         return;
 
@@ -524,11 +521,12 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
-    if ( !this->ui->propertyView->currentIndex().isValid() || this->ui->propertyView->selectionModel()->selectedRows().count() > 1 || !this->reagentIndex.isValid())
+    const QModelIndex reagentIndex( ReagentDock::instance()->view()->filterModel()->mapToSource( ReagentDock::instance()->view()->currentIndex()));
+    if ( !this->ui->propertyView->currentIndex().isValid() || this->ui->propertyView->selectionModel()->selectedRows().count() > 1 || !reagentIndex.isValid())
         return;
 
     // get reagent id
-    const Id reagentId = static_cast<QStandardItem*>( this->reagentIndex.internalPointer())->data( ReagentModel::ID ).value<Id>();
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( reagentIndex );
     if ( reagentId == Id::Invalid )
         return;
 
