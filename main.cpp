@@ -91,8 +91,6 @@ misc:
    (not sure how to get a list of vars from globalObject, though)
  - unify text editor toolbars (in tagedit and propertyedit) as a separate
    class
- - some widgets (QListView in TagEditor, QTextEdit in PropertyEditor) are
-   dark in light mode when windows theme set to dark
 
 future:
  - common reaction browser

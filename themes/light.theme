@@ -18,9 +18,9 @@ PaletteHighlightedText=ffffffff
 PaletteToolTipText=ff000000
 PaletteLink=ff000000
 PaletteLinkVisited=ffa57aff
-PaletteWindowDisabled=ff444444
+PaletteWindowDisabled=ffcccccc
 PaletteWindowTextDisabled=55000000
-PaletteBaseDisabled=ff444444
+PaletteBaseDisabled=ffcccccc
 PaletteTextDisabled=55000000
 
 [Syntax]

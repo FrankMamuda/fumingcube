@@ -104,9 +104,6 @@ void NodeHistory::restoreNodeState() {
     }
 
     this->setEnabled();
-
-    // FIXME: save on exit
-    this->saveHistory();
 }
 
 /**

@@ -162,7 +162,7 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
 
     auto subSupModifier = [ this ]( const QList<QChar> list ) {
         QLineEdit *editor = qobject_cast<QLineEdit*>( this->focusWidget());
-        if ( editor != this->ui->nameEdit || editor != this->ui->aliasEdit )
+        if ( editor != this->ui->nameEdit && editor != this->ui->aliasEdit )
             return;
 
         const int cursorPos = editor->cursorPosition();
@@ -187,13 +187,15 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
         if ( !allDigits)
             return;
 
-        this->ui->nameEdit->setText( QString( editor->text()).replace( selectionStart, out.length(), qAsConst( out )));
-        this->ui->nameEdit->setCursorPosition( cursorPos );
-        this->ui->nameEdit->setSelection( selectionStart, out.length());
+        editor->blockSignals( true );
+        editor->setText( QString( editor->text()).replace( selectionStart, out.length(), qAsConst( out )));
+        editor->blockSignals( false );
+        editor->setCursorPosition( cursorPos );
+        editor->setSelection( selectionStart, out.length());
     };
 
-    this->connect( this->ui->subButton, &QToolButton::pressed, std::bind( subSupModifier, ReagentTools::SuperscriptDigits ));
-    this->connect( this->ui->supButton, &QToolButton::pressed, std::bind( subSupModifier, ReagentTools::SubscriptDigits ));
+    this->connect( this->ui->supButton, &QToolButton::pressed, std::bind( subSupModifier, ReagentTools::SuperscriptDigits ));
+    this->connect( this->ui->subButton, &QToolButton::pressed, std::bind( subSupModifier, ReagentTools::SubscriptDigits ));
 
     this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, [ this ]( const QString &text ) {
         QLineEdit *a( this->ui->aliasEdit );
@@ -208,7 +210,8 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
         QString alias( QString( text ).remove( ' ' ));
         const QString plain( ReagentTools::ScriptToDigits( alias ));
 
-        if ( a->cursorPosition() > 1 && a->cursorPosition() == plain.length()) {
+        const int cursorPos = a->cursorPosition();
+        if ( cursorPos > 1 && a->cursorPosition() == plain.length()) {
             const QRegularExpression re( "([a-zA-Z])(\\d+)$" );
             const QRegularExpressionMatch match( re.match( plain ));
             if ( match.hasMatch()) {
@@ -221,6 +224,7 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
 
         a->blockSignals( true );
         a->setText( alias );
+        a->setCursorPosition( cursorPos );
         a->blockSignals( false );
     } );
 }

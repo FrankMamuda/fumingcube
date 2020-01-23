@@ -130,7 +130,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
  * @brief Label::removeOrphanedEntries
  */
 void Label::removeOrphanedEntries() {
-    // NOTE: STUB
+    // NOTE: labels do not have foreign ids, therefore they cannot be orphaned
 }
 
 /**

@@ -40,6 +40,8 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         return;
 
     const Tag::Types type = Tag::instance()->type( tagId );
+    const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
+
     switch ( type ) {
     case Tag::Integer:
     case Tag::Real:
@@ -50,7 +52,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
         this->ui->textEdit->setValidator( validator );
         this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
         this->ui->textEdit->setAlignment( Qt::AlignRight );
-        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, tagId, type ]( const QString &text ) {
+        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, tagId, type, darkMode ]( const QString &text ) {
             bool ok;
 
             const QString minStr( Tag::instance()->minValue( tagId ).toString());
@@ -76,8 +78,10 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
                     ok = false;
             }
 
-            // FIXME: is this compatible with dark mode?
-            this->ui->textEdit->setStyleSheet( ok ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
+            if ( darkMode )
+                this->ui->textEdit->setStyleSheet( ok ? "QLineEdit {}" : "QLineEdit { background-color: #ff5555; color: white; }" );
+            else
+                this->ui->textEdit->setStyleSheet( ok ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
             this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( ok );
         } );
     }
@@ -86,14 +90,17 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
     case Tag::CAS:
     {
         this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
-        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this ]( const QString &text ) {
+        this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, darkMode ]( const QString &text ) {
             const QRegularExpression pattern( "\\d{2,7}-\\d{2}-\\d{1}" );
 
             QString simplified( text.simplified());
             int pos = 0;
 
-            // FIXME: is this compatible with dark mode?
-            this->ui->textEdit->setStyleSheet(( QRegularExpressionValidator( pattern ).validate( simplified, pos ) == QValidator::Acceptable ) ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
+            const bool acceptable = ( QRegularExpressionValidator( pattern ).validate( simplified, pos ) == QValidator::Acceptable );
+            if ( darkMode )
+                this->ui->textEdit->setStyleSheet( acceptable ? "QLineEdit {}" : "QLineEdit { background-color: #ff5555; color: white; }" );
+            else
+                this->ui->textEdit->setStyleSheet( acceptable ? "QLineEdit {}" : "QLineEdit { background-color: #ff9999; }" );
         } );
     }
         break;

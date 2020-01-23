@@ -98,5 +98,7 @@ QList<Id> Reagent::labelIds( const Row &row ) const {
  * @brief Reagent::removeOrphanedEntries
  */
 void Reagent::removeOrphanedEntries() {
-    // NOTE: STUB
+    // NOTE: labels do not have foreign ids, therefore they cannot be orphaned
+    //       batch deletion is handled elsewhere, so that there should not be
+    //       any orphaned batces
 }

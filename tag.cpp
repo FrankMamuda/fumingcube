@@ -56,8 +56,8 @@ Row Tag::add( const QString &name, const Types &type, const QString &units, cons
 /**
  * @brief Tag::removeOrphanedEntries
  */
-void Tag::removeOrphanedEntries() {
-    // NOTE: STUB
+void Tag::removeOrphanedEntries() {    
+    // NOTE: tags do not have foreign ids, therefore they cannot be orphaned
 }
 
 /**
@@ -69,7 +69,6 @@ void Tag::populate() {
     this->add( this->tr( "Density" ),              Real, this->tr( "&nbsp;g/cm<sup>3</sup>" ), 0.001, 100.0,   1.0,  3, "density",       1.00,
                QStringList() << "Density" << QString() << "(\\d+(?:\\.\\d+)?)(?!\\)$)(\\sg\\/[\\w|\\d]+)?" );
     this->add( this->tr( "Assay" ),                Real, this->tr( "&percnt;" ),              0.0,   110.0, 100.0,  3, "assay",         0.01 );
-    // NOTE: cannot remove this right now without messing up the built-in database
     this->add( this->tr( "State" ),                State );
     this->add( this->tr( "Analysis id" ));
     this->add( this->tr( "Loss on drying" ),       Real, this->tr( "&percnt;" ),              0.0,   1000.0,  0.0,  2, "lossOnDrying",  0.01 );
@@ -105,6 +104,6 @@ void Tag::populate() {
                QStringList() << "Solubility" << "Solubility" );
     this->add( this->tr( "Synonyms" ),             Text, "",                                    0,        0,     0, 0, "",                 0,
                QStringList() << "MeSH Entry Terms" << "MeSH Entry Terms" );
-    this->add( this->tr( "Synonyms" ),             Text, "",                                    0,        0,     0, 0, "",                 0,
+    this->add( this->tr( "IUPAC Name" ),           Text, "",                                    0,        0,     0, 0, "",                 0,
                QStringList() << "IUPAC Name" << "IUPAC Name" );
 }

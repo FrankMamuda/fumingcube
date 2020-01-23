@@ -249,8 +249,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
         }
 
         // finally append the end result to the calculator
-        // NOTE: must be wrapped in <span></span>
-       // if ( !result.isError())
+        // NOTE: must be wrapped in <span></span> to avoid trailing anchors
         this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
         this->ui->calcView->append( QString( "<span>" ) + ( !result.isError() ? "= " : "" ) + QString( "<a href=\"ans;%1\">%1<\a>" ).arg( string ) + "</span>" + "<br>" );
     }
