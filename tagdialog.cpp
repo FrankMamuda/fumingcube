@@ -25,6 +25,7 @@
 #include "charactermap.h"
 #include <QMessageBox>
 #include <QKeyEvent>
+#include "property.h"
 
 /**
  * @brief TagDialog::TagDialog
@@ -228,7 +229,7 @@ void TagDialog::on_actionAdd_triggered() {
  */
 void TagDialog::on_actionRemove_triggered() {
     const QModelIndexList indexes( this->ui->tagView->selectionModel()->selectedRows());
-    auto removeProperty = []( const QModelIndexList &indexList ) {
+    auto removeTags = []( const QModelIndexList &indexList ) {
         QList<Id> idList;
 
         // must build an id list, because indexes/rows change on removal
@@ -245,6 +246,9 @@ void TagDialog::on_actionRemove_triggered() {
 
         foreach ( const Id &id, idList )
             Tag::instance()->remove( Tag::instance()->row( id ));
+
+        // remove all property orphans
+        Property::instance()->removeOrphanedEntries();
     };
 
     if ( indexes.count() == 1 ) {
@@ -256,11 +260,11 @@ void TagDialog::on_actionRemove_triggered() {
         if ( row == Row::Invalid )
             return;
 
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove '%1'?" ).arg( Tag::instance()->name( row ))) == QMessageBox::Yes )
-            removeProperty( QModelIndexList() << this->ui->tagView->currentIndex());
+        if ( QMessageBox::warning( this, this->tr( "Confirm removal" ), this->tr( "Remove '%1' tag?\nThis will irreversibly remove all associated properties." ).arg( Tag::instance()->name( row )), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+            removeTags( QModelIndexList() << this->ui->tagView->currentIndex());
     } else if ( indexes.count() > 1 ) {
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 tags?" ).arg( indexes.count())) == QMessageBox::Yes )
-            removeProperty( indexes );
+        if ( QMessageBox::warning( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 tags?\nThis will irreversibly remove all associated properties." ).arg( indexes.count()), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+            removeTags( indexes );
     }
 }
 

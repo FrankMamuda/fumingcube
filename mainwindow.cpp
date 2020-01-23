@@ -52,8 +52,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     LabelDock::instance()->setup( this->ui->actionLabels );
 
     if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
-        this->restoreGeometry( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/geometry" )));
-        this->restoreState( QByteArray::fromBase64( Variable::instance()->value<QByteArray>( "mainWindow/state" )));
+        this->restoreGeometry( Variable::instance()->compressedByteArray( "mainWindow/geometry" ));
+        this->restoreState( Variable::instance()->compressedByteArray( "mainWindow/state" ));
         this->restoreDockWidget( ReagentDock::instance());
         this->restoreDockWidget( PropertyDock::instance());
         this->restoreDockWidget( LabelDock::instance());
@@ -66,7 +66,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
     // resture previous calculations
     this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; }" );
-    this->ui->calcView->append( Variable::uncompressedString( Variable::instance()->string( "calculator/history" )));
+    this->ui->calcView->append( Variable::instance()->compressedString( "calculator/history" ));
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
@@ -280,7 +280,7 @@ void MainWindow::insertCommand( const QString &command ) {
  */
 void MainWindow::saveHistory() {
     // save calculator view history
-    Variable::instance()->setString( "calculator/history", Variable::compressedString( this->ui->calcView->toHtml()));
+    Variable::instance()->setCompressedString( "calculator/history", this->ui->calcView->toHtml());
 
     // save expression editor hidtory
     this->ui->calcEdit->saveHistory();
@@ -306,7 +306,7 @@ void MainWindow::on_actionClear_triggered() {
 void MainWindow::on_actionTags_triggered() {
     TagDialog td( this );
     td.exec();
-    PropertyDock::instance()->updateView();
+    ReagentDock::instance()->view()->updateView();
 }
 
 /**
@@ -314,8 +314,8 @@ void MainWindow::on_actionTags_triggered() {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
-    Variable::instance()->setValue( "mainWindow/geometry", MainWindow::instance()->saveGeometry().toBase64());
-    Variable::instance()->setValue( "mainWindow/state", MainWindow::instance()->saveState().toBase64());
+    Variable::instance()->setCompressedByteArray( "mainWindow/geometry", MainWindow::instance()->saveGeometry());
+    Variable::instance()->setCompressedByteArray( "mainWindow/state", MainWindow::instance()->saveState());
     QMainWindow::closeEvent( event );
 }
 

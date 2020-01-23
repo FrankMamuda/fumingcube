@@ -187,7 +187,7 @@ void ReagentModel::add( const Id &id ) {
  * @param parentItem
  */
 void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
-    QStandardItem *item( new QStandardItem( Reagent::instance()->name( id )));
+    QStandardItem *item( new QStandardItem( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->alias( id )) : Reagent::instance()->name( id )));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
     parentItem->appendRow( item );

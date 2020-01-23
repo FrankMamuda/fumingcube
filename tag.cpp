@@ -101,4 +101,10 @@ void Tag::populate() {
     this->add( this->tr( "Structural formula" ),   Formula );
     this->add( this->tr( "Physical description" ), Text, "",                                    0,        0,     0, 0, "",                 0,
                QStringList() << "Physical Description" << "Physical Description" );
+    this->add( this->tr( "Solubility" ),           Text, "",                                    0,        0,     0, 0, "",                 0,
+               QStringList() << "Solubility" << "Solubility" );
+    this->add( this->tr( "Synonyms" ),             Text, "",                                    0,        0,     0, 0, "",                 0,
+               QStringList() << "MeSH Entry Terms" << "MeSH Entry Terms" );
+    this->add( this->tr( "Synonyms" ),             Text, "",                                    0,        0,     0, 0, "",                 0,
+               QStringList() << "IUPAC Name" << "IUPAC Name" );
 }

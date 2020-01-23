@@ -188,8 +188,10 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
             name = rd.name();
             alias = rd.alias();
 
-            if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
-                return;
+            if ( ok ) {
+                if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
+                    return;
+            }
         }
 
         if ( ok ) {

@@ -50,8 +50,7 @@
  TODO:
 
 reagents:
- - multiple aliases?
- - up down arrow in dock does not change index (is this the intended behaviour)
+ - multiple aliases
  - store selection in NodeHisotry
 
 database:
@@ -64,9 +63,6 @@ properties:
    sources
  - filter in dock
  - icons in "add property" menu
- - solubility data as a property
- - must remove orphaned properties on tag removal
- - fetch 'other names' such as IUPAC name
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
@@ -75,6 +71,7 @@ extraction:
 completion:
  - fix reagent completion (does not work as indended)
  - complete batch from selected reagent, not the whole list
+ - resolve subscipt/superscipt to regular digits
  - complete function( "CURSOR to function( "CURSOR"
 
 scripting:
@@ -96,10 +93,6 @@ misc:
    class
  - some widgets (QListView in TagEditor, QTextEdit in PropertyEditor) are
    dark in light mode when windows theme set to dark
-
-variables:
- - automatically store QByteArray as base64
- - and QStringList as proper compressed string
 
 future:
  - common reaction browser
@@ -148,7 +141,7 @@ int main( int argc, char *argv[] ) {
     QFile file( ":/initial/calculator_history" );
     QString history;
     if ( file.open( QIODevice::ReadOnly )) {
-        history = Variable::compressedString( file.readAll());
+        history = Variable::compressString( file.readAll());
         file.close();
     }
 

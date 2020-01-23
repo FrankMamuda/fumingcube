@@ -69,9 +69,11 @@ public:
     bool isEnabled( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<bool>( key, defaultValue ); }
     bool isDisabled( const QString &key, bool defaultValue = false ) { return !Variable::instance()->isEnabled( key, defaultValue ); }
     QString string( const QString &key, bool defaultValue = false ) { return Variable::instance()->value<QString>( key, defaultValue ); }
+    QString compressedString( const QString &key, bool defaultValue = false ) { return Variable::uncompressString( Variable::instance()->value<QString>( key, defaultValue )); }
+    QByteArray compressedByteArray( const QString &key, bool defaultValue = false ) { return qUncompress( QByteArray::fromBase64( Variable::instance()->string( key, defaultValue ).toUtf8().constData())); }
 
-    static QString compressedString( const QString &string ) { return qCompress( QByteArray( string.toUtf8().constData())).toBase64().constData(); }
-    static QString uncompressedString( const QString &string ) { if ( string.isEmpty()) return QString(); return qUncompress( QByteArray::fromBase64( string.toUtf8().constData())).constData(); }
+    static QString compressString( const QString &string ) { return qCompress( QByteArray( string.toUtf8().constData())).toBase64().constData(); }
+    static QString uncompressString( const QString &string ) { if ( string.isEmpty()) return QString(); return qUncompress( QByteArray::fromBase64( string.toUtf8().constData())).constData(); }
 
     template<typename T>
     void updateConnections( const QString &key, const T &value ) {
@@ -140,6 +142,8 @@ public:
 public slots:
     void setInteger( const QString &key, int value ) { Variable::instance()->setValue<int>( key, value ); }
     void setDecimalValue( const QString &key, qreal value ) { Variable::instance()->setValue<qreal>( key, value ); }
+    void setCompressedString( const QString &key, const QString &string ) { Variable::instance()->setValue<QString>( key, Variable::compressString( string )); }
+    void setCompressedByteArray( const QString &key, const QByteArray &byteArray ) { Variable::instance()->setValue<QString>( key, qCompress( byteArray ).toBase64().constData()); }
     void setEnabled( const QString &key, bool value ) { Variable::instance()->setValue<bool>( key, value ); }
     void enable( const QString &key ) { Variable::instance()->setValue<bool>( key, true ); }
     void disable( const QString &key ) { Variable::instance()->setValue<bool>( key, false ); }

@@ -231,7 +231,7 @@ bool CalcEdit::completeCommand() {
  * @brief CalcEdit::saveHistory
  */
 void CalcEdit::saveHistory() {
-    Variable::instance()->setString( "calculator/commands", Variable::compressedString( this->history.join( ";" )));
+    Variable::instance()->setCompressedString( "calculator/commands", this->history.join( ";" ));
 }
 
 /**
@@ -287,7 +287,7 @@ bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
 CalcEdit::CalcEdit( QWidget *parent ) : QLineEdit( parent ) {
     // install event filter
     this->installEventFilter( this );
-    this->history = Variable::uncompressedString( Variable::instance()->string( "calculator/commands" )).split( ";" );
+    this->history = Variable::instance()->compressedString( "calculator/commands" ).split( ";" );
 
     this->connect( this, &QLineEdit::returnPressed, [ this ]( ) {
         const QString st( this->text().simplified());

@@ -38,7 +38,7 @@ public:
     /**
      * @brief ~ReagentView::~ReagentView
      */
-    ~ReagentView() { delete this->m_nodeHistory; }
+    ~ReagentView() override { delete this->m_nodeHistory; }
 
     /**
      * @brief model
@@ -84,6 +84,9 @@ public slots:
     void selectReagent( const QModelIndex &filterIndex = QModelIndex());
     //void openContextMenu( const QPoint &pos );
     void restoreIndex();
+
+protected:
+    void keyReleaseEvent( QKeyEvent *event ) override;
 
 private:
     NodeHistory *m_nodeHistory;

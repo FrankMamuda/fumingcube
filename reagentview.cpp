@@ -112,3 +112,17 @@ void ReagentView::restoreIndex() {
 
     this->selectReagent();
 }
+
+/**
+ * @brief ReagentView::keyReleaseEvent
+ * @param event
+ */
+void ReagentView::keyReleaseEvent( QKeyEvent *event ) {
+    if ( event->key() == Qt::Key_Down || event->key() == Qt::Key_Up ) {
+        const QModelIndex &index( this->selectionModel()->currentIndex());
+        if ( index.isValid())
+            this->selectReagent( index );
+    }
+
+    QTreeView::keyReleaseEvent( event );
+}
