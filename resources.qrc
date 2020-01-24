@@ -22,5 +22,9 @@
     <qresource prefix="/initial">
         <file alias="calculator_history">initial/calculator_history</file>
         <file alias="database.db">initial/database.db</file>
+        <file alias="calculator_history_lv_LV">initial/calculator_history_copy</file>
+    </qresource>
+    <qresource prefix="/i18n">
+        <file alias="fumingCube_lv_LV">i18n/fumingCube_lv_LV.qm</file>
     </qresource>
 </RCC>

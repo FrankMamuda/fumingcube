@@ -66,9 +66,11 @@ quint32 Cache::checksum( const char *data, size_t len ) {
     switch ( l - data ) {
     case 3:
         h += static_cast<quint32>( data[2] << 16 );
+        [[fallthrough]];
 
     case 2:
         h += static_cast<quint32>( data[1] << 8 );
+        [[fallthrough]];
 
     case 1:
         h += static_cast<quint32>( data[0] );

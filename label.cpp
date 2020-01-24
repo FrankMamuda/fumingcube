@@ -137,7 +137,9 @@ void Label::removeOrphanedEntries() {
  * @brief Label::populate
  */
 void Label::populate() {
-    this->add( this->tr( "Bases" ),    QColor::fromRgb( 218,  32,  32, 255/*32*/ ));
-    this->add( this->tr( "Acids" ),    QColor::fromRgb(  32,  218, 32, 255/*32*/ ));
-    this->add( this->tr( "Solvents" ), QColor::fromRgb(  32,   32, 218, 255/*32*/ ));
+    this->add( this->tr( "Bases" ),      QColor::fromRgb( 218,  32,  32, 255/*32*/ ));
+    this->add( this->tr( "Acids" ),      QColor::fromRgb(  32,  218, 32, 255/*32*/ ));
+    this->add( this->tr( "Solvents" ),   QColor::fromRgb(  32,   32, 218, 255/*32*/ ));
+    this->add( this->tr( "Inorganics" ), QColor::fromRgb( 128,  128, 128, 255/*32*/ ));
+    this->add( this->tr( "Alcohols" ),   QColor::fromRgb(  66,  183, 255, 255/*32*/ ));
 }

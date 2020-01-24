@@ -28,16 +28,7 @@
  * namespace Main
  */
 namespace Main {
-#ifdef Q_CC_MSVC
-static constexpr const char *Path = ".fumingCubeAlt";
-#else
-static constexpr const char __attribute__((unused)) *Path = ".fumingCubeAlt";
-static QObject __attribute__((unused)) *Console( nullptr );
-#endif
-enum TimeFormat {
-    DecimalTime = 0,
-    HoursMinutes
-};
+[[maybe_unused]] static constexpr const char *Path = ".fumingCube";
 }
 
 /**

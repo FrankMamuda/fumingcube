@@ -65,7 +65,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->ui->calcView->setFont( qAsConst( font ));
 
     // resture previous calculations
-    this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; }" );
+    this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; } ​p { margin: 0px; }​" );
     this->ui->calcView->append( Variable::instance()->compressedString( "calculator/history" ));
 
     // setup syntax highlighter
@@ -251,7 +251,10 @@ void MainWindow::appendToCalculator( const QString &line ) {
         // finally append the end result to the calculator
         // NOTE: must be wrapped in <span></span> to avoid trailing anchors
         this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
-        this->ui->calcView->append( QString( "<span>" ) + ( !result.isError() ? "= " : "" ) + QString( "<a href=\"ans;%1\">%1<\a>" ).arg( string ) + "</span>" + "<br>" );
+        if ( result.isError())
+            this->ui->calcView->append( QString( "<span>%1</span><br>" ).arg( string ));
+        else
+            this->ui->calcView->append( QString( "<span>= <a href=\"ans;%1\">%1<\a></span><br>" ).arg( string ));
     }
 
     // ensure the result is visible

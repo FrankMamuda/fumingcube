@@ -29,7 +29,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++17
 
 SOURCES += \
     about.cpp \
@@ -157,3 +157,7 @@ RESOURCES += \
 # NOTE: using libs from https://bintray.com/vszakats/generic/openssl
 win32:INCLUDEPATH += C:/openssl-win64/include/openssl
 win32:LIBS += -LC:/openssl-win64/lib -lcrypto -lssl
+
+# latvian locale
+# DEFINES += FORCE_LV_LOCALE
+TRANSLATIONS = i18n/fumingCube_lv_LV.ts

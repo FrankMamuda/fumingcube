@@ -33,7 +33,6 @@ Reagent::Reagent() : Table( "reagent" ) {
     this->addField( FIELD( Name, String ));
     this->addField( FIELD( Alias, String ));
     this->addField( FIELD( ParentId, Int ));
-//    this->setSort( Name, Qt::AscendingOrder ); this has no effect
 }
 
 /**

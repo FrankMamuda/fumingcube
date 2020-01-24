@@ -45,17 +45,23 @@
 #include <QSharedMemory>
 #include <QSettings>
 #include <QStyleFactory>
+#include <QTranslator>
 
 /*
  TODO:
 
 reagents:
  - multiple aliases
- - store selection in NodeHisotry
 
 database:
  - check API
  - crash on argument count mismatch
+
+i18n:
+ - tags
+ - labels
+ - initial greeting
+ - language selector in settings
 
 properties:
  - for now we use built in property extractor from PubChem
@@ -135,8 +141,22 @@ int main( int argc, char *argv[] ) {
     qRegisterMetaType<Row>();
     qRegisterMetaType<Table::Roles>();
 
+    // i18n
+    QTranslator translator;
+#ifndef FORCE_LV_LOCALE
+    const QString locale( QLocale::system().name());
+#else
+    const QString locale( "lv_LV" );
+#endif
+    translator.load( ":/i18n/fumingCube_" + locale );
+    a.installTranslator( &translator );
+
     // read initial history
+#ifndef FORCE_LV_LOCALE
     QFile file( ":/initial/calculator_history" );
+#else
+    QFile file( ":/initial/calculator_history_lv_LV" );
+#endif
     QString history;
     if ( file.open( QIODevice::ReadOnly )) {
         history = Variable::compressString( file.readAll());
@@ -145,7 +165,6 @@ int main( int argc, char *argv[] ) {
 
     // set variable defaults
     Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
-    //Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
     Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );

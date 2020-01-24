@@ -82,7 +82,6 @@ public:
 public slots:
     void updateView();
     void selectReagent( const QModelIndex &filterIndex = QModelIndex());
-    //void openContextMenu( const QPoint &pos );
     void restoreIndex();
 
 protected:

@@ -1,0 +1,23 @@
+<p style="margin: 0px;">
+/*<br>
+Laipni lūgti Kūpošajā Kubā<br>
+<br>
+Šī programma atvieglo ķīmijas aprēķinus.<br>
+Programmā var izveidot reaģentu sarakstus un pievienot tiem īpašības.<br>
+Reaģentu īpašības ir izmantojamas kalkulatorā, izmantojot to atsauces.<br>
+<br>
+Sāc ar šo piemēru,<br>
+*/<br>
+<br>
+5.0 * <a href="assay;NaOH;demo">assay( "NaOH", "demo" )</a> / <a href="molarMass;NaOH">molarMass( "NaOH" )</a><br>
+= <a href="ans;0.12475935695177139">0.12475935695177139</a><br>
+<br>
+/*<br>
+kur mēs iegūstam molus 5 gramiem Nātrija hidroksīda.<br>
+Kalkulators automātiski iegūst īpašību vērtības no atsaucēm.<br>
+<br>
+Vari rakstīt funkcijas manuāli vai atsauces ielīmēt no īpašību loga ar dubultklikšķi.<br>
+<br>
+Veiksmi!<br>
+*/<br>
+</p>
