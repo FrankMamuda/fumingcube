@@ -1,11 +1,14 @@
 # fumingcube
 
-## Chemistry calculations simplified (alpha)
+## Chemistry calculations simplified (beta)
 
-Applet is a simple mass/volume/mol calculator for everyday laboratory use. Uses sqlite database to store common reagent templates. Currently in **alpha**, so some features have not been implemented or do not work as intended.
+**Fuming cube** does the following things:
+ - it is a **chemical reagent management tool** (make lists of all your common reagents)
+ - it keeps reagent **properties** in a database (such as molar mass, density, etc.)
+ - it is an **interactive calculator** and uses reagent properties as references to simplify calculations.
 
-Project goal is to create a powerful toolbox to simplify work in an organic chemistry lab.
+Currently in **beta**, therefore some features are not quite polished and may not work as intended.
 
-**Fuming cube** is a pun on the 'flaming circle' symbol.
+Project's goal is to create a powerful toolbox to simplify work in an organic chemistry lab.
 
-
+**Fuming cube** is a pun on the 'flaming circle' pictogram.
