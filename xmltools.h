@@ -31,11 +31,8 @@
  * @brief The XML namespace
  */
 namespace XMLTools_ {
-#ifdef Q_CC_MSVC
+[[maybe_unused]]
 static constexpr const char *ConfigFile( "configuration.xml" );
-#else
-static constexpr const char __attribute__((unused)) *ConfigFile( "configuration.xml" );
-#endif
 const static QLoggingCategory Debug( "xml" );
 }
 

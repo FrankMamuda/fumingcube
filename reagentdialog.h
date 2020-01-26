@@ -64,7 +64,8 @@ const static QList<QChar> SubscriptDigits {
  * @param list
  * @return
  */
-[[maybe_unused]] const static QString ScriptToDigits( const QString &string ) {
+[[maybe_unused]]
+const static QString ScriptToDigits( const QString &string ) {
     QString out( string );
 
     auto back = [ &out ]( const QList<QChar> &list ) {
@@ -96,8 +97,10 @@ const static QString DigitsToScript( const QString &string, const QList<QChar> &
     return out;
 }
 
-[[maybe_unused]] static const QString DigitsToSubscript( const QString &string ) { return DigitsToScript( string, ReagentTools::SubscriptDigits ); }
-[[maybe_unused]] static const QString DigitsToSuperscript( const QString &string ) { return DigitsToScript( string, ReagentTools::SuperscriptDigits ); }
+[[maybe_unused]]
+static const QString DigitsToSubscript( const QString &string ) { return DigitsToScript( string, ReagentTools::SubscriptDigits ); }
+[[maybe_unused]]
+static const QString DigitsToSuperscript( const QString &string ) { return DigitsToScript( string, ReagentTools::SuperscriptDigits ); }
 };
 
 /**
