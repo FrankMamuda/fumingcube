@@ -1,7 +1,3 @@
-# fumingcube
-
-## Chemistry calculations simplified (beta)
-
 **Fuming cube** does the following things:
  - it is a **chemical reagent management tool** (make lists of all your common reagents)
  - it keeps reagent **properties** in a database (such as molar mass, density, etc.)
