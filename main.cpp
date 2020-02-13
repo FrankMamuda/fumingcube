@@ -102,6 +102,20 @@ future:
  - common reaction browser
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
+
+unsorted:
+  - cut/paste properties from reagents
+  - better subscript/superscript support in reagent addition dialog
+  - automatic subscript does not work (it pushes cursor to the end of the line)
+  - Bad behaviour:
+    right click on reagent, change label
+    (the property view still displays the last selected reagent)
+    add property
+    (the property is added to the reagent selected with the right click, not the one displayed in property screen)
+  - subscript not visible in property dock for physical description (if edited in advanced mode)
+  - for some reason, searching for similiar reagents it only returns formula
+    but when searching for CAS, all properties are returned
+  - allow to display treeview in multiple columns
 */
 
 /**

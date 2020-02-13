@@ -380,23 +380,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         } );
 
         menu.addAction( this->tr( "Replace" ), [ this, row ]() {
-            // FIXME: dup code
-            const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
-            if ( fileName.isEmpty())
-                return;
-
-            // load image
-            const QPixmap pixmap( fileName );
-            if ( !pixmap.isNull()) {
-                QByteArray bytes;
-                QBuffer buffer( &bytes );
-                buffer.open( QIODevice::WriteOnly );
-                QPixmap( pixmap ).save( &buffer, "PNG" );
-                buffer.close();
-
-                Property::instance()->setPropertyData( row, bytes );
-                this->updateView();
-            }
+            this->replacePixmap( row );
         } );
     }
 
@@ -518,6 +502,30 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
 }
 
 /**
+ * @brief PropertyDock::replacePixmap
+ * @param row
+ */
+void PropertyDock::replacePixmap( const Row &row ) {
+    // FIXME: dup code
+    const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
+    if ( fileName.isEmpty())
+        return;
+
+    // load image
+    const QPixmap pixmap( fileName );
+    if ( !pixmap.isNull()) {
+        QByteArray bytes;
+        QBuffer buffer( &bytes );
+        buffer.open( QIODevice::WriteOnly );
+        QPixmap( pixmap ).save( &buffer, "PNG" );
+        buffer.close();
+
+        Property::instance()->setPropertyData( row, bytes );
+        this->updateView();
+    }
+}
+
+/**
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
@@ -540,11 +548,17 @@ void PropertyDock::on_editPropButton_clicked() {
     if ( propertyId == Id::Invalid )
         return;
 
-    // set new value
-    this->ui->propertyView->setUpdatesEnabled( false );
-    const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Property::instance()->tagId( propertyId ), propertyId ));
-    if ( !values.second.isNull())
-        Property::instance()->setPropertyData( propertyRow, values.second.toString());
+    // handle pixmaps
+    const Id tagId = Property::instance()->tagId( propertyId );
+    if ( tagId == PixmapTag ) {
+        this->replacePixmap( propertyRow );
+    } else {
+        // set new value
+        this->ui->propertyView->setUpdatesEnabled( false );
+        const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId, propertyId ));
+        if ( !values.second.isNull())
+            Property::instance()->setPropertyData( propertyRow, values.second.toString());
+    }
 
     // update view
     this->updateView();

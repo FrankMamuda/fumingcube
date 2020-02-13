@@ -180,6 +180,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
         //  reagents can only have unique names and aliases
         //  batches can be named anything and do not have aliases at all
         //
+        QList<Id> labels;
         if ( parentId != Id::Invalid ) {
             name = QInputDialog::getText( this, this->tr( "Add batch" ), this->tr( "Name:" ), QLineEdit::Normal, QString(), &ok );
         } else {
@@ -191,17 +192,39 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
             if ( ok ) {
                 if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
                     return;
+
+                labels = rd.labels;
             }
         }
 
         if ( ok ) {
             if ( !name.isEmpty()) {
+                // save filter
+                // NOTE: why? because when we add a reagent when filtered the row will always be invalid
+                //       due to non-existant label sets
+                //       this way filter is temporarely removed and restore after addition
+                const QString oldFilter( Reagent::instance()->filter());
+                if ( !Reagent::instance()->filter().isEmpty())
+                    Reagent::instance()->setFilter( "" );
+
                 const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( alias ), parentId );
                 if ( row == Row::Invalid )
                     return;
 
-                // get reagentId and add to treeView without resetting the model
+                // get reagentId
                 const Id reagentId = Reagent::instance()->id( row );
+
+                // add labels if any
+                qDebug() << "got labels" << labels;
+
+                foreach ( const Id &id, labels ) {
+                    if ( id == Id::Invalid )
+                        continue;
+
+                    LabelSet::instance()->add( id, reagentId );
+                }
+
+                // ... and add to treeView without resetting the model
                 this->view()->model()->add( reagentId );
 
                 // expand parent reagent
@@ -216,6 +239,12 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                     ExtractionDialog ed( this, reagentId );
                     ed.exec();
                     PropertyDock::instance()->updateView();
+                }
+
+                // restore filter
+                if ( !oldFilter.isEmpty()) {
+                    Reagent::instance()->setFilter( oldFilter );
+                    this->view()->updateView();
                 }
             } else {
                 QMessageBox::warning( this,  this->tr( "Cannot add reagent" ), ( parentId != Id::Invalid ?  this->tr( "Batch" ) : this->tr( "Reagent" )) + this->tr( " name is empty" ));

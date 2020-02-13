@@ -16,42 +16,49 @@
  *
  */
 
-#pragma once
-
 /*
  * includes
  */
-#include "dockwidget.h"
-#include <QModelIndexList>
-#include <QShortcut>
+#include <QMenu>
+#include <QDialog>
 #include "table.h"
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-class LabelDock;
+class LabelSelector;
 }
 
+#include <QCloseEvent>
+
 /**
- * @brief The LabelDock class
+ * @brief The NoCloseMenu class
  */
-class LabelDock final : public DockWidget {
+class NoCloseMenu : public QMenu {
+public:
+    explicit NoCloseMenu( QWidget *parent = nullptr );
+
+protected:
+    void closeEvent( QCloseEvent *event ) {
+        event->ignore();
+    }
+};
+
+/**
+ * @brief The LabelSelector class
+ */
+class LabelSelector : public QDialog {
     Q_OBJECT
-    Q_DISABLE_COPY( LabelDock )
 
 public:
-    static LabelDock *instance() { static LabelDock *labelDock( new LabelDock()); return labelDock; }
-    ~LabelDock() override;
-    Id currentLabel() const;
+    explicit LabelSelector( QWidget *parent = nullptr, const QList<Id> &selected = QList<Id>());
+    ~LabelSelector();
+    QList<Id> labelIds;
 
-public slots:
-    void setFilter( const QModelIndexList &list = QModelIndexList());
-
-private slots:
-    void on_labelView_customContextMenuRequested( const QPoint &pos );
+/*protected:
+    bool eventFilter( QObject *, QEvent * ) override;*/
 
 private:
-    explicit LabelDock( QWidget *parent = nullptr );
-    Ui::LabelDock *ui;
+    Ui::LabelSelector *ui;
 };

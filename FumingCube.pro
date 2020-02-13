@@ -31,7 +31,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++17
 CONFIG += c++1z
-QMAKE_CXXFLAGS += /std:c++17
+#QMAKE_CXXFLAGS += /std:c++17
 
 SOURCES += \
     about.cpp \
@@ -44,6 +44,7 @@ SOURCES += \
     label.cpp \
     labeldialog.cpp \
     labeldock.cpp \
+    labelselector.cpp \
     labelset.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -92,6 +93,7 @@ HEADERS += \
     label.h \
     labeldialog.h \
     labeldock.h \
+    labelselector.h \
     labelset.h \
     mainwindow.h \
     database.h \
@@ -135,6 +137,7 @@ FORMS += \
         imageutils.ui \
         labeldialog.ui \
         labeldock.ui \
+        labelselector.ui \
         mainwindow.ui \
         nfpabuilder.ui \
         propertydialog.ui \

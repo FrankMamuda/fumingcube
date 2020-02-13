@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="allowedAreas">
-   <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   <set>Qt::AllDockWidgetAreas</set>
   </property>
   <property name="windowTitle">
    <string>Labels</string>

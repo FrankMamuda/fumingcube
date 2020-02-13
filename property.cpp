@@ -102,7 +102,8 @@ void Property::removeOrphanedEntries() {
                       .arg( Reagent::instance()->fieldName( Reagent::ID ))
                       .arg( Reagent::instance()->tableName()));
 
-    QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
+    // NOTE: must not delete -1 and -2 tags (NoTag and PixmapTag)
+    QSqlQuery().exec( QString( "delete from %1 where %2!=-1 and %2!=-2 and %2 not in ( select %3 from %4 )" )
                       .arg( this->tableName())
                       .arg( this->fieldName( Property::TagId ))
                       .arg( Tag::instance()->fieldName( Tag::ID ))

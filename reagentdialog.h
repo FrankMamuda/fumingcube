@@ -23,6 +23,7 @@
  */
 #include <QCompleter>
 #include <QDialog>
+#include "table.h"
 
 /**
  * @brief The Ui namespace
@@ -110,10 +111,17 @@ class ReagentDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(), const QString &alias = QString());
+    enum Modes {
+        AddMode,
+        EditMode
+    };
+    Q_ENUM( Modes )
+
+    explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(), const QString &alias = QString(), const Modes &mode = AddMode );
     ~ReagentDialog();
     QString name() const;
     QString alias() const;
+    QList<Id> labels;
 
 private:
     Ui::ReagentDialog *ui;

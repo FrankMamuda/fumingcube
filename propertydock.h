@@ -51,6 +51,7 @@ public slots:
     void clearDocumentCache();
     void setSpecialWidgets();
     void setCurrentIndex( const QModelIndex &index );
+    void replacePixmap( const Row &row );
 
 private slots:
     void on_addPropButton_clicked();

@@ -49,6 +49,20 @@ LabelDock::~LabelDock() {
     delete this->ui;
 }
 
+
+/**
+ * @brief LabelDock::currentLabel
+ * @return
+ */
+Id LabelDock::currentLabel() const {
+    const QModelIndex index( this->ui->labelView->currentIndex());
+
+    if ( !index.isValid())
+        return Id::Invalid;
+
+    return Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
+}
+
 /**
  * @brief LabelDock::setFilter
  * @param list
@@ -62,6 +76,7 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
         QList<Id> labelIds;
         foreach ( const QModelIndex &index, list )
             labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
+
 
         QString whereStatement( QString( "select %1.%2 from %1 " ).arg( LabelSet::instance()->tableName()).arg( LabelSet::instance()->fieldName( LabelSet::ReagentId )));
         for ( int y = 0; y < labelIds.count(); y++ )

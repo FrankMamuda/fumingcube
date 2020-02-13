@@ -20,10 +20,13 @@
  * includes
  */
 #include "charactermap.h"
+#include "labelselector.h"
 #include "reagentdialog.h"
 #include "ui_reagentdialog.h"
 #include "variable.h"
 #include <QRegularExpression>
+#include "labeldock.h"
+#include "label.h"
 
 /*
  * Reagent alias map
@@ -129,11 +132,16 @@ const static QMap<QString, QString> reagentAliases {
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QString &alias ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
+ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QString &alias, const Modes &mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
     this->completer = new QCompleter( reagentAliases.keys());
     this->completer->setCaseSensitivity( Qt::CaseInsensitive );
     this->ui->setupUi( this );
     this->ui->nameEdit->setCompleter( completer );
+
+    if ( mode == EditMode ) {
+        this->setWindowTitle( this->tr( "Edit reagent" ));
+        this->ui->labelButton->hide();
+    }
 
     if ( !name.isEmpty())
         this->ui->nameEdit->setText( name );
@@ -226,6 +234,15 @@ ReagentDialog::ReagentDialog( QWidget *parent , const QString &name, const QStri
         a->setText( alias );
         a->setCursorPosition( cursorPos );
         a->blockSignals( false );
+    } );
+
+    // set current label
+    this->labels << LabelDock::instance()->currentLabel();
+    this->connect( this->ui->labelButton, &QPushButton::pressed, [ this ]() {
+        // modify labels in label selector
+        LabelSelector ls( this, this->labels );
+        ls.exec();
+        this->labels = ls.labelIds;
     } );
 }
 
