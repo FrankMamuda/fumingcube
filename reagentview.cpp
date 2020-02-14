@@ -78,7 +78,7 @@ void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
     Variable::instance()->setInteger( "reagentDock/selection", reagentId );
 
     // apply sql filter
-   // qDebug() << ;
+   //qDebug() << PropertyDock::instance()->hiddenTags.join( ", " ).append( " ) " ).prepend( "not in ( ");
     Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 and %4 %6 ) or ( %1=%3 and %1>-1 and %4 %6 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
                                      .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
                                      .arg( reagentId )                                               // 2

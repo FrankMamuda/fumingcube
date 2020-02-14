@@ -349,80 +349,81 @@ void PropertyDock::on_addPropButton_clicked() {
  * @param pos
  */
 void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos ) {
-    if ( !this->ui->propertyView->currentIndex().isValid())
-        return;
-
-    // get property and tag
-    const Row row = Property::instance()->row( this->ui->propertyView->currentIndex());
-    const Id tagId = Property::instance()->tagId( row );
-    const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
-
     QMenu menu;
-    if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula || tagId == Id::Invalid ) {
-        menu.addAction( this->tr( "Copy" ), [ row, type ]() {
-            const QVariant data( Property::instance()->propertyData( row ));
+    const QModelIndex index( this->ui->propertyView->indexAt( pos ));
 
-            if ( type == Tag::Formula )
-                QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
-            else if ( type == Tag::Real )
-                QGuiApplication::clipboard()->setText( data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" ))));
-            else {
-                const QTextEdit edit( data.toString());
-                QGuiApplication::clipboard()->setText( edit.toPlainText());
-            }
-        } )->setIcon( QIcon::fromTheme( "copy" ));
-    }
+    if ( index.isValid()) {
 
-    if ( type == Tag::Formula || tagId == PixmapTag ) {
-        menu.addAction( this->tr( "View" ), [ this, row ]() {
-            QPixmap pixmap;
+        // get property and tag
+        const Row row = Property::instance()->row( index );
+        const Id tagId = Property::instance()->tagId( row );
+        const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
-            if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
-                ImageUtils iu( this, qAsConst( pixmap ), 0, true );
-                iu.setWindowFlags( Qt::Dialog | Qt::Tool );
-                iu.exec();
-            }
-        } )->setIcon( QIcon::fromTheme( "image" ));
+        if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula || tagId == Id::Invalid ) {
+            menu.addAction( this->tr( "Copy" ), [ row, type ]() {
+                const QVariant data( Property::instance()->propertyData( row ));
 
-        menu.addAction( this->tr( "Replace" ), [ this, row ]() {
-            this->replacePixmap( row );
-        } )->setIcon( QIcon::fromTheme( "replace" ));
-    }
-
-    if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
-        menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
-
-    if ( tagId != Id::Invalid ) {
-        const QString functionName( Tag::instance()->function( tagId ));
-        if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
-            auto paste = [ row, tagId ]() {
-                // paste
-                const QString value( QString::number( Property::instance()->propertyData( row ).toReal() *  Tag::instance()->scale( tagId )));
-                MainWindow::instance()->insertCommand( value );
-            };
-
-            // tag.
-            QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
-            subMenu2->setIcon( QIcon::fromTheme( "paste" ));
-            subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } )->setIcon( QIcon::fromTheme( "clean" ));
-            subMenu2->addAction( this->tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
+                if ( type == Tag::Formula )
+                    QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
+                else if ( type == Tag::Real )
+                    QGuiApplication::clipboard()->setText( data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" ))));
+                else {
+                    const QTextEdit edit( data.toString());
+                    QGuiApplication::clipboard()->setText( edit.toPlainText());
+                }
+            } )->setIcon( QIcon::fromTheme( "copy" ));
         }
 
+        if ( type == Tag::Formula || tagId == PixmapTag ) {
+            menu.addAction( this->tr( "View" ), [ this, row ]() {
+                QPixmap pixmap;
 
-        menu.addAction( this->tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
-            this->hiddenTags << QString::number( static_cast<int>( tagId ));
-            ReagentDock::instance()->view()->updateView();
-        } )->setIcon( QIcon::fromTheme( "hide" ));
+                if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
+                    ImageUtils iu( this, qAsConst( pixmap ), 0, true );
+                    iu.setWindowFlags( Qt::Dialog | Qt::Tool );
+                    iu.exec();
+                }
+            } )->setIcon( QIcon::fromTheme( "image" ));
 
-        if ( !this->hiddenTags.isEmpty()) {
-            menu.addAction( this->tr( "Show all properties" ), [ this ]() {
-                this->hiddenTags.clear();
+            menu.addAction( this->tr( "Replace" ), [ this, row ]() {
+                this->replacePixmap( row );
+            } )->setIcon( QIcon::fromTheme( "replace" ));
+        }
+
+        if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
+            menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
+
+        if ( tagId != Id::Invalid ) {
+            const QString functionName( Tag::instance()->function( tagId ));
+            if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
+                auto paste = [ row, tagId ]() {
+                    // paste
+                    const QString value( QString::number( Property::instance()->propertyData( row ).toReal() *  Tag::instance()->scale( tagId )));
+                    MainWindow::instance()->insertCommand( value );
+                };
+
+                // tag.
+                QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
+                subMenu2->setIcon( QIcon::fromTheme( "paste" ));
+                subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } )->setIcon( QIcon::fromTheme( "clean" ));
+                subMenu2->addAction( this->tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
+            }
+
+
+            menu.addAction( this->tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
+                this->hiddenTags << QString::number( static_cast<int>( tagId ));
+                this->hiddenTags.removeAll( "" );
                 ReagentDock::instance()->view()->updateView();
-            } )->setIcon( QIcon::fromTheme( "show" ));
+            } )->setIcon( QIcon::fromTheme( "hide" ));
         }
     }
 
-  //  if ( tagId == Id::Invalid ) {
+    if ( !this->hiddenTags.isEmpty()) {
+        menu.addAction( this->tr( "Show all properties" ), [ this ]() {
+            this->hiddenTags.clear();
+            ReagentDock::instance()->view()->updateView();
+        } )->setIcon( QIcon::fromTheme( "show" ));
+    }
 
     menu.exec( this->ui->propertyView->mapToGlobal( pos ));
 }
@@ -550,6 +551,7 @@ void PropertyDock::replacePixmap( const Row &row ) {
  * @brief PropertyDock::saveHiddenTags
  */
 void PropertyDock::saveHiddenTags() {
+    this->hiddenTags.removeAll( "" );
     Variable::instance()->setValue( "propertyDock/hiddenTags", this->hiddenTags );
 }
 
@@ -558,6 +560,7 @@ void PropertyDock::saveHiddenTags() {
  */
 void PropertyDock::loadHiddenTags() {
     this->hiddenTags = Variable::instance()->value<QStringList>( "propertyDock/hiddenTags" );
+    this->hiddenTags.removeAll( "" );
 }
 
 /**
