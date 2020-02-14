@@ -51,6 +51,9 @@
 PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::PropertyDock ) {
     this->ui->setupUi( this );
 
+    // load hidden tags
+    this->loadHiddenTags();
+
     // buttonTest lambda
     auto buttonTest = [ this ]( const QModelIndex &index ) {
         if ( Property::instance()->count() < 2 ) {
@@ -302,7 +305,7 @@ void PropertyDock::on_addPropButton_clicked() {
     menu.addAction( this->tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
         const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Id::Invalid ));
         this->addProperty( values.first, values.second, reagentId );
-    } );
+    } )->setIcon( QIcon::fromTheme( "star" ));
 
     // add an option to embed images
     menu.addAction( this->tr( "Add image to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
@@ -325,7 +328,7 @@ void PropertyDock::on_addPropButton_clicked() {
             if ( ok && !title.isEmpty())
                 this->addProperty( title, bytes, reagentId, PixmapTag );
         }
-    } );
+    } )->setIcon( QIcon::fromTheme( "image" ));
 
     // add an option to get properties from the internet
     menu.addAction( this->tr( "Get properties from the internet" ), [ this, reagentId ]() {
@@ -334,7 +337,7 @@ void PropertyDock::on_addPropButton_clicked() {
         ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
         ed.exec();
         this->updateView();
-    } );
+    } )->setIcon( QIcon::fromTheme( "extract" ));
 
     // display the menu
     menu.exec( this->mapToGlobal( this->ui->addPropButton->pos()));
@@ -355,7 +358,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
     QMenu menu;
-    if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula ) {
+    if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula || tagId == Id::Invalid ) {
         menu.addAction( this->tr( "Copy" ), [ row, type ]() {
             const QVariant data( Property::instance()->propertyData( row ));
 
@@ -363,9 +366,11 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
             else if ( type == Tag::Real )
                 QGuiApplication::clipboard()->setText( data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" ))));
-            else
-                QGuiApplication::clipboard()->setText( data.toString());
-        } );
+            else {
+                const QTextEdit edit( data.toString());
+                QGuiApplication::clipboard()->setText( edit.toPlainText());
+            }
+        } )->setIcon( QIcon::fromTheme( "copy" ));
     }
 
     if ( type == Tag::Formula || tagId == PixmapTag ) {
@@ -377,15 +382,15 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 iu.setWindowFlags( Qt::Dialog | Qt::Tool );
                 iu.exec();
             }
-        } );
+        } )->setIcon( QIcon::fromTheme( "image" ));
 
         menu.addAction( this->tr( "Replace" ), [ this, row ]() {
             this->replacePixmap( row );
-        } );
+        } )->setIcon( QIcon::fromTheme( "replace" ));
     }
 
     if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
-        menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()));
+        menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
 
     if ( tagId != Id::Invalid ) {
         const QString functionName( Tag::instance()->function( tagId ));
@@ -398,10 +403,26 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
             // tag.
             QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
-            subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } );
-            subMenu2->addAction( this->tr( "Value" ), paste );
+            subMenu2->setIcon( QIcon::fromTheme( "paste" ));
+            subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } )->setIcon( QIcon::fromTheme( "clean" ));
+            subMenu2->addAction( this->tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
+        }
+
+
+        menu.addAction( this->tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
+            this->hiddenTags << QString::number( static_cast<int>( tagId ));
+            ReagentDock::instance()->view()->updateView();
+        } )->setIcon( QIcon::fromTheme( "hide" ));
+
+        if ( !this->hiddenTags.isEmpty()) {
+            menu.addAction( this->tr( "Show all properties" ), [ this ]() {
+                this->hiddenTags.clear();
+                ReagentDock::instance()->view()->updateView();
+            } )->setIcon( QIcon::fromTheme( "show" ));
         }
     }
+
+  //  if ( tagId == Id::Invalid ) {
 
     menu.exec( this->ui->propertyView->mapToGlobal( pos ));
 }
@@ -526,6 +547,20 @@ void PropertyDock::replacePixmap( const Row &row ) {
 }
 
 /**
+ * @brief PropertyDock::saveHiddenTags
+ */
+void PropertyDock::saveHiddenTags() {
+    Variable::instance()->setValue( "propertyDock/hiddenTags", this->hiddenTags );
+}
+
+/**
+ * @brief PropertyDock::loadHiddenTags
+ */
+void PropertyDock::loadHiddenTags() {
+    this->hiddenTags = Variable::instance()->value<QStringList>( "propertyDock/hiddenTags" );
+}
+
+/**
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
@@ -550,7 +585,7 @@ void PropertyDock::on_editPropButton_clicked() {
 
     // handle pixmaps
     const Id tagId = Property::instance()->tagId( propertyId );
-    if ( tagId == PixmapTag ) {
+    if (( tagId == PixmapTag ) || ( tagId != Id::Invalid && tagId != PixmapTag && Tag::instance()->type( tagId ) == Tag::Formula )) {
         this->replacePixmap( propertyRow );
     } else {
         // set new value

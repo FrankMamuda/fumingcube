@@ -78,12 +78,14 @@ void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
     Variable::instance()->setInteger( "reagentDock/selection", reagentId );
 
     // apply sql filter
-    Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 ) or ( %1=%3 and %1>-1 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
+   // qDebug() << ;
+    Property::instance()->setFilter( QString( "( %1=%2 and %1>-1 and %4 %6 ) or ( %1=%3 and %1>-1 and %4 %6 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
                                      .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
                                      .arg( reagentId )                                               // 2
                                      .arg( item->data( ReagentModel::ParentId ).toInt())             // 3
                                      .arg( Property::instance()->fieldName( Property::TagId ))       // 4
                                      .arg( Property::instance()->tableName())                        // 5
+                                     .arg( PropertyDock::instance()->hiddenTags.join( ", " ).append( " ) " ).prepend( "not in ( "))    // 6
                                      );
     Property::instance()->sort( Property::TableOrder, Qt::AscendingOrder );
     Property::instance()->select();

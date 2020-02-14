@@ -46,6 +46,7 @@ public:
     ~ReagentDock() override;
     bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
     ReagentView *view() const;
+    QMenu *buildMenu( bool context = true );
 
 signals:
     void currentIndexChanged( const QModelIndex &index );

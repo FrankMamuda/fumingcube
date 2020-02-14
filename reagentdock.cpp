@@ -165,11 +165,12 @@ ReagentView *ReagentDock::view() const {
 }
 
 /**
- * @brief ReagentDock::on_reagentView_customContextMenuRequested
- * @param pos
+ * @brief ReagentDock::buildMenu
+ * @param context
+ * @return
  */
-void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos ) {
-    QMenu menu;
+QMenu *ReagentDock::buildMenu( bool context ) {
+    QMenu *menu( new QMenu());
 
     auto addReagent = [ this ]( const Id &parentId ) {
         QString name, alias;
@@ -215,8 +216,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
                 const Id reagentId = Reagent::instance()->id( row );
 
                 // add labels if any
-                qDebug() << "got labels" << labels;
-
+                //qDebug() << "got labels" << labels;
                 foreach ( const Id &id, labels ) {
                     if ( id == Id::Invalid )
                         continue;
@@ -253,7 +253,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
         }
     };
 
-    menu.addAction( this->tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ));
+    menu->addAction( this->tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ))->setIcon( QIcon::fromTheme( "reagent" ));
 
     const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
     if ( index.isValid()) {
@@ -261,50 +261,65 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
-        menu.addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( ReagentModel::ID ).toInt()) : parentId  ));
-        menu.addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } );
+        menu->addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( ReagentModel::ID ).toInt()) : parentId  ))->setIcon( QIcon::fromTheme( "add" ));
 
-        if ( parentId == Id::Invalid ) {
-            QMenu *labels( menu.addMenu( this->tr( "Labels" )));
-            for ( int y = 0; y < Label::instance()->count(); y++ ) {
-                const Row row = static_cast<Row>( y );
-                const Id menuLabelId = Label::instance()->id( row );
-                const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+        if ( context ) {
+            menu->addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } )->setIcon( QIcon::fromTheme( "copy" ));
 
-                const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
-                bool hasLabel = false;
-                foreach ( const Id &labelId, labelIds ) {
-                    if ( labelId == menuLabelId ) {
-                        hasLabel = true;
-                        break;
+            if ( parentId == Id::Invalid ) {
+                QMenu *labels( menu->addMenu( this->tr( "Labels" )));
+                labels->setIcon( QIcon::fromTheme( "label" ));
+                for ( int y = 0; y < Label::instance()->count(); y++ ) {
+                    const Row row = static_cast<Row>( y );
+                    const Id menuLabelId = Label::instance()->id( row );
+                    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+
+                    const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
+                    bool hasLabel = false;
+                    foreach ( const Id &labelId, labelIds ) {
+                        if ( labelId == menuLabelId ) {
+                            hasLabel = true;
+                            break;
+                        }
                     }
+
+                    QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ item, menuLabelId, reagentId, hasLabel ]() {
+                        if ( hasLabel ) {
+                            LabelSet::instance()->remove( menuLabelId, reagentId );
+                            LabelSet::instance()->removeOrphanedEntries();
+                        } else
+                            LabelSet::instance()->add( menuLabelId, reagentId );
+
+                        // force icon reset without resetting the model
+                        const_cast<QStandardItem*>( item )->setIcon( QIcon());
+                    } ));
+                    action->setCheckable( true );
+                    if ( hasLabel )
+                        action->setChecked( true );
                 }
-
-                QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ item, menuLabelId, reagentId, hasLabel ]() {
-                    if ( hasLabel ) {
-                        LabelSet::instance()->remove( menuLabelId, reagentId );
-                        LabelSet::instance()->removeOrphanedEntries();
-                    } else
-                        LabelSet::instance()->add( menuLabelId, reagentId );
-
-                    // force icon reset without resetting the model
-                    const_cast<QStandardItem*>( item )->setIcon( QIcon());
-                } ));
-                action->setCheckable( true );
-                if ( hasLabel )
-                    action->setChecked( true );
             }
         }
     }
 
-    menu.exec( this->mapToGlobal( pos ));
+    menu->setAttribute( Qt::WA_DeleteOnClose, true );
+    return menu;
+}
+
+/**
+ * @brief ReagentDock::on_reagentView_customContextMenuRequested
+ * @param pos
+ */
+void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos ) {
+    QMenu *menu( this->buildMenu( true ));
+    menu->exec( this->mapToGlobal( pos ));
 }
 
 /**
  * @brief ReagentDock::on_addButton_clicked
  */
 void ReagentDock::on_addButton_clicked() {
-    this->on_reagentView_customContextMenuRequested( this->ui->addButton->pos());
+    QMenu *menu( this->buildMenu( false ));
+    menu->exec( this->mapToGlobal( this->ui->addButton->pos()));
 }
 
 /**
@@ -356,7 +371,7 @@ void ReagentDock::on_removeButton_clicked() {
 
             // remove items without resetting model
             this->view()->model()->remove( qAsConst( sourceList ));
-        } );
+        } )->setIcon( QIcon::fromTheme( "remove" ));
     } else {
         // remove just one entry
         // get current index
@@ -450,7 +465,7 @@ void ReagentDock::on_editButton_clicked() {
             const_cast<QStandardItem*>( item )->setText( ReagentModel::generateName( name ));
         }
     } else {
-        ReagentDialog rd( this, previousName, previousAlias );
+        ReagentDialog rd( this, previousName, previousAlias, ReagentDialog::EditMode );
         ok = ( rd.exec() == QDialog::Accepted );
         const QString name( rd.name());
         const QString alias( rd.alias());

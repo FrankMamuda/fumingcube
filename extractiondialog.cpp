@@ -497,7 +497,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
 
         const QString cid( this->cidList.first());
         this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
-        NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
+        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
         this->getFormula( cid );
     }
         break;
@@ -524,10 +524,11 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         std::sort( cidListInt.begin(), cidListInt.end());
         cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
-        qDebug() << "FROM NET CIDLISTSIM";
-        if ( cidListInt.count() == 1 )
+        qDebug() << "FROM NET CIDLISTSIM" << cidListInt;
+        if ( cidListInt.count() == 1 ) {
             this->getFormula( QString::number( cidListInt.first()));
-        else
+            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
+        } else
             this->getSimilar( qAsConst( cidListInt ));
     }
         break;
@@ -590,9 +591,10 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
                     qDebug() << "FROM CACHE CIDLISTSIM";
-                    if ( cidListInt.count() == 1 )
+                    if ( cidListInt.count() == 1 ) {
+                        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
                         this->getFormula( QString::number( cidListInt.first()));
-                    else
+                    } else
                         this->getSimilar( qAsConst( cidListInt ));
 
                     return;

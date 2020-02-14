@@ -270,6 +270,8 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
  * @return
  */
 QString TextEdit::stripHTML( const QString &input ) {
-    const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
+    // FIXME: don't strip tables as well?
+    const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
+    //const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
     return QString( input ).replace( re, "" );
 }

@@ -45,6 +45,7 @@ public:
     static PropertyDock *instance() { static PropertyDock *reagentDock( new PropertyDock()); return reagentDock; }
     ~PropertyDock();
     int sectionSize( int column ) const;
+    QStringList hiddenTags;
 
 public slots:
     void updateView();
@@ -52,6 +53,8 @@ public slots:
     void setSpecialWidgets();
     void setCurrentIndex( const QModelIndex &index );
     void replacePixmap( const Row &row );
+    void saveHiddenTags();
+    void loadHiddenTags();
 
 private slots:
     void on_addPropButton_clicked();

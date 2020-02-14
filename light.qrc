@@ -22,7 +22,13 @@
       <file alias="16x16/right.png">icons/light/16x16/right.png</file>
       <file alias="16x16/star.png">icons/light/16x16/star.png</file>
       <file alias="16x16/up.png">icons/light/16x16/up.png</file>
-	  <file alias="16x16/settings.png">icons/light/16x16/settings.png</file>
+      <file alias="16x16/settings.png">icons/light/16x16/settings.png</file>
+      <file alias="16x16/label.png">icons/light/16x16/label.png</file>
+      <file alias="16x16/paste.png">icons/light/16x16/paste.png</file>
+      <file alias="16x16/replace.png">icons/light/16x16/replace.png</file>
+      <file alias="16x16/hide.png">icons/light/16x16/hide.png</file>
+      <file alias="16x16/show.png">icons/light/16x16/show.png</file>
+      <file alias="16x16/copy.png">icons/light/16x16/copy.png</file>
       <file alias="scalable/accept.svg">icons/light/scalable/accept.svg</file>
       <file alias="scalable/add.svg">icons/light/scalable/add.svg</file>
       <file alias="scalable/clean.svg">icons/light/scalable/clean.svg</file>
@@ -44,6 +50,12 @@
       <file alias="scalable/right.svg">icons/light/scalable/right.svg</file>
       <file alias="scalable/star.svg">icons/light/scalable/star.svg</file>
       <file alias="scalable/up.svg">icons/light/scalable/up.svg</file>
-	  <file alias="scalable/settings.svg">icons/light/scalable/settings.svg</file>
+      <file alias="scalable/settings.svg">icons/light/scalable/settings.svg</file>
+      <file alias="scalable/label.svg">icons/light/scalable/label.svg</file>
+      <file alias="scalable/paste.svg">icons/light/scalable/paste.svg</file>
+      <file alias="scalable/replace.svg">icons/light/scalable/replace.svg</file>
+      <file alias="scalable/hide.svg">icons/light/scalable/hide.svg</file>
+      <file alias="scalable/show.svg">icons/light/scalable/show.svg</file>
+      <file alias="scalable/copy.svg">icons/light/scalable/copy.svg</file>
   </qresource>
 </RCC>

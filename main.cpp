@@ -106,15 +106,11 @@ future:
 unsorted:
   - cut/paste properties from reagents
   - better subscript/superscript support in reagent addition dialog
-  - automatic subscript does not work (it pushes cursor to the end of the line)
   - Bad behaviour:
     right click on reagent, change label
     (the property view still displays the last selected reagent)
     add property
     (the property is added to the reagent selected with the right click, not the one displayed in property screen)
-  - subscript not visible in property dock for physical description (if edited in advanced mode)
-  - for some reason, searching for similiar reagents it only returns formula
-    but when searching for CAS, all properties are returned
   - allow to display treeview in multiple columns
 */
 
@@ -185,6 +181,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
     Variable::instance()->add( "reagentDock/openNodes", "", Var::Flag::Hidden );
+    Variable::instance()->add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
     Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
@@ -197,6 +194,7 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     qApp->connect( qApp, &QApplication::aboutToQuit, []() {
+        PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();
         XMLTools::instance()->write();
 
