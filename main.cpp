@@ -52,6 +52,7 @@
 
 reagents:
  - multiple aliases
+ - richtext
 
 database:
  - check API
@@ -95,8 +96,6 @@ settings:
 misc:
  - store variables (for example F = molarMasss( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
- - unify text editor toolbars (in tagedit and propertyedit) as a separate
-   class
 
 future:
  - common reaction browser

@@ -304,7 +304,7 @@
       <addaction name="actionEdit"/>
       <addaction name="actionRemove"/>
      </widget>
-     <widget class="QToolBar" name="styleToolbar">
+     <widget class="EditorToolbar" name="styleToolbar">
       <property name="movable">
        <bool>false</bool>
       </property>
@@ -329,20 +329,17 @@
       <attribute name="toolBarBreak">
        <bool>false</bool>
       </attribute>
-      <addaction name="actionSubScript"/>
-      <addaction name="actionSuperScript"/>
-      <addaction name="actionCharacterMap"/>
      </widget>
     </widget>
    </item>
   </layout>
-  <action name="actionAdd">
+  <action name="actionEdit">
    <property name="icon">
-    <iconset theme="add">
+    <iconset theme="edit">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Add</string>
+    <string>Edit</string>
    </property>
   </action>
   <action name="actionRemove">
@@ -354,34 +351,13 @@
     <string>Remove</string>
    </property>
   </action>
-  <action name="actionEdit">
+  <action name="actionAdd">
    <property name="icon">
-    <iconset theme="edit">
+    <iconset theme="add">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Edit</string>
-   </property>
-  </action>
-  <action name="actionSubScript">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Subscript</string>
-   </property>
-  </action>
-  <action name="actionSuperScript">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Superscript</string>
-   </property>
-  </action>
-  <action name="actionCharacterMap">
-   <property name="text">
-    <string>CharacterMap</string>
+    <string>Add</string>
    </property>
   </action>
  </widget>
@@ -389,7 +365,12 @@
   <customwidget>
    <class>TextEdit</class>
    <extends>QTextEdit</extends>
-   <header>textedit.h</header>
+   <header>mainwindow.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EditorToolbar</class>
+   <extends>QToolBar</extends>
+   <header>editortoolbar.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

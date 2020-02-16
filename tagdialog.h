@@ -55,7 +55,6 @@ private slots:
     void on_actionEdit_triggered();
     void clear();
     void setMode( const Modes &mode = NoMode ) { this->m_mode = mode; }
-    void mergeFormat( const QTextCharFormat &format );
 
 protected:
     bool eventFilter( QObject *object, QEvent *event ) override;

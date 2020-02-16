@@ -67,13 +67,12 @@ public:
     QString value() const;
 
 private slots:
-    void mergeFormat( const QTextCharFormat &format );
-    void fontChanged( const QFont &font );
-    void colourChanged( const QColor &colour );
     void setText( Editors editor, const QString &text );
+
+protected:
+    void showEvent( QShowEvent *event ) override;
 
 private:
     Ui::PropertyEditor *ui;
-    TextEdit *activeEditor;
     Modes mode;
 };

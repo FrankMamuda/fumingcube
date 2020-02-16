@@ -76,7 +76,8 @@ SOURCES += \
     reagent.cpp \
     property.cpp \
     calcedit.cpp \
-    nodehistory.cpp
+    nodehistory.cpp \
+    editortoolbar.cpp
 
 HEADERS += \
     about.h \
@@ -129,7 +130,8 @@ HEADERS += \
     reagent.h \
     property.h \
     calcedit.h \
-    nodehistory.h
+    nodehistory.h \
+    editortoolbar.h
 
 FORMS += \
         about.ui \

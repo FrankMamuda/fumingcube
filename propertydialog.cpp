@@ -21,7 +21,6 @@
  */
 #include "propertydialog.h"
 #include "propertydock.h"
-#include "propertyeditor.h"
 #include "reagent.h"
 #include "tag.h"
 #include "ui_propertydialog.h"

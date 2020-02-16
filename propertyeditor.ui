@@ -14,7 +14,8 @@
    <string>Property editor</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="property"/>
+   <iconset theme="property">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -40,12 +41,6 @@
      <widget class="QWidget" name="centralwidget">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QFontComboBox" name="comboFont"/>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboSize"/>
-       </item>
-       <item>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QGroupBox" name="groupTitle">
@@ -60,18 +55,15 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
+             <widget class="QLineEdit" name="lineEdit"/>
+            </item>
+            <item>
              <widget class="TextEdit" name="name">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>32</height>
-               </size>
               </property>
               <property name="acceptDrops">
                <bool>false</bool>
@@ -130,7 +122,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QToolBar" name="primaryToolBar">
+     <widget class="EditorToolbar" name="nameToolBar">
       <property name="font">
        <font>
         <pointsize>10</pointsize>
@@ -154,18 +146,13 @@ p, li { white-space: pre-wrap; }
       <attribute name="toolBarBreak">
        <bool>false</bool>
       </attribute>
-      <addaction name="actionBold"/>
-      <addaction name="actionItalic"/>
-      <addaction name="actionUnderlined"/>
-      <addaction name="actionSubScript"/>
-      <addaction name="actionSuperScript"/>
-      <addaction name="actionCharacterMap"/>
-      <addaction name="actionColour"/>
-      <addaction name="actionImage"/>
-      <addaction name="actionGHS"/>
-      <addaction name="actionCleanHTML"/>
      </widget>
-     <widget class="QToolBar" name="fontToolBar">
+     <widget class="EditorToolbar" name="valueToolBar">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="windowTitle">
        <string>toolBar_2</string>
       </property>
@@ -185,143 +172,25 @@ p, li { white-space: pre-wrap; }
        <bool>false</bool>
       </attribute>
      </widget>
-     <action name="actionBold">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>B</string>
-      </property>
-      <property name="toolTip">
-       <string>Set bold font</string>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </action>
-     <action name="actionItalic">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>I</string>
-      </property>
-      <property name="toolTip">
-       <string>Set italic font</string>
-      </property>
-      <property name="font">
-       <font>
-        <italic>true</italic>
-       </font>
-      </property>
-     </action>
-     <action name="actionUnderlined">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>U</string>
-      </property>
-      <property name="toolTip">
-       <string>Underline selection</string>
-      </property>
-      <property name="font">
-       <font>
-        <underline>true</underline>
-       </font>
-      </property>
-     </action>
-     <action name="actionCharacterMap">
-      <property name="text">
-       <string>Ch</string>
-      </property>
-      <property name="toolTip">
-       <string>Insert special character</string>
-      </property>
-     </action>
-     <action name="actionSuperScript">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Super</string>
-      </property>
-      <property name="toolTip">
-       <string>Set superscript</string>
-      </property>
-     </action>
-     <action name="actionSubScript">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Sub</string>
-      </property>
-      <property name="toolTip">
-       <string>Set subscript</string>
-      </property>
-     </action>
-     <action name="actionColour">
-      <property name="icon">
-       <iconset theme="colour"/>
-      </property>
-      <property name="text">
-       <string>C</string>
-      </property>
-      <property name="toolTip">
-       <string>Set selection colour</string>
-      </property>
-     </action>
-     <action name="actionImage">
-      <property name="icon">
-       <iconset theme="image"/>
-      </property>
-      <property name="text">
-       <string>Image</string>
-      </property>
-      <property name="toolTip">
-       <string>Insert image</string>
-      </property>
-     </action>
-     <action name="actionCleanHTML">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="icon">
-       <iconset theme="clean"/>
-      </property>
-      <property name="text">
-       <string>Clean HTML</string>
-      </property>
-     </action>
-     <action name="actionGHS">
-      <property name="icon">
-       <iconset theme="hazard"/>
-      </property>
-      <property name="text">
-       <string>GHS</string>
-      </property>
-      <property name="toolTip">
-       <string>Add GHS pictogram</string>
-      </property>
-     </action>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
+   <class>TextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>mainwindow.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EditorToolbar</class>
+   <extends>QToolBar</extends>
+   <header>editortoolbar.h</header>
+  </customwidget>
+  <customwidget>
    <class>ButtonBox</class>
    <extends>QDialogButtonBox</extends>
    <header>buttonbox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>TextEdit</class>
-   <extends>QTextEdit</extends>
-   <header>textedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

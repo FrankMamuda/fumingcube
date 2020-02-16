@@ -79,212 +79,47 @@ QString PropertyEditor::value() const {
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
-PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), activeEditor( nullptr ), mode( mode ) {
+PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), mode( mode ) {
     // set up ui
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
-    const QListWidget w;
-    const QFont font( QApplication::font( &w ));
-
-    // we don't currently need this
-    this->ui->fontToolBar->hide();
-
-    // fix tab issues
+    // setup name editor and toolbar
     this->ui->name->installEventFilter( this );
     this->ui->name->setSimpleEditor( true );
-
-    // set font toolbar below other buttons
-    this->ui->mainWindow->insertToolBarBreak( this->ui->fontToolBar );
-
-    /**
-     * @brief formatChanged (lambda) changes ui elements (buttons, font selector, etc.) to match text format
-     * @param format
-     */
-    auto formatChanged = [ this ]( const QTextCharFormat &format ) {
-        this->fontChanged( format.font());
-        this->colourChanged( format.foreground().color());
-        this->ui->actionSubScript->setChecked( format.verticalAlignment() == QTextCharFormat::AlignSubScript );
-        this->ui->actionSuperScript->setChecked( format.verticalAlignment() == QTextCharFormat::AlignSuperScript );
-    };
-
-    /**
-     * @brief activeFormatChanged (lambda) changes ui elements according to active editor
-     */
-    auto activeFormatChanged = [ this, formatChanged ]() { formatChanged( this->activeEditor->currentCharFormat()); };
-
-    // make sure to change ui elements on active editor switch
-    this->connect( this->ui->name, &TextEdit::currentCharFormatChanged, formatChanged );
-    this->connect( this->ui->value, &TextEdit::currentCharFormatChanged, formatChanged );
+    this->ui->name->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    this->ui->name->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    this->ui->nameToolBar->setEditor( this->ui->name );
+    this->ui->nameToolBar->installFeature( EditorToolbar::Font );
+    this->ui->nameToolBar->installFeature( EditorToolbar::VerticalAlignment );
 
     // set default font for property value editor
+    const QListWidget w;
+    const QFont font( QApplication::font( &w ));
     this->ui->value->setFont( font );
-
-    /**
-     * @brief flipFlop (lambda) toggles ui element visibility
-     * @param enable
-     */
-    auto flipFlop = [ this ]( bool enable ) {
-        this->ui->comboFont->setEnabled( enable );
-        this->ui->comboSize->setEnabled( enable );
-        this->ui->actionImage->setEnabled( enable );
-        this->ui->actionGHS->setEnabled( enable );
-        this->ui->actionColour->setEnabled( enable );
-    };
+    this->ui->valueToolBar->setEditor( this->ui->value );
+    this->ui->valueToolBar->installFeature( EditorToolbar::Font );
+    this->ui->valueToolBar->installFeature( EditorToolbar::VerticalAlignment );
+    this->ui->valueToolBar->installFeature( EditorToolbar::CharacterMap );
+    this->ui->valueToolBar->installFeature( EditorToolbar::Image );
+    this->ui->valueToolBar->installFeature( EditorToolbar::GHS );
+    this->ui->valueToolBar->installFeature( EditorToolbar::Colour );
+    this->ui->valueToolBar->installFeature( EditorToolbar::CleanHTML );
 
     // actions performed upon entering property name editor
-    this->connect( this->ui->name, &TextEdit::entered, [ this, activeFormatChanged, flipFlop, font ]() {
-        this->activeEditor = this->ui->name;
-        activeFormatChanged();
-        flipFlop( false );
-
-        // must always use default font (disallow other fonts)
-        this->ui->name->setFont( font );
-        this->fontChanged( this->ui->name->currentFont());
+    this->connect( this->ui->name, &TextEdit::entered, [ this ]() {
+        this->ui->nameToolBar->show();
+        this->ui->valueToolBar->hide();
     } );
 
     // actions performed upon entering property value editor
-    this->connect( this->ui->value, &TextEdit::entered, [ this, activeFormatChanged, flipFlop ]() {
-        this->activeEditor = this->ui->value;
-        activeFormatChanged();
-        flipFlop( true );
+    this->connect( this->ui->value, &TextEdit::entered, [ this ]() {
+        this->ui->valueToolBar->show();
+        this->ui->nameToolBar->hide();
     } );
 
     // focus on the name editor to begin with
     this->ui->name->setFocus();
-
-    // bold text toggle lambda
-    this->connect( this->ui->actionBold, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setFontWeight( this->ui->actionBold->isChecked() ? QFont::Bold : QFont::Normal );
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // italic text toggle lambda
-    this->connect( this->ui->actionItalic, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setFontItalic( this->ui->actionItalic->isChecked());
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // underlined text toggle lambda
-    this->connect( this->ui->actionUnderlined, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setFontUnderline( this->ui->actionUnderlined->isChecked());
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // subScript text toggle lambda
-    this->ui->actionSubScript->setText( QChar( 0x25bc ));
-    this->connect( this->ui->actionSubScript, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setVerticalAlignment( !this->ui->actionSubScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSubScript );
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // superScript text toggle lambda
-    this->ui->actionSuperScript->setText( QChar( 0x25b2 ));
-    this->connect( this->ui->actionSuperScript, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setVerticalAlignment( !this->ui->actionSuperScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSuperScript );
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // font color picker lambda
-    this->connect( this->ui->actionColour, &QAction::triggered, [ this ] () {
-        QColor colour( QColorDialog::getColor( this->activeEditor->textColor(), this ));
-        if ( !colour.isValid())
-            return;
-
-        QTextCharFormat format;
-        format.setForeground( colour );
-        this->mergeFormat( qAsConst( format ));
-        this->colourChanged( colour );
-    });
-
-    // font selector lambda
-    this->connect( this->ui->comboFont, QOverload<const QString &>::of( &QComboBox::activated ), [ this ]( const QString &fontName ) {
-        QTextCharFormat format;
-        format.setFontFamily( fontName );
-        this->mergeFormat( qAsConst( format ));
-    });
-
-    // add font selector
-    this->ui->fontToolBar->addWidget( this->ui->comboFont );
-
-    // add font size comboBox
-    this->ui->fontToolBar->addWidget( this->ui->comboSize );
-    this->ui->comboSize->setEditable( true );
-
-    // set up font sizes
-    foreach ( const int &size, QFontDatabase::standardSizes())
-        this->ui->comboSize->addItem( QString::number( size ));
-
-    // set up size selector
-    this->ui->comboSize->setCurrentIndex( QFontDatabase::standardSizes().indexOf( QApplication::font().pointSize()));
-    this->connect( this->ui->comboSize, QOverload<const QString &>::of( &QComboBox::activated ), [ this ] ( const QString &pointSize ) {
-        if ( pointSize.toFloat() > 0 ) {
-            QTextCharFormat format;
-            format.setFontPointSize( pointSize.toDouble());
-            this->mergeFormat( qAsConst( format ));
-        }
-    } );
-
-    // add character map action
-    this->ui->actionCharacterMap->setText( QChar( 0x212b ));
-    this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
-        CharacterMap cm( this );
-
-        // add character map action
-        this->connect( &cm, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
-            this->activeEditor->insertPlainText( character );
-        } );
-
-        cm.exec();
-    } );
-
-    // set up image selector action
-    this->connect( this->ui->actionImage, &QAction::triggered, [ this ]() {
-        const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
-
-        if ( fileName.isEmpty())
-            return;
-
-        // load image
-        const QPixmap pixmap( fileName );
-        if ( !pixmap.isNull())
-            this->activeEditor->insertPixmap( pixmap );
-    } );
-
-    // set up image selector action
-    this->connect( this->ui->actionGHS, &QAction::triggered, [ this ]() {
-        QMenu *menu( new QMenu());
-
-        foreach ( const QString &key, GHSHazards::Hazards.keys()) {
-            const QIcon icon( GHSPictograms::icon( key ));
-            menu->addAction( icon, GHSHazards::Hazards[key], [ this, key ]() {
-                const QPixmap pixmap( GHSPictograms::pixmap( key, 48 ));
-                if ( !pixmap.isNull())
-                    this->activeEditor->insertPixmap( pixmap );
-            } );
-        }
-
-        menu->exec( QCursor::pos());
-        menu->deleteLater();
-    } );
-
-    // resize name editor to minimum
-    //const QFontMetrics fm( this->ui->name->document()->defaultFont());
-    //const QMargins margins( this->ui->name->contentsMargins());
-    //this->ui->name->setFixedHeight( static_cast<int>( fm.lineSpacing() + margins.top() + margins.bottom() + ( this->ui->name->document()->documentMargin() + this->ui->name->frameWidth()) * 2 ));
-    // connect actionCleanHTML
-    this->connect( this->ui->actionCleanHTML, &QAction::toggled, [ this ]( bool enable ) {
-        this->ui->value->setCleanHTML( enable );
-    } );
-    this->ui->actionCleanHTML->setChecked( true );
-
-    // make sure name editor gets plain HTML from clipboard
-    this->ui->name->setCleanHTML( true );
 
     // setup view
     if ( mode == Add ) {
@@ -308,22 +143,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
  */
 PropertyEditor::~PropertyEditor() {
     // disconnects
-    this->disconnect( this->ui->name, &TextEdit::currentCharFormatChanged, this, nullptr );
-    this->disconnect( this->ui->value, &TextEdit::currentCharFormatChanged, this, nullptr );
     this->disconnect( this->ui->name, &TextEdit::entered, this, nullptr );
     this->disconnect( this->ui->value, &TextEdit::entered, this, nullptr );
-    this->disconnect( this->ui->actionBold, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionItalic, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionUnderlined, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionSubScript, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionSuperScript, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionColour, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->comboFont, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
-    this->disconnect( this->ui->comboSize, QOverload<const QString &>::of( &QComboBox::activated ), this, nullptr );
-    this->disconnect( this->ui->actionCharacterMap, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionImage, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionGHS, &QAction::triggered, this, nullptr );
-    this->disconnect( this->ui->actionCleanHTML, &QAction::toggled, this, nullptr );
 
     delete this->ui;
 }
@@ -349,42 +170,14 @@ void PropertyEditor::setText( Editors editor, const QString &text ) {
 }
 
 /**
- * @brief PropertyEditor::mergeFormat
- * @param format
+ * @brief PropertyEditor::showEvent
+ * @param event
  */
-void PropertyEditor::mergeFormat( const QTextCharFormat &format ) {
-    QTextCursor cursor( this->activeEditor->textCursor());
-
-    if ( !cursor.hasSelection())
-        cursor.select( QTextCursor::WordUnderCursor );
-
-    cursor.mergeCharFormat( format );
-    this->activeEditor->mergeCurrentCharFormat( format );
+void PropertyEditor::showEvent(QShowEvent *event) {
+    QDialog::showEvent( event );
+    this->ui->name->setMaximumHeight( this->ui->lineEdit->height());
+    this->ui->lineEdit->hide();
+    this->ui->nameToolBar->setMinimumHeight( this->ui->valueToolBar->height());
 }
 
-/**
- * @brief PropertyEditor::fontChanged
- * @param font
- */
-void PropertyEditor::fontChanged( const QFont &font ) {
-    this->ui->comboFont->setCurrentIndex( this->ui->comboFont->findText( QFontInfo( font ).family()));
-    this->ui->comboSize->setCurrentIndex( this->ui->comboSize->findText( QString::number( font.pointSize())));
-    this->ui->actionBold->setChecked( font.bold());
-    this->ui->actionItalic->setChecked( font.italic());
-    this->ui->actionUnderlined->setChecked( font.underline());
-}
-
-/**
- * @brief PropertyEditor::colourChanged
- * @param colour
- */
-void PropertyEditor::colourChanged( const QColor &colour ) {
-    QPixmap pixmap( QIcon::fromTheme( "colour" ).pixmap( 16, 16 ));
-    const QBitmap mask( pixmap.createMaskFromColor( Qt::transparent, Qt::MaskInColor ));
-
-    pixmap.fill( colour );
-    pixmap.setMask( mask );
-
-    this->ui->actionColour->setIcon( QIcon( qAsConst( pixmap )));
-}
 

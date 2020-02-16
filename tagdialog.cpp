@@ -41,59 +41,16 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
     this->ui->dockWidget->installEventFilter( this );
     this->ui->unitsEdit->installEventFilter( this );
     this->ui->styleToolbar->hide();
+    this->ui->styleToolbar->installFeature( EditorToolbar::VerticalAlignment );
+    this->ui->styleToolbar->installFeature( EditorToolbar::CharacterMap );
+    this->ui->styleToolbar->installFeature( EditorToolbar::Font );
+    this->ui->styleToolbar->setEditor( this->ui->unitsEdit );
+    this->ui->unitsEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    this->ui->unitsEdit->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->unitsEdit->setSimpleEditor( true );
 
     // set style toolbar below other buttons
     this->ui->widget->insertToolBarBreak( this->ui->styleToolbar );
-
-    /**
-     * @brief formatChanged (lambda) changes ui elements (buttons, font selector, etc.) to match text format
-     * @param format
-     */
-    auto formatChanged = [ this ]( const QTextCharFormat &format ) {
-        this->ui->actionSubScript->setChecked( format.verticalAlignment() == QTextCharFormat::AlignSubScript );
-        this->ui->actionSuperScript->setChecked( format.verticalAlignment() == QTextCharFormat::AlignSuperScript );
-    };
-
-    /**
-     * @brief activeFormatChanged (lambda) changes ui elements according to active editor
-     */
-    auto activeFormatChanged = [ this, formatChanged ]() { formatChanged( this->ui->unitsEdit->currentCharFormat()); };
-
-    // actions performed upon entering property unit editor
-    this->connect( this->ui->unitsEdit, &TextEdit::entered, activeFormatChanged );
-
-    // make sure to change ui elements on active editor switch
-    this->connect( this->ui->unitsEdit, &TextEdit::currentCharFormatChanged, formatChanged );
-
-    // subScript text toggle lambda
-    this->ui->actionSubScript->setText( QChar( 0x25bc ));
-    this->connect( this->ui->actionSubScript, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setVerticalAlignment( !this->ui->actionSubScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSubScript );
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // superScript text toggle lambda
-    this->ui->actionSuperScript->setText( QChar( 0x25b2 ));
-    this->connect( this->ui->actionSuperScript, &QAction::triggered, [ this ] () {
-        QTextCharFormat format;
-        format.setVerticalAlignment( !this->ui->actionSuperScript->isChecked() ? QTextCharFormat::AlignNormal : QTextCharFormat::AlignSuperScript );
-        this->mergeFormat( qAsConst( format ));
-    } );
-
-    // add character map action
-    this->ui->actionCharacterMap->setText( QChar( 0x212b ));
-    this->connect( this->ui->actionCharacterMap, &QAction::triggered, [ this ]() {
-        CharacterMap cm( this );
-
-        // add character map action
-        this->connect( &cm, &CharacterMap::characterSelected, [ this ]( const QString &character ) {
-            this->ui->unitsEdit->insertPlainText( character );
-        } );
-
-        cm.exec();
-    } );
 
     const QList<QWidget*> widgets( QList<QWidget*>() <<
                                    this->ui->unitsEdit <<
@@ -331,16 +288,3 @@ bool TagDialog::eventFilter( QObject *object, QEvent *event ) {
     return QDialog::eventFilter( object, event );
 }
 
-/**
- * @brief PropertyEditor::mergeFormat
- * @param format
- */
-void TagDialog::mergeFormat( const QTextCharFormat &format ) {
-    QTextCursor cursor( this->ui->unitsEdit->textCursor());
-
-    if ( !cursor.hasSelection())
-        cursor.select( QTextCursor::WordUnderCursor );
-
-    cursor.mergeCharFormat( format );
-    this->ui->unitsEdit->mergeCurrentCharFormat( format );
-}
