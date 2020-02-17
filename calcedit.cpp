@@ -118,6 +118,10 @@ bool CalcEdit::completeCommand() {
             if ( captured.isEmpty())
                 return false;
 
+            //
+            // FIXME: THIS NEEDS AN URGENT REWRITE
+            //
+
             QStringList reagents;
             QSqlQuery query;
             query.exec( QString( "select %1 from %2 where %1 like '%3%'" )

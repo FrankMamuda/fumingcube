@@ -204,6 +204,7 @@ Id Script::getPropertyId( const QString &name ) const {
 Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
     // FIXME: this needs a rewrite to support rich text
 
+    // first pass (no rich text)
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
                 .arg( Reagent::instance()->fieldName( Reagent::ID ))
@@ -215,7 +216,39 @@ Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
                 .arg( static_cast<int>( parentId ))
                 );
 
-    return query.next() ? query.value( 0 ).value<Id>() : Id::Invalid;
+    if ( query.next())
+        return query.value( 0 ).value<Id>();
+
+    // TODO: there must be a way to optimize this via caching
+    //
+    // second pass (handles richtext)
+    //
+    // get all names and reference
+    query.exec( QString( "select %1, %2, %3 from %4 where %5=%6" )
+                .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                .arg( Reagent::instance()->tableName())
+                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                .arg( static_cast<int>( parentId ))
+                );
+
+    // build a map of plainText names as keys and ids as values
+    QMap<QString, Id> map;
+    while ( query.next()) {
+        map[QTextEdit( query.value( 1 ).toString()).toPlainText()] = query.value( 0 ).value<Id>();
+
+        const QString reference( QTextEdit( query.value( 2 ).toString()).toPlainText());
+        if ( !reference.isEmpty())
+            map[reference] = query.value( 0 ).value<Id>();
+    }
+
+    // compare plainText names
+    if ( map.contains( alias ))
+        return map[alias];
+
+    // still nothing? return failure!
+    return Id::Invalid;
 }
 
 /**

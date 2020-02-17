@@ -656,10 +656,10 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
 
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
-            parents = QString( "\"%1\", \"%2\"" ).arg( Reagent::instance()->alias( parentId )).arg( Reagent::instance()->name( reagentId ));
+            parents = QString( "\"%1\", \"%2\"" ).arg( QTextEdit( Reagent::instance()->alias( parentId )).toPlainText()).arg( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
             //qDebug() << "has parent";
         } else {
-            parents = QString( "\"%1\"" ).arg( Reagent::instance()->alias( reagentId ));
+            parents = QString( "\"%1\"" ).arg( QTextEdit( Reagent::instance()->alias( reagentId )).toPlainText());
         }
 
         // paste
