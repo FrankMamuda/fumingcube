@@ -36,7 +36,9 @@ public:
     enum Data {
         NoData = Qt::UserRole,
         ID,
-        ParentId
+        ParentId,
+        HTML,
+        Pixmap
     };
 
     /**

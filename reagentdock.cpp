@@ -27,6 +27,7 @@
 #include <QMoveEvent>
 #include <QSqlQuery>
 #include <QMessageBox>
+#include <QTextEdit>
 #include "reagent.h"
 #include "property.h"
 #include "tag.h"
@@ -188,7 +189,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             ReagentDialog rd( this );
             ok = ( rd.exec() == QDialog::Accepted );
             name = rd.name();
-            alias = rd.alias();
+            alias = rd.reference();
 
             if ( ok ) {
                 if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
@@ -291,7 +292,9 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                             LabelSet::instance()->add( menuLabelId, reagentId );
 
                         // force icon reset without resetting the model
-                        const_cast<QStandardItem*>( item )->setIcon( QIcon());
+                        //const_cast<QStandardItem*>( item )->setIcon( QIcon());
+                        // force pixmap reset without resetting the model
+                        const_cast<QStandardItem*>( item )->setData( QPixmap(), ReagentModel::Pixmap );
                     } ));
                     action->setCheckable( true );
                     if ( hasLabel )
@@ -462,13 +465,16 @@ void ReagentDock::on_editButton_clicked() {
             Reagent::instance()->setName( reagentRow, name );
 
             // rename without resetting the model
-            const_cast<QStandardItem*>( item )->setText( ReagentModel::generateName( name ));
+            const QString generatedName( ReagentModel::generateName( name ));
+            QStandardItem* modelItem = const_cast<QStandardItem*>( item );
+            modelItem->setText( QTextEdit( generatedName ).toPlainText());
+            modelItem->setData( generatedName, ReagentModel::HTML );
         }
     } else {
         ReagentDialog rd( this, previousName, previousAlias, ReagentDialog::EditMode );
         ok = ( rd.exec() == QDialog::Accepted );
         const QString name( rd.name());
-        const QString alias( rd.alias());
+        const QString alias( rd.reference());
 
         if ( !this->checkForDuplicates( name, alias, reagentId ) || name.isEmpty() || alias.isEmpty() || !ok )
             return;
@@ -477,6 +483,9 @@ void ReagentDock::on_editButton_clicked() {
         Reagent::instance()->setAlias( reagentRow, alias );
 
         // rename without resetting the model
-        const_cast<QStandardItem*>( item )->setText( ReagentModel::generateName( name, alias ));
+        const QString generatedName( ReagentModel::generateName( name, alias ));
+        QStandardItem* modelItem = const_cast<QStandardItem*>( item );
+        modelItem->setText( QTextEdit( generatedName ).toPlainText());
+        modelItem->setData( generatedName, ReagentModel::HTML );
     }
 }

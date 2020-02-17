@@ -35,6 +35,7 @@
 #endif
 #include "property.h"
 #include "propertydock.h"
+#include <QAbstractItemView>
 
 /**
  * @brief TextEdit::insertPixmap
@@ -77,12 +78,12 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
-    if ( this->isSimpleEditor())
+    if ( source->hasImage() && this->isSimpleEditor())
         return false;
 
     // check if dropped item is an image
     foreach ( const QUrl &url, source->urls()) {
-        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ))
+        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ) && !this->isSimpleEditor())
             return true;
     }
 
@@ -111,11 +112,38 @@ void TextEdit::dropEvent( QDropEvent *event ) {
 }
 
 /**
+ * @brief TextEdit::keyPressEvent
+ * @param e
+ */
+void TextEdit::keyPressEvent( QKeyEvent *event ) {
+    if ( this->completer() != nullptr ) {
+        if ( this->completer()->popup()->isVisible()) {
+            switch (event->key()) {
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+            case Qt::Key_Escape:
+            case Qt::Key_Tab:
+            case Qt::Key_Backtab:
+                event->ignore();
+                return;
+            default:
+                break;
+            }
+        }
+
+        this->completer()->setCompletionPrefix( this->toPlainText());
+        this->completer()->complete();
+    }
+
+    QTextEdit::keyPressEvent( event );
+}
+
+/**
  * @brief TextEdit::insertFromMimeData
  * @param source
  */
 void TextEdit::insertFromMimeData( const QMimeData *source ) {
-    if ( this->isSimpleEditor())
+    if ( this->isSimpleEditor() && source->hasImage())
         return;
 
     // insert as plain text if required
@@ -275,3 +303,22 @@ QString TextEdit::stripHTML( const QString &input ) {
     //const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
     return QString( input ).replace( re, "" );
 }
+
+/**
+ * @brief TextEdit::setCompleter
+ * @param completer
+ */
+void TextEdit::setCompleter( QCompleter *completer ) {
+    if ( this->completer() != nullptr )
+        this->completer()->disconnect(this);
+
+    this->m_completer = completer;
+    if ( completer == nullptr )
+        return;
+
+    this->completer()->setWidget(this);
+    this->completer()->setCompletionMode( QCompleter::PopupCompletion );
+    this->completer()->setCaseSensitivity( Qt::CaseInsensitive );
+    this->completer()->connect( this->completer(), QOverload<const QString &>::of( &QCompleter::activated ), [ this ]( const QString &completion ) { this->setHtml( completion ); } );
+}
+

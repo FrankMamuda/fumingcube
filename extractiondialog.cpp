@@ -61,7 +61,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
             return;
     }
 
-    this->ui->nameEdit->setText( Reagent::instance()->name( reagentId ));
+    this->ui->nameEdit->setText( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
     this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();

@@ -128,7 +128,7 @@ bool CalcEdit::completeCommand() {
             while ( query.next())
                 reagents << query.value( 0 ).toString();
 
-            // if aliases come up empty, search reagent names instead
+            // if references come up empty, search reagent names instead
             if ( reagents.isEmpty()) {
                 query.exec( QString( "select %1 from %2 where %1 like '%3%'" )
                             .arg( Reagent::instance()->fieldName( Reagent::Name ))

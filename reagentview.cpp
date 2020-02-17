@@ -23,6 +23,7 @@
 #include "propertydock.h"
 #include "reagentview.h"
 #include "reagent.h"
+#include "reagentdelegate.h"
 
 /**
  * @brief ReagentView::ReagentView
@@ -31,11 +32,19 @@
 ReagentView::ReagentView( QWidget *parent) : QTreeView( parent ) {
     // set a model to treeview
     this->setModel( new QSortFilterProxyModel());
+
+    // TODO: move to class and delete?
     this->filterModel()->setSourceModel( new ReagentModel());
     this->filterModel()->setRecursiveFilteringEnabled( true );
     this->filterModel()->setSortCaseSensitivity( Qt::CaseInsensitive );
     this->filterModel()->setFilterCaseSensitivity( Qt::CaseInsensitive );
     this->setRootIndex( this->model()->invisibleRootItem()->index());
+
+    // set html delegate
+    // TODO: deleteme
+    ReagentDelegate *delegate = new ReagentDelegate();
+    delegate->setModel( this->filterModel());
+    this->setItemDelegate( delegate );
 
     this->m_nodeHistory = new NodeHistory( this );
     this->connect( this, SIGNAL( clicked( const QModelIndex & )), this, SLOT( selectReagent( const QModelIndex & )));
@@ -45,6 +54,7 @@ ReagentView::ReagentView( QWidget *parent) : QTreeView( parent ) {
  * @brief ReagentView::updateView
  */
 void ReagentView::updateView() {
+    qobject_cast<ReagentDelegate *>( this->itemDelegate())->clearCache();
     this->nodeHistory()->setEnabled( false );
     this->model()->setupModelData();
 

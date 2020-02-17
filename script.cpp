@@ -202,6 +202,8 @@ Id Script::getPropertyId( const QString &name ) const {
  * @return
  */
 Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
+    // FIXME: this needs a rewrite to support rich text
+
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
                 .arg( Reagent::instance()->fieldName( Reagent::ID ))

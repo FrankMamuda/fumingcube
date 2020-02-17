@@ -94,6 +94,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
     if ( this->cache.contains( qAsConst( name )))
         return this->cache[qAsConst( name )];
 
+    // FIXME: hardcoded
     QPixmap pixmap( 12, 8 );
     pixmap.fill( Qt::transparent );
     QPainter painter( &pixmap );

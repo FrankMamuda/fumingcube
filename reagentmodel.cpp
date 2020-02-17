@@ -25,6 +25,7 @@
 #include "labeldock.h"
 #include "reagentdock.h"
 #include <QDebug>
+#include <QTextEdit>
 
 /**
  * @brief ReagentModel::headerData
@@ -47,7 +48,7 @@ QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int
  * @return
  */
 QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
-    if ( index.isValid() && role == Qt::DecorationRole ) {
+    if ( index.isValid() && role == ReagentModel::Pixmap ) {
         if ( !LabelDock::instance()->isVisible())
             return QVariant();
 
@@ -55,8 +56,9 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         if ( item->data( ReagentModel::ParentId ).value<Id>() != Id::Invalid )
             return QVariant();
 
-        if ( !item->icon().isNull())
-            return item->icon();
+        const QPixmap pixmap( item->data( ReagentModel::Pixmap ).value<QPixmap>());
+        if ( !pixmap.isNull())
+            return pixmap;
 
         const Id reagentId = item->data( ID ).value<Id>();
         if ( reagentId == Id::Invalid )
@@ -70,9 +72,15 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         foreach ( const Id &id, labelIds )
             colours << Label::instance()->colour( id );
 
-        item->setIcon( QIcon( Label::instance()->pixmap( qAsConst( colours ))));
-        return item->icon();
+        item->setData( Label::instance()->pixmap( qAsConst( colours )), ReagentModel::Pixmap );
+        return item->data( ReagentModel::Pixmap ).value<QPixmap>();
     }
+
+    // for search
+    /*if ( index.isValid() && role == Qt::DisplayRole ) {
+        QStandardItem *item( this->itemFromIndex( index ));
+        return QTextEdit( item->text()).toPlainText();
+    }*/
 
     return QStandardItemModel::data( index, role );
 }
@@ -96,9 +104,11 @@ void ReagentModel::setupModelData() {
 
         // make a new reagent treeItem
         const Id reagentId = Reagent::instance()->id( row );
-        QStandardItem *reagent( new QStandardItem( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->alias( row ))));
+        const QString generatedName( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->alias( row )));
+        QStandardItem *reagent( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
+        reagent->setData( generatedName, HTML );
 
         // go through batches (children of the reagent)
         foreach ( const Row &child, Reagent::instance()->children( row ))
@@ -187,9 +197,11 @@ void ReagentModel::add( const Id &id ) {
  * @param parentItem
  */
 void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
-    QStandardItem *item( new QStandardItem( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->alias( id )) : Reagent::instance()->name( id )));
+    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->alias( id )) : Reagent::instance()->name( id ));
+    QStandardItem *item( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
+    item->setData( generatedName, HTML );
     parentItem->appendRow( item );
 }
 

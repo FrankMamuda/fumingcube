@@ -273,7 +273,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent name
-    const QString reagentName( Reagent::instance()->name( Reagent::instance()->row( reagentId )));
+    const QString reagentName( QTextEdit( Reagent::instance()->name( Reagent::instance()->row( reagentId ))).toPlainText());
 
     // get all tags that have already been set
     QList<Id> tags;

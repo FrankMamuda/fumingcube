@@ -52,7 +52,6 @@
 
 reagents:
  - multiple aliases
- - richtext
 
 database:
  - check API
@@ -77,8 +76,8 @@ extraction:
 
 completion:
  - fix reagent completion (does not work as indended)
+   especially now, when using rich text
  - complete batch from selected reagent, not the whole list
- - resolve subscipt/superscipt to regular digits
  - complete function( "CURSOR to function( "CURSOR"
 
 scripting:
@@ -104,7 +103,6 @@ future:
 
 unsorted:
   - cut/paste properties from reagents
-  - better subscript/superscript support in reagent addition dialog
   - Bad behaviour:
     right click on reagent, change label
     (the property view still displays the last selected reagent)

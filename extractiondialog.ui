@@ -133,7 +133,7 @@
    <item row="0" column="1">
     <widget class="QGroupBox" name="parmsGroup">
      <property name="title">
-      <string>Parameters</string>
+      <string>Parameters (reagent name or CAS number)</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="1">

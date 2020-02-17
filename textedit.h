@@ -22,6 +22,7 @@
 /*
  * includes
  */
+#include <QCompleter>
 #include <QTextEdit>
 
 /**
@@ -37,6 +38,7 @@ public:
     bool cleanHTML() const { return this->m_cleanHTML; }
     static QString stripHTML( const QString &input );
     bool isSimpleEditor() const { return this->m_simpleEditor; }
+    QCompleter *completer() const { return this->m_completer; }
 
 signals:
     void entered();
@@ -46,12 +48,15 @@ protected:
     void insertFromMimeData( const QMimeData *source ) override;
     void dropEvent( QDropEvent *event ) override;
     void focusInEvent( QFocusEvent *event ) override { emit this->entered(); QTextEdit::focusInEvent( event ); }
+    void keyPressEvent( QKeyEvent *event ) override;
 
 public slots:
     void setCleanHTML( bool enable ) { this->m_cleanHTML = enable; }
     void setSimpleEditor( bool simple ) { this->m_simpleEditor = simple; }
+    void setCompleter( QCompleter *completer );
 
 private:
     bool m_cleanHTML;
     bool m_simpleEditor = false;
+    QCompleter *m_completer = nullptr;
 };

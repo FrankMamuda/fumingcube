@@ -192,6 +192,7 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
 
     case CleanHTML:
         this->actionCleanHTML = this->addAction( "" );
+        this->actionCleanHTML->setCheckable( true );
         this->actionCleanHTML->setIcon( QIcon::fromTheme( "clean" ));
         this->connect( this->actionCleanHTML, &QAction::toggled, [ this ]( bool enable ) {
             this->editor()->setCleanHTML( enable );
