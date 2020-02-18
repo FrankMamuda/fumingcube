@@ -56,11 +56,11 @@ reagents:
 database:
  - check API
  - crash on argument count mismatch
+ - alias->reference
 
 i18n:
  - tags
  - labels
- - initial greeting
  - language selector in settings
 
 properties:
@@ -80,7 +80,7 @@ extraction:
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:
    mol = mass * assay( reagent ) / molarMass( reagent )
- - add 'any' as batch name (a whildcard that chooses any batch with the
+ - add 'any' as batch name (a wildcard that chooses any batch with the
    property)
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,

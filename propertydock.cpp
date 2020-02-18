@@ -425,7 +425,8 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         } )->setIcon( QIcon::fromTheme( "show" ));
     }
 
-    menu.exec( this->ui->propertyView->mapToGlobal( pos ));
+    if ( !menu.actions().isEmpty())
+        menu.exec( this->ui->propertyView->mapToGlobal( pos ));
 }
 
 /**
