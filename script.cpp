@@ -30,6 +30,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #include <QSqlQuery>
+#include "variable.h"
 
 /**
  * @brief Script::Script
@@ -78,13 +79,28 @@ QJSValue Script::evaluate( const QString &script ) {
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
         //  2) replace comma decimal separator with a dot
         //  3) simplify string to remove trailing whitespace and newline
-        const QString processed( QString( script ).replace( QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"").arg( functions.join( "|" ))), "JS.getProperty( \"\\1\", \"" ).replace( QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)"), "\\1.\\2" ).simplified());
+        const QString processed( QString( script ).replace( QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"").arg( functions.join( "|" ))), "JS.getProperty( \"\\1\", \"" ).replace( QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)"), "\\1.\\2" ).replace( QRegularExpression( "(?<!\")\\b(ans)\\b(?!\")" ), "JS.ans()" ).simplified());
 
         // evalute script
         result = this->engine.evaluate( processed );
     }
 
     return result;
+}
+
+/**
+ * @brief Script::ans
+ * @return
+ */
+QJSValue Script::ans() {
+    const QString answer( Variable::instance()->string( "calculator/ans" ));
+
+    if ( answer.isEmpty()) {
+        this->engine.throwError( QJSValue::EvalError, this->tr( "answer is empty" ));
+        return QJSValue();
+    }
+
+    return answer;
 }
 
 /**
@@ -202,8 +218,6 @@ Id Script::getPropertyId( const QString &name ) const {
  * @return
  */
 Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
-    // FIXME: this needs a rewrite to support rich text
-
     // first pass (no rich text)
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )

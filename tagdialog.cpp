@@ -154,6 +154,7 @@ TagDialog::~TagDialog() {
  * @return
  */
 QString TagDialog::captureBody( const QString &input ) {
+    // TODO: make global static with extended options to strip parts of html
     const QString text( QString( input ).remove( "\n" ));
     const QRegularExpression re( "<body.+?(?=<p)<p.+?(?=>)>(.+?)(?=<\\/p)" );
     const QRegularExpressionMatch match = re.match( text );

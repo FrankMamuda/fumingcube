@@ -48,6 +48,7 @@ public:
     static Script *instance() { static Script *instance = new Script(); return instance; }
     virtual ~Script() override {}
     QJSValue evaluate( const QString &script );
+    Q_INVOKABLE QJSValue ans();
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reagentAlias );
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reagentAlias, const QString &batchName );
     QJSValue getPropertyInternal(  const QString &functionName, const QString &reagentAlias, const QString &batchName = QString());

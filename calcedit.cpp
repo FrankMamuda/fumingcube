@@ -109,57 +109,86 @@ bool CalcEdit::completeCommand() {
     }
 
     {
-        // const QRegularExpression keywords( "\\(\\s*\\\"([^\\\"]*)$" );
-        const QRegularExpression keywords( "(?:\\(|,)\\s*\\\"([^\\\"]*)$" );
+       //const QRegularExpression keywords( "(?:\\(|,)\\s*\\\"([^\\\"]*)$" );
+        const QRegularExpression keywords( "(?:\"(.+?)(?=\")\")?(?:\\(|,)\\s*\"([^\"]*)$" );
         const QRegularExpressionMatch match( keywords.match( left ));
-        if ( match.hasMatch() && mid.contains( QRegularExpression( "^\\\"" ))) {
-            const QString captured( match.captured( 1 ));
+        if ( match.hasMatch()/* && mid.contains( QRegularExpression( "^\\\"" ))*/) {
+            const QString captured( match.captured( 2 ));
+            const QString parent( match.captured( 1 ));
 
-            if ( captured.isEmpty())
-                return false;
+            if ( captured.isEmpty() && parent.isEmpty())
+                return true;
+
+            Id parentId = Id::Invalid;
+            if ( !parent.isEmpty()) {
+                query.exec( QString( "select %1, %2, %6 from %3 where %4=%5" )
+                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                            .arg( Reagent::instance()->tableName())
+                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                            .arg( static_cast<int>( Id::Invalid ))
+                            .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                            );
+
+                // append plainText names
+                while ( query.next()) {
+                    const QString name( QTextEdit( query.value( 0 ).toString()).toPlainText());
+                    const QString reference( QTextEdit( query.value( 1 ).toString()).toPlainText());
+
+                    if ( !QString::compare( name, parent, Qt::CaseInsensitive ) || !QString::compare( reference, parent, Qt::CaseInsensitive )) {
+                        parentId = query.value( 2 ).value<Id>();
+                        break;
+                    }
+                }
+            }
 
             //
-            // FIXME: THIS NEEDS AN URGENT REWRITE
+            // TODO: use references exclusively?
             //
-
             QStringList reagents;
-            QSqlQuery query;
-            query.exec( QString( "select %1 from %2 where %1 like '%3%'" )
+            query.exec( QString( "select %1, %2 from %3 where %4=%5" )
+                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
                         .arg( Reagent::instance()->fieldName( Reagent::Alias ))
                         .arg( Reagent::instance()->tableName())
-                        .arg( captured )
+                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                        .arg( static_cast<int>( parentId ))
                         );
-            while ( query.next())
-                reagents << query.value( 0 ).toString();
 
-            // if references come up empty, search reagent names instead
-            if ( reagents.isEmpty()) {
-                query.exec( QString( "select %1 from %2 where %1 like '%3%'" )
-                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                            .arg( Reagent::instance()->tableName())
-                            .arg( captured )
-                            );
-                while ( query.next())
-                    reagents << query.value( 0 ).toString();
+            // append plainText names
+            while ( query.next()) {
+                const QString name( QTextEdit( query.value( 0 ).toString()).toPlainText());
+                const QString reference( QTextEdit( query.value( 1 ).toString()).toPlainText());
+
+                if ( name.startsWith( captured, Qt::CaseInsensitive ))
+                    reagents << name;
+
+                if ( reference.startsWith( captured, Qt::CaseInsensitive ))
+                    reagents << reference;
             }
 
             if ( reagents.isEmpty())
                 return true;
 
+            reagents.removeDuplicates();
+            QStringList reagentsCaseInsensitive;
+            foreach ( const QString &reagent, reagents )
+                reagentsCaseInsensitive << reagent.toLower();
+            reagentsCaseInsensitive.removeDuplicates();
+
             // complete to the shortest string
             QString completion;
             int match, y;
-            if ( reagents.count() == 1 ) {
+            if ( reagentsCaseInsensitive.count() == 1 ) {
                 // append extra space (since it's the only match that will likely be follwed by an argument)
                 completion = reagents.first();
-            } else if ( reagents.count() > 1 ) {
+            } else if ( reagentsCaseInsensitive.count() > 1 ) {
                 match = 1;
                 for ( y = 0; y < reagents.count(); y++ ) {
                     // make sure we check string length
                     if ( reagents.first().length() == match || reagents.at( y ).length() == match )
                         break;
 
-                    if ( reagents.first().at( match ) == reagents.at( y ).at( match )) {
+                    if ( !QString::compare( reagents.first().at( match ), reagents.at( y ).at( match ), Qt::CaseInsensitive )) {
                         if ( y == reagents.count()-1 ) {
                             match++;
                             y = 0;
@@ -169,14 +198,13 @@ bool CalcEdit::completeCommand() {
                 completion = reagents.first().left( match );
             }
 
-            reagents.removeDuplicates();
             const int index = left.indexOf( captured, initialPosition - captured.length());
             if ( index == -1 )
                 return false;
 
             left = left.remove( index, captured.length());
             this->setText( left.insert( index, completion + mid ));
-            this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( reagents.count() == 1 ? 1 : 0 ));
+            this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( reagentsCaseInsensitive.count() == 1 ? 1 : 0 ));
             return true;
         }
     }

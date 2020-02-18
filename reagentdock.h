@@ -45,6 +45,7 @@ public:
     static ReagentDock *instance() { static ReagentDock *reagentDock( new ReagentDock()); return reagentDock; }
     ~ReagentDock() override;
     bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
+    bool checkBatchForDuplicates( const QString &name, const Id parentId ) const;
     ReagentView *view() const;
     QMenu *buildMenu( bool context = true );
 

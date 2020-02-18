@@ -69,23 +69,20 @@ properties:
    sources
  - filter in dock
  - icons in "add property" menu
+ - pre-capture paste and pre-parse input for property addition
+   example: 56.05 C gets stripped of units before passing
+   to validator
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
-
-completion:
- - fix reagent completion (does not work as indended)
-   especially now, when using rich text
- - complete batch from selected reagent, not the whole list
- - complete function( "CURSOR to function( "CURSOR"
 
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:
    mol = mass * assay( reagent ) / molarMass( reagent )
  - add 'any' as batch name (a whildcard that chooses any batch with the
    property)
- - implement ans (history), Avogadro constant, etc.
+ - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
    in that order; useful when assay is not defined)
 
@@ -174,6 +171,7 @@ int main( int argc, char *argv[] ) {
     Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
     Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
+    Variable::instance()->add( "calculator/ans", "", Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );

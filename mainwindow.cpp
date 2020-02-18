@@ -238,7 +238,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
             matches << Match( functionMatch.captured( "function" ) + ";" + args.join( ";" ), functionMatch.capturedStart(), functionMatch.capturedEnd());
         }
 
-        // perform strring replacement
+        // perform string replacement
         int offset = 0;
         foreach ( const Match &match, matches ) {
             const QString link( QString( "<a href=\"%1\">" ).arg( match.args ));
@@ -251,10 +251,13 @@ void MainWindow::appendToCalculator( const QString &line ) {
         // finally append the end result to the calculator
         // NOTE: must be wrapped in <span></span> to avoid trailing anchors
         this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
-        if ( result.isError())
+        if ( result.isError()) {
             this->ui->calcView->append( QString( "<span>%1</span><br>" ).arg( string ));
-        else
+            Variable::instance()->setString( "calculator/ans", "" );
+        } else {
             this->ui->calcView->append( QString( "<span>= <a href=\"ans;%1\">%1<\a></span><br>" ).arg( string ));
+            Variable::instance()->setString( "calculator/ans", string );
+        }
     }
 
     // ensure the result is visible

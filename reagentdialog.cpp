@@ -155,26 +155,6 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
         this->ui->editorToolBar->setEditor( this->ui->referenceEdit );
     } );
 
-    // copy reference from name by default
-    this->connect( this->ui->nameEdit, &TextEdit::textChanged, [ this ]() {
-        const QString plain( this->ui->nameEdit->toPlainText());
-        const QString html( this->ui->nameEdit->toHtml());
-
-        if ( plain.isEmpty()) {
-            this->ui->referenceEdit->setPlainText( "" );
-            return;
-        }
-
-        QString match;
-        foreach ( const QString &key, reagentAliases.keys()) {
-            if ( !QString::compare( key, plain, Qt::CaseInsensitive )) {
-                match = key;
-                break;
-            }
-        }
-        this->ui->referenceEdit->setText( !match.isEmpty() ? reagentAliases[match] : QString( html ).remove( ' ' ));
-    } );
-
     // focus on the name editor to begin with
     this->ui->nameEdit->setFocus();
 
@@ -267,6 +247,26 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     QTimer::singleShot( 0, [this]() {
         this->resize( this->minimumSizeHint());
     });
+
+    // copy reference from name by default
+    this->connect( this->ui->nameEdit, &TextEdit::textChanged, [ this ]() {
+        const QString plain( this->ui->nameEdit->toPlainText());
+        const QString html( this->ui->nameEdit->toHtml());
+
+        if ( plain.isEmpty()) {
+            this->ui->referenceEdit->setPlainText( "" );
+            return;
+        }
+
+        QString match;
+        foreach ( const QString &key, reagentAliases.keys()) {
+            if ( !QString::compare( key, plain, Qt::CaseInsensitive )) {
+                match = key;
+                break;
+            }
+        }
+        this->ui->referenceEdit->setText( !match.isEmpty() ? reagentAliases[match] : QString( html ).remove( ' ' ));
+    } );
 }
 
 /**

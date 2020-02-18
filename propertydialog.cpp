@@ -46,7 +46,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
     case Tag::Real:
     {
 
-        const QRegularExpression pattern( type == Tag::Integer ? "-?\\d+" : "-?\\d*(?:[,|\\.]\\d*)?" );
+        const QRegularExpression pattern( type == Tag::Integer ? "\\s*-?\\d+" : "-?\\d*(?:[,|\\.]\\d*)?\\s*" );
         QRegularExpressionValidator *validator( new QRegularExpressionValidator( pattern, this ));
         this->ui->textEdit->setValidator( validator );
         this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
@@ -90,7 +90,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
     {
         this->ui->textEdit->setText( defaultValue.isEmpty() ? Tag::instance()->defaultValue( tagId ).toString() : defaultValue );
         this->ui->textEdit->connect( this->ui->textEdit, &QLineEdit::textChanged, [ this, darkMode ]( const QString &text ) {
-            const QRegularExpression pattern( "\\d{2,7}-\\d{2}-\\d{1}" );
+            const QRegularExpression pattern( "\\s*\\d{2,7}-\\d{2}-\\d{1}\\s*" );
 
             QString simplified( text.simplified());
             int pos = 0;

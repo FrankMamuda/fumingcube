@@ -127,30 +127,74 @@ ReagentDock::~ReagentDock() {
  * @param alias
  * @return
  */
-bool ReagentDock::checkForDuplicates(const QString &name, const QString &alias, const Id reagentId ) const {
-    QSqlQuery query;
+bool ReagentDock::checkForDuplicates( const QString &name, const QString &reference, const Id reagentId ) const {
+    //
+    //
+    // LET ME THINK
+    //
+    // reagent names and references can be the same, BUT there cannot be duplicate n/r for other reagents
+    //
+    // so when we add a reagent, we check for names/references in existing reagents
+    // and when we edit, we do the same, omitting the reagentId
+    //
+    //
 
-    // check alias for duplicates
-    query.exec( QString( "select %1 from %2 where %1='%3' and %4!=%5" )
-                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                .arg( Reagent::instance()->tableName())
-                .arg( alias )
-                .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                .arg( static_cast<int>( reagentId )));
-    if ( query.next()) {
-        QMessageBox::warning( ReagentDock::instance(), reagentId != Id::Invalid ? this->tr( "Cannot rename reagent" ) : this->tr( "Cannot add reagent" ), this->tr( "Alias '%1' already exists" ).arg( alias ));
-        return false;
+    QSqlQuery query;
+    if ( reagentId == Id::Invalid ) {
+        // reagent does not exist yet
+        query.exec( QString( "select %1, %2 from %3 where %4=%5" )
+                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                    .arg( Reagent::instance()->tableName())
+                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                    .arg( static_cast<int>( Id::Invalid ))
+                    );
+    } else {
+        // reagent does exist, we're just renaming it
+        query.exec( QString( "select %1, %2, %6 from %3 where %4=%5 and %6!=%7" )
+                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                    .arg( Reagent::instance()->tableName())
+                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                    .arg( static_cast<int>( Id::Invalid ))
+                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                    .arg( static_cast<int>( reagentId ))
+                    );
     }
 
-    // check name for duplicates
-    query.exec( QString( "select %1 from %2 where %1='%3' and %4!=%5" )
-                .arg( Reagent::instance()->fieldName( Reagent::Name ))
+    // check plainText names
+    while ( query.next()) {
+        const QString name_( QTextEdit( query.value( 0 ).toString()).toPlainText());
+        const QString reference_( QTextEdit( query.value( 1 ).toString()).toPlainText());
+
+        if ( !QString::compare( name, name_, Qt::CaseInsensitive ) || !QString::compare( name, reference_, Qt::CaseInsensitive ) ||
+             !QString::compare( reference, reference_, Qt::CaseInsensitive ) || !QString::compare( reference, name_, Qt::CaseInsensitive )) {
+            QMessageBox::warning( ReagentDock::instance(), this->tr( "Cannot add or rename reagent" ), this->tr( "Name or reference already exists" ));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * @brief ReagentDock::checkBatchDuplicates
+ * @param name
+ * @param parentId
+ * @return
+ */
+bool ReagentDock::checkBatchForDuplicates( const QString &name, const Id parentId ) const {
+    QSqlQuery query;
+    query.exec( QString( "select %4 from %1 where %2=%3 and %4='%5'" )
                 .arg( Reagent::instance()->tableName())
+                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                .arg( static_cast<int>( parentId ))
+                .arg( Reagent::instance()->fieldName( Reagent::Name ))
                 .arg( name )
-                .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                .arg( static_cast<int>( reagentId )));
+                );
+
     if ( query.next()) {
-        QMessageBox::warning( ReagentDock::instance(), reagentId != Id::Invalid ? this->tr( "Cannot rename reagent" ) : this->tr( "Cannot add reagent" ), this->tr( "Reagent '%1' already exists" ).arg( name ));
+        QMessageBox::warning( ReagentDock::instance(), this->tr( "Cannot add or rename batch" ), this->tr( "Batch '%1' already exists for this reagent" ).arg( name ));
         return false;
     }
 
@@ -185,6 +229,9 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         QList<Id> labels;
         if ( parentId != Id::Invalid ) {
             name = QInputDialog::getText( this, this->tr( "Add batch" ), this->tr( "Name:" ), QLineEdit::Normal, QString(), &ok );
+
+            if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
+                return;
         } else {
             ReagentDialog rd( this );
             ok = ( rd.exec() == QDialog::Accepted );
@@ -462,6 +509,9 @@ void ReagentDock::on_editButton_clicked() {
         const QString name( QInputDialog::getText( this, this->tr( "Rename batch" ), this->tr( "Name:" ), QLineEdit::Normal, previousName, &ok ));
 
         if ( !name.isEmpty()) {
+            if ( !this->checkBatchForDuplicates( name, parentId ))
+                return;
+
             Reagent::instance()->setName( reagentRow, name );
 
             // rename without resetting the model
