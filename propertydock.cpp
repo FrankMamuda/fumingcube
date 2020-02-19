@@ -300,6 +300,7 @@ void PropertyDock::on_addPropButton_clicked() {
         } );
         //action->setDisabled( tags.contains( tagId ));
     }
+    subMenu->setIcon( QIcon::fromTheme( "add" ));
 
     // add an option to add custom properties
     menu.addAction( this->tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
@@ -657,10 +658,10 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
 
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
-            parents = QString( "\"%1\", \"%2\"" ).arg( QTextEdit( Reagent::instance()->alias( parentId )).toPlainText()).arg( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
+            parents = QString( "\"%1\", \"%2\"" ).arg( QTextEdit( Reagent::instance()->reference( parentId )).toPlainText()).arg( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
             //qDebug() << "has parent";
         } else {
-            parents = QString( "\"%1\"" ).arg( QTextEdit( Reagent::instance()->alias( reagentId )).toPlainText());
+            parents = QString( "\"%1\"" ).arg( QTextEdit( Reagent::instance()->reference( reagentId )).toPlainText());
         }
 
         // paste

@@ -51,7 +51,7 @@
  TODO:
 
 reagents:
- - multiple aliases
+ - multiple references
 
 database:
  - check API

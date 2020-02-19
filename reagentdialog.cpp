@@ -31,9 +31,9 @@
 #include "tagdialog.h"
 
 /*
- * Reagent alias map
+ * Reagent reference map
  */
-const static QMap<QString, QString> reagentAliases {
+const static QMap<QString, QString> reagentReferences {
     { "Sodium hydroxide", "NaOH" },
     { "Acetic acid", "AcOH" },
     { "Trifluoroacetic acid", "CF<sub>3</sub>COOH" },
@@ -134,8 +134,8 @@ const static QMap<QString, QString> reagentAliases {
  * @brief ReagentDialog::ReagentDialog
  * @param parent
  */
-ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QString &alias, const Modes &mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
-    this->completer = new QCompleter( reagentAliases.keys());
+ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QString &reference, const Modes &mode ) : QDialog( parent ), ui( new Ui::ReagentDialog ) {
+    this->completer = new QCompleter( reagentReferences.keys());
     this->completer->setCaseSensitivity( Qt::CaseInsensitive );
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
@@ -169,8 +169,8 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     if ( !name.isEmpty())
         this->ui->nameEdit->setText( name );
 
-    if ( !alias.isEmpty())
-        this->ui->referenceEdit->setText( alias );
+    if ( !reference.isEmpty())
+        this->ui->referenceEdit->setText( reference );
 
     // bind property button
     this->variables << Variable::instance()->bind( "fetchPropertiesOnAddition", this->ui->propertyCheck );
@@ -259,13 +259,13 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
         }
 
         QString match;
-        for ( const QString &key : reagentAliases.keys()) {
+        for ( const QString &key : reagentReferences.keys()) {
             if ( !QString::compare( key, plain, Qt::CaseInsensitive )) {
                 match = key;
                 break;
             }
         }
-        this->ui->referenceEdit->setText( !match.isEmpty() ? reagentAliases[match] : QString( html ).remove( ' ' ));
+        this->ui->referenceEdit->setText( !match.isEmpty() ? reagentReferences[match] : QString( html ).remove( ' ' ));
     } );
 }
 

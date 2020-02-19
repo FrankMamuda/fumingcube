@@ -49,11 +49,11 @@ public:
     virtual ~Script() override {}
     QJSValue evaluate( const QString &script );
     Q_INVOKABLE QJSValue ans();
-    Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reagentAlias );
-    Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reagentAlias, const QString &batchName );
-    QJSValue getPropertyInternal(  const QString &functionName, const QString &reagentAlias, const QString &batchName = QString());
+    Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference );
+    Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference, const QString &batchName );
+    QJSValue getPropertyInternal(  const QString &functionName, const QString &reference, const QString &batchName = QString());
     Id getPropertyId( const QString &name ) const;
-    Id getReagentId( const QString &alias, const Id &parentId = Id::Invalid ) const;
+    Id getReagentId( const QString &reference, const Id &parentId = Id::Invalid ) const;
     QVariant getPropertyValue(const Id &tagId, const Id &reagentId, const Id &parentId = Id::Invalid ) const;
 
 private:

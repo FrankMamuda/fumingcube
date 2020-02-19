@@ -52,7 +52,7 @@ public:
      */
     static Reagent *instance() { static Reagent *reagent( new Reagent()); return reagent; }
     ~Reagent() override = default;
-    Row add( const QString &name , const QString &alias, const Id &parentId = Id::Invalid );
+    Row add( const QString &name , const QString &reference, const Id &parentId = Id::Invalid );
     QList<Row> children( const Row &row ) const;
     QList<Id> labelIds( const Row &row ) const;
 
@@ -61,6 +61,10 @@ public:
     INITIALIZE_FIELD( QString, Name,     name )
     INITIALIZE_FIELD( QString, Alias,    alias )
     INITIALIZE_FIELD( Id,      ParentId, parentId )
+
+    // FIXME: temporary
+    QString reference( const Row &row ) const { return this->alias( row ); }
+    QString reference( const Id &id ) const { return this->alias( id ); }
 
 public slots:
     void removeOrphanedEntries() override;

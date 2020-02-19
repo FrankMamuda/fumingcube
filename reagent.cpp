@@ -40,8 +40,8 @@ Reagent::Reagent() : Table( "reagent" ) {
  * @param name
  * @return
  */
-Row Reagent::add( const QString &name, const QString &alias, const Id &parentId ) {
-    return Table::add( QVariantList() << Database_::null << name << alias << static_cast<int>( parentId ));
+Row Reagent::add( const QString &name, const QString &reference, const Id &parentId ) {
+    return Table::add( QVariantList() << Database_::null << name << reference << static_cast<int>( parentId ));
 }
 
 /**

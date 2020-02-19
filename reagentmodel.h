@@ -61,7 +61,7 @@ public:
     QVariant data( const QModelIndex &index, int role ) const override;
     QModelIndex indexFromId( const Id &id ) const;
     Id idFromIndex( const QModelIndex &index ) const;
-    static QString generateName( const QString &name, const QString &alias = QString());
+    static QString generateName( const QString &name, const QString &reference = QString());
 
 public slots:
     void add( const Id &id );

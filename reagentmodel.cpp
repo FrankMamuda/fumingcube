@@ -104,7 +104,7 @@ void ReagentModel::setupModelData() {
 
         // make a new reagent treeItem
         const Id reagentId = Reagent::instance()->id( row );
-        const QString generatedName( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->alias( row )));
+        const QString generatedName( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
         QStandardItem *reagent( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
@@ -161,14 +161,14 @@ Id ReagentModel::idFromIndex( const QModelIndex &index ) const {
 /**
  * @brief ReagentModel::generateName
  * @param name
- * @param alias
+ * @param reference
  * @return
  */
-QString ReagentModel::generateName( const QString &name, const QString &alias ) {
-    if ( alias.isEmpty())
+QString ReagentModel::generateName( const QString &name, const QString &reference ) {
+    if ( reference.isEmpty())
         return name;
 
-    return ( !QString::compare( name, alias ) ? name : QString( "%1 (%2)" ).arg( name ).arg( alias ));
+    return ( !QString::compare( name, reference ) ? name : QString( "%1 (%2)" ).arg( name ).arg( reference ));
 }
 
 /**
@@ -197,7 +197,7 @@ void ReagentModel::add( const Id &id ) {
  * @param parentItem
  */
 void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
-    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->alias( id )) : Reagent::instance()->name( id ));
+    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->reference( id )) : Reagent::instance()->name( id ));
     QStandardItem *item( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );

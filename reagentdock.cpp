@@ -28,6 +28,8 @@
 #include <QSqlQuery>
 #include <QMessageBox>
 #include <QTextEdit>
+#include <QPainter>
+#include <QDesktopServices>
 #include "reagent.h"
 #include "property.h"
 #include "tag.h"
@@ -124,7 +126,7 @@ ReagentDock::~ReagentDock() {
 /**
  * @brief ReagentDock::checkForDuplicates
  * @param name
- * @param alias
+ * @param reference
  * @return
  */
 bool ReagentDock::checkForDuplicates( const QString &name, const QString &reference, const Id reagentId ) const {
@@ -218,13 +220,13 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     QMenu *menu( new QMenu());
 
     auto addReagent = [ this ]( const Id &parentId ) {
-        QString name, alias;
+        QString name, reference;
         bool ok;
 
         //
         // NOTE:
-        //  reagents can only have unique names and aliases
-        //  batches can be named anything and do not have aliases at all
+        //  reagents can only have unique names and references
+        //  batches can be named anything and do not have references at all
         //
         QList<Id> labels;
         if ( parentId != Id::Invalid ) {
@@ -236,10 +238,10 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             ReagentDialog rd( this );
             ok = ( rd.exec() == QDialog::Accepted );
             name = rd.name();
-            alias = rd.reference();
+            reference = rd.reference();
 
             if ( ok ) {
-                if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( alias )))
+                if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( reference )))
                     return;
 
                 labels = rd.labels;
@@ -256,7 +258,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 if ( !Reagent::instance()->filter().isEmpty())
                     Reagent::instance()->setFilter( "" );
 
-                const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( alias ), parentId );
+                const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( reference ), parentId );
                 if ( row == Row::Invalid )
                     return;
 
@@ -348,6 +350,49 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                         action->setChecked( true );
                 }
             }
+        }
+
+        if ( context ) {
+            const Id id = item->data( ReagentModel::ID ).value<Id>();
+            const QString reagentName( QTextEdit( Reagent::instance()->name( Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))).toPlainText());
+
+            auto simpleSmallIcon = []( const QString &string ) {
+                QPixmap pixmap( 16, 16 );
+                pixmap.fill( Qt::transparent );
+                QPainter painter( &pixmap );
+                QTextOption opt;
+                opt.setAlignment( Qt::AlignCenter );
+                painter.drawText( QRect( 0, 0, 16, 16 ), string, opt );
+                return QIcon( pixmap );
+            };
+
+            // search online
+            QMenu *searchMenu( menu->addMenu( this->tr( "Search online" )));
+            searchMenu->setIcon( QIcon::fromTheme( "find" ));
+            const QString queryName( QString( reagentName ).replace( " ", "+" ));
+
+            // TODO: search engines should be moved to XML, not hardcoded
+            searchMenu->addAction( this->tr( "Google" ), [ queryName ]() {
+                QDesktopServices::openUrl( "https://www.google.com/search?q=" + queryName );
+            } )->setIcon( simpleSmallIcon( "G" ));
+            searchMenu->addAction( this->tr( "DuckDuckGo" ), [ queryName ]() {
+                QDesktopServices::openUrl( "https://duckduckgo.com/?q=" + queryName );
+            } )->setIcon( simpleSmallIcon( "D" ));
+            searchMenu->addAction( this->tr( "Wikipedia" ), [ queryName ]() {
+                QDesktopServices::openUrl( "https://en.wikipedia.org/w/index.php?sort=relevance&search=" + queryName );
+            } )->setIcon( simpleSmallIcon( "W" ));
+            searchMenu->addAction( this->tr( "Alfa Aesar" ), [ queryName ]() {
+                QDesktopServices::openUrl( "https://www.alfa.com/en/search/?search-tab=product-search-container&type=SEARCH_CHOICE_ITEM_NUM&q=" + queryName );
+            } )->setIcon( simpleSmallIcon( "AA" ));
+            searchMenu->addAction( this->tr( "Acros" ), [ reagentName ]() {
+                QDesktopServices::openUrl( "https://www.acros.com/DesktopModules/Acros_Search_Results/Acros_Search_Results.aspx?search_type=PartOfName&SearchString=" + QString( reagentName ).replace( " ", "%20 " ));
+            } )->setIcon( simpleSmallIcon( "A" ));
+            searchMenu->addAction( this->tr( "Sigma Aldrich" ), [ queryName ]() {
+                QDesktopServices::openUrl( "https://www.sigmaaldrich.com/catalog/search?term=" + queryName + "&interface=All" );
+            } )->setIcon( simpleSmallIcon( "SA" ));
+            searchMenu->addAction( this->tr( "fluorochem" ), [ reagentName ]() {
+                QDesktopServices::openUrl( "http://www.fluorochem.co.uk/Products/Search?searchType=N&searchText=" + QString( reagentName ).replace( " ", "%20 " ));
+            } )->setIcon( simpleSmallIcon( "FC" ));
         }
     }
 
@@ -502,7 +547,7 @@ void ReagentDock::on_editButton_clicked() {
 
     const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
     const QString previousName( Reagent::instance()->name( reagentId ));
-    const QString previousAlias( Reagent::instance()->alias( reagentId ));
+    const QString previousReference( Reagent::instance()->reference( reagentId ));
 
     bool ok;
     if ( parentId != Id::Invalid ) {
@@ -521,19 +566,19 @@ void ReagentDock::on_editButton_clicked() {
             modelItem->setData( generatedName, ReagentModel::HTML );
         }
     } else {
-        ReagentDialog rd( this, previousName, previousAlias, ReagentDialog::EditMode );
+        ReagentDialog rd( this, previousName, previousReference, ReagentDialog::EditMode );
         ok = ( rd.exec() == QDialog::Accepted );
         const QString name( rd.name());
-        const QString alias( rd.reference());
+        const QString reference( rd.reference());
 
-        if ( !this->checkForDuplicates( name, alias, reagentId ) || name.isEmpty() || alias.isEmpty() || !ok )
+        if ( !this->checkForDuplicates( name, reference, reagentId ) || name.isEmpty() || reference.isEmpty() || !ok )
             return;
 
         Reagent::instance()->setName( reagentRow, name );
-        Reagent::instance()->setAlias( reagentRow, alias );
+        Reagent::instance()->setAlias( reagentRow, reference );
 
         // rename without resetting the model
-        const QString generatedName( ReagentModel::generateName( name, alias ));
+        const QString generatedName( ReagentModel::generateName( name, reference ));
         QStandardItem* modelItem = const_cast<QStandardItem*>( item );
         modelItem->setText( QTextEdit( generatedName ).toPlainText());
         modelItem->setData( generatedName, ReagentModel::HTML );

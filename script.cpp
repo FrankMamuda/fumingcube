@@ -105,44 +105,45 @@ QJSValue Script::ans() {
 
 /**
  * @brief Script::getProperty
- * @param tag
+ * @param functionName
+ * @param reference
  * @return
  */
-QJSValue Script::getProperty( const QString &functionName, const QString &reagentAlias ) {
-    // validate reagentAlias
-    if ( reagentAlias.isEmpty()) {
+QJSValue Script::getProperty( const QString &functionName, const QString &reference ) {
+    // validate reagent reference
+    if ( reference.isEmpty()) {
         this->engine.throwError( QJSValue::SyntaxError, this->tr( "expected an argument for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
-    return this->getPropertyInternal( functionName, reagentAlias );
+    return this->getPropertyInternal( functionName, reference );
 }
 
 /**
  * @brief Script::getProperty
- * @param tag
- * @param alias
- * @param batch
+ * @param functionName
+ * @param reference
+ * @param batchName
  * @return
  */
-QJSValue Script::getProperty( const QString &functionName, const QString &reagentAlias, const QString &batchName ) {
+QJSValue Script::getProperty( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate batchName
     if ( batchName.isEmpty()) {
         this->engine.throwError( QJSValue::SyntaxError, this->tr( "expected arguments for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
-    return this->getPropertyInternal( functionName, reagentAlias, batchName );
+    return this->getPropertyInternal( functionName, reference, batchName );
 }
 
 /**
  * @brief Script::getPropertyInternal
- * @param tag
- * @param alias
+ * @param functionName
+ * @param reference
  * @param batchName
  * @return
  */
-QJSValue Script::getPropertyInternal( const QString &functionName, const QString &reagentAlias, const QString &batchName ) {
+QJSValue Script::getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate functionName
     if ( functionName.isEmpty()) {
         this->engine.throwError( QJSValue::SyntaxError, this->tr( "function name expected" ));
@@ -157,9 +158,9 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
     }
 
     // get reagentId
-    const Id reagentId = this->getReagentId( reagentAlias );
+    const Id reagentId = this->getReagentId( reference );
     if ( reagentId == Id::Invalid ) {
-        this->engine.throwError( QJSValue::ReferenceError, this->tr( "reagent \"%1\" is not defined" ).arg( reagentAlias ));
+        this->engine.throwError( QJSValue::ReferenceError, this->tr( "reagent \"%1\" is not defined" ).arg( reference ));
         return QJSValue();
     }
 
@@ -179,7 +180,7 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
 
     // get property value
     if ( propertyValue.isNull()) {
-        this->engine.throwError( QJSValue::TypeError, this->tr( "property \"%1\" is not defined for \"%2\"" ).arg( functionName ).arg( batchName.isEmpty() ? reagentAlias : batchName ));
+        this->engine.throwError( QJSValue::TypeError, this->tr( "property \"%1\" is not defined for \"%2\"" ).arg( functionName ).arg( batchName.isEmpty() ? reference : batchName ));
         return QJSValue();
     }
 
@@ -187,7 +188,7 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
     bool ok;
     const qreal value = propertyValue.toReal( &ok );
     if ( !ok ) {
-        this->engine.throwError( QJSValue::TypeError, this->tr( "%1( %2 ) does not evaluate to a valid number" ).arg( functionName ).arg( reagentAlias ) + ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
+        this->engine.throwError( QJSValue::TypeError, this->tr( "%1( %2 ) does not evaluate to a valid number" ).arg( functionName ).arg( reference ) + ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
         return QJSValue();
     }
 
@@ -213,18 +214,18 @@ Id Script::getPropertyId( const QString &name ) const {
 
 /**
  * @brief Script::getReagentId
- * @param alias
+ * @param reference
  * @param parentId
  * @return
  */
-Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
+Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     // first pass (no rich text)
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
                 .arg( Reagent::instance()->fieldName( Reagent::ID ))
                 .arg( Reagent::instance()->tableName())
                 .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                .arg( alias )
+                .arg( reference )
                 .arg( Reagent::instance()->fieldName( Reagent::Name ))
                 .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
                 .arg( static_cast<int>( parentId ))
@@ -258,8 +259,8 @@ Id Script::getReagentId( const QString &alias, const Id &parentId ) const {
     }
 
     // compare plainText names
-    if ( map.contains( alias ))
-        return map[alias];
+    if ( map.contains( reference ))
+        return map[reference];
 
     // still nothing? return failure!
     return Id::Invalid;
