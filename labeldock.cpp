@@ -74,7 +74,7 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
         qDebug() << "select none";
     } else {
         QList<Id> labelIds;
-        foreach ( const QModelIndex &index, list )
+        for ( const QModelIndex &index : list )
             labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
 
 

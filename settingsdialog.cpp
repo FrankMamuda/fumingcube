@@ -77,7 +77,7 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
  */
 SettingsDialog::~SettingsDialog() {
     // unbind vars
-    foreach ( const QString &key, this->variables )
+    for ( const QString &key : this->variables )
         Variable::instance()->unbind( key );
 
     delete this->ui;

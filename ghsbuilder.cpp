@@ -109,7 +109,7 @@ GHSBuilder::~GHSBuilder() {
 QStringList GHSBuilder::parameters() const {
     QStringList parms;
 
-    foreach ( const QToolButton *button, this->buttons ) {
+    for ( const QToolButton *button : this->buttons ) {
         if ( button->isChecked())
             parms << button->text();
     }

@@ -61,7 +61,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                                    this->ui->functionEdit <<
                                    this->ui->scaleSpin );
     auto widgetText = [ this, widgets ]( int index ) {
-        foreach ( QWidget *widget, widgets )
+        for ( QWidget *widget : widgets )
             widget->setDisabled( true );
 
         if ( index >= Tag::Text && index <= Tag::Real )
@@ -179,7 +179,7 @@ void TagDialog::on_actionRemove_triggered() {
         QList<Id> idList;
 
         // must build an id list, because indexes/rows change on removal
-        foreach ( const QModelIndex &index, indexList ) {
+        for ( const QModelIndex &index : indexList ) {
             if ( !index.isValid())
                 continue;
 
@@ -190,7 +190,7 @@ void TagDialog::on_actionRemove_triggered() {
             idList << Tag::instance()->id( row );
         }
 
-        foreach ( const Id &id, idList )
+        for ( const Id &id : idList )
             Tag::instance()->remove( Tag::instance()->row( id ));
 
         // remove all property orphans

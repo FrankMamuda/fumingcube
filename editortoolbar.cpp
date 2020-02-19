@@ -176,7 +176,7 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
         this->connect( this->actionGHS, &QAction::triggered, [ this ]() {
             QMenu *menu( new QMenu());
 
-            foreach ( const QString &key, GHSHazards::Hazards.keys()) {
+            for ( const QString &key : GHSHazards::Hazards.keys()) {
                 const QIcon icon( GHSPictograms::icon( key ));
                 menu->addAction( icon, GHSHazards::Hazards[key], [ this, key ]() {
                     const QPixmap pixmap( GHSPictograms::pixmap( key, 48 ));

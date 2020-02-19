@@ -121,7 +121,7 @@ Database::Database( QObject *parent ) : QObject( parent ) {
  * @brief Database::removeOrphanedEntries removes orphaned entries in database tables
  */
 void Database::removeOrphanedEntries() {
-    foreach ( Table *table, this->tables )
+    for ( Table *table : this->tables )
         table->removeOrphanedEntries();
 }
 
@@ -142,7 +142,7 @@ Database::~Database() {
     // unbind variables
     //Variable::instance()->unbind( "report" );
     qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
-    foreach ( Table *table, this->tables )
+    for ( Table *table : this->tables )
         table->clear();
 
     // delete all tables
@@ -182,9 +182,9 @@ bool Database::add( Table *table ) {
 
     // validate schema
     bool found = false;
-    foreach ( const QString &tableName, tables ) {
+    for ( const QString &tableName : tables ) {
         if ( !QString::compare( table->tableName(), tableName )) {
-            foreach ( const Field &field, qAsConst( table->fields )) {
+            for ( const Field &field : qAsConst( table->fields )) {
 
                 if ( !database.record( table->tableName()).contains( field->name())) {
                     qCCritical( Database_::Debug ) << this->tr( "database field mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg( field->name());
@@ -212,7 +212,7 @@ bool Database::add( Table *table ) {
         qCInfo( Database_::Debug ) << this->tr( "creating an empty table - \"%1\"" ).arg( table->tableName());
 
         // prepare statement
-        foreach ( const Field &field, qAsConst( table->fields )) {
+        for ( const Field &field : qAsConst( table->fields )) {
             statement.append( QString( "%1 %2" ).arg( field->name()).arg( field->format()));
 
             if ( field->isUnique())

@@ -265,7 +265,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
                 // add labels if any
                 //qDebug() << "got labels" << labels;
-                foreach ( const Id &id, labels ) {
+                for ( const Id &id : labels ) {
                     if ( id == Id::Invalid )
                         continue;
 
@@ -324,7 +324,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
                     const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
                     bool hasLabel = false;
-                    foreach ( const Id &labelId, labelIds ) {
+                    for ( const Id &labelId : labelIds ) {
                         if ( labelId == menuLabelId ) {
                             hasLabel = true;
                             break;
@@ -388,7 +388,7 @@ void ReagentDock::on_removeButton_clicked() {
         // remove batches
         if ( Reagent::instance()->parentId( reagentRow ) == Id::Invalid ) {
             const QList<Row>children( Reagent::instance()->children( reagentRow ));
-            foreach ( const Row &batchRow, children )
+            for ( const Row &batchRow : children )
                 Reagent::instance()->remove( batchRow );
         }
 
@@ -410,7 +410,7 @@ void ReagentDock::on_removeButton_clicked() {
     if ( list.count() > 1 ) {
         menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
             QModelIndexList sourceList;
-            foreach ( const QModelIndex &filter, list ) {
+            for ( const QModelIndex &filter : list ) {
                 const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
                 sourceList << index;
 

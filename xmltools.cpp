@@ -123,7 +123,7 @@ void XMLTools::write() {
     stream.writeAttribute( "version", "3" );
 
     // switch mode
-    foreach ( const QSharedPointer<Var> &var, qAsConst( Variable::instance()->list )) {
+    for ( const QSharedPointer<Var> &var : qAsConst( Variable::instance()->list )) {
         if ( var->key().isEmpty() || var->flags() & Var::Flag::NoSave )
             continue;
 

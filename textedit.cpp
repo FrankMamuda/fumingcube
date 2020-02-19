@@ -82,7 +82,7 @@ bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
         return false;
 
     // check if dropped item is an image
-    foreach ( const QUrl &url, source->urls()) {
+    for ( const QUrl &url : source->urls()) {
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchExtension ).iconName().startsWith( "image" ) && !this->isSimpleEditor())
             return true;
     }
@@ -159,7 +159,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         // NOTE: application/x-qt-image has problems with transparency
         //       therefore prioritize loading image from an actual file
         if ( !source->urls().isEmpty()) {
-            foreach ( const QUrl &url, source->urls()) {
+            for ( const QUrl &url : source->urls()) {
                 if ( !url.isLocalFile())
                     continue;
 
@@ -265,7 +265,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 #endif
 
     // check droped items for images
-    foreach ( const QUrl &url, source->urls()) {
+    for ( const QUrl &url : source->urls()) {
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
             QPixmap pixmap;
 

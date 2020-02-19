@@ -240,7 +240,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
         // perform string replacement
         int offset = 0;
-        foreach ( const Match &match, matches ) {
+        for ( const Match &match : matches ) {
             const QString link( QString( "<a href=\"%1\">" ).arg( match.args ));
             replacedLine.insert( match.start + offset, link );
             offset += link.length();

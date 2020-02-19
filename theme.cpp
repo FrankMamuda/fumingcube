@@ -103,7 +103,7 @@ QPalette Theme::palette() const {
                                            ThemeColour( "PaletteShadowDisabled",            QPalette::Shadow,           QPalette::Disabled, false ));
 
     QPalette palette( qApp->palette());
-    foreach ( const ThemeColour &themeColour, themeColours ) {
+    for ( const ThemeColour &themeColour : themeColours ) {
         if ( this->paletteMap.contains( themeColour.key())) {
             const QColor colour( this->paletteMap[themeColour.key()] );
             if ( colour.isValid()) {
@@ -148,13 +148,13 @@ void Theme::readThemeFile( const QString &fileName ) {
 
     // parse palette
     settings.beginGroup( "Palette" );
-    foreach ( const QString &key, settings.allKeys())
+    for ( const QString &key : settings.allKeys())
         this->paletteMap[key] = parseColour( settings.value( key ).toString());
     settings.endGroup();
 
     // parse general settings
     settings.beginGroup( "Theme" );
-    foreach ( const QString &key, settings.allKeys()) {
+    for ( const QString &key : settings.allKeys()) {
         if ( !QString::compare( key, "Dark" ))
             this->m_dark = settings.value( key ).toBool();
 
@@ -167,7 +167,7 @@ void Theme::readThemeFile( const QString &fileName ) {
 
     // override syntax highlighter colours from theme file
     settings.beginGroup( "Syntax" );
-    foreach ( const QString &key, settings.allKeys())
+    for ( const QString &key : settings.allKeys())
         this->syntaxMap[key] = parseColour( settings.value( key ).toString());
     settings.endGroup();
 }

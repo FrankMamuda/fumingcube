@@ -87,11 +87,11 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
     };
 
     // add keywords
-    foreach ( const QString &k, qAsConst( this->keywords ))
+    for ( const QString &k : qAsConst( this->keywords ))
         options << SyntaxHighlighterOption( QString( "%1(?!\")" ).arg( k ), keyword );
 
     // set options
-    foreach ( const SyntaxHighlighterOption &option, qAsConst( options )) {
+    for ( const SyntaxHighlighterOption &option : qAsConst( options )) {
         QTextCharFormat format;
 
         if ( option.bold )

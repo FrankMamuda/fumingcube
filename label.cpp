@@ -88,7 +88,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
         return this->pixmap( colourList.isEmpty() ? QColor() : colourList.first());
 
     QString name;
-    foreach ( const QColor &colour, colourList )
+    for ( const QColor &colour : colourList )
         name.append( colour.name());
 
     if ( this->cache.contains( qAsConst( name )))
@@ -115,7 +115,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
         const QMap<int,int> sizes { { 2, 6 }, { 3, 4 }, { 4, 3 } };
 
         int offset = 0;
-        foreach ( const QColor &colour, colourList ) {
+        for ( const QColor &colour : colourList ) {
             const int size = sizes[colourList.count()];
             painter.setBrush( colour );
             painter.drawRect( QRect( offset, 0, size, 8 ));

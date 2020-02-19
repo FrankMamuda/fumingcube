@@ -30,6 +30,8 @@
  * @brief The NFPAWidget class
  */
 class NFPAWidget final : public PropertyViewWidget {
+    Q_OBJECT
+
 public:
     explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
     int scale() const { return this->m_scale; }

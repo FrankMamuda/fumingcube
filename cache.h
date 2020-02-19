@@ -28,6 +28,8 @@
  * @brief The Cache class
  */
 class Cache : public QObject {
+    Q_OBJECT
+
 public:
     enum Types {
         NoType = -1,

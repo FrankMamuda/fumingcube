@@ -170,3 +170,6 @@ win32:LIBS += -LC:/openssl-win64/lib -lcrypto -lssl
 # latvian locale
 # DEFINES += FORCE_LV_LOCALE
 TRANSLATIONS = i18n/fumingCube_lv_LV.ts
+
+DISTFILES += \
+    CMakeLists.txt

@@ -102,7 +102,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
             // reorder tasks accordint to id list
             y = 0;
-            foreach ( const Id id, idList ) {
+            for ( const Id id : idList ) {
                 Property::instance()->setTableOrder( Property::instance()->row( id ), y );
                 y++;
             }
@@ -442,7 +442,7 @@ void PropertyDock::on_removePropButton_clicked() {
         QList<Id> idList;
 
         // must build an id list, because indexes/rows change on removal
-        foreach ( const QModelIndex &index, indexList ) {
+        for ( const QModelIndex &index : indexList ) {
             if ( !index.isValid())
                 continue;
 
@@ -453,7 +453,7 @@ void PropertyDock::on_removePropButton_clicked() {
             idList << Property::instance()->id( row );
         }
 
-        foreach ( const Id &id, idList )
+        for ( const Id &id : idList )
             Property::instance()->remove( Property::instance()->row( id ));
     };
 

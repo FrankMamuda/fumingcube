@@ -35,7 +35,7 @@
 Variable::Variable() {
     // update widgets on variable change
     this->connect( this, &Variable::valueChanged, [ this ]( const QString &key ) {
-        foreach ( Widget *widget, this->boundVariables.values( key )) {
+        for ( Widget *widget : this->boundVariables.values( key )) {
             QVariant var( this->value<QVariant>( key ));
 
             if ( widget->value() != var )
@@ -45,7 +45,7 @@ Variable::Variable() {
 
     // update variable and sibling widgets on widget change
     this->connect( this, &Variable::widgetChanged, [ this ]( const QString &key, Widget *widget, const QVariant &value ) {
-        foreach ( Widget *boundWidget, this->boundVariables.values( key )) {
+        for ( Widget *boundWidget : this->boundVariables.values( key )) {
             if ( boundWidget == widget ) {
                 this->setValue( key, value );
             } else {
@@ -117,7 +117,7 @@ void Variable::unbind( const QString &key, QObject *object ) {
             return;
         }
 
-        foreach ( Widget *compare, this->boundVariables.values( key )) {
+        for ( Widget *compare : this->boundVariables.values( key )) {
             if ( compare->widget == object ) {
                 this->boundVariables.remove( key, compare );
                 delete compare;

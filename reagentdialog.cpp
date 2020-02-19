@@ -190,7 +190,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
  */
 ReagentDialog::~ReagentDialog() {    
     // unbind vars
-    foreach ( const QString &key, this->variables )
+    for ( const QString &key : this->variables )
         Variable::instance()->unbind( key );
 
     delete this->completer;
@@ -259,7 +259,7 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
         }
 
         QString match;
-        foreach ( const QString &key, reagentAliases.keys()) {
+        for ( const QString &key : reagentAliases.keys()) {
             if ( !QString::compare( key, plain, Qt::CaseInsensitive )) {
                 match = key;
                 break;

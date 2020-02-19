@@ -111,7 +111,7 @@ void NodeHistory::restoreNodeState() {
  */
 void NodeHistory::saveHistory() {
     QStringList list;
-    foreach ( const Id &id, this->openNodes )
+    for ( const Id &id : this->openNodes )
         list << QString::number( static_cast<int>( id ));
     Variable::instance()->setValue( "reagentDock/openNodes", list );
 }
@@ -122,7 +122,7 @@ void NodeHistory::saveHistory() {
 void NodeHistory::loadHistory() {
     // TODO: add global static QStringList->QList<Id>
     const QStringList list( Variable::instance()->value<QStringList>( "reagentDock/openNodes" ));
-    foreach ( const QString &n, list ) {
+    for ( const QString &n : list ) {
         bool ok;
         const Id id = static_cast<Id>( n.toInt( &ok ));
         if ( ok )

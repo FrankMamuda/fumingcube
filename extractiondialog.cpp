@@ -70,7 +70,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
         if ( all )
             this->ui->propertyView->selectAll();
 
-        foreach ( const QModelIndex &index, this->ui->propertyView->selectionModel()->selectedRows()) {
+        for ( const QModelIndex &index : this->ui->propertyView->selectionModel()->selectedRows()) {
             const int row = index.row();
             PropertyWidget *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
             if ( widget != nullptr ) {
@@ -141,7 +141,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
         if ( value.isObject()) {
             const QJsonObject object( value.toObject());
 
-            foreach ( const QString &key, object.keys()) {
+            for ( const QString &key : object.keys()) {
                 const QJsonValue keyValue( object.value( key ));
 
                 if ( !QString::compare( key, "TOCHeading" )) {
@@ -161,7 +161,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
         } else if ( value.isArray()) {
             const QJsonArray array( value.toArray());
 
-            foreach ( const QJsonValue &arrayValue, array )
+            for ( const QJsonValue &arrayValue : array )
                 findTag( arrayValue, heading, matches );
         }
     };
@@ -172,8 +172,8 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
     auto extractValues = []( const QList<QJsonArray> &matches, const QString &name, const QString &pattern, QList<QStringList> &out, bool global ) {
         QStringList values;
 
-        foreach ( const QJsonArray &array, matches ) {
-            foreach ( const QJsonValue &info, array ) {
+        for ( const QJsonArray &array : matches ) {
+            for ( const QJsonValue &info : array ) {
                 if ( info.isObject()) {
                     const QJsonObject infoObject( info.toObject());
 
@@ -198,7 +198,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                                 const QJsonValue numberTag( valueObject["Number"] );
                                 if ( numberTag.isArray()) {
                                     const QJsonArray numberArray( numberTag.toArray());
-                                    foreach ( const QJsonValue &number, numberArray )
+                                    for ( const QJsonValue &number : numberArray )
                                         values << QString( "%1 %2" ).arg( number.toDouble()).arg( qAsConst( units ));
                                 }
                             } else if ( valueObject.keys().contains( "StringWithMarkup" )) {
@@ -206,7 +206,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                                 if ( stringTag.isArray()) {
 
                                     const QJsonArray stringArray( stringTag.toArray());
-                                    foreach ( const QJsonValue &stringValue, stringArray ) {
+                                    for ( const QJsonValue &stringValue : stringArray ) {
                                         if ( stringValue.isObject()) {
                                             const QJsonObject stringObject( stringValue.toObject());
                                             QStringList extra;
@@ -215,7 +215,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                                                 if ( markupTag.isArray()) {
                                                     const QJsonArray markupArray( markupTag.toArray());
                                                     if ( markupArray.count()) {
-                                                        foreach ( const QJsonValue markupValue, markupArray ) {
+                                                        for ( const QJsonValue markupValue : markupArray ) {
                                                             if ( markupValue.isObject()) {
                                                                 const QJsonObject markupObject( markupValue.toObject());
 
@@ -265,7 +265,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
             if ( !re.isValid())
                 return;
 
-            foreach ( const QString &value, values ) {
+            for ( const QString &value : values ) {
                 QStringList captured;
 
                 const QString stripped( QString( value ).remove( QRegularExpression( "\\(\\w+, \\d{4}\\)" )));
@@ -296,7 +296,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                     out.append( captured );
             }
         } else {
-            foreach ( const QString &value, values )
+            for ( const QString &value : values )
                 out << ( QStringList() << value << value );
         }
 
@@ -350,7 +350,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
 
     int row = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propList.keys().count());
-    foreach ( const QString &name, propList.keys()) {
+    for ( const QString &name : propList.keys()) {
         this->ui->propertyView->setItem( row, 0, new QTableWidgetItem( name ));
         this->ui->propertyView->setCellWidget( row, 1, propList[name] );
         row++;
@@ -518,7 +518,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         }
 
         QList<int> cidListInt;
-        foreach ( const QString &cid, this->cidList )
+        for ( const QString &cid : this->cidList )
             cidListInt << cid.toInt();
         cidListInt.removeAll( 0 );
         std::sort( cidListInt.begin(), cidListInt.end());
@@ -584,7 +584,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     file.close();
 
                     QList<int> cidListInt;
-                    foreach ( const QString &cid, this->cidList )
+                    for ( const QString &cid : this->cidList )
                         cidListInt << cid.toInt();
                     cidListInt.removeAll( 0 );
                     std::sort( cidListInt.begin(), cidListInt.end());

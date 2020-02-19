@@ -38,7 +38,7 @@ constexpr const int GHSWidget::scale = 48;
 GHSWidget::GHSWidget( QWidget *parent, const QStringList &parms ) : PropertyViewWidget( parent, parms ) {
     this->update( parms );
 
-    foreach ( const QString &key, GHSHazards::Hazards.keys()) {
+    for ( const QString &key : GHSHazards::Hazards.keys()) {
         if ( !this->parameters().contains( key ))
             this->parameters().removeAll( key );
     }
@@ -53,7 +53,7 @@ void GHSWidget::paintEvent( QPaintEvent * ) {
     int yOffset = 0;
     int index = 0;
 
-    foreach ( const QString &key, this->parameters()) {
+    for ( const QString &key : this->parameters()) {
         const QPixmap pixmap( GHSPictograms::pixmap( key, GHSWidget::scale ));
         if ( xOffset >= this->iconsPerRow() * GHSWidget::scale ) {
             xOffset = 0;

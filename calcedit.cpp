@@ -171,7 +171,7 @@ bool CalcEdit::completeCommand() {
 
             reagents.removeDuplicates();
             QStringList reagentsCaseInsensitive;
-            foreach ( const QString &reagent, reagents )
+            for ( const QString &reagent : reagents )
                 reagentsCaseInsensitive << reagent.toLower();
             reagentsCaseInsensitive.removeDuplicates();
 

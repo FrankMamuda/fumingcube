@@ -69,7 +69,7 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
             return QVariant();
 
         QList<QColor> colours;
-        foreach ( const Id &id, labelIds )
+        for ( const Id &id : labelIds )
             colours << Label::instance()->colour( id );
 
         item->setData( Label::instance()->pixmap( qAsConst( colours )), ReagentModel::Pixmap );
@@ -111,7 +111,7 @@ void ReagentModel::setupModelData() {
         reagent->setData( generatedName, HTML );
 
         // go through batches (children of the reagent)
-        foreach ( const Row &child, Reagent::instance()->children( row ))
+        for ( const Row &child : Reagent::instance()->children( row ))
             this->addItem( Reagent::instance()->id( child ), reagentId, reagent );
 
         // add reagent to treeView
@@ -212,7 +212,7 @@ void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *par
 void ReagentModel::remove( const QModelIndexList &list ) {
     // first build a list of QPersistentModelIndexes
     QList<QPersistentModelIndex> pList;
-    foreach ( const QModelIndex &index, list ) {
+    for ( const QModelIndex &index : list ) {
         if ( !index.isValid())
             continue;
 
@@ -220,6 +220,6 @@ void ReagentModel::remove( const QModelIndexList &list ) {
     }
 
     // then delete items one by one
-    foreach ( const QPersistentModelIndex &index, qAsConst( pList ))
+    for ( const QPersistentModelIndex &index : qAsConst( pList ))
         this->removeRow( index.row(), index.parent());
 }

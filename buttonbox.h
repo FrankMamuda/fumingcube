@@ -30,6 +30,8 @@
  * @brief The ButtonBox class
  */
 class ButtonBox final : public QDialogButtonBox {
+    Q_OBJECT
+
 public:
     /**
      * @brief ButtonBox
