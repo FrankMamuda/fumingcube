@@ -30,11 +30,9 @@
 #include "label.h"
 #include "labelset.h"
 #include "tag.h"
-#include "script.h"
 #include "reagentdock.h"
 #include "labeldock.h"
 #include "theme.h"
-#include "reagentdock.h"
 #include "propertydock.h"
 #include <QApplication>
 #include <QDate>
@@ -44,7 +42,6 @@
 #include <QDesktopWidget>
 #include <QSharedMemory>
 #include <QSettings>
-#include <QStyleFactory>
 #include <QTranslator>
 
 /*
@@ -83,14 +80,14 @@ scripting:
  - add 'any' as batch name (a wildcard that chooses any batch with the
    property)
  - implement Avogadro constant, etc.
- - smart formulas such as 'purity' (uses assay, HPLC, 100-related subtances,
+ - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
 
 settings:
  - option to change syntax highlighter (and font size) (partially supported)
 
 misc:
- - store variables (for example F = molarMasss( "NaOH" )
+ - store variables (for example F = molarMass( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
 
 future:
@@ -105,7 +102,7 @@ unsorted:
     (the property view still displays the last selected reagent)
     add property
     (the property is added to the reagent selected with the right click, not the one displayed in property screen)
-  - allow to display treeview in multiple columns
+  - allow to display treeView in multiple columns
 */
 
 /**
@@ -153,7 +150,7 @@ int main( int argc, char *argv[] ) {
     const QString locale( "lv_LV" );
 #endif
     translator.load( ":/i18n/fumingCube_" + locale );
-    a.installTranslator( &translator );
+    QApplication::installTranslator( &translator );
 
     // read initial history
 #ifndef FORCE_LV_LOCALE
@@ -247,9 +244,9 @@ int main( int argc, char *argv[] ) {
                                             "Please restart the application" ),
                                QMessageBox::Ok );
 
-        QFile file( QDir::currentPath() + "/badapi" );
-        if ( file.open( QIODevice::WriteOnly ))
-            file.close();
+        QFile badAPIFile( QDir::currentPath() + "/badapi" );
+        if ( badAPIFile.open( QIODevice::WriteOnly ))
+            badAPIFile.close();
 
         QApplication::quit();
         return 0;
@@ -259,7 +256,7 @@ int main( int argc, char *argv[] ) {
     bool darkMode = false;
     bool darkModeWin10 = false;
 #ifdef Q_OS_WIN
-    const QVariant key( QSettings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
+    const QVariant key( QSettings( R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
     if ( key.isValid() && !key.toBool()) {
         darkMode = true;
         darkModeWin10 = true;
@@ -277,14 +274,14 @@ int main( int argc, char *argv[] ) {
 
     if ( Variable::instance()->isEnabled( "overrideTheme" ) || darkModeWin10 ) {
         // load theme from file
-        Theme *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::instance()->string( "theme" ))));
+        auto *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::instance()->string( "theme" ))));
 
         // override the variable
         Variable::instance()->setEnabled( "darkMode", theme->isDark());
 
         // override style and palette
-        a.setStyle( theme->style());
-        a.setPalette( theme->palette());
+        QApplication::setStyle( theme->style());
+        QApplication::setPalette( theme->palette());
 
         // override icon theme and syntax highlighter theme
         QIcon::setThemeName( theme->isDark() ? "dark" : "light" );
@@ -316,5 +313,5 @@ int main( int argc, char *argv[] ) {
     // restore last reagent selection
     ReagentDock::instance()->view()->updateView();
 
-    return a.exec();
+    return QApplication::exec();
 }

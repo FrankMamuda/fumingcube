@@ -35,6 +35,7 @@
 #include <QMenu>
 #include <QSqlQuery>
 #include <QTimer>
+#include <utility>
 
 /**
  * @brief MainWindow::MainWindow
@@ -51,7 +52,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     PropertyDock::instance()->setup( this->ui->actionProperties );
     LabelDock::instance()->setup( this->ui->actionLabels );
 
-    if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
+    if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() &&
+         !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
         this->restoreGeometry( Variable::instance()->compressedByteArray( "mainWindow/geometry" ));
         this->restoreState( Variable::instance()->compressedByteArray( "mainWindow/state" ));
         this->restoreDockWidget( ReagentDock::instance());
@@ -71,7 +73,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
 
-    this->ui->calcView->connect( this->ui->calcView, &QTextBrowser::anchorClicked, [ this ]( const QUrl &url ) {
+    QTextBrowser::connect( this->ui->calcView, &QTextBrowser::anchorClicked, [ this ]( const QUrl &url ) {
         const QStringList args( url.toString().split( ";" ));
         if ( args.count() < 2 || args.count() > 3 )
             return;
@@ -83,8 +85,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         }
 
         // get all arguments - property name, reagent name and batch name
-        const QString property( args.at( 0 ));
-        const QString reagent( args.at( 1 ));
+        const QString& property( args.at( 0 ));
+        const QString& reagent( args.at( 1 ));
         const QString batch( args.count() == 3 ? args.at( 2 ) : "" );
 
         // get reagentId (parent)
@@ -124,7 +126,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
             return;
 
         // select propery index
-        const QModelIndex index( Property::instance()->index( static_cast<int>( propertyRow ), Property::PropertyData ));
+        const QModelIndex index(
+                Property::instance()->index( static_cast<int>( propertyRow ), Property::PropertyData ));
         if ( !index.isValid())
             return;
 
@@ -132,8 +135,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // add an option to paste reference to calculator
         QMenu menu( this->ui->calcView );
-        menu.addAction( this->tr( "Paste" ), [ this, property, reagent, batch ]() {
-            this->insertCommand( QString( "%1( \"%2\"%3 )" ).arg( property ).arg( reagent ).arg( batch.isEmpty() ? "" : ", \"" + batch + "\"" ));
+        menu.addAction( MainWindow::tr( "Paste" ), [ this, property, reagent, batch ]() {
+            this->insertCommand( QString( "%1( \"%2\"%3 )" ).arg( property ).arg( reagent ).arg(
+                    batch.isEmpty() ? "" : ", \"" + batch + "\"" ));
         } );
         QTimer::singleShot( 2000, &menu, SLOT( close()));
         menu.exec( QCursor::pos());
@@ -157,22 +161,6 @@ MainWindow::~MainWindow() {
 }
 
 /**
- * @brief MainWindow::commandWidget
- * @return
- */
-QLineEdit *MainWindow::commandWidget() {
-    return this->ui->calcEdit;
-}
-
-/**
- * @brief MainWindow::calculatorWidget
- * @return
- */
-QTextBrowser *MainWindow::calculatorWidget() {
-    return this->ui->calcView;
-}
-
-/**
  * @brief MainWindow::appendToCalculator
  * @param line
  */
@@ -191,9 +179,9 @@ void MainWindow::appendToCalculator( const QString &line ) {
         QStringList functions;
         QSqlQuery query;
         query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                    .arg( Tag::instance()->fieldName( Tag::ID ))
-                    .arg( Tag::instance()->fieldName( Tag::Function ))
-                    .arg( Tag::instance()->tableName()));
+                            .arg( Tag::instance()->fieldName( Tag::ID ))
+                            .arg( Tag::instance()->fieldName( Tag::Function ))
+                            .arg( Tag::instance()->tableName()));
         while ( query.next()) {
             const QString functionName( query.value( 1 ).toString());
             if ( !functionName.isEmpty())
@@ -207,7 +195,8 @@ void MainWindow::appendToCalculator( const QString &line ) {
             QString args;
             int start;
             int end;
-            Match( const QString &args, int start, int end ) : args( args ), start( start ), end( end ) {}
+
+            Match( QString args, int start, int end ) : args( std::move( args )), start( start ), end( end ) {}
         };
 
 
@@ -215,7 +204,9 @@ void MainWindow::appendToCalculator( const QString &line ) {
         //       what it does is:
         //       1) finds function( args, .. )
         //       2) encloses this with an anchor
-        const QRegularExpression functionExpresstion( QString( "(?<function>%1)\\s*\\(\\s*(?<arguments>.+?(?=\\)|\\s*\\)))\\s*\\)" ).arg( functions.join( "|" )));
+        const QRegularExpression functionExpresstion(
+                QString( R"((?<function>%1)\s*\(\s*(?<arguments>.+?(?=\)|\s*\)))\s*\))" ).arg(
+                        functions.join( "|" )));
         QString replacedLine( line );
         replacedLine = replacedLine.remove( "\n" );
         QRegularExpressionMatchIterator functionIterator( functionExpresstion.globalMatch( qAsConst( replacedLine )));
@@ -227,7 +218,8 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
             // then separate args
             const QRegularExpression argsExpression( "\"(.+?(?=\"))\"" );
-            QRegularExpressionMatchIterator argsIterator( argsExpression.globalMatch( functionMatch.captured( "arguments" )));
+            QRegularExpressionMatchIterator argsIterator(
+                    argsExpression.globalMatch( functionMatch.captured( "arguments" )));
             QStringList args;
             while ( argsIterator.hasNext()) {
                 const QRegularExpressionMatch argsMatch( argsIterator.next());
@@ -235,7 +227,8 @@ void MainWindow::appendToCalculator( const QString &line ) {
             }
 
             // build a list of functionNames, args, capture start and end positions for proper string replacement
-            matches << Match( functionMatch.captured( "function" ) + ";" + args.join( ";" ), functionMatch.capturedStart(), functionMatch.capturedEnd());
+            matches << Match( functionMatch.captured( "function" ) + ";" + args.join( ";" ),
+                              functionMatch.capturedStart(), functionMatch.capturedEnd());
         }
 
         // perform string replacement
@@ -337,4 +330,3 @@ void MainWindow::on_actionSettings_triggered() {
 void MainWindow::on_actionAbout_triggered() {
     About( this ).exec();
 }
-

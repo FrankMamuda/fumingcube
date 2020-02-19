@@ -13,3 +13,5 @@ sqlite/
 i18n/*.qm
 *.qrc~
 *.autosave
+cmake-build-*/
+.idea/

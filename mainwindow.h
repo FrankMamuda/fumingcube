@@ -41,11 +41,9 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    static MainWindow *instance() { static MainWindow *instance( new MainWindow()); return instance; }
+    static MainWindow *instance() { static auto *instance( new MainWindow()); return instance; }
     ~MainWindow() override;
-    QLineEdit *commandWidget();
-    QTextBrowser *calculatorWidget();
-    Theme *theme() const { return this->m_theme; }
+    [[nodiscard]] auto *theme() const { return this->m_theme; }
 
 public slots:
     void appendToCalculator( const QString &line );
