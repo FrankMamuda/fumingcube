@@ -67,7 +67,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
     this->ui->addPropButton->setEnabled( false );
     this->ui->removePropButton->setEnabled( false );
-    this->ui->propertyView->selectionModel()->connect( this->ui->propertyView->selectionModel(),
+    QItemSelectionModel::connect( this->ui->propertyView->selectionModel(),
                                                        &QItemSelectionModel::currentChanged,
                                                        [ this, buttonTest ]( const QModelIndex &current,
                                                                              const QModelIndex & ) {
@@ -77,7 +77,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
                                                            buttonTest( current );
                                                        } );
 
-    ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged,
+    ReagentDock::connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged,
                                       [ this ]( const QModelIndex &current ) {
                                           this->ui->addPropButton->setEnabled( current.isValid());
                                       } );
@@ -219,7 +219,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
         }
     }
 
-    PropertyEditor *pe(
+    auto *pe(
             new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
     if ( pe->exec() == QDialog::Accepted ) {
         const QString strippedName( TextEdit::stripHTML( pe->name()));
@@ -523,7 +523,10 @@ void PropertyDock::setSpecialWidgets() {
             bool hasWidget = widget != nullptr;
 
             auto setWidget = [ this, index, hasWidget, parms ]( PropertyViewWidget *widget ) {
-                if ( hasWidget && widget != nullptr ) {
+                if ( widget == nullptr )
+                    return;
+
+                if ( hasWidget ) {
                     widget->update( parms );
                 } else {
                     // set widget and make sure to delete it on close
@@ -535,7 +538,7 @@ void PropertyDock::setSpecialWidgets() {
             if ( type == Tag::NFPA ) {
                 NFPAWidget *nfpa( hasWidget ? dynamic_cast<NFPAWidget *>( widget ) : new NFPAWidget( nullptr, parms ));
                 setWidget( nfpa );
-            } else if ( type == Tag::GHS ) {
+            } else {
                 GHSWidget *ghs( hasWidget ? dynamic_cast<GHSWidget *>( widget ) : new GHSWidget( nullptr, parms ));
                 setWidget( ghs );
             }
@@ -620,7 +623,7 @@ void PropertyDock::on_editPropButton_clicked() {
     // handle pixmaps
     const Id tagId = Property::instance()->tagId( propertyId );
     if (( tagId == PixmapTag ) ||
-        ( tagId != Id::Invalid && tagId != PixmapTag && Tag::instance()->type( tagId ) == Tag::Formula )) {
+        ( tagId != Id::Invalid  && Tag::instance()->type( tagId ) == Tag::Formula )) {
         this->replacePixmap( propertyRow );
     } else {
         // set new value
@@ -654,7 +657,7 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
         pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
 
     // add property
-    Property::instance()->add(( tagId == Id::Invalid || pixmap ) ? name : "", tagId, value, reagentId );
+    Property::instance()->add(( tagId == Id::Invalid || pixmap ) ? name : QString(), tagId, value, reagentId );
 
     // clear document cache and resize view
     this->updateView();
@@ -688,7 +691,7 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
 
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
-            parents = QString( "\"%1\", \"%2\"" ).arg(
+            parents = QString( R"("%1", "%2")" ).arg(
                     QTextEdit( Reagent::instance()->reference( parentId )).toPlainText()).arg(
                     QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
             //qDebug() << "has parent";

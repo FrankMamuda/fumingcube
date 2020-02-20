@@ -261,7 +261,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             if ( !name.isEmpty()) {
                 // save filter
                 // NOTE: why? because when we add a reagent when filtered the row will always be invalid
-                //       due to non-existant label sets
+                //       due to non-existent label sets
                 //       this way filter is temporarily removed and restore after addition
                 const QString oldFilter( Reagent::instance()->filter());
                 if ( !Reagent::instance()->filter().isEmpty())
