@@ -23,10 +23,10 @@
 #include <QMessageBox>
 #include "about.h"
 #include "ui_about.h"
+
 #ifdef Q_OS_MAC
 #include <QDebug>
 #endif
-
 
 /**
  * @brief About::About
@@ -34,8 +34,8 @@
  */
 About::About( QWidget *parent ) : QDialog( parent ), ui( new Ui::About ) {
     this->ui->setupUi( this );
-    this->connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() { this->close(); } );
-    this->connect( this->ui->qtButton, &QPushButton::clicked, [ this ]() { QMessageBox::aboutQt( this ); } );
+    About::connect( this->ui->closeButton, &QPushButton::clicked, [ this ]() { this->close(); } );
+    About::connect( this->ui->qtButton, &QPushButton::clicked, [ this ]() { QMessageBox::aboutQt( this ); } );
 
 #ifndef Q_OS_WIN
     QString text( this->ui->textBrowser->toHtml());

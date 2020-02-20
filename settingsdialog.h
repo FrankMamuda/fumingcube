@@ -27,7 +27,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class SettingsDialog;
+    class SettingsDialog;
 }
 
 /**
@@ -38,7 +38,7 @@ class SettingsDialog : public QDialog {
 
 public:
     explicit SettingsDialog( QWidget *parent = nullptr );
-    ~SettingsDialog();
+    ~SettingsDialog() override;
 
 private:
     QStringList variables;

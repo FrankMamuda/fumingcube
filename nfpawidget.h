@@ -30,12 +30,12 @@
  * @brief The NFPAWidget class
  */
 class NFPAWidget final : public PropertyViewWidget {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
-    int scale() const { return this->m_scale; }
-    qreal vscale() const { return this->m_vscale; }
+    [[nodiscard]] int scale() const { return this->m_scale; }
+    [[nodiscard]] qreal vscale() const { return this->m_vscale; }
 
 public slots:
     /**
@@ -44,7 +44,7 @@ public slots:
      */
     void update( const QStringList &parms ) override {
         if ( this->parameters() == parms )
-             return;
+            return;
 
         this->m_parameters = parms;
         this->repaint();
@@ -59,14 +59,18 @@ protected:
      * @brief sizeHint
      * @return
      */
-    QSize sizeHint() const override {
-        const qreal vScale = sqrt( 2 * ( this->scale() * this->scale() ));
+    [[nodiscard]] QSize sizeHint() const override {
+        const qreal vScale = sqrt( 2 * ( this->scale() * this->scale()));
         return QSizeF( vScale * 2, vScale * 2 ).toSize();
     }
 
 private:
-    int m_scale;
-    qreal m_vscale;
-    const QMap<int,qreal> scales { { 0, 0 }, { 1, this->scale() * 0.5 }, { 2, this->scale() * 0.42 }, { 3, this->scale() * 0.35 }, { 4, this->scale() * 0.22 } };
+    int m_scale = 0;
+    qreal m_vscale = 0.0;
+    const QMap<int, qreal> scales {{ 0, 0 },
+                                   { 1, this->scale() * 0.5 },
+                                   { 2, this->scale() * 0.42 },
+                                   { 3, this->scale() * 0.35 },
+                                   { 4, this->scale() * 0.22 }};
     QList<QRectF> rects;
 };

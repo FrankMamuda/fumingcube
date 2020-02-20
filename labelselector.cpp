@@ -20,30 +20,34 @@
  * includes
  */
 #include "labelselector.h"
+
+#include <utility>
 #include "ui_labelselector.h"
 #include "label.h"
 #include "labelset.h"
-#include "reagent.h"
 
 /**
  * @brief LabelSelector::LabelSelector
  * @param parent
  */
-LabelSelector::LabelSelector( QWidget *parent , const QList<Id> &selected ) : QDialog( parent ), labelIds( selected ), ui( new Ui::LabelSelector ) {
-    this->ui->setupUi( this) ;
+LabelSelector::LabelSelector( QWidget *parent, QList<Id> selected ) : QDialog( parent ),
+                                                                      labelIds( std::move( selected )),
+                                                                      ui( new Ui::LabelSelector ) {
+    this->ui->setupUi( this );
     this->setWindowFlag( Qt::Tool );
 
-    NoCloseMenu *labels = new NoCloseMenu();
+    auto *labels = new NoCloseMenu();
     for ( int y = 0; y < Label::instance()->count(); y++ ) {
         const Row row = static_cast<Row>( y );
         const Id id = Label::instance()->id( row );
-        QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row )));
+        QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))),
+                                            Label::instance()->name( row )));
         action->setCheckable( true );
 
         if ( this->labelIds.contains( id ))
             action->setChecked( true );
 
-        action->connect( action, &QAction::toggled, [ this, id ]( bool toggle ) {
+        QAction::connect( action, &QAction::toggled, [ this, id ]( bool toggle ) {
             if ( toggle )
                 this->labelIds << id;
             else

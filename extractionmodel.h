@@ -23,6 +23,7 @@
  * includes
  */
 #include <QAbstractListModel>
+#include <utility>
 
 /**
  * @brief The ExtractionModel class
@@ -31,9 +32,10 @@ class ExtractionModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    explicit ExtractionModel( QObject *parent = nullptr, const QStringList &entries = QStringList()) : QAbstractListModel( parent ), list( entries ) {}
-    int rowCount( const QModelIndex & = QModelIndex()) const override { return this->list.count(); }
-    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override {
+    explicit ExtractionModel( QObject *parent = nullptr, QStringList entries = QStringList())
+            : QAbstractListModel( parent ), list( std::move( entries )) {}
+    [[nodiscard]] int rowCount( const QModelIndex & = QModelIndex()) const override { return this->list.count(); }
+    [[nodiscard]] QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override {
         if ( index.row() < 0 || index.row() >= this->list.count())
             return QVariant();
 
@@ -42,7 +44,12 @@ public:
 
         return QVariant();
     }
-    void reset( const QStringList &entries = QStringList()) { this->beginResetModel(); this->list = entries; this->endResetModel(); }
+
+    [[maybe_unused]] void reset( const QStringList &entries = QStringList()) {
+        this->beginResetModel();
+        this->list = entries;
+        this->endResetModel();
+    }
 
 private:
     QStringList list;

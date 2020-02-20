@@ -29,10 +29,10 @@
  * @brief Reagent::Reagent
  */
 Reagent::Reagent() : Table( "reagent" ) {
-    this->addField( PRIMARY_FIELD( ID ));
-    this->addField( FIELD( Name, String ));
-    this->addField( FIELD( Alias, String ));
-    this->addField( FIELD( ParentId, Int ));
+    this->addField( PRIMARY_FIELD( ID ) );
+    this->addField( FIELD( Name, String ) );
+    this->addField( FIELD( Alias, String ) );
+    this->addField( FIELD( ParentId, Int ) );
 }
 
 /**
@@ -54,13 +54,12 @@ QList<Row> Reagent::children( const Row &row ) const {
     const Id id = this->id( row );
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where %3=%4" )
-                .arg( Reagent::instance()->fieldName( ID ))
-                .arg( Reagent::instance()->tableName())
-                .arg( Reagent::instance()->fieldName( ParentId ))
-                .arg( static_cast<int>( id )));
+                        .arg( Reagent::instance()->fieldName( ID ))
+                        .arg( Reagent::instance()->tableName())
+                        .arg( Reagent::instance()->fieldName( ParentId ))
+                        .arg( static_cast<int>( id )));
     while ( query.next()) {
-        const Id id = query.value( 0 ).value<Id>();
-        list << this->row( id );
+        list << this->row( query.value( 0 ).value<Id>());
     }
 
     return list;
@@ -81,10 +80,10 @@ QList<Id> Reagent::labelIds( const Row &row ) const {
 
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where %3=%4" )
-                .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ))
-                .arg( LabelSet::instance()->tableName())
-                .arg( LabelSet::instance()->fieldName( LabelSet::ReagentId ))
-                .arg( static_cast<int>( qAsConst( reagentId ))));
+                        .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ))
+                        .arg( LabelSet::instance()->tableName())
+                        .arg( LabelSet::instance()->fieldName( LabelSet::ReagentId ))
+                        .arg( static_cast<int>( qAsConst( reagentId ))));
     while ( query.next()) {
         const Id id = query.value( 0 ).value<Id>();
         list << id;
@@ -99,5 +98,5 @@ QList<Id> Reagent::labelIds( const Row &row ) const {
 void Reagent::removeOrphanedEntries() {
     // NOTE: labels do not have foreign ids, therefore they cannot be orphaned
     //       batch deletion is handled elsewhere, so that there should not be
-    //       any orphaned batces
+    //       any orphaned batches
 }

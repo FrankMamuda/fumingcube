@@ -31,8 +31,8 @@
 /**
  * @brief The NetworkManager class
  */
-class NetworkManager: public QObject {
-    Q_OBJECT
+class NetworkManager : public QObject {
+Q_OBJECT
 
 public:
     enum Types {
@@ -50,7 +50,10 @@ public:
      * @brief instance
      * @return
      */
-    static NetworkManager *instance() { static NetworkManager *instance( new NetworkManager()); return instance; }
+    static NetworkManager *instance() {
+        static auto *instance( new NetworkManager());
+        return instance;
+    }
 
 signals:
     /**

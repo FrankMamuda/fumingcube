@@ -36,7 +36,7 @@ class CalcEdit final : public QLineEdit {
 public:
     explicit CalcEdit( QWidget *parent = nullptr );
     ~CalcEdit() override { this->history.clear(); }
-    int offset() const { return this->m_historyOffset; }
+    [[nodiscard]] int offset() const { return this->m_historyOffset; }
     bool completeCommand();
 
 public slots:
@@ -44,6 +44,11 @@ public slots:
     void reset() { this->set(); }
     void push() { this->m_historyOffset++; }
     void pop() { this->m_historyOffset--; }
+
+    /**
+     * add
+     * @param text
+     */
     void add( const QString &text ) {
         if ( this->history.count()) {
             if ( !QString::compare( this->history.last(), text ))

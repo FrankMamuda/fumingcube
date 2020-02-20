@@ -36,7 +36,7 @@
  */
 QVariant ReagentModel::headerData( int section, Qt::Orientation orientation, int role ) const {
     if ( section == 0 && role == Qt::DisplayRole && orientation == Qt::Horizontal )
-        return this->tr( "Reagents" );
+        return ReagentModel::tr( "Reagents" );
 
     return QVariant();
 }
@@ -56,7 +56,7 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         if ( item->data( ReagentModel::ParentId ).value<Id>() != Id::Invalid )
             return QVariant();
 
-        const QPixmap pixmap( item->data( ReagentModel::Pixmap ).value<QPixmap>());
+        const auto pixmap( item->data( ReagentModel::Pixmap ).value<QPixmap>());
         if ( !pixmap.isNull())
             return pixmap;
 
@@ -64,7 +64,7 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         if ( reagentId == Id::Invalid )
             return QVariant();
 
-        const QList<Id>labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
+        const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
         if ( labelIds.isEmpty())
             return QVariant();
 
@@ -104,15 +104,16 @@ void ReagentModel::setupModelData() {
 
         // make a new reagent treeItem
         const Id reagentId = Reagent::instance()->id( row );
-        const QString generatedName( ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
-        QStandardItem *reagent( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
+        const QString generatedName(
+                ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
+        auto *reagent( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
         reagent->setData( generatedName, HTML );
 
         // go through batches (children of the reagent)
         for ( const Row &child : Reagent::instance()->children( row ))
-            this->addItem( Reagent::instance()->id( child ), reagentId, reagent );
+            ReagentModel::addItem( Reagent::instance()->id( child ), reagentId, reagent );
 
         // add reagent to treeView
         this->invisibleRootItem()->appendRow( reagent );
@@ -134,7 +135,8 @@ QModelIndex ReagentModel::indexFromId( const Id &id ) const {
             return reagent->index();
         } else {
             for ( int k = 0; k < reagent->rowCount(); k++ ) {
-                const QStandardItem *batch( reagent->child( k )); {
+                const QStandardItem *batch( reagent->child( k ));
+                {
                     if ( batch->data( ID ).value<Id>() == id )
                         return batch->index();
                 }
@@ -182,9 +184,9 @@ void ReagentModel::add( const Id &id ) {
         if ( !index.isValid())
             return;
 
-        this->addItem( id, parentId, this->itemFromIndex( index ));
+        ReagentModel::addItem( id, parentId, this->itemFromIndex( index ));
     } else {
-        this->addItem( id, Id::Invalid, this->invisibleRootItem());
+        ReagentModel::addItem( id, Id::Invalid, this->invisibleRootItem());
     }
 
     ReagentDock::instance()->view()->filterModel()->sort( 0, Qt::AscendingOrder );
@@ -197,8 +199,11 @@ void ReagentModel::add( const Id &id ) {
  * @param parentItem
  */
 void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
-    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ), Reagent::instance()->reference( id )) : Reagent::instance()->name( id ));
-    QStandardItem *item( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
+    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ),
+                                                                                       Reagent::instance()->reference(
+                                                                                               id ))
+                                                         : Reagent::instance()->name( id ));
+    auto *item( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
     item->setData( generatedName, HTML );

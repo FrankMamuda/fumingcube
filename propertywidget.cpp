@@ -30,7 +30,8 @@
  * @param values
  * @param tagId
  */
-PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget( parent ), m_tagId( tagId ) {
+PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &values, const Id &tagId ) : QWidget(
+        parent ), m_tagId( tagId ) {
     if ( this->tagId() == Id::Invalid )
         return;
 
@@ -56,32 +57,32 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
         return;
 
     switch ( type ) {
-    case Tag::Text:
-    case Tag::Integer:
-    case Tag::Real:
-    case Tag::CAS:
-        this->label = new QLabel( this->displayValues.first());
-        this->label->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
-        this->label->setWordWrap( true );
-        this->layout->addWidget( this->label );
-        break;
+        case Tag::Text:
+        case Tag::Integer:
+        case Tag::Real:
+        case Tag::CAS:
+            this->label = new QLabel( this->displayValues.first());
+            this->label->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+            this->label->setWordWrap( true );
+            this->layout->addWidget( this->label );
+            break;
 
-    case Tag::NFPA:
-        this->nfpa = new NFPAWidget( nullptr, propertyValues.first());
-        this->layout->addWidget( this->nfpa );
-        this->nfpa->setScale( 16 );
-        break;
+        case Tag::NFPA:
+            this->nfpa = new NFPAWidget( nullptr, propertyValues.first());
+            this->layout->addWidget( this->nfpa );
+            this->nfpa->setScale( 16 );
+            break;
 
-    case Tag::GHS:
-        this->ghs = new GHSWidget( nullptr, PropertyWidget::parseGHS( this->propertyValues.first()));
-        this->ghs->setLinear();
-        this->layout->addWidget( this->ghs );
-        break;
+        case Tag::GHS:
+            this->ghs = new GHSWidget( nullptr, PropertyWidget::parseGHS( this->propertyValues.first()));
+            this->ghs->setLinear();
+            this->layout->addWidget( this->ghs );
+            break;
 
-    case Tag::Formula:
-    case Tag::State:
-    case Tag::NoType:
-        return;
+        case Tag::Formula:
+        case Tag::State:
+        case Tag::NoType:
+            return;
     }
 
     this->m_position = 0;
@@ -95,7 +96,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
         this->right->setIconSize( QSize( 8, 16 ));
         this->layout->addWidget( this->left );
         this->layout->addWidget( this->right );
-        this->left->connect( this->left, &QToolButton::pressed, [ this, type ]() {
+        QToolButton::connect( this->left, &QToolButton::pressed, [ this, type ]() {
             if ( this->position() == -1 )
                 return;
 
@@ -105,28 +106,28 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
                 this->m_position = this->displayValues.count() - 1;
 
             switch ( type ) {
-            case Tag::Text:
-            case Tag::Integer:
-            case Tag::Real:
-            case Tag::CAS:
-                this->label->setText( this->displayValues[this->position()] );
-                break;
+                case Tag::Text:
+                case Tag::Integer:
+                case Tag::Real:
+                case Tag::CAS:
+                    this->label->setText( this->displayValues[this->position()] );
+                    break;
 
-            case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
-                break;
+                case Tag::NFPA:
+                    this->nfpa->update( this->propertyValues[this->position()] );
+                    break;
 
-            case Tag::GHS:
-                this->ghs->update( PropertyWidget::parseGHS( this->propertyValues[this->position()] ));
-                break;
+                case Tag::GHS:
+                    this->ghs->update( PropertyWidget::parseGHS( this->propertyValues[this->position()] ));
+                    break;
 
-            case Tag::Formula:
-            case Tag::State:
-            case Tag::NoType:
-                return;
+                case Tag::Formula:
+                case Tag::State:
+                case Tag::NoType:
+                    return;
             }
         } );
-        this->right->connect( this->right, &QToolButton::pressed, [ this, type ]() {
+        QToolButton::connect( this->right, &QToolButton::pressed, [ this, type ]() {
             if ( this->position() == -1 )
                 return;
 
@@ -136,25 +137,25 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
                 this->m_position = 0;
 
             switch ( type ) {
-            case Tag::Text:
-            case Tag::Integer:
-            case Tag::Real:
-            case Tag::CAS:
-                this->label->setText( this->displayValues[this->position()] );
-                break;
+                case Tag::Text:
+                case Tag::Integer:
+                case Tag::Real:
+                case Tag::CAS:
+                    this->label->setText( this->displayValues[this->position()] );
+                    break;
 
-            case Tag::NFPA:
-                this->nfpa->update( this->propertyValues[this->position()] );
-                break;
+                case Tag::NFPA:
+                    this->nfpa->update( this->propertyValues[this->position()] );
+                    break;
 
-            case Tag::GHS:
-                this->ghs->update( PropertyWidget::parseGHS( this->propertyValues[this->position()] ));
-                break;
+                case Tag::GHS:
+                    this->ghs->update( PropertyWidget::parseGHS( this->propertyValues[this->position()] ));
+                    break;
 
-            case Tag::Formula:
-            case Tag::State:
-            case Tag::NoType:
-                return;
+                case Tag::Formula:
+                case Tag::State:
+                case Tag::NoType:
+                    return;
             }
         } );
     }
@@ -172,9 +173,9 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QPixmap &pixmap ) : QWidg
     if ( pixmap.isNull())
         return;
 
-    const bool darkMode = Variable::instance()->isEnabled( "darkMode" );
+    const bool darkMode = Variable::isEnabled( "darkMode" );
     this->label = new QLabel();
-    this->label->setPixmap( darkMode ? ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( pixmap )) : pixmap  );
+    this->label->setPixmap( darkMode ? ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( pixmap )) : pixmap );
     this->label->setFixedSize( pixmap.width(), pixmap.height());
     this->layout->addWidget( label );
     this->setLayout( this->layout );
@@ -184,14 +185,14 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QPixmap &pixmap ) : QWidg
  * @brief PropertyWidget::~PropertyWidget
  */
 PropertyWidget::~PropertyWidget() {
-    if ( this->left != nullptr ) this->disconnect( this->left, &QToolButton::pressed, this, nullptr );
-    if ( this->right != nullptr ) this->disconnect( this->right, &QToolButton::pressed, this, nullptr );
+    if ( this->left != nullptr ) PropertyWidget::disconnect( this->left, &QToolButton::pressed, this, nullptr );
+    if ( this->right != nullptr ) PropertyWidget::disconnect( this->right, &QToolButton::pressed, this, nullptr );
 
-    if ( this->ghs != nullptr ) delete this->ghs;
-    if ( this->nfpa != nullptr ) delete this->nfpa;
-    if ( this->label != nullptr ) delete this->label;
-    if ( this->left != nullptr ) delete this->left;
-    if ( this->right != nullptr ) delete this->right;
+    delete this->ghs;
+    delete this->nfpa;
+    delete this->label;
+    delete this->left;
+    delete this->right;
     delete this->layout;
 }
 
@@ -204,24 +205,27 @@ void PropertyWidget::add( const Id &id ) {
         return;
 
     switch ( Tag::instance()->type( this->tagId())) {
-    case Tag::Text:
-    case Tag::Integer:
-    case Tag::Real:
-    case Tag::CAS:
-        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].first(), id );
-        break;
+        case Tag::Text:
+        case Tag::Integer:
+        case Tag::Real:
+        case Tag::CAS:
+            Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].first(), id );
+            break;
 
-    case Tag::NFPA:
-        Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].join( " " ), id );
-        break;
+        case Tag::NFPA:
+            Property::instance()->add( QString(), this->tagId(), this->propertyValues[this->position()].join( " " ),
+                                       id );
+            break;
 
-    case Tag::GHS:
-        Property::instance()->add( QString(), this->tagId(), PropertyWidget::parseGHS( this->propertyValues[this->position()] ).join( " " ), id );
-        break;
+        case Tag::GHS:
+            Property::instance()->add( QString(), this->tagId(),
+                                       PropertyWidget::parseGHS( this->propertyValues[this->position()] ).join( " " ),
+                                       id );
+            break;
 
-    case Tag::Formula:
-    case Tag::State:
-    case Tag::NoType:
-        return;
+        case Tag::Formula:
+        case Tag::State:
+        case Tag::NoType:
+            return;
     }
 }

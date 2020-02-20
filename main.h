@@ -28,7 +28,7 @@
  * namespace Main
  */
 namespace Main {
-[[maybe_unused]] static constexpr const char *Path = ".fumingCube";
+    [[maybe_unused]] static constexpr const char *Path = ".fumingCube";
 }
 
 /**
@@ -40,7 +40,10 @@ public:
      * @brief instance
      * @return
      */
-    static GarbageMan *instance() { static GarbageMan *instance( new GarbageMan()); return instance; }
+    static GarbageMan *instance() {
+        static auto *instance( new GarbageMan());
+        return instance;
+    }
     GarbageMan( const GarbageMan & ) = delete;
     ~GarbageMan() = default;
 
@@ -58,7 +61,7 @@ public:
      */
     void clear() {
         std::reverse( this->garbage.begin(), this->garbage.end());
-        foreach ( QObject *object, this->garbage ) {
+        for ( QObject *object : this->garbage ) {
             if ( object != nullptr ) {
                 delete object;
                 object = nullptr;
@@ -69,5 +72,5 @@ public:
 
 private:
     explicit GarbageMan() = default;
-    QList<QObject*> garbage;
+    QList<QObject *> garbage;
 };

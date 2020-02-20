@@ -32,7 +32,6 @@
 #include <QDesktopServices>
 #include "reagent.h"
 #include "property.h"
-#include "tag.h"
 #include "variable.h"
 #include "propertydock.h"
 #include "reagentdialog.h"
@@ -50,17 +49,18 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
     // disable the remove button (and enable it only when a reagent is clicked upon)
     this->ui->removeButton->setEnabled( false );
-    this->view()->selectionModel()->connect( this->view()->selectionModel(), &QItemSelectionModel::currentChanged, [ this ]( const QModelIndex &current, const QModelIndex & ) {
-        this->ui->removeButton->setEnabled( current.isValid());
-        this->ui->editButton->setEnabled( current.isValid());
-        emit this->currentIndexChanged( current );
-    } );
+    QItemSelectionModel::connect( this->view()->selectionModel(), &QItemSelectionModel::currentChanged,
+                                             [ this ]( const QModelIndex &current, const QModelIndex & ) {
+                                                 this->ui->removeButton->setEnabled( current.isValid());
+                                                 this->ui->editButton->setEnabled( current.isValid());
+                                                 emit this->currentIndexChanged( current );
+                                             } );
 
     // hide searchBox
     this->ui->searchEdit->hide();
 
     // implement search
-    this->ui->searchEdit->connect( this->ui->searchEdit, &QLineEdit::textChanged, [ this ]( const QString &filter ) {
+    QLineEdit::connect( this->ui->searchEdit, &QLineEdit::textChanged, [ this ]( const QString &filter ) {
         this->view()->filterModel()->setFilterFixedString( filter );
 
         if ( !filter.isEmpty())
@@ -68,7 +68,9 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
 
         // previous selection is unavailable
         const QModelIndex &previous( this->view()->selectionModel()->currentIndex());
-        const QModelIndexList list( this->view()->filterModel()->match( previous.isValid() ? previous : this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter, 2, Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
+        const QModelIndexList list( this->view()->filterModel()->match(
+                previous.isValid() ? previous : this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter, 2,
+                Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
         if ( !previous.isValid() && !list.isEmpty()) {
             const QModelIndex nextIndex( list.first());
             this->view()->selectionModel()->select( list.first(), QItemSelectionModel::ClearAndSelect );
@@ -78,7 +80,7 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     } );
 
     // implement going through found entries
-    this->ui->searchEdit->connect( this->ui->searchEdit, &QLineEdit::returnPressed, [ this ]() {
+    QLineEdit::connect( this->ui->searchEdit, &QLineEdit::returnPressed, [ this ]() {
         const QString &filter( this->ui->searchEdit->text());
 
         // no filter - hide the search box
@@ -90,7 +92,9 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
         // previous selection is unavailable
         const QModelIndexList selectedIndexes( this->view()->selectionModel()->selectedIndexes());
         const QModelIndex &previousIndex( selectedIndexes.isEmpty() ? QModelIndex() : selectedIndexes.first());
-        const QModelIndexList list( this->view()->filterModel()->match( this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter, -1, Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
+        const QModelIndexList list(
+                this->view()->filterModel()->match( this->view()->filterModel()->index( 0, 0 ), Qt::DisplayRole, filter,
+                                                    -1, Qt::MatchContains | Qt::MatchRecursive | Qt::MatchWrap ));
 
         // if we have more than two reagents, iterate over them
         if ( list.count() < 2 ) {
@@ -109,8 +113,8 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
     } );
 
     // add keyboard shortcut to reagent filter
-    this->shortcut = new QShortcut( QKeySequence( this->tr( "Ctrl+F", "Find" )), this );
-    this->shortcut->connect( this->shortcut, &QShortcut::activated, [ this ]() {
+    this->shortcut = new QShortcut( QKeySequence( ReagentDock::tr( "Ctrl+F", "Find" )), this );
+    QShortcut::connect( this->shortcut, &QShortcut::activated, [ this ]() {
         this->on_buttonFind_clicked();
     } );
 }
@@ -145,23 +149,23 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
     if ( reagentId == Id::Invalid ) {
         // reagent does not exist yet
         query.exec( QString( "select %1, %2 from %3 where %4=%5" )
-                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                    .arg( Reagent::instance()->tableName())
-                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                    .arg( static_cast<int>( Id::Invalid ))
-                    );
+                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                            .arg( Reagent::instance()->tableName())
+                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                            .arg( static_cast<int>( Id::Invalid ))
+        );
     } else {
         // reagent does exist, we're just renaming it
         query.exec( QString( "select %1, %2, %6 from %3 where %4=%5 and %6!=%7" )
-                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                    .arg( Reagent::instance()->tableName())
-                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                    .arg( static_cast<int>( Id::Invalid ))
-                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                    .arg( static_cast<int>( reagentId ))
-                    );
+                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                            .arg( Reagent::instance()->tableName())
+                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                            .arg( static_cast<int>( Id::Invalid ))
+                            .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                            .arg( static_cast<int>( reagentId ))
+        );
     }
 
     // check plainText names
@@ -169,9 +173,12 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
         const QString name_( QTextEdit( query.value( 0 ).toString()).toPlainText());
         const QString reference_( QTextEdit( query.value( 1 ).toString()).toPlainText());
 
-        if ( !QString::compare( name, name_, Qt::CaseInsensitive ) || !QString::compare( name, reference_, Qt::CaseInsensitive ) ||
-             !QString::compare( reference, reference_, Qt::CaseInsensitive ) || !QString::compare( reference, name_, Qt::CaseInsensitive )) {
-            QMessageBox::warning( ReagentDock::instance(), this->tr( "Cannot add or rename reagent" ), this->tr( "Name or reference already exists" ));
+        if ( !QString::compare( name, name_, Qt::CaseInsensitive ) ||
+             !QString::compare( name, reference_, Qt::CaseInsensitive ) ||
+             !QString::compare( reference, reference_, Qt::CaseInsensitive ) ||
+             !QString::compare( reference, name_, Qt::CaseInsensitive )) {
+            QMessageBox::warning( ReagentDock::instance(), ReagentDock::tr( "Cannot add or rename reagent" ),
+                                  ReagentDock::tr( "Name or reference already exists" ));
             return false;
         }
     }
@@ -188,15 +195,16 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
 bool ReagentDock::checkBatchForDuplicates( const QString &name, const Id parentId ) const {
     QSqlQuery query;
     query.exec( QString( "select %4 from %1 where %2=%3 and %4='%5'" )
-                .arg( Reagent::instance()->tableName())
-                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                .arg( static_cast<int>( parentId ))
-                .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                .arg( name )
-                );
+                        .arg( Reagent::instance()->tableName())
+                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                        .arg( static_cast<int>( parentId ))
+                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                        .arg( name )
+    );
 
     if ( query.next()) {
-        QMessageBox::warning( ReagentDock::instance(), this->tr( "Cannot add or rename batch" ), this->tr( "Batch '%1' already exists for this reagent" ).arg( name ));
+        QMessageBox::warning( ReagentDock::instance(), ReagentDock::tr( "Cannot add or rename batch" ),
+                              ReagentDock::tr( "Batch '%1' already exists for this reagent" ).arg( name ));
         return false;
     }
 
@@ -217,7 +225,7 @@ ReagentView *ReagentDock::view() const {
  * @return
  */
 QMenu *ReagentDock::buildMenu( bool context ) {
-    QMenu *menu( new QMenu());
+    auto *menu( new QMenu());
 
     auto addReagent = [ this ]( const Id &parentId ) {
         QString name, reference;
@@ -230,7 +238,8 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         //
         QList<Id> labels;
         if ( parentId != Id::Invalid ) {
-            name = QInputDialog::getText( this, this->tr( "Add batch" ), this->tr( "Name:" ), QLineEdit::Normal, QString(), &ok );
+            name = QInputDialog::getText( this, ReagentDock::tr( "Add batch" ), ReagentDock::tr( "Name:" ), QLineEdit::Normal,
+                                          QString(), &ok );
 
             if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
                 return;
@@ -253,7 +262,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 // save filter
                 // NOTE: why? because when we add a reagent when filtered the row will always be invalid
                 //       due to non-existant label sets
-                //       this way filter is temporarely removed and restore after addition
+                //       this way filter is temporarily removed and restore after addition
                 const QString oldFilter( Reagent::instance()->filter());
                 if ( !Reagent::instance()->filter().isEmpty())
                     Reagent::instance()->setFilter( "" );
@@ -275,17 +284,19 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 }
 
                 // ... and add to treeView without resetting the model
-                this->view()->model()->add( reagentId );
+                this->view()->sourceModel()->add( reagentId );
 
                 // expand parent reagent
                 if ( parentId != Id::Invalid )
-                    this->view()->expand( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
+                    this->view()->expand(
+                            this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
 
                 // select the newly added reagent or batch
-                this->view()->selectReagent( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
+                this->view()->selectReagent(
+                        this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
 
                 // open extraction dialog if this feature is enabled
-                if ( Variable::instance()->isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
+                if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
                     ExtractionDialog ed( this, reagentId );
                     ed.exec();
                     PropertyDock::instance()->updateView();
@@ -297,13 +308,16 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                     this->view()->updateView();
                 }
             } else {
-                QMessageBox::warning( this,  this->tr( "Cannot add reagent" ), ( parentId != Id::Invalid ?  this->tr( "Batch" ) : this->tr( "Reagent" )) + this->tr( " name is empty" ));
+                QMessageBox::warning( this, ReagentDock::tr( "Cannot add reagent" ),
+                                      ( parentId != Id::Invalid ? ReagentDock::tr( "Batch" ) : ReagentDock::tr( "Reagent" )) +
+                                      ReagentDock::tr( " name is empty" ));
                 return;
             }
         }
     };
 
-    menu->addAction( this->tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ))->setIcon( QIcon::fromTheme( "reagent" ));
+    menu->addAction( ReagentDock::tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ))->setIcon(
+            QIcon::fromTheme( "reagent" ));
 
     const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
     if ( index.isValid()) {
@@ -311,13 +325,18 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
-        menu->addAction( this->tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId == Id::Invalid ) ? static_cast<Id>( item->data( ReagentModel::ID ).toInt()) : parentId  ))->setIcon( QIcon::fromTheme( "add" ));
+        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId ==
+                                                                                                             Id::Invalid )
+                                                                                                           ? static_cast<Id>( item->data(
+                        ReagentModel::ID ).toInt()) : parentId ))->setIcon( QIcon::fromTheme( "add" ));
 
         if ( context ) {
-            menu->addAction( this->tr( "Copy name" ), [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } )->setIcon( QIcon::fromTheme( "copy" ));
+            menu->addAction( ReagentDock::tr( "Copy name" ),
+                             [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } )->setIcon(
+                    QIcon::fromTheme( "copy" ));
 
             if ( parentId == Id::Invalid ) {
-                QMenu *labels( menu->addMenu( this->tr( "Labels" )));
+                QMenu *labels( menu->addMenu( ReagentDock::tr( "Labels" )));
                 labels->setIcon( QIcon::fromTheme( "label" ));
                 for ( int y = 0; y < Label::instance()->count(); y++ ) {
                     const Row row = static_cast<Row>( y );
@@ -333,18 +352,22 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                         }
                     }
 
-                    QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))), Label::instance()->name( row ), [ item, menuLabelId, reagentId, hasLabel ]() {
-                        if ( hasLabel ) {
-                            LabelSet::instance()->remove( menuLabelId, reagentId );
-                            LabelSet::instance()->removeOrphanedEntries();
-                        } else
-                            LabelSet::instance()->add( menuLabelId, reagentId );
+                    QAction *action(
+                            labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))),
+                                               Label::instance()->name( row ),
+                                               [ item, menuLabelId, reagentId, hasLabel ]() {
+                                                   if ( hasLabel ) {
+                                                       LabelSet::instance()->remove( menuLabelId, reagentId );
+                                                       LabelSet::instance()->removeOrphanedEntries();
+                                                   } else
+                                                       LabelSet::instance()->add( menuLabelId, reagentId );
 
-                        // force icon reset without resetting the model
-                        //const_cast<QStandardItem*>( item )->setIcon( QIcon());
-                        // force pixmap reset without resetting the model
-                        const_cast<QStandardItem*>( item )->setData( QPixmap(), ReagentModel::Pixmap );
-                    } ));
+                                                   // force icon reset without resetting the model
+                                                   //const_cast<QStandardItem*>( item )->setIcon( QIcon());
+                                                   // force pixmap reset without resetting the model
+                                                   const_cast<QStandardItem *>( item )->setData( QPixmap(),
+                                                                                                 ReagentModel::Pixmap );
+                                               } ));
                     action->setCheckable( true );
                     if ( hasLabel )
                         action->setChecked( true );
@@ -354,7 +377,8 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
         if ( context ) {
             const Id id = item->data( ReagentModel::ID ).value<Id>();
-            const QString reagentName( QTextEdit( Reagent::instance()->name( Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))).toPlainText());
+            const QString reagentName( QTextEdit( Reagent::instance()->name(
+                    Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))).toPlainText());
 
             auto simpleSmallIcon = []( const QString &string ) {
                 QPixmap pixmap( 16, 16 );
@@ -367,31 +391,37 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             };
 
             // search online
-            QMenu *searchMenu( menu->addMenu( this->tr( "Search online" )));
+            QMenu *searchMenu( menu->addMenu( ReagentDock::tr( "Search online" )));
             searchMenu->setIcon( QIcon::fromTheme( "find" ));
             const QString queryName( QString( reagentName ).replace( " ", "+" ));
 
             // TODO: search engines should be moved to XML, not hardcoded
-            searchMenu->addAction( this->tr( "Google" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Google" ), [ queryName ]() {
                 QDesktopServices::openUrl( "https://www.google.com/search?q=" + queryName );
             } )->setIcon( simpleSmallIcon( "G" ));
-            searchMenu->addAction( this->tr( "DuckDuckGo" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "DuckDuckGo" ), [ queryName ]() {
                 QDesktopServices::openUrl( "https://duckduckgo.com/?q=" + queryName );
             } )->setIcon( simpleSmallIcon( "D" ));
-            searchMenu->addAction( this->tr( "Wikipedia" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Wikipedia" ), [ queryName ]() {
                 QDesktopServices::openUrl( "https://en.wikipedia.org/w/index.php?sort=relevance&search=" + queryName );
             } )->setIcon( simpleSmallIcon( "W" ));
-            searchMenu->addAction( this->tr( "Alfa Aesar" ), [ queryName ]() {
-                QDesktopServices::openUrl( "https://www.alfa.com/en/search/?search-tab=product-search-container&type=SEARCH_CHOICE_ITEM_NUM&q=" + queryName );
+            searchMenu->addAction( ReagentDock::tr( "Alfa Aesar" ), [ queryName ]() {
+                QDesktopServices::openUrl(
+                        "https://www.alfa.com/en/search/?search-tab=product-search-container&type=SEARCH_CHOICE_ITEM_NUM&q=" +
+                        queryName );
             } )->setIcon( simpleSmallIcon( "AA" ));
-            searchMenu->addAction( this->tr( "Acros" ), [ reagentName ]() {
-                QDesktopServices::openUrl( "https://www.acros.com/DesktopModules/Acros_Search_Results/Acros_Search_Results.aspx?search_type=PartOfName&SearchString=" + QString( reagentName ).replace( " ", "%20 " ));
+            searchMenu->addAction( ReagentDock::tr( "Acros" ), [ reagentName ]() {
+                QDesktopServices::openUrl(
+                        "https://www.acros.com/DesktopModules/Acros_Search_Results/Acros_Search_Results.aspx?search_type=PartOfName&SearchString=" +
+                        QString( reagentName ).replace( " ", "%20 " ));
             } )->setIcon( simpleSmallIcon( "A" ));
-            searchMenu->addAction( this->tr( "Sigma Aldrich" ), [ queryName ]() {
-                QDesktopServices::openUrl( "https://www.sigmaaldrich.com/catalog/search?term=" + queryName + "&interface=All" );
+            searchMenu->addAction( ReagentDock::tr( "Sigma Aldrich" ), [ queryName ]() {
+                QDesktopServices::openUrl(
+                        "https://www.sigmaaldrich.com/catalog/search?term=" + queryName + "&interface=All" );
             } )->setIcon( simpleSmallIcon( "SA" ));
-            searchMenu->addAction( this->tr( "fluorochem" ), [ reagentName ]() {
-                QDesktopServices::openUrl( "http://www.fluorochem.co.uk/Products/Search?searchType=N&searchText=" + QString( reagentName ).replace( " ", "%20 " ));
+            searchMenu->addAction( ReagentDock::tr( "fluorochem" ), [ reagentName ]() {
+                QDesktopServices::openUrl( "http://www.fluorochem.co.uk/Products/Search?searchType=N&searchText=" +
+                                           QString( reagentName ).replace( " ", "%20 " ));
             } )->setIcon( simpleSmallIcon( "FC" ));
         }
     }
@@ -432,7 +462,7 @@ void ReagentDock::on_removeButton_clicked() {
 
         // remove batches
         if ( Reagent::instance()->parentId( reagentRow ) == Id::Invalid ) {
-            const QList<Row>children( Reagent::instance()->children( reagentRow ));
+            const QList<Row> children( Reagent::instance()->children( reagentRow ));
             for ( const Row &batchRow : children )
                 Reagent::instance()->remove( batchRow );
         }
@@ -453,20 +483,21 @@ void ReagentDock::on_removeButton_clicked() {
 
     // remove reagents and batches (list)
     if ( list.count() > 1 ) {
-        menu.addAction( this->tr( "Remove %1 selected reagents and their batches" ).arg( list.count()), [ this, list, removeReagentsAndBatches ]() {
-            QModelIndexList sourceList;
-            for ( const QModelIndex &filter : list ) {
-                const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
-                sourceList << index;
+        menu.addAction( ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count()),
+                        [ this, list, removeReagentsAndBatches ]() {
+                            QModelIndexList sourceList;
+                            for ( const QModelIndex &filter : list ) {
+                                const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
+                                sourceList << index;
 
-                const QStandardItem *item( this->view()->itemFromIndex( index ));
-                if ( item != nullptr )
-                    removeReagentsAndBatches( item );
-            }
+                                const QStandardItem *item( this->view()->itemFromIndex( index ));
+                                if ( item != nullptr )
+                                    removeReagentsAndBatches( item );
+                            }
 
-            // remove items without resetting model
-            this->view()->model()->remove( qAsConst( sourceList ));
-        } )->setIcon( QIcon::fromTheme( "remove" ));
+                            // remove items without resetting model
+                            this->view()->sourceModel()->remove( qAsConst( sourceList ));
+                        } )->setIcon( QIcon::fromTheme( "remove" ));
     } else {
         // remove just one entry
         // get current index
@@ -478,18 +509,19 @@ void ReagentDock::on_removeButton_clicked() {
         // remove reagent and batches
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
-        menu.addAction( this->tr( parentId == Id::Invalid ?
-                                      "Remove reagent '%1' and its batches" :
-                                      "Remove batch '%1'"
-                                      ).arg( item->text()), [ this, item, index, parentId, removeReagentsAndBatches ]() {
+        menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
+                                  "Remove reagent '%1' and its batches" :
+                                  "Remove batch '%1'"
+        ).arg( item->text()), [ this, item, index, parentId, removeReagentsAndBatches ]() {
             removeReagentsAndBatches( item );
 
             // remove items without resetting model
-            this->view()->model()->remove( index );
+            this->view()->sourceModel()->remove( index );
 
             // reselect parent reagent item if any
             if ( parentId != Id::Invalid )
-                this->view()->selectReagent( this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
+                this->view()->selectReagent(
+                        this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
         } );
     }
 
@@ -502,7 +534,7 @@ void ReagentDock::on_removeButton_clicked() {
  */
 void ReagentDock::on_buttonFind_clicked() {
     // toggle searchBox visibility
-    this->ui->searchEdit->setVisible( !this->ui->searchEdit->isVisible() );
+    this->ui->searchEdit->setVisible( !this->ui->searchEdit->isVisible());
 
     if ( this->ui->searchEdit->isVisible()) {
         // disable node history
@@ -513,11 +545,13 @@ void ReagentDock::on_buttonFind_clicked() {
 
         // select the first reagent
         this->view()->selectionModel()->clearSelection();
-        this->view()->selectionModel()->select( this->view()->filterModel()->index( 0, 0 ), QItemSelectionModel::Select );
+        this->view()->selectionModel()->select( this->view()->filterModel()->index( 0, 0 ),
+                                                QItemSelectionModel::Select );
     } else {
         const QModelIndexList list( this->view()->selectionModel()->selectedIndexes());
         if ( !list.isEmpty())
-            Variable::instance()->setValue( "reagentDock/selection", static_cast<int>( this->view()->idFromIndex( this->view()->filterModel()->mapToSource( list.first()))));
+            Variable::setValue( "reagentDock/selection", static_cast<int>( this->view()->idFromIndex(
+                    this->view()->filterModel()->mapToSource( list.first()))));
 
         this->ui->searchEdit->clear();
         this->view()->nodeHistory()->setEnabled( true );
@@ -551,7 +585,9 @@ void ReagentDock::on_editButton_clicked() {
 
     bool ok;
     if ( parentId != Id::Invalid ) {
-        const QString name( QInputDialog::getText( this, this->tr( "Rename batch" ), this->tr( "Name:" ), QLineEdit::Normal, previousName, &ok ));
+        const QString name(
+                QInputDialog::getText( this, ReagentDock::tr( "Rename batch" ), ReagentDock::tr( "Name:" ), QLineEdit::Normal,
+                                       previousName, &ok ));
 
         if ( !name.isEmpty()) {
             if ( !this->checkBatchForDuplicates( name, parentId ))
@@ -561,7 +597,7 @@ void ReagentDock::on_editButton_clicked() {
 
             // rename without resetting the model
             const QString generatedName( ReagentModel::generateName( name ));
-            QStandardItem* modelItem = const_cast<QStandardItem*>( item );
+            auto *modelItem = const_cast<QStandardItem *>( item );
             modelItem->setText( QTextEdit( generatedName ).toPlainText());
             modelItem->setData( generatedName, ReagentModel::HTML );
         }
@@ -579,7 +615,7 @@ void ReagentDock::on_editButton_clicked() {
 
         // rename without resetting the model
         const QString generatedName( ReagentModel::generateName( name, reference ));
-        QStandardItem* modelItem = const_cast<QStandardItem*>( item );
+        auto *modelItem = const_cast<QStandardItem *>( item );
         modelItem->setText( QTextEdit( generatedName ).toPlainText());
         modelItem->setData( generatedName, ReagentModel::HTML );
     }

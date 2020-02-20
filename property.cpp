@@ -79,10 +79,10 @@ QVariant Property::headerData( int section, Qt::Orientation orientation, int rol
     if ( role == Qt::DisplayRole && orientation == Qt::Horizontal ) {
         switch ( section ) {
         case Property::Name:
-            return this->tr( "Property" );
+            return Property::tr( "Property" );
 
         case Property::PropertyData:
-            return this->tr( "Value" );
+            return Property::tr( "Value" );
 
         default:
             break;

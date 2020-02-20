@@ -82,7 +82,8 @@ QSize GHSWidget::sizeHint() const {
 
     this->m_iconsPerRow = qMax( 1, ( sectionSize - ( sectionSize % GHSWidget::scale )) / GHSWidget::scale );
     const int numIcons = this->parameters().count();
-    const int rows = ( numIcons - ( numIcons % this->iconsPerRow())) / this->iconsPerRow() + ( numIcons % this->iconsPerRow() > 0 ? 1 : 0 );
+    const int rows = ( numIcons - ( numIcons % this->iconsPerRow())) / this->iconsPerRow() +
+                     ( numIcons % this->iconsPerRow() > 0 ? 1 : 0 );
 
     int height = GHSWidget::scale;
     for ( int y = 1; y < rows; y++ )

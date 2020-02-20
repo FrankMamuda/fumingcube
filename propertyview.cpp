@@ -40,22 +40,23 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
     this->setItemDelegateForColumn( Property::PropertyData, this->delegate );
     this->setItemDelegateForColumn( Property::Name, this->delegate );
 
-    this->connect( this->horizontalHeader(), &QHeaderView::sectionResized, [ this ]( const int column, const int oldWidth, const int newWidth ) {
-        if ( oldWidth == newWidth )
-            return;
+    PropertyView::connect( this->horizontalHeader(), &QHeaderView::sectionResized,
+                           [ this ]( const int column, const int oldWidth, const int newWidth ) {
+                               if ( oldWidth == newWidth )
+                                   return;
 
-        this->resizeTimer.start( 200 );
-        this->m_resizeInProgress = true;
-        if ( column == Property::Name )
-            this->resizeToContents();
-    } );
+                               this->resizeTimer.start( 200 );
+                               this->m_resizeInProgress = true;
+                               if ( column == Property::Name )
+                                   this->resizeToContents();
+                           } );
 
     this->horizontalHeader()->show();
     //this->resizeRowsToContents();
 
     // setup timer
     this->resizeTimer.setSingleShot( true );
-    this->resizeTimer.connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
+    QTimer::connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
         this->m_resizeInProgress = false;
 
         // what this does is:
@@ -65,11 +66,12 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
         //   3) forces propertyView to resize, thus recreating missing documents
         //      a) here pixmaps are rescaled if required and stored into pixmap cache
         //      b) loaded from pixmap cache and displayed
-        // all this is done to resolve performace issues in handling large pixmaps
+        // all this is done to resolve performance issues in handling large pixmaps
         for ( int y = 0; y < Property::instance()->count(); y++ ) {
             const Row row = Property::instance()->row( y );
             const Id tagId = Property::instance()->tagId( row );
-            const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag ) : false;
+            const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula ||
+                                                                tagId == PixmapTag ) : false;
 
             if ( !pixmapTag )
                 continue;

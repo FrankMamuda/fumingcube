@@ -28,7 +28,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class StructureBrowser;
+    class StructureBrowser;
 }
 
 /**
@@ -38,46 +38,35 @@ class StructureBrowser : public QDialog {
     Q_OBJECT
 
 public:
-    explicit StructureBrowser( const QList<int> &cidList, QWidget *parent = nullptr );
-    ~StructureBrowser();
+    explicit StructureBrowser( QList<int> cidList, QWidget *parent = nullptr );
+    ~StructureBrowser() override;
 
     /**
      * @brief The StatusOption enum
      */
     enum StatusOption {
-        Idle          = 0x0,
-        FetchName     = 0x1,
-        FetchFormula  = 0x2,
-        Error         = 0x4
+        Idle = 0x0,
+        FetchName = 0x1,
+        FetchFormula = 0x2,
+        Error = 0x4
     };
     Q_DECLARE_FLAGS( Status, StatusOption )
-
-public slots:
-    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Types, const QString &errorString );
 
     /**
      * @brief status
      * @return
      */
     Status status() const { return this->m_status; }
-    int cid() const;
+    [[nodiscard]] int cid() const;
+
+public slots:
+    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void error( const QString &, NetworkManager::Types type, const QString &errorString );
 
 private slots:
-    /**
-     * @brief index
-     * @return
-     */
-    int index() const { return this->m_index; }
-
-    /**
-     * @brief path
-     * @return
-     */
-    QString path() const { return this->m_path; }
     void getInfo();
-    void getFormula( const int cid );
-    void getName( const int cid );
+    void getFormula( int cid );
+    void getName( int cid );
     void readFormula( const QByteArray &data );
 
     /**
@@ -88,6 +77,18 @@ private slots:
     void buttonTest();
 
 private:
+    /**
+     * @brief index
+     * @return
+     */
+    [[nodiscard]] int index() const { return this->m_index; }
+
+    /**
+     * @brief path
+     * @return
+     */
+    [[nodiscard]] QString path() const { return this->m_path; }
+
     Ui::StructureBrowser *ui;
     QList<int> cidList;
     int m_index = 0;

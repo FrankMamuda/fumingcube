@@ -31,9 +31,9 @@
  * @brief The XML namespace
  */
 namespace XMLTools_ {
-[[maybe_unused]]
-static constexpr const char *ConfigFile( "configuration.xml" );
-const static QLoggingCategory Debug( "xml" );
+    [[maybe_unused]]
+    static constexpr const char *ConfigFile( "configuration.xml" );
+    const static QLoggingCategory Debug( "xml" );
 }
 
 /**
@@ -44,11 +44,17 @@ class XMLTools final : public QObject {
     Q_OBJECT
 
 public:
-    virtual ~XMLTools() = default;
-    static XMLTools *instance() { static XMLTools *instance( new XMLTools()); return instance; }
-    void write();
-    void read();
+    ~XMLTools() override = default;
+    static XMLTools *instance() {
+        static auto *instance( new XMLTools());
+        return instance;
+    }
+    static void write();
+    static void read();
 
 private:
-    explicit XMLTools( QObject *parent = nullptr ) : QObject( parent ) { this->setObjectName( "XMLTools" ); GarbageMan::instance()->add( this ); }
+    explicit XMLTools( QObject *parent = nullptr ) : QObject( parent ) {
+        this->setObjectName( "XMLTools" );
+        GarbageMan::instance()->add( this );
+    }
 };

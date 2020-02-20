@@ -30,18 +30,18 @@
  * @brief The Pictograms namespace
  */
 namespace GHSHazards {
-const QMap<QString, QString> Hazards {
-    { "GHS01", QT_TR_NOOP( "Explosive" ) },
-    { "GHS02", QT_TR_NOOP( "Flammable" ) },
-    { "GHS03", QT_TR_NOOP( "Oxidizing" ) },
-    { "GHS04", QT_TR_NOOP( "Compressed gas" ) },
-    { "GHS05", QT_TR_NOOP( "Corrosive" ) },
-    { "GHS06", QT_TR_NOOP( "Toxic" ) },
-    { "GHS07", QT_TR_NOOP( "Harmful" ) },
-    { "GHS08", QT_TR_NOOP( "Health hazard" ) },
-    { "GHS09", QT_TR_NOOP( "Environment hazard" ) }
-};
-};
+    const QMap<QString, QString> Hazards {
+            { "GHS01", QT_TR_NOOP( "Explosive" ) },
+            { "GHS02", QT_TR_NOOP( "Flammable" ) },
+            { "GHS03", QT_TR_NOOP( "Oxidizing" ) },
+            { "GHS04", QT_TR_NOOP( "Compressed gas" ) },
+            { "GHS05", QT_TR_NOOP( "Corrosive" ) },
+            { "GHS06", QT_TR_NOOP( "Toxic" ) },
+            { "GHS07", QT_TR_NOOP( "Harmful" ) },
+            { "GHS08", QT_TR_NOOP( "Health hazard" ) },
+            { "GHS09", QT_TR_NOOP( "Environment hazard" ) }
+    };
+}
 
 /**
  * @brief The GHSPictograms class

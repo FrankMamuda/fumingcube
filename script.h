@@ -30,7 +30,7 @@
  * @brief The Script_ namespace
  */
 namespace Script_ {
-const static unsigned int API = 1;
+    [[maybe_unused]] const static unsigned int API = 1;
 }
 
 /**
@@ -45,16 +45,20 @@ public:
      * @brief instance
      * @return
      */
-    static Script *instance() { static Script *instance = new Script(); return instance; }
-    virtual ~Script() override {}
+    static Script *instance() {
+        static auto *instance = new Script();
+        return instance;
+    }
+    ~Script() override = default;
     QJSValue evaluate( const QString &script );
     Q_INVOKABLE QJSValue ans();
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference );
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference, const QString &batchName );
-    QJSValue getPropertyInternal(  const QString &functionName, const QString &reference, const QString &batchName = QString());
-    Id getPropertyId( const QString &name ) const;
-    Id getReagentId( const QString &reference, const Id &parentId = Id::Invalid ) const;
-    QVariant getPropertyValue(const Id &tagId, const Id &reagentId, const Id &parentId = Id::Invalid ) const;
+    QJSValue
+    getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName = QString());
+    [[nodiscard]] Id getPropertyId( const QString &name ) const;
+    [[nodiscard]] Id getReagentId( const QString &reference, const Id &parentId = Id::Invalid ) const;
+    [[nodiscard]] QVariant getPropertyValue( const Id &tagId, const Id &reagentId, const Id &parentId = Id::Invalid ) const;
 
 private:
     explicit Script();

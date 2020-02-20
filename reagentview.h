@@ -44,13 +44,13 @@ public:
      * @brief model
      * @return
      */
-    ReagentModel *model() const { return qobject_cast<ReagentModel*>( this->filterModel()->sourceModel()); }
+    ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->filterModel()->sourceModel()); }
 
     /**
      * @brief filterModel
      * @return
      */
-    QSortFilterProxyModel *filterModel() const { return qobject_cast<QSortFilterProxyModel*>( QTreeView::model()); }
+    [[nodiscard]] QSortFilterProxyModel *filterModel() const { return qobject_cast<QSortFilterProxyModel *>( QTreeView::model()); }
 
     /**
      * @brief nodeHistory
@@ -63,21 +63,21 @@ public:
      * @param index
      * @return
      */
-    Id idFromIndex( const QModelIndex &index ) const { return this->model()->idFromIndex( index ); }
+    [[nodiscard]] Id idFromIndex( const QModelIndex &index ) const { return this->sourceModel()->idFromIndex( index ); }
 
     /**
      * @brief indexFromId
      * @param id
      * @return
      */
-    QModelIndex indexFromId( const Id &id ) const { return this->model()->indexFromId( id ); }
+    [[nodiscard]] QModelIndex indexFromId( const Id &id ) const { return this->sourceModel()->indexFromId( id ); }
 
     /**
      * @brief itemFromIndex
      * @param index
      * @return
      */
-    QStandardItem *itemFromIndex( const QModelIndex &index ) const { return this->model()->itemFromIndex( index ); }
+    [[nodiscard]] QStandardItem *itemFromIndex( const QModelIndex &index ) const { return this->sourceModel()->itemFromIndex( index ); }
 
 public slots:
     void updateView();

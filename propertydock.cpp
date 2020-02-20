@@ -67,14 +67,20 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
     this->ui->addPropButton->setEnabled( false );
     this->ui->removePropButton->setEnabled( false );
-    this->ui->propertyView->selectionModel()->connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentChanged, [ this, buttonTest ]( const QModelIndex &current, const QModelIndex & ) {
-        this->ui->removePropButton->setEnabled( current.isValid());
-        this->ui->editPropButton->setEnabled( current.isValid());
+    this->ui->propertyView->selectionModel()->connect( this->ui->propertyView->selectionModel(),
+                                                       &QItemSelectionModel::currentChanged,
+                                                       [ this, buttonTest ]( const QModelIndex &current,
+                                                                             const QModelIndex & ) {
+                                                           this->ui->removePropButton->setEnabled( current.isValid());
+                                                           this->ui->editPropButton->setEnabled( current.isValid());
 
-        buttonTest( current );
-    } );
+                                                           buttonTest( current );
+                                                       } );
 
-    ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged, [ this ]( const QModelIndex &current ) { this->ui->addPropButton->setEnabled( current.isValid()); } );
+    ReagentDock::instance()->connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged,
+                                      [ this ]( const QModelIndex &current ) {
+                                          this->ui->addPropButton->setEnabled( current.isValid());
+                                      } );
 
     // move up/down lambda
     auto move = [ this, buttonTest ]( bool up ) {
@@ -97,10 +103,10 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
             QList<Id> idList;
 
             // get id list
-            for ( int y = 0; y < Property::instance()->count(); y++ )
+            for ( y = 0; y < Property::instance()->count(); y++ )
                 idList << Property::instance()->id( Property::instance()->row( y ));
 
-            // reorder tasks accordint to id list
+            // reorder tasks according to id list
             y = 0;
             for ( const Id id : idList ) {
                 Property::instance()->setTableOrder( Property::instance()->row( id ), y );
@@ -146,8 +152,8 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
     buttonTest( this->ui->propertyView->currentIndex());
 
     // move
-    this->ui->upButton->connect( this->ui->upButton, &QToolButton::clicked, std::bind( move, true ));
-    this->ui->downButton->connect( this->ui->downButton, &QToolButton::clicked, std::bind( move, false ));
+    QToolButton::connect( this->ui->upButton, &QToolButton::clicked, std::bind( move, true ));
+    QToolButton::connect( this->ui->downButton, &QToolButton::clicked, std::bind( move, false ));
 }
 
 /**
@@ -156,7 +162,8 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
  * @param tagRow
  * @return
  */
-QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &propertyId ) const {
+QPair<QString, QVariant>
+PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &propertyId ) const {
     QPair<QString, QVariant> values;
     QString name, value;
     PropertyEditor::Modes mode = PropertyEditor::Add;
@@ -173,56 +180,59 @@ QPair<QString, QVariant> PropertyDock::getPropertyValue( const Id &reagentId, co
     if ( tagId != Id::Invalid ) {
         const Tag::Types type = Tag::instance()->type( Tag::instance()->row( tagId ));
         switch ( type ) {
-        case Tag::CAS:
-        case Tag::Text:
-        case Tag::Integer:
-        case Tag::Real:
-        case Tag::State:
-        {
-            // goto rich text editor
-            if ( type == Tag::Text && Qt::mightBeRichText( qAsConst( value )))
+            case Tag::CAS:
+            case Tag::Text:
+            case Tag::Integer:
+            case Tag::Real:
+            case Tag::State: {
+                // goto rich text editor
+                if ( type == Tag::Text && Qt::mightBeRichText( qAsConst( value )))
+                    break;
+
+                PropertyDialog pd( PropertyDock::instance(), tagId, qAsConst( value ));
+                int result = pd.exec();
+                if ( result == QDialog::Accepted )
+                    return { QString(), pd.value() };
+                else if ( result == PropertyDialog::Rejected )
+                    return values;
+
                 break;
+            }
 
-            PropertyDialog pd( PropertyDock::instance(), tagId, qAsConst( value ));
-            int result = pd.exec();
-            if ( result == QDialog::Accepted )
-                return { QString(), pd.value() };
-            else if ( result == PropertyDialog::Rejected )
+            case Tag::NFPA: {
+                NFPABuilder nfpa( PropertyDock::instance(), value.split( " " ));
+                return ( nfpa.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(),
+                                                                                        nfpa.parameters().join( " " ))
+                                                            : values;
+            }
+
+            case Tag::GHS: {
+                GHSBuilder ghs( PropertyDock::instance(), value.split( " " ));
+                return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(),
+                                                                                       ghs.parameters().join( " " ))
+                                                           : values;
+            }
+
+            case Tag::Formula:
+            case Tag::NoType:
                 return values;
-
-            break;
-        }
-
-        case Tag::NFPA:
-        {
-            NFPABuilder nfpa( PropertyDock::instance(), value.split( " " ));
-            return ( nfpa.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), nfpa.parameters().join( " " )) : values;
-        }
-
-        case Tag::GHS:
-        {
-            GHSBuilder ghs( PropertyDock::instance(), value.split( " " ));
-            return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) : values;
-        }
-
-        case Tag::Formula:
-        case Tag::NoType:
-            return values;
         }
     }
 
-    PropertyEditor *pe( new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
+    PropertyEditor *pe(
+            new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
     if ( pe->exec() == QDialog::Accepted ) {
-        const QString name( TextEdit::stripHTML( pe->name()));
+        const QString strippedName( TextEdit::stripHTML( pe->name()));
 
         QTextEdit ed;
-        ed.setText( name );
+        ed.setText( strippedName );
         if ( ed.toPlainText().isEmpty() && tagId == Id::Invalid ) {
-            QMessageBox::warning( PropertyDock::instance(), this->tr( "Cannot add property" ), this->tr( "Property missing name" ));
+            QMessageBox::warning( PropertyDock::instance(), PropertyDock::tr( "Cannot add property" ),
+                                  PropertyDock::tr( "Property missing name" ));
             return values;
         }
 
-        return { name, pe->value() };
+        return { strippedName, pe->value() };
     }
 
     return values;
@@ -268,12 +278,15 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent id
-    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( ReagentDock::instance()->view()->filterModel()->mapToSource( ReagentDock::instance()->view()->currentIndex()));
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex(
+            ReagentDock::instance()->view()->filterModel()->mapToSource(
+                    ReagentDock::instance()->view()->currentIndex()));
     if ( reagentId == Id::Invalid )
         return;
 
     // get reagent name
-    const QString reagentName( QTextEdit( Reagent::instance()->name( Reagent::instance()->row( reagentId ))).toPlainText());
+    const QString reagentName(
+            QTextEdit( Reagent::instance()->name( Reagent::instance()->row( reagentId ))).toPlainText());
 
     // get all tags that have already been set
     QList<Id> tags;
@@ -286,13 +299,13 @@ void PropertyDock::on_addPropButton_clicked() {
 
     // add built-in properties to menu
     QMenu menu;
-    QMenu *subMenu( menu.addMenu( this->tr( "Add property" )));
+    QMenu *subMenu( menu.addMenu( PropertyDock::tr( "Add property" )));
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const Row tagRow = Tag::instance()->row( y );
         const Id tagId = Tag::instance()->id( tagRow );
 
         if ( tags.contains( tagId ))
-             continue;
+            continue;
 
         subMenu->addAction( Tag::instance()->name( tagRow ), [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
@@ -303,14 +316,15 @@ void PropertyDock::on_addPropButton_clicked() {
     subMenu->setIcon( QIcon::fromTheme( "add" ));
 
     // add an option to add custom properties
-    menu.addAction( this->tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
         const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Id::Invalid ));
         this->addProperty( values.first, values.second, reagentId );
     } )->setIcon( QIcon::fromTheme( "star" ));
 
     // add an option to embed images
-    menu.addAction( this->tr( "Add image to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
-        const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
+    menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
+        const QString fileName(
+                QFileDialog::getOpenFileName( this, PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
         if ( fileName.isEmpty())
             return;
 
@@ -325,14 +339,16 @@ void PropertyDock::on_addPropButton_clicked() {
             buffer.close();
 
             bool ok;
-            const QString title( QInputDialog::getText( this, this->tr( "Set title" ), this->tr( "Title:" ), QLineEdit::Normal, "", &ok ));
+            const QString title(
+                    QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",
+                                           &ok ));
             if ( ok && !title.isEmpty())
                 this->addProperty( title, bytes, reagentId, PixmapTag );
         }
     } )->setIcon( QIcon::fromTheme( "image" ));
 
     // add an option to get properties from the internet
-    menu.addAction( this->tr( "Get properties from the internet" ), [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Get properties from the internet" ), [ this, reagentId ]() {
         const Id parentId = Reagent::instance()->parentId( reagentId );
 
         ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
@@ -360,14 +376,18 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         const Id tagId = Property::instance()->tagId( row );
         const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
-        if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS || type == Tag::Formula || tagId == Id::Invalid ) {
-            menu.addAction( this->tr( "Copy" ), [ row, type ]() {
+        if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS ||
+             type == Tag::Formula || tagId == Id::Invalid ) {
+            menu.addAction( PropertyDock::tr( "Copy" ), [ row, type ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
 
                 if ( type == Tag::Formula )
                     QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
                 else if ( type == Tag::Real )
-                    QGuiApplication::clipboard()->setText( data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" ))));
+                    QGuiApplication::clipboard()->setText(
+                            data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
+                                                     QString( "\\1%1\\2" ).arg(
+                                                             Variable::string( "decimalSeparator" ))));
                 else {
                     const QTextEdit edit( data.toString());
                     QGuiApplication::clipboard()->setText( edit.toPlainText());
@@ -376,7 +396,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         }
 
         if ( type == Tag::Formula || tagId == PixmapTag ) {
-            menu.addAction( this->tr( "View" ), [ this, row ]() {
+            menu.addAction( PropertyDock::tr( "View" ), [ this, row ]() {
                 QPixmap pixmap;
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
@@ -386,32 +406,36 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));
 
-            menu.addAction( this->tr( "Replace" ), [ this, row ]() {
+            menu.addAction( PropertyDock::tr( "Replace" ), [ this, row ]() {
                 this->replacePixmap( row );
             } )->setIcon( QIcon::fromTheme( "replace" ));
         }
 
         if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
-            menu.addAction( this->tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
+            menu.addAction( PropertyDock::tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon(
+                    QIcon::fromTheme( "edit" ));
 
         if ( tagId != Id::Invalid ) {
             const QString functionName( Tag::instance()->function( tagId ));
             if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
                 auto paste = [ row, tagId ]() {
                     // paste
-                    const QString value( QString::number( Property::instance()->propertyData( row ).toReal() *  Tag::instance()->scale( tagId )));
+                    const QString value( QString::number(
+                            Property::instance()->propertyData( row ).toReal() * Tag::instance()->scale( tagId )));
                     MainWindow::instance()->insertCommand( value );
                 };
 
                 // tag.
-                QMenu *subMenu2( menu.addMenu( this->tr( "Paste to calculator" )));
+                QMenu *subMenu2( menu.addMenu( PropertyDock::tr( "Paste to calculator" )));
                 subMenu2->setIcon( QIcon::fromTheme( "paste" ));
-                subMenu2->addAction( this->tr( "Reference" ), [ this ]() { this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex()); } )->setIcon( QIcon::fromTheme( "clean" ));
-                subMenu2->addAction( this->tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
+                subMenu2->addAction( PropertyDock::tr( "Reference" ), [ this ]() {
+                    this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex());
+                } )->setIcon( QIcon::fromTheme( "clean" ));
+                subMenu2->addAction( PropertyDock::tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
             }
 
 
-            menu.addAction( this->tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
+            menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
                 this->hiddenTags << QString::number( static_cast<int>( tagId ));
                 this->hiddenTags.removeAll( "" );
                 ReagentDock::instance()->view()->updateView();
@@ -420,7 +444,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     }
 
     if ( !this->hiddenTags.isEmpty()) {
-        menu.addAction( this->tr( "Show all properties" ), [ this ]() {
+        menu.addAction( PropertyDock::tr( "Show all properties" ), [ this ]() {
             this->hiddenTags.clear();
             ReagentDock::instance()->view()->updateView();
         } )->setIcon( QIcon::fromTheme( "show" ));
@@ -463,10 +487,12 @@ void PropertyDock::on_removePropButton_clicked() {
         if ( !index.isValid())
             return;
 
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove selected property?" )) == QMessageBox::Yes )
+        if ( QMessageBox::question( this, PropertyDock::tr( "Confirm removal" ), PropertyDock::tr( "Remove selected property?" )) ==
+             QMessageBox::Yes )
             removeProperty( QModelIndexList() << this->ui->propertyView->currentIndex());
     } else if ( indexes.count() > 1 ) {
-        if ( QMessageBox::question( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 properties?" ).arg( indexes.count())) == QMessageBox::Yes )
+        if ( QMessageBox::question( this, PropertyDock::tr( "Confirm removal" ),
+                                    PropertyDock::tr( "Remove %1 properties?" ).arg( indexes.count())) == QMessageBox::Yes )
             removeProperty( indexes );
     }
 
@@ -507,10 +533,10 @@ void PropertyDock::setSpecialWidgets() {
             };
 
             if ( type == Tag::NFPA ) {
-                NFPAWidget *nfpa( hasWidget ? dynamic_cast<NFPAWidget*>( widget ) : new NFPAWidget( nullptr, parms ));
+                NFPAWidget *nfpa( hasWidget ? dynamic_cast<NFPAWidget *>( widget ) : new NFPAWidget( nullptr, parms ));
                 setWidget( nfpa );
             } else if ( type == Tag::GHS ) {
-                GHSWidget *ghs( hasWidget ? dynamic_cast<GHSWidget*>( widget ) : new GHSWidget( nullptr, parms ));
+                GHSWidget *ghs( hasWidget ? dynamic_cast<GHSWidget *>( widget ) : new GHSWidget( nullptr, parms ));
                 setWidget( ghs );
             }
         }
@@ -531,7 +557,8 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
  */
 void PropertyDock::replacePixmap( const Row &row ) {
     // FIXME: dup code
-    const QString fileName( QFileDialog::getOpenFileName( this, this->tr( "Open Image" ), "", this->tr( "Images (*.png *.jpg)" )));
+    const QString fileName(
+            QFileDialog::getOpenFileName( this, PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
     if ( fileName.isEmpty())
         return;
 
@@ -554,14 +581,14 @@ void PropertyDock::replacePixmap( const Row &row ) {
  */
 void PropertyDock::saveHiddenTags() {
     this->hiddenTags.removeAll( "" );
-    Variable::instance()->setValue( "propertyDock/hiddenTags", this->hiddenTags );
+    Variable::setValue( "propertyDock/hiddenTags", this->hiddenTags );
 }
 
 /**
  * @brief PropertyDock::loadHiddenTags
  */
 void PropertyDock::loadHiddenTags() {
-    this->hiddenTags = Variable::instance()->value<QStringList>( "propertyDock/hiddenTags" );
+    this->hiddenTags = Variable::value<QStringList>( "propertyDock/hiddenTags" );
     this->hiddenTags.removeAll( "" );
 }
 
@@ -569,8 +596,10 @@ void PropertyDock::loadHiddenTags() {
  * @brief PropertyDock::on_editPropButton_clicked
  */
 void PropertyDock::on_editPropButton_clicked() {
-    const QModelIndex reagentIndex( ReagentDock::instance()->view()->filterModel()->mapToSource( ReagentDock::instance()->view()->currentIndex()));
-    if ( !this->ui->propertyView->currentIndex().isValid() || this->ui->propertyView->selectionModel()->selectedRows().count() > 1 || !reagentIndex.isValid())
+    const QModelIndex reagentIndex( ReagentDock::instance()->view()->filterModel()->mapToSource(
+            ReagentDock::instance()->view()->currentIndex()));
+    if ( !this->ui->propertyView->currentIndex().isValid() ||
+         this->ui->propertyView->selectionModel()->selectedRows().count() > 1 || !reagentIndex.isValid())
         return;
 
     // get reagent id
@@ -590,7 +619,8 @@ void PropertyDock::on_editPropButton_clicked() {
 
     // handle pixmaps
     const Id tagId = Property::instance()->tagId( propertyId );
-    if (( tagId == PixmapTag ) || ( tagId != Id::Invalid && tagId != PixmapTag && Tag::instance()->type( tagId ) == Tag::Formula )) {
+    if (( tagId == PixmapTag ) ||
+        ( tagId != Id::Invalid && tagId != PixmapTag && Tag::instance()->type( tagId ) == Tag::Formula )) {
         this->replacePixmap( propertyRow );
     } else {
         // set new value
@@ -658,7 +688,9 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
 
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
-            parents = QString( "\"%1\", \"%2\"" ).arg( QTextEdit( Reagent::instance()->reference( parentId )).toPlainText()).arg( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
+            parents = QString( "\"%1\", \"%2\"" ).arg(
+                    QTextEdit( Reagent::instance()->reference( parentId )).toPlainText()).arg(
+                    QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
             //qDebug() << "has parent";
         } else {
             parents = QString( "\"%1\"" ).arg( QTextEdit( Reagent::instance()->reference( reagentId )).toPlainText());

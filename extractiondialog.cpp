@@ -33,11 +33,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QStringListModel>
-#include <QToolButton>
 #include "tag.h"
 #include "propertywidget.h"
-#include "tag.h"
 #include "imageutils.h"
 #include "structurebrowser.h"
 
@@ -71,8 +68,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
             this->ui->propertyView->selectAll();
 
         for ( const QModelIndex &index : this->ui->propertyView->selectionModel()->selectedRows()) {
-            const int row = index.row();
-            PropertyWidget *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( row, 1 )));
+            auto *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( index.row(), 1 )));
             if ( widget != nullptr ) {
                 if ( widget->tagId() != Id::Invalid ) {
                     widget->add( this->reagentId());
@@ -96,7 +92,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
                         buffer.open( QIODevice::WriteOnly );
                         pixmap.save( &buffer, "PNG" );
                         buffer.close();
-                        Property::instance()->add( this->tr( "Structural formula" ), Tag::instance()->id( row ), bytes, this->reagentId());
+                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), bytes, this->reagentId());
                     }
                 }
             }
@@ -167,7 +163,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
     };
 
     /**
-     * @brief extractValues gets string or numberic values from json
+     * @brief extractValues gets string or numeric values from json
      */
     auto extractValues = []( const QList<QJsonArray> &matches, const QString &name, const QString &pattern, QList<QStringList> &out, bool global ) {
         QStringList values;
@@ -406,7 +402,7 @@ void ExtractionDialog::getFormula( const QString &cid ) {
  * @brief ExtractionDialog::getSimilar
  * @param cidListInt
  */
-void ExtractionDialog::getSimilar( const QList<int> cidListInt ) {
+void ExtractionDialog::getSimilar( const QList<int> &cidListInt ) {
     StructureBrowser sb( cidListInt, this );
     if ( sb.exec() != QDialog::Accepted )
         return;
@@ -415,7 +411,7 @@ void ExtractionDialog::getSimilar( const QList<int> cidListInt ) {
     if ( cid == -1 )
         return;
 
-    this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
+    this->ui->cidEdit->setText( ExtractionDialog::tr( "Success: CID - %1" ).arg( cid ));
     NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
     this->getFormula( QString::number( cid ));
 }
@@ -433,7 +429,7 @@ void ExtractionDialog::on_extractButton_clicked() {
         return;
 
     if ( QFileInfo( this->cache()).exists()) {
-        this->ui->cidEdit->setText( this->tr( "Reading from cache" ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Reading from cache" ));
 
         QFile file( this->cache());
         if ( file.open( QIODevice::ReadOnly )) {
@@ -496,7 +492,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         }
 
         const QString cid( this->cidList.first());
-        this->ui->cidEdit->setText( this->tr( "Success: CID - %1" ).arg( cid ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Success: CID - %1" ).arg( cid ));
         NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
         this->getFormula( cid );
     }
@@ -506,7 +502,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     {
         this->cidList << QString( data ).split( "\n" );
         if ( this->cidList.isEmpty()) {
-            this->ui->nameEdit->setText( this->tr( "Could not find the reagent" ));
+            this->ui->nameEdit->setText( ExtractionDialog::tr( "Could not find the reagent" ));
             return;
         }
 
@@ -574,7 +570,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
     switch ( type ) {
     case NetworkManager::CIDRequestInitial:
     {
-        this->ui->cidEdit->setText( this->tr( "Could not get a valid CID, trying similar" ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Could not get a valid CID, trying similar" ));
 
             // get formula
             if ( QFileInfo( this->cache() + ".cid" ).exists()) {
@@ -601,21 +597,21 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                 }
             }
 
-            // intial failed to yield a list, proceed to similiar search
+            // initial failed to yield a list, proceed to similar search
             NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
        }
             break;
 
     case NetworkManager::CIDRequestSimilar:
-        this->ui->cidEdit->setText( this->tr( "Could not get a valid CID" ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Could not get a valid CID" ));
         break;
 
     case NetworkManager::DataRequest:
-        this->ui->cidEdit->setText( this->tr( "Could retrieve data associated with CID" ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Could retrieve data associated with CID" ));
         break;
 
     case NetworkManager::FormulaRequest:
-        this->ui->cidEdit->setText( this->tr( "Could retrieve formula associated with CID" ));
+        this->ui->cidEdit->setText( ExtractionDialog::tr( "Could retrieve formula associated with CID" ));
         break;
 
         // do not handle errors related to other classes

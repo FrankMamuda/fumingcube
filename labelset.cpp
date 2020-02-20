@@ -31,9 +31,9 @@
  * @brief LabelSet::LabelSet
  */
 LabelSet::LabelSet() : Table( "labelset" ) {
-    this->addField( PRIMARY_FIELD( ID ));
-    this->addField( FIELD( LabelId, Int ));
-    this->addField( FIELD( ReagentId, Int ));
+    this->addField( PRIMARY_FIELD( ID ) );
+    this->addField( FIELD( LabelId, Int ) );
+    this->addField( FIELD( ReagentId, Int ) );
 }
 
 /**
@@ -43,7 +43,8 @@ LabelSet::LabelSet() : Table( "labelset" ) {
  * @return
  */
 Row LabelSet::add( const Id &labelId, const Id &reagentId ) {
-    return Table::add( QVariantList() << Database_::null << static_cast<int>( labelId ) << static_cast<int>( reagentId ));
+    return Table::add(
+            QVariantList() << Database_::null << static_cast<int>( labelId ) << static_cast<int>( reagentId ));
 }
 
 /**
@@ -53,11 +54,11 @@ Row LabelSet::add( const Id &labelId, const Id &reagentId ) {
  */
 void LabelSet::remove( const Id &labelId, const Id &reagentId ) {
     QSqlQuery().exec( QString( "delete from %1 where %2=%3 and %4=%5" )
-                      .arg( this->tableName())
-                      .arg( this->fieldName( LabelId ))
-                      .arg( static_cast<int>( labelId ))
-                      .arg( this->fieldName( ReagentId ))
-                      .arg( static_cast<int>( reagentId )));
+                              .arg( this->tableName())
+                              .arg( this->fieldName( LabelId ))
+                              .arg( static_cast<int>( labelId ))
+                              .arg( this->fieldName( ReagentId ))
+                              .arg( static_cast<int>( reagentId )));
 }
 
 /**
@@ -66,15 +67,15 @@ void LabelSet::remove( const Id &labelId, const Id &reagentId ) {
 void LabelSet::removeOrphanedEntries() {
     // remove if label has been deleted
     QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
-                      .arg( this->tableName())
-                      .arg( this->fieldName( LabelId ))
-                      .arg( Label::instance()->fieldName( Label::ID ))
-                      .arg( Label::instance()->tableName()));
+                              .arg( this->tableName())
+                              .arg( this->fieldName( LabelId ))
+                              .arg( Label::instance()->fieldName( Label::ID ))
+                              .arg( Label::instance()->tableName()));
 
     // remove if reagent has been deleted
     QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
-                      .arg( this->tableName())
-                      .arg( this->fieldName( ReagentId ))
-                      .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                      .arg( Reagent::instance()->tableName()));
+                              .arg( this->tableName())
+                              .arg( this->fieldName( ReagentId ))
+                              .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                              .arg( Reagent::instance()->tableName()));
 }

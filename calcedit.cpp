@@ -40,9 +40,9 @@ bool CalcEdit::completeCommand() {
     QStringList functions;
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                .arg( Tag::instance()->fieldName( Tag::ID ))
-                .arg( Tag::instance()->fieldName( Tag::Function ))
-                .arg( Tag::instance()->tableName()));
+                        .arg( Tag::instance()->fieldName( Tag::ID ))
+                        .arg( Tag::instance()->fieldName( Tag::Function ))
+                        .arg( Tag::instance()->tableName()));
     while ( query.next()) {
         const QString functionName( query.value( 1 ).toString());
         if ( !functionName.isEmpty())
@@ -55,7 +55,8 @@ bool CalcEdit::completeCommand() {
     const int initialPosition = this->cursorPosition();
 
     {
-        const QRegularExpression keywords( QString( "\\b((?:%1)\\s*\\(\\s*\\\".+?(?=\\\")\\\"\\s*,\\s*(?!\\s*\\\"|\\s*\\)))$" ).arg( functionExpression ));
+        const QRegularExpression keywords(
+                QString( R"(\b((?:%1)\s*\(\s*\".+?(?=\")\"\s*,\s*(?!\s*\"|\s*\)))$)" ).arg( functionExpression ));
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch() && !mid.contains( QRegularExpression( "^\\s*," ))) {
             QString captured( match.captured( 0 ));
@@ -73,7 +74,7 @@ bool CalcEdit::completeCommand() {
     }
 
     {
-        const QRegularExpression keywords( "\\w\\\"\\s*$" );
+        const QRegularExpression keywords( R"(\w\"\s*$)" );
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch() && !mid.contains( QRegularExpression( "^\\s*\\)" ))) {
             QString captured( match.captured( 0 ));
@@ -91,7 +92,7 @@ bool CalcEdit::completeCommand() {
     }
 
     {
-        const QRegularExpression keywords( "\\w\\\"\\s*$" );
+        const QRegularExpression keywords( R"(\w\"\s*$)" );
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch() && !mid.contains( QRegularExpression( "^\\s*\\)" ))) {
             QString captured( match.captured( 0 ));
@@ -109,7 +110,7 @@ bool CalcEdit::completeCommand() {
     }
 
     {
-       //const QRegularExpression keywords( "(?:\\(|,)\\s*\\\"([^\\\"]*)$" );
+        //const QRegularExpression keywords( "(?:\\(|,)\\s*\\\"([^\\\"]*)$" );
         const QRegularExpression keywords( "(?:\"(.+?)(?=\")\")?(?:\\(|,)\\s*\"([^\"]*)$" );
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch()/* && mid.contains( QRegularExpression( "^\\\"" ))*/) {
@@ -122,20 +123,21 @@ bool CalcEdit::completeCommand() {
             Id parentId = Id::Invalid;
             if ( !parent.isEmpty()) {
                 query.exec( QString( "select %1, %2, %6 from %3 where %4=%5" )
-                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                            .arg( Reagent::instance()->tableName())
-                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                            .arg( static_cast<int>( Id::Invalid ))
-                            .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                            );
+                                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                                    .arg( Reagent::instance()->tableName())
+                                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                                    .arg( static_cast<int>( Id::Invalid ))
+                                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                );
 
                 // append plainText names
                 while ( query.next()) {
                     const QString name( QTextEdit( query.value( 0 ).toString()).toPlainText());
                     const QString reference( QTextEdit( query.value( 1 ).toString()).toPlainText());
 
-                    if ( !QString::compare( name, parent, Qt::CaseInsensitive ) || !QString::compare( reference, parent, Qt::CaseInsensitive )) {
+                    if ( !QString::compare( name, parent, Qt::CaseInsensitive ) ||
+                         !QString::compare( reference, parent, Qt::CaseInsensitive )) {
                         parentId = query.value( 2 ).value<Id>();
                         break;
                     }
@@ -147,12 +149,12 @@ bool CalcEdit::completeCommand() {
             //
             QStringList reagents;
             query.exec( QString( "select %1, %2 from %3 where %4=%5" )
-                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                        .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                        .arg( Reagent::instance()->tableName())
-                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                        .arg( static_cast<int>( parentId ))
-                        );
+                                .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                                .arg( Reagent::instance()->tableName())
+                                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                                .arg( static_cast<int>( parentId ))
+            );
 
             // append plainText names
             while ( query.next()) {
@@ -177,25 +179,26 @@ bool CalcEdit::completeCommand() {
 
             // complete to the shortest string
             QString completion;
-            int match, y;
+            int matchPos, y;
             if ( reagentsCaseInsensitive.count() == 1 ) {
-                // append extra space (since it's the only match that will likely be follwed by an argument)
+                // append extra space (since it's the only match that will likely be followed by an argument)
                 completion = reagents.first();
             } else if ( reagentsCaseInsensitive.count() > 1 ) {
-                match = 1;
+                matchPos = 1;
                 for ( y = 0; y < reagents.count(); y++ ) {
                     // make sure we check string length
-                    if ( reagents.first().length() == match || reagents.at( y ).length() == match )
+                    if ( reagents.first().length() == matchPos || reagents.at( y ).length() == matchPos )
                         break;
 
-                    if ( !QString::compare( reagents.first().at( match ), reagents.at( y ).at( match ), Qt::CaseInsensitive )) {
-                        if ( y == reagents.count()-1 ) {
-                            match++;
+                    if ( !QString::compare( reagents.first().at( matchPos ), reagents.at( y ).at( matchPos ),
+                                            Qt::CaseInsensitive )) {
+                        if ( y == reagents.count() - 1 ) {
+                            matchPos++;
                             y = 0;
                         }
                     }
                 }
-                completion = reagents.first().left( match );
+                completion = reagents.first().left( matchPos );
             }
 
             const int index = left.indexOf( captured, initialPosition - captured.length());
@@ -204,13 +207,14 @@ bool CalcEdit::completeCommand() {
 
             left = left.remove( index, captured.length());
             this->setText( left.insert( index, completion + mid ));
-            this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( reagentsCaseInsensitive.count() == 1 ? 1 : 0 ));
+            this->setCursorPosition( initialPosition + completion.length() - captured.length() +
+                                     ( reagentsCaseInsensitive.count() == 1 ? 1 : 0 ));
             return true;
         }
     }
 
     {
-        const QRegularExpression keywords( "(?<!\\\")\\s*\\b(\\w+)$" );
+        const QRegularExpression keywords( R"((?<!\")\s*\b(\w+)$)" );
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch() && !mid.contains( QRegularExpression( "^\\\"" ))) {
             const QString captured( match.captured( 1 ));
@@ -224,25 +228,25 @@ bool CalcEdit::completeCommand() {
 
             // complete to the shortest string
             QString completion;
-            int match, y;
+            int matchPos, y;
             if ( filtered.count() == 1 ) {
-                // append extra space (since it's the only match that will likely be follwed by an argument)
+                // append extra space (since it's the only match that will likely be followed by an argument)
                 completion = filtered.first();
             } else if ( filtered.count() > 1 ) {
-                match = 1;
+                matchPos = 1;
                 for ( y = 0; y < filtered.count(); y++ ) {
                     // make sure we check string length
-                    if ( filtered.first().length() == match || filtered.at( y ).length() == match )
+                    if ( filtered.first().length() == matchPos || filtered.at( y ).length() == matchPos )
                         break;
 
-                    if ( filtered.first().at( match ) == filtered.at( y ).at( match )) {
-                        if ( y == filtered.count()-1 ) {
-                            match++;
+                    if ( filtered.first().at( matchPos ) == filtered.at( y ).at( matchPos )) {
+                        if ( y == filtered.count() - 1 ) {
+                            matchPos++;
                             y = 0;
                         }
                     }
                 }
-                completion = filtered.first().left( match );
+                completion = filtered.first().left( matchPos );
             }
 
             const int index = left.indexOf( captured, initialPosition - captured.length());
@@ -251,7 +255,8 @@ bool CalcEdit::completeCommand() {
 
             left = left.remove( index, captured.length());
             this->setText( left.insert( index, completion + ( filtered.count() == 1 ? "( \"\"" : "" ) + mid ));
-            this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( filtered.count() == 1 ? 3 : 0 ));
+            this->setCursorPosition(
+                    initialPosition + completion.length() - captured.length() + ( filtered.count() == 1 ? 3 : 0 ));
             return true;
         }
     }
@@ -263,7 +268,7 @@ bool CalcEdit::completeCommand() {
  * @brief CalcEdit::saveHistory
  */
 void CalcEdit::saveHistory() {
-    Variable::instance()->setCompressedString( "calculator/commands", this->history.join( ";" ));
+    Variable::setCompressedString( "calculator/commands", this->history.join( ";" ));
 }
 
 /**
@@ -275,7 +280,7 @@ void CalcEdit::saveHistory() {
 bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
     if ( this->hasFocus()) {
         if ( event->type() == QEvent::KeyPress ) {
-            QKeyEvent *keyEvent( static_cast<QKeyEvent*>( event ));
+            QKeyEvent *keyEvent( static_cast<QKeyEvent *>( event ));
 
             if ( keyEvent->key() == Qt::Key_Up ) {
                 if ( !this->history.isEmpty()) {
@@ -319,9 +324,9 @@ bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
 CalcEdit::CalcEdit( QWidget *parent ) : QLineEdit( parent ) {
     // install event filter
     this->installEventFilter( this );
-    this->history = Variable::instance()->compressedString( "calculator/commands" ).split( ";" );
+    this->history = Variable::compressedString( "calculator/commands" ).split( ";" );
 
-    this->connect( this, &QLineEdit::returnPressed, [ this ]( ) {
+    this->connect( this, &QLineEdit::returnPressed, [ this ]() {
         const QString st( this->text().simplified());
         MainWindow::instance()->appendToCalculator( st );
         this->add( st );

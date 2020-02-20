@@ -27,7 +27,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class LabelSelector;
+    class LabelSelector;
 }
 
 #include <QCloseEvent>
@@ -40,7 +40,7 @@ public:
     explicit NoCloseMenu( QWidget *parent = nullptr );
 
 protected:
-    void closeEvent( QCloseEvent *event ) {
+    void closeEvent( QCloseEvent *event ) override {
         event->ignore();
     }
 };
@@ -52,8 +52,8 @@ class LabelSelector : public QDialog {
     Q_OBJECT
 
 public:
-    explicit LabelSelector( QWidget *parent = nullptr, const QList<Id> &selected = QList<Id>());
-    ~LabelSelector();
+    explicit LabelSelector( QWidget *parent = nullptr, QList<Id> selected = QList<Id>());
+    ~LabelSelector() override;
     QList<Id> labelIds;
 
 /*protected:

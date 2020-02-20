@@ -38,9 +38,9 @@ public:
      * @param parent
      */
     explicit DockWidget( QWidget *parent = nullptr ) : QDockWidget( parent ) {
-        this->connect( this, &QDockWidget::visibilityChanged, [ this ]( const bool &visible ) {
+        DockWidget::connect( this, &QDockWidget::visibilityChanged, [ this ]( const bool &visible ) {
             if ( this->action() != nullptr ) {
-                if( this->action()->isChecked() != visible ) {
+                if ( this->action()->isChecked() != visible ) {
                     this->action()->blockSignals( true );
                     this->action()->setChecked( visible );
                     this->action()->blockSignals( false );
@@ -53,14 +53,14 @@ public:
      * @brief action
      * @return
      */
-    QAction *action() const { return this->m_action; }
+    [[nodiscard]] QAction *action() const { return this->m_action; }
 
 public slots:
     /**
      * @brief setup
      * @param action
      */
-    virtual void setup( QAction *action = nullptr ) {
+     void setup( QAction *action = nullptr ) {
         this->m_action = action;
         if ( this->action() != nullptr ) {
             this->action()->setChecked( this->isVisible());

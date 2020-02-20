@@ -30,7 +30,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class LabelDock;
+    class LabelDock;
 }
 
 /**
@@ -41,12 +41,13 @@ class LabelDock final : public DockWidget {
     Q_DISABLE_COPY( LabelDock )
 
 public:
-    static LabelDock *instance() { static LabelDock *labelDock( new LabelDock()); return labelDock; }
+    static LabelDock *instance() {
+        static auto *labelDock( new LabelDock());
+        return labelDock;
+    }
     ~LabelDock() override;
-    Id currentLabel() const;
-
-public slots:
-    void setFilter( const QModelIndexList &list = QModelIndexList());
+    [[nodiscard]] Id currentLabel() const;
+    static void setFilter( const QModelIndexList &list = QModelIndexList());
 
 private slots:
     void on_labelView_customContextMenuRequested( const QPoint &pos );

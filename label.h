@@ -43,7 +43,7 @@ public:
         Colour,
 
         // count (DO NOT REMOVE)
-        Count
+                Count
     };
     Q_ENUM( Fields )
 
@@ -51,14 +51,17 @@ public:
      * @brief instance
      * @return
      */
-    static Label *instance() { static Label *label( new Label()); return label; }
+    static Label *instance() {
+        static auto *label( new Label());
+        return label;
+    }
     ~Label() override = default;
     Row add( const QString &name, const QColor &colour = Qt::transparent );
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id,          ID,       id )
-    INITIALIZE_FIELD( QString,     Name,     name )
-    INITIALIZE_FIELD( QColor,      Colour,   colour )
+    INITIALIZE_FIELD( Id, ID, id )
+    INITIALIZE_FIELD( QString, Name, name )
+    INITIALIZE_FIELD( QColor, Colour, colour )
 
     QVariant data( const QModelIndex &index, int role ) const override;
     QPixmap pixmap( const QColor &colour ) const;

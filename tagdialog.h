@@ -46,7 +46,7 @@ public:
         Edit
     };
     Q_ENUM( Modes )
-    Modes mode() const { return this->m_mode; }
+    [[nodiscard]] Modes mode() const { return this->m_mode; }
     static QString captureBody( const QString &input );
 
 private slots:

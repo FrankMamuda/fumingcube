@@ -29,13 +29,14 @@
 // classes
 //
 class TextEdit;
+
 class CharacterMap;
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-class PropertyEditor;
+    class PropertyEditor;
 }
 
 /**
@@ -60,11 +61,12 @@ public:
     };
     Q_ENUM( Modes )
 
-    explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(), const QString &value = QString());
+    explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(),
+                             const QString &value = QString());
     ~PropertyEditor() override;
     bool eventFilter( QObject *watched, QEvent *event ) override;
-    QString name() const;
-    QString value() const;
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] QString value() const;
 
 private slots:
     void setText( Editors editor, const QString &text );

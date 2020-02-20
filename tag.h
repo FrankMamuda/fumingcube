@@ -79,8 +79,8 @@ public:
     ~Tag() override = default;
     Row add( const QString &name, const Types &type = Text, const QString &units = QString(),
              const QVariant &min = QVariant(), const QVariant &max = QVariant(),
-             const QVariant &value = QVariant(), const int precision = 0,
-             const QString &function = QString(), const qreal scale = 1.0,
+             const QVariant &value = QVariant(), int precision = 0,
+             const QString &function = QString(), qreal scale = 1.0,
              const QVariant &script = QVariant());
 
     // initialize field setters and getters

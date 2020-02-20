@@ -21,13 +21,11 @@
  * includes
  */
 #include "main.h"
-#include "main.h"
 #include "mainwindow.h"
 #include "property.h"
 #include "reagent.h"
 #include "script.h"
 #include "tag.h"
-#include <QDebug>
 #include <QRegularExpression>
 #include <QSqlQuery>
 #include "variable.h"
@@ -54,10 +52,12 @@ QJSValue Script::evaluate( const QString &script ) {
     QJSValue result;
 
     // pre-process script to ensure no javascript keywords are used
-    const QRegularExpression keywords( "\\b(abstract|arguments|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield|Array|Date|eval|function|hasOwnProperty|Infinity|isFinite|isNaN|isPrototypeOf|length|Math|NaN|name|Number|Object|prototype|String|toString|undefined|valueOf|alert|all|anchor|anchors|area|assign|blur|button|checkbox|clearInterval|clearTimeout|clientInformation|close|closed|confirm|constructor|crypto|decodeURI|decodeURIComponent|defaultStatus|document|element|elements|embed|embeds|encodeURI|encodeURIComponent|escape|event|fileUpload|focus|form|forms|frame|innerHeight|innerWidth|layer|layers|link|location|mimeTypes|navigate|navigator|frames|frameRate|hidden|history|image|images|offscreenBuffering|open|opener|option|outerHeight|outerWidth|packages|pageXOffset|pageYOffset|parent|parseFloat|parseInt|password|pkcs11|plugin|prompt|propertyIsEnum|radio|reset|screenX|screenY|scroll|secure|select|self|setInterval|setTimeout|status|submit|taint|text|textarea|top|unescape|untaint|window)\\b" );
+    const QRegularExpression keywords(
+            "\\b(abstract|arguments|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield|Array|Date|eval|function|hasOwnProperty|Infinity|isFinite|isNaN|isPrototypeOf|length|Math|NaN|name|Number|Object|prototype|String|toString|undefined|valueOf|alert|all|anchor|anchors|area|assign|blur|button|checkbox|clearInterval|clearTimeout|clientInformation|close|closed|confirm|constructor|crypto|decodeURI|decodeURIComponent|defaultStatus|document|element|elements|embed|embeds|encodeURI|encodeURIComponent|escape|event|fileUpload|focus|form|forms|frame|innerHeight|innerWidth|layer|layers|link|location|mimeTypes|navigate|navigator|frames|frameRate|hidden|history|image|images|offscreenBuffering|open|opener|option|outerHeight|outerWidth|packages|pageXOffset|pageYOffset|parent|parseFloat|parseInt|password|pkcs11|plugin|prompt|propertyIsEnum|radio|reset|screenX|screenY|scroll|secure|select|self|setInterval|setTimeout|status|submit|taint|text|textarea|top|unescape|untaint|window)\\b" );
     const QRegularExpressionMatch match( keywords.match( script ));
     if ( match.hasMatch())
-        result = this->engine.newErrorObject( QJSValue::SyntaxError, this->tr( "keyword \"%1\" is not allowed" ).arg( match.captured( 1 )));
+        result = this->engine.newErrorObject( QJSValue::SyntaxError,
+                                              Script::tr( "keyword \"%1\" is not allowed" ).arg( match.captured( 1 )));
 
     // unfortunately we have to do this every time unless we start caching tag functions
     // which also is painful, since we have to track each add/edit/remove
@@ -68,7 +68,9 @@ QJSValue Script::evaluate( const QString &script ) {
         // TODO: make a global static
         QStringList functions;
         QSqlQuery query;
-        query.exec( QString( "select %1 from %2 where %1 not null" ).arg( Tag::instance()->fieldName( Tag::Function )) .arg( Tag::instance()->tableName()));
+        query.exec(
+                QString( "select %1 from %2 where %1 not null" ).arg( Tag::instance()->fieldName( Tag::Function )).arg(
+                        Tag::instance()->tableName()));
         while ( query.next()) {
             const QString functionName( query.value( 0 ).toString());
             if ( !functionName.isEmpty())
@@ -79,9 +81,13 @@ QJSValue Script::evaluate( const QString &script ) {
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
         //  2) replace comma decimal separator with a dot
         //  3) simplify string to remove trailing whitespace and newline
-        const QString processed( QString( script ).replace( QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"").arg( functions.join( "|" ))), "JS.getProperty( \"\\1\", \"" ).replace( QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)"), "\\1.\\2" ).replace( QRegularExpression( "(?<!\")\\b(ans)\\b(?!\")" ), "JS.ans()" ).simplified());
+        const QString processed( QString( script ).replace(
+                QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"" ).arg( functions.join( "|" ))),
+                "JS.getProperty( \"\\1\", \"" ).replace(
+                QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)" ), "\\1.\\2" ).replace(
+                QRegularExpression( "(?<!\")\\b(ans)\\b(?!\")" ), "JS.ans()" ).simplified());
 
-        // evalute script
+        // evaluate script
         result = this->engine.evaluate( processed );
     }
 
@@ -93,10 +99,10 @@ QJSValue Script::evaluate( const QString &script ) {
  * @return
  */
 QJSValue Script::ans() {
-    const QString answer( Variable::instance()->string( "calculator/ans" ));
+    const QString answer( Variable::string( "calculator/ans" ));
 
     if ( answer.isEmpty()) {
-        this->engine.throwError( QJSValue::EvalError, this->tr( "answer is empty" ));
+        this->engine.throwError( QJSValue::EvalError, Script::tr( "answer is empty" ));
         return QJSValue();
     }
 
@@ -112,7 +118,8 @@ QJSValue Script::ans() {
 QJSValue Script::getProperty( const QString &functionName, const QString &reference ) {
     // validate reagent reference
     if ( reference.isEmpty()) {
-        this->engine.throwError( QJSValue::SyntaxError, this->tr( "expected an argument for function \"%1\"" ).arg( functionName ));
+        this->engine.throwError( QJSValue::SyntaxError,
+                                 Script::tr( "expected an argument for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
@@ -129,7 +136,8 @@ QJSValue Script::getProperty( const QString &functionName, const QString &refere
 QJSValue Script::getProperty( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate batchName
     if ( batchName.isEmpty()) {
-        this->engine.throwError( QJSValue::SyntaxError, this->tr( "expected arguments for function \"%1\"" ).arg( functionName ));
+        this->engine.throwError( QJSValue::SyntaxError,
+                                 Script::tr( "expected arguments for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
@@ -143,24 +151,27 @@ QJSValue Script::getProperty( const QString &functionName, const QString &refere
  * @param batchName
  * @return
  */
-QJSValue Script::getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName ) {
+QJSValue
+Script::getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate functionName
     if ( functionName.isEmpty()) {
-        this->engine.throwError( QJSValue::SyntaxError, this->tr( "function name expected" ));
+        this->engine.throwError( QJSValue::SyntaxError, Script::tr( "function name expected" ));
         return QJSValue();
     }
 
     // get propertyId
     const Id propertyId = this->getPropertyId( functionName );
     if ( propertyId == Id::Invalid ) {
-        this->engine.throwError( QJSValue::ReferenceError, this->tr( "function \"%1\" is not defined" ).arg( functionName ));
+        this->engine.throwError( QJSValue::ReferenceError,
+                                 Script::tr( "function \"%1\" is not defined" ).arg( functionName ));
         return QJSValue();
     }
 
     // get reagentId
     const Id reagentId = this->getReagentId( reference );
     if ( reagentId == Id::Invalid ) {
-        this->engine.throwError( QJSValue::ReferenceError, this->tr( "reagent \"%1\" is not defined" ).arg( reference ));
+        this->engine.throwError( QJSValue::ReferenceError,
+                                 Script::tr( "reagent \"%1\" is not defined" ).arg( reference ));
         return QJSValue();
     }
 
@@ -170,7 +181,8 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
     if ( !batchName.isEmpty()) {
         const Id batchId = this->getReagentId( batchName, reagentId );
         if ( batchId == Id::Invalid ) {
-            this->engine.throwError( QJSValue::ReferenceError, this->tr( "batch \"%1\" is not defined" ).arg( batchName ));
+            this->engine.throwError( QJSValue::ReferenceError,
+                                     Script::tr( "batch \"%1\" is not defined" ).arg( batchName ));
             return QJSValue();
         }
         propertyValue = this->getPropertyValue( propertyId, batchId, reagentId );
@@ -180,7 +192,9 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
 
     // get property value
     if ( propertyValue.isNull()) {
-        this->engine.throwError( QJSValue::TypeError, this->tr( "property \"%1\" is not defined for \"%2\"" ).arg( functionName ).arg( batchName.isEmpty() ? reference : batchName ));
+        this->engine.throwError( QJSValue::TypeError,
+                                 Script::tr( "property \"%1\" is not defined for \"%2\"" ).arg( functionName ).arg(
+                                         batchName.isEmpty() ? reference : batchName ));
         return QJSValue();
     }
 
@@ -188,7 +202,10 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
     bool ok;
     const qreal value = propertyValue.toReal( &ok );
     if ( !ok ) {
-        this->engine.throwError( QJSValue::TypeError, this->tr( "%1( %2 ) does not evaluate to a valid number" ).arg( functionName ).arg( reference ) + ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
+        this->engine.throwError( QJSValue::TypeError,
+                                 Script::tr( "%1( %2 ) does not evaluate to a valid number" ).arg( functionName ).arg(
+                                         reference ) +
+                                 ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
         return QJSValue();
     }
 
@@ -204,11 +221,11 @@ QJSValue Script::getPropertyInternal( const QString &functionName, const QString
 Id Script::getPropertyId( const QString &name ) const {
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where %3='%4'" )
-                .arg( Tag::instance()->fieldName( Tag::ID ))
-                .arg( Tag::instance()->tableName())
-                .arg( Tag::instance()->fieldName( Tag::Function ))
-                .arg( name )
-                );
+                        .arg( Tag::instance()->fieldName( Tag::ID ))
+                        .arg( Tag::instance()->tableName())
+                        .arg( Tag::instance()->fieldName( Tag::Function ))
+                        .arg( name )
+    );
     return query.next() ? query.value( 0 ).value<Id>() : Id::Invalid;
 }
 
@@ -222,40 +239,40 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     // first pass (no rich text)
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
-                .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                .arg( Reagent::instance()->tableName())
-                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                .arg( reference )
-                .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                .arg( static_cast<int>( parentId ))
-                );
+                        .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                        .arg( Reagent::instance()->tableName())
+                        .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                        .arg( reference )
+                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                        .arg( static_cast<int>( parentId ))
+    );
 
     if ( query.next())
         return query.value( 0 ).value<Id>();
 
     // TODO: there must be a way to optimize this via caching
     //
-    // second pass (handles richtext)
+    // second pass (handles rich text)
     //
     // get all names and reference
     query.exec( QString( "select %1, %2, %3 from %4 where %5=%6" )
-                .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                .arg( Reagent::instance()->tableName())
-                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                .arg( static_cast<int>( parentId ))
-                );
+                        .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
+                        .arg( Reagent::instance()->fieldName( Reagent::Alias ))
+                        .arg( Reagent::instance()->tableName())
+                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
+                        .arg( static_cast<int>( parentId ))
+    );
 
     // build a map of plainText names as keys and ids as values
     QMap<QString, Id> map;
     while ( query.next()) {
         map[QTextEdit( query.value( 1 ).toString()).toPlainText()] = query.value( 0 ).value<Id>();
 
-        const QString reference( QTextEdit( query.value( 2 ).toString()).toPlainText());
-        if ( !reference.isEmpty())
-            map[reference] = query.value( 0 ).value<Id>();
+        const QString ref( QTextEdit( query.value( 2 ).toString()).toPlainText());
+        if ( !ref.isEmpty())
+            map[ref] = query.value( 0 ).value<Id>();
     }
 
     // compare plainText names
@@ -276,14 +293,14 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3=%4 and %5=%6 ) "
                          "or ( %3=%4 and %5=%7 and ( select count(*) from %2 where ( %3=%4 and %5=%6 )) = 0 )" )
-                .arg( Property::instance()->fieldName( Property::PropertyData ))       // 1
-                .arg( Property::instance()->tableName())                        // 2
-                .arg( Property::instance()->fieldName( Property::TagId ))       // 3
-                .arg( static_cast<int>( tagId ))                                // 4
-                .arg( Property::instance()->fieldName( Property::ReagentId ))   // 5
-                .arg( static_cast<int>( reagentId ))                            // 6
-                .arg( static_cast<int>( parentId ))                             // 7
-                );
+                        .arg( Property::instance()->fieldName( Property::PropertyData ))       // 1
+                        .arg( Property::instance()->tableName())                        // 2
+                        .arg( Property::instance()->fieldName( Property::TagId ))       // 3
+                        .arg( static_cast<int>( tagId ))                                // 4
+                        .arg( Property::instance()->fieldName( Property::ReagentId ))   // 5
+                        .arg( static_cast<int>( reagentId ))                            // 6
+                        .arg( static_cast<int>( parentId ))                             // 7
+    );
 
     return query.next() ? query.value( 0 ) : QVariant();
 }

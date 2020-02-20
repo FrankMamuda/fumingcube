@@ -42,7 +42,7 @@ public:
         ParentId,
 
         // count (DO NOT REMOVE)
-        Count
+                Count
     };
     Q_ENUM( Fields )
 
@@ -50,21 +50,24 @@ public:
      * @brief instance
      * @return
      */
-    static Reagent *instance() { static Reagent *reagent( new Reagent()); return reagent; }
+    static Reagent *instance() {
+        static auto *reagent( new Reagent());
+        return reagent;
+    }
     ~Reagent() override = default;
-    Row add( const QString &name , const QString &reference, const Id &parentId = Id::Invalid );
-    QList<Row> children( const Row &row ) const;
-    QList<Id> labelIds( const Row &row ) const;
+    Row add( const QString &name, const QString &reference, const Id &parentId = Id::Invalid );
+    [[nodiscard]] QList<Row> children( const Row &row ) const;
+    [[nodiscard]] QList<Id> labelIds( const Row &row ) const;
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id,      ID,       id )
-    INITIALIZE_FIELD( QString, Name,     name )
-    INITIALIZE_FIELD( QString, Alias,    alias )
-    INITIALIZE_FIELD( Id,      ParentId, parentId )
+    INITIALIZE_FIELD( Id, ID, id )
+    INITIALIZE_FIELD( QString, Name, name )
+    INITIALIZE_FIELD( QString, Alias, alias )
+    INITIALIZE_FIELD( Id, ParentId, parentId )
 
     // FIXME: temporary
-    QString reference( const Row &row ) const { return this->alias( row ); }
-    QString reference( const Id &id ) const { return this->alias( id ); }
+    [[nodiscard]] QString reference( const Row &row ) const { return this->alias( row ); }
+    [[nodiscard]] QString reference( const Id &id ) const { return this->alias( id ); }
 
 public slots:
     void removeOrphanedEntries() override;

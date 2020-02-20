@@ -31,11 +31,9 @@
 #include "reagentmodel.h"
 #include "reagentdock.h"
 #include "propertyview.h"
-//#include "nfpawidget.h"
 #include <QPainter>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
-#include <QDebug>
 #include <QApplication>
 #include <QPalette>
 #include <QTableView>
@@ -46,7 +44,7 @@
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
-void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {    
+void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {
     // reuse document from cache if any
     if ( this->documentMap.contains( index ) || !index.isValid())
         return;
@@ -55,11 +53,12 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     const Row row = Property::instance()->row( index );
     const QVariant data( Property::instance()->propertyData( row ));
     const Id tagId = Property::instance()->tagId( row );
-    const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag ) : false;
-    const PropertyView *view( qobject_cast<PropertyView*>( this->parent()));
+    const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula ||
+                                                        tagId == PixmapTag ) : false;
+    const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
 
     // create a new document
-    QTextDocument *document( new QTextDocument());
+    auto *document( new QTextDocument());
 
     // special handling of pixmaps
     if ( pixmapTag && index.column() == Property::PropertyData ) {
@@ -70,7 +69,8 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             auto setupPixmap = [ this, data, tagId, &scaledSize, &pixmapData ]() {
                 // get pixmap data and calculate a quick checksum for cache access
                 const QByteArray storedData( data.toByteArray());
-                const quint32 checksum = Cache::checksum( storedData.constData(), static_cast<size_t>( storedData.length()));
+                const quint32 checksum = Cache::checksum( storedData.constData(),
+                                                          static_cast<size_t>( storedData.length()));
 
                 // get sectionWidth (property value column width)
                 const int sectionWidth = PropertyDock::instance()->sectionSize( Property::PropertyData );
@@ -92,7 +92,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                 // calculate the preferred with (to fit property value column)
                 const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth : originalSize.width();
-                const int scaledHeight = static_cast<int>(( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) * static_cast<qreal>( originalSize.height()));
+                const int scaledHeight = static_cast<int>(
+                        ( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) *
+                        static_cast<qreal>( originalSize.height()));
                 scaledSize = QSize( scaledWidth, scaledHeight );
 
                 // generateMipMap lambda - downscales, inverts and crops pixmap
@@ -102,20 +104,20 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                             return false;
                     }
 
-                    // invert and autocrop it if necessary
+                    // invert and autoCrop it if necessary
                     if ( Tag::instance()->type( tagId ) == Tag::Formula ) {
                         pixmap = ImageUtils::autoCropPixmap( qAsConst( pixmap ));
-                        if ( Variable::instance()->isEnabled( "darkMode" ))
+                        if ( Variable::isEnabled( "darkMode" ))
                             pixmap = ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( qAsConst( pixmap )));
                     }
 
                     // FAST downscale pixmap
                     if ( scaledSize.width() * 2 < originalSize.width())
-                        pixmap = pixmap.scaled( QSize( scaledSize.width() * 2, scaledSize.height() * 2 ), Qt::IgnoreAspectRatio, Qt::FastTransformation );
+                        pixmap = pixmap.scaled( QSize( scaledSize.width() * 2, scaledSize.height() * 2 ),
+                                                Qt::IgnoreAspectRatio, Qt::FastTransformation );
 
                     // downscale pixmap
                     pixmap = pixmap.scaled( qAsConst( scaledSize ), Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
-                    //qDebug() << "RECACHE with size" << scaledWidth << "ORIGINAL" << originalSize.width();
 
                     // convert it back to buffer
                     QBuffer buffer( &pixmapData );
@@ -147,16 +149,14 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 if ( scaledSize.isEmpty())
                     return false;
 
-                if ( pixmapData.isEmpty())
-                    return false;
-
-                return true;
+                return !pixmapData.isEmpty();
             };
 
 
             // embed pixmap in html
             if ( setupPixmap())
-                document->setHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( scaledSize.width()).arg( scaledSize.height()).arg( pixmapData.toBase64().constData()));
+                document->setHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg(
+                        scaledSize.width()).arg( scaledSize.height()).arg( pixmapData.toBase64().constData()));
         }
     } else {
         QString html;
@@ -170,39 +170,43 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
             QString stringData( data.toString());
             if ( tagId != Id::Invalid ) {
-                const Tag::Types type =  Tag::instance()->type( tagId );
+                const Tag::Types type = Tag::instance()->type( tagId );
                 if ( type == Tag::Real )
-                    stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ), QString( "\\1%1\\2" ).arg( Variable::instance()->string( "decimalSeparator" )));
+                    stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
+                                        QString( "\\1%1\\2" ).arg( Variable::string( "decimalSeparator" )));
                 else if ( type == Tag::State ) {
                     bool ok;
-                    int index = stringData.toInt( &ok );
+                    int stateIndex = stringData.toInt( &ok );
 
                     if ( !ok )
-                        index = -1;
+                        stateIndex = -1;
 
-                    switch ( index ) {
-                    case 0:
-                        stringData = this->tr( "Solid" );
-                        break;
+                    switch ( stateIndex ) {
+                        case 0:
+                            stringData = PropertyDelegate::tr( "Solid" );
+                            break;
 
-                    case 1:
-                        stringData = this->tr( "Liquid" );
-                        break;
+                        case 1:
+                            stringData = PropertyDelegate::tr( "Liquid" );
+                            break;
 
-                    case 2:
-                        stringData = this->tr( "Gaseous" );
-                        break;
+                        case 2:
+                            stringData = PropertyDelegate::tr( "Gaseous" );
+                            break;
 
-                    default:
-                        stringData = this->tr( "Unknown" );
+                        default:
+                            stringData = PropertyDelegate::tr( "Unknown" );
                     }
                 }
             }
 
-            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML( qAsConst( stringData ) + units )));
+            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML(
+                    qAsConst( stringData ) + units )));
         }
 
-        document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( qAsConst( html )));
+        document->setHtml(
+                QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3<\p>)" ).arg( font.pointSize()).arg(
+                        font.family()).arg( qAsConst( html )));
     }
 
     document->setDocumentMargin( 2 );
@@ -218,11 +222,11 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
  * @param index
  */
 void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    const QTableView *view( qobject_cast<QTableView*>( this->parent()));
+    const QTableView *view( qobject_cast<QTableView *>( this->parent()));
 
     // draw custom selection highlight
     if ( option.state & QStyle::State_Selected ) {
-        QColor highlight( qApp->palette().highlight().color());
+        QColor highlight( QApplication::palette().highlight().color());
         highlight.setAlpha( 128 );
         painter->fillRect( option.rect, QBrush( qAsConst( highlight )));
     }
@@ -241,7 +245,9 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
 
     // draw html
     painter->save();
-    painter->translate( option.rect.left(), option.rect.top() + option.rect.height() / 2 - document->size().height() / 2 );
+    painter->translate( option.rect.left(),
+                        option.rect.top() + static_cast<int>( option.rect.height() / 2 ) -
+                        document->size().height() / 2 );
     document->drawContents( painter );
     painter->restore();
 }
@@ -252,13 +258,13 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @param index
  * @return
  */
-QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {    
+QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
     // prevents caching before the model initializes
     const Row row = Property::instance()->row( index );
     if ( row == Row::Invalid )
         return QSize();
 
-    const Id reagentId = Variable::instance()->value<Id>( "reagentDock/selection" );
+    const Id reagentId = Variable::value<Id>( "reagentDock/selection" );
     const Id parentId = Reagent::instance()->parentId( reagentId );
     const Id propertyParentId = Property::instance()->reagentId( row );
     if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )

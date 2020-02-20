@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Armands Aleksejevs
+ * Copyright (C) 2019-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,16 +36,17 @@ class PropertyWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PropertyWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(), const Id &tagId = Id::Invalid );
-    PropertyWidget( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap());
+    explicit PropertyWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(),
+                             const Id &tagId = Id::Invalid );
+    explicit PropertyWidget( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap());
     ~PropertyWidget() override;
 
-    int position() const { return this->m_position; }
-    Id tagId() const { return this->m_tagId; }
+    [[nodiscard]] int position() const { return this->m_position; }
+    [[nodiscard]] Id tagId() const { return this->m_tagId; }
 
     static QStringList parseGHS( const QStringList &list ) {
         QStringList parms;
-        foreach ( const QString &parm, list ) {
+        for ( const QString &parm : list ) {
             if ( parm.contains( QRegularExpression( "[Ee]xplosive" )))
                 parms << "GHS01";
             if ( parm.contains( QRegularExpression( "[Ff]lammable" )))
@@ -58,7 +59,8 @@ public:
                 parms << "GHS05";
             if ( parm.contains( QRegularExpression( "[Tt]oxic" )))
                 parms << "GHS06";
-            if ( parm.contains( QRegularExpression( "[Hh]armful" )) || parm.contains( QRegularExpression( "[Ii]rritant" )))
+            if ( parm.contains( QRegularExpression( "[Hh]armful" )) ||
+                 parm.contains( QRegularExpression( "[Ii]rritant" )))
                 parms << "GHS07";
             if ( parm.contains( QRegularExpression( "[Hh]ealth\\s[Hh]azard" )))
                 parms << "GHS08";
@@ -68,7 +70,7 @@ public:
         return qAsConst( parms );
     }
 
-    QPixmap pixmap() const { return this->m_pixmap; }
+    [[nodiscard]] QPixmap pixmap() const { return this->m_pixmap; }
 
 public slots:
     void add( const Id &id );

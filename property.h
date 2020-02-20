@@ -55,7 +55,7 @@ public:
         TableOrder,
 
         // count (DO NOT REMOVE)
-        Count
+                Count
     };
     Q_ENUM( Fields )
 
@@ -63,21 +63,24 @@ public:
      * @brief instance
      * @return
      */
-    static Property *instance() { static Property *property( new Property()); return property; }
+    static Property *instance() {
+        static auto *property( new Property());
+        return property;
+    }
     ~Property() override = default;
     Row add( const QString &name = QString(), const Id &tagId = Id::Invalid,
              const QVariant &value = QVariant(), const Id &reagentId = Id::Invalid );
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id,       ID,           id )
-    INITIALIZE_FIELD( QString,  Name,         name )
-    INITIALIZE_FIELD( Id,       TagId,        tagId )
-    INITIALIZE_FIELD( QVariant, PropertyData, propertyData )
-    INITIALIZE_FIELD( Id,       ReagentId,    reagentId )
-    INITIALIZE_FIELD( int,      TableOrder,   tableOrder )
+INITIALIZE_FIELD( Id, ID, id )
+INITIALIZE_FIELD( QString, Name, name )
+INITIALIZE_FIELD( Id, TagId, tagId )
+INITIALIZE_FIELD( QVariant, PropertyData, propertyData )
+INITIALIZE_FIELD( Id, ReagentId, reagentId )
+INITIALIZE_FIELD( int, TableOrder, tableOrder )
 
 protected:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
 
 public slots:
     void removeOrphanedEntries() override;

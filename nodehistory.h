@@ -31,10 +31,10 @@ class NodeHistory : public QObject {
     Q_OBJECT
 
 public:
-    NodeHistory( QTreeView *parent );
-    ~NodeHistory();
-    QTreeView *treeParent() const { return this->m_treeParent; }
-    bool isEnabled() const { return this->m_enabled; }
+    explicit NodeHistory( QTreeView *parent );
+    ~NodeHistory() override;
+    [[nodiscard]] QTreeView *treeParent() const { return this->m_treeParent; }
+    [[nodiscard]] bool isEnabled() const { return this->m_enabled; }
 
 public slots:
     void setEnabled( bool enabled = true ) { this->m_enabled = enabled; }

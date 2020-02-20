@@ -40,9 +40,10 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
     QNetworkReply *reply( this->manager.get( qAsConst( request )));
 
     // handle replies
-    reply->connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
+    QNetworkReply::connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
         const Types type = static_cast<Types>( reply->request().attribute( QNetworkRequest::User ).toInt());
-        const QVariant userData( reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 )));
+        const QVariant userData(
+                reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 )));
 
         // abort on errors
         if ( reply->error()) {
@@ -52,7 +53,7 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
         }
 
         // handle redirects
-        if ( !reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).isNull())
+        if ( !reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toUrl().isValid())
             this->execute( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toString(), type, userData );
 
         // emit downloaded data

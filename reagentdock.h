@@ -31,7 +31,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class ReagentDock;
+    class ReagentDock;
 }
 
 /**
@@ -42,11 +42,14 @@ class ReagentDock final : public DockWidget {
     Q_DISABLE_COPY( ReagentDock )
 
 public:
-    static ReagentDock *instance() { static ReagentDock *reagentDock( new ReagentDock()); return reagentDock; }
+    static ReagentDock *instance() {
+        static auto *reagentDock( new ReagentDock());
+        return reagentDock;
+    }
     ~ReagentDock() override;
-    bool checkForDuplicates( const QString &name, const QString &alias, const Id reagentId = Id::Invalid ) const;
-    bool checkBatchForDuplicates( const QString &name, const Id parentId ) const;
-    ReagentView *view() const;
+    [[nodiscard]] bool checkForDuplicates( const QString &name, const QString &alias, Id reagentId = Id::Invalid ) const;
+    [[nodiscard]] bool checkBatchForDuplicates( const QString &name, Id parentId ) const;
+    [[nodiscard]] ReagentView *view() const;
     QMenu *buildMenu( bool context = true );
 
 signals:

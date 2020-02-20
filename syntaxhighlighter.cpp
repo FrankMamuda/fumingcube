@@ -25,6 +25,7 @@
 #include "variable.h"
 #include <QSqlQuery>
 #include <QApplication>
+#include <utility>
 #include "mainwindow.h"
 
 /**
@@ -35,9 +36,9 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
     QSqlQuery query;
 
     query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                .arg( Tag::instance()->fieldName( Tag::ID ))
-                .arg( Tag::instance()->fieldName( Tag::Function ))
-                .arg( Tag::instance()->tableName()));
+                        .arg( Tag::instance()->fieldName( Tag::ID ))
+                        .arg( Tag::instance()->fieldName( Tag::Function ))
+                        .arg( Tag::instance()->tableName()));
     while ( query.next())
         this->keywords << qAsConst( query ).value( 1 ).toString();
 }
@@ -62,11 +63,13 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
      */
     struct SyntaxHighlighterOption {
         SyntaxHighlighterOption(
-                    QString e,
-                    QColor c,
-                    bool b = false,
-                    bool u = false,
-                    bool i = false ) : expression( QRegularExpression( e )), colour( c ), bold( b ), underline( u ), italic( i ) {}
+                const QString &e,
+                QColor c,
+                bool b = false,
+                bool u = false,
+                bool i = false ) : expression( QRegularExpression( e )), colour( std::move( c )), bold( b ),
+                                   underline( u ),
+                                   italic( i ) {}
         QRegularExpression expression;
         QColor colour;
         bool bold;
@@ -76,14 +79,14 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
 
     // add types
     QList<SyntaxHighlighterOption> options = {
-        { "\\w+",                           string                  },
-        { "\\(|\\)",                        parenthesis,            },
-        { "\\d+\\.?\\d*",                   number,     true        },
-        { "\\/|\\*|\\+|\\-|\\=|\\,[^\\w]",  op                      },
-        { "\".+?(?=\")\"",                  reference,  true        },
-        { "\\w+Error.+",                    error,      true, true  },
-        { "\\bundefined\\b(?!\")",          undefined               },
-        { "\\/\\/.+",                       comment                 }
+            { "\\w+",                          string },
+            { "\\(|\\)",                       parenthesis, },
+            { R"(\d+\.?\d*)",                  number,    true },
+            { R"(\/|\*|\+|\-|\=|\,[^\w])", op },
+            { "\".+?(?=\")\"",                 reference, true },
+            { "\\w+Error.+",                   error,     true, true },
+            { R"(\bundefined\b(?!"))",         undefined },
+            { "\\/\\/.+",                      comment }
     };
 
     // add keywords
@@ -122,7 +125,7 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
         const int endIndex = text.indexOf( endExpression, startIndex, &endMatch );
         int commentLength;
         if ( endIndex == -1 ) {
-            this->setCurrentBlockState(1);
+            this->setCurrentBlockState( 1 );
             commentLength = text.length() - startIndex;
         } else {
             commentLength = endIndex - startIndex + endMatch.capturedLength();

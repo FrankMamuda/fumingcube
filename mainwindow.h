@@ -31,7 +31,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 /**
@@ -41,7 +41,10 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    static MainWindow *instance() { static auto *instance( new MainWindow()); return instance; }
+    static MainWindow *instance() {
+        static auto *instance( new MainWindow());
+        return instance;
+    }
     ~MainWindow() override;
     [[nodiscard]] auto *theme() const { return this->m_theme; }
 

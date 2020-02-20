@@ -136,7 +136,7 @@ int main( int argc, char *argv[] ) {
     // dummy file
     const QString apiFileName( QDir::currentPath() + "/badapi" );
 
-    // register metatypes
+    // register metaTypes
     //qRegisterMetaType<Reagent::Fields>();
     qRegisterMetaType<Id>();
     qRegisterMetaType<Row>();
@@ -165,27 +165,27 @@ int main( int argc, char *argv[] ) {
     }
 
     // set variable defaults
-    Variable::instance()->add( "databasePath", "", Var::Flag::Hidden );
-    Variable::instance()->add( "calculator/commands", "", Var::Flag::ReadOnly );
-    Variable::instance()->add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
-    Variable::instance()->add( "calculator/ans", "", Var::Flag::ReadOnly );
-    Variable::instance()->add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
-    Variable::instance()->add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
-    Variable::instance()->add( "reagentDock/selection", -1, Var::Flag::Hidden );
-    Variable::instance()->add( "reagentDock/openNodes", "", Var::Flag::Hidden );
-    Variable::instance()->add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
-    Variable::instance()->add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
-    Variable::instance()->add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
-    Variable::instance()->add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
-    Variable::instance()->add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
-    Variable::instance()->add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
-    Variable::instance()->add( "decimalSeparator", ",", Var::Flag::Hidden );
+    Variable::add( "databasePath", "", Var::Flag::Hidden );
+    Variable::add( "calculator/commands", "", Var::Flag::ReadOnly );
+    Variable::add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
+    Variable::add( "calculator/ans", "", Var::Flag::ReadOnly );
+    Variable::add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
+    Variable::add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
+    Variable::add( "reagentDock/selection", -1, Var::Flag::Hidden );
+    Variable::add( "reagentDock/openNodes", "", Var::Flag::Hidden );
+    Variable::add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
+    Variable::add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
+    Variable::add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::add( "decimalSeparator", ",", Var::Flag::Hidden );
 
     // read configuration
     XMLTools::instance()->read();
 
     // clean up on exit
-    qApp->connect( qApp, &QApplication::aboutToQuit, []() {
+    QApplication::connect( &a, &QApplication::aboutToQuit, []() {
         PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();
         XMLTools::instance()->write();
@@ -202,17 +202,18 @@ int main( int argc, char *argv[] ) {
 
     // check for previous crashes
     if ( QFileInfo( apiFileName ).exists()) {
-        const QFileInfo info( Variable::instance()->string( "databasePath" ));
+        const QFileInfo info( Variable::string( "databasePath" ));
 
         // just change path
-        Variable::instance()->setString( "databasePath", info.absolutePath() + "/database_"
-                                         + QDateTime::currentDateTime()
-                                         .toString( "yyyyMMdd_hhmmss" ) +
-                                         ".db" );
+        Variable::setString( "databasePath", info.absolutePath() + "/database_"
+                                                         + QDateTime::currentDateTime()
+                                                                 .toString( "yyyyMMdd_hhmmss" ) +
+                                                         ".db" );
 
         // copy built-in demo version
-        QFile::copy( ":/initial/database.db", Variable::instance()->string( "databasePath" ));
-        QFile( Variable::instance()->string( "databasePath" )).setPermissions( QFileDevice::ReadOwner | QFileDevice::WriteOwner );
+        QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));
+        QFile( Variable::string( "databasePath" )).setPermissions(
+                QFileDevice::ReadOwner | QFileDevice::WriteOwner );
 
         QFile::remove( apiFileName );
     }
@@ -256,13 +257,14 @@ int main( int argc, char *argv[] ) {
     bool darkMode = false;
     bool darkModeWin10 = false;
 #ifdef Q_OS_WIN
-    const QVariant key( QSettings( R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)", QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
+    const QVariant key( QSettings( R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
+                                   QSettings::NativeFormat ).value( "AppsUseLightTheme" ));
     if ( key.isValid() && !key.toBool()) {
         darkMode = true;
         darkModeWin10 = true;
 
-        if ( !Variable::instance()->isEnabled( "overrideTheme" ))
-            Variable::instance()->setString( "theme", "dark" );
+        if ( !Variable::isEnabled( "overrideTheme" ))
+            Variable::setString( "theme", "dark" );
     }
 #else
     if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
@@ -272,12 +274,12 @@ int main( int argc, char *argv[] ) {
     // set default icon theme
     QIcon::setThemeName( darkMode ? "dark" : "light" );
 
-    if ( Variable::instance()->isEnabled( "overrideTheme" ) || darkModeWin10 ) {
+    if ( Variable::isEnabled( "overrideTheme" ) || darkModeWin10 ) {
         // load theme from file
-        auto *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::instance()->string( "theme" ))));
+        auto *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::string( "theme" ))));
 
         // override the variable
-        Variable::instance()->setEnabled( "darkMode", theme->isDark());
+        Variable::setEnabled( "darkMode", theme->isDark());
 
         // override style and palette
         QApplication::setStyle( theme->style());
@@ -289,7 +291,7 @@ int main( int argc, char *argv[] ) {
     }
 
     // show main window
-    MainWindow::instance()->setWindowFlag( Qt::WindowStaysOnTopHint, Variable::instance()->isEnabled( "alwaysOnTop" ));
+    MainWindow::instance()->setWindowFlag( Qt::WindowStaysOnTopHint, Variable::isEnabled( "alwaysOnTop" ));
     MainWindow::instance()->show();
     MainWindow::instance()->scrollToBottom();
 
@@ -304,10 +306,14 @@ int main( int argc, char *argv[] ) {
 #endif
 
     // set initial sizes
-    if ( Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() && Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
+    if ( Variable::value<QVariant>( "mainWindow/geometry" ).isNull() &&
+         Variable::value<QVariant>( "mainWindow/state" ).isNull()) {
         MainWindow::instance()->resize( 1024, 650 );
-        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << PropertyDock::instance() << ReagentDock::instance() << LabelDock::instance(), QList<int>() << 300 << 210 << 210, Qt::Horizontal );
-        MainWindow::instance()->resizeDocks( QList<QDockWidget*>() << LabelDock::instance(), QList<int>() << 96, Qt::Vertical );
+        MainWindow::instance()->resizeDocks(
+                QList<QDockWidget *>() << PropertyDock::instance() << ReagentDock::instance() << LabelDock::instance(),
+                QList<int>() << 300 << 210 << 210, Qt::Horizontal );
+        MainWindow::instance()->resizeDocks( QList<QDockWidget *>() << LabelDock::instance(), QList<int>() << 96,
+                                             Qt::Vertical );
     }
 
     // restore last reagent selection

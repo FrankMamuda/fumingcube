@@ -35,10 +35,10 @@ class Table;
  * @brief The Database_ class
  */
 namespace Database_ {
-const static QLoggingCategory Debug( "database" );
-const static constexpr int null = 0;
-static const constexpr int API = 1;
-};
+    const static QLoggingCategory Debug( "database" );
+    const static constexpr int null = 0;
+    [[maybe_unused]] static const constexpr int API = 1;
+}
 
 /**
  * @brief The Database class
@@ -52,10 +52,13 @@ public:
      * @brief instance
      * @return
      */
-    static Database *instance() { static Database *instance( new Database()); return instance; }
-    ~Database();
+    static Database *instance() {
+        static auto *instance( new Database());
+        return instance;
+    }
+    ~Database() override;
     bool add( Table *table );
-    bool hasInitialised() const { return this->m_initialised; }
+    [[nodiscard]] bool hasInitialised() const { return this->m_initialised; }
 
 public slots:
     void removeOrphanedEntries();
@@ -69,6 +72,6 @@ private:
      * @brief createInstance
      * @return
      */
-    QMap<QString, Table*> tables;
+    QMap<QString, Table *> tables;
     bool m_initialised = false;
 };

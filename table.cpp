@@ -46,9 +46,9 @@ QVariant Table::value( const Row &row, int fieldId ) const {
 
     const QModelIndex index( this->index( static_cast<int>( row ), fieldId ));
     if ( row == Row::Invalid || !index.isValid() || index.row() < 0 || index.row() >= this->count()) {
-        qWarning( Database_::Debug ) << this->tr( "could not retrieve field \"%1\" value from table \"%2\"" )
-                                        .arg( this->field( fieldId )->name())
-                                        .arg( this->tableName()) << !index.isValid()
+        qWarning( Database_::Debug ) << Table::tr( "could not retrieve field \"%1\" value from table \"%2\"" )
+                .arg( this->field( fieldId )->name())
+                .arg( this->tableName()) << !index.isValid()
                                      << ( index.row() < 0 ) << ( index.row() >= this->count()) << row;
         return -1;
     }
@@ -72,10 +72,10 @@ QVariant Table::value( const Id &id, int fieldId ) const {
 
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %1=%4" )
-                .arg( this->fieldName( this->primaryField()->id()))
-                .arg( this->fieldName( fieldId ))
-                .arg( this->tableName())
-                .arg( static_cast<int>( id )));
+                        .arg( this->fieldName( this->primaryField()->id()))
+                        .arg( this->fieldName( fieldId ))
+                        .arg( this->tableName())
+                        .arg( static_cast<int>( id )));
 
     return query.next() ? query.value( 1 ) : "";
 }
@@ -100,16 +100,17 @@ bool Table::select() {
  * @return
  */
 Row Table::row( const Id &id ) const {
-    const QModelIndexList list( this->match( this->index( 0, 0 ), IDRole, static_cast<int>( id ), 1, Qt::MatchExactly ));
+    const QModelIndexList list(
+            this->match( this->index( 0, 0 ), IDRole, static_cast<int>( id ), 1, Qt::MatchExactly ));
     return this->row( list.isEmpty() ? QModelIndex() : list.first());
 }
 
 /**
  * @brief Table::addConstraint
- * @param fields
+ * @param constrainedFields
  */
-void Table::addUniqueConstraint( const QList<QSharedPointer<Field_>> &fields ) {
-    this->constraints << fields;
+void Table::addUniqueConstraint( const QList<QSharedPointer<Field_>> &constrainedFields ) {
+    this->constraints << constrainedFields;
 }
 
 /**
@@ -126,7 +127,8 @@ QVariant Table::data( const QModelIndex &index, int role ) const {
         if ( !index.isValid())
             return static_cast<int>( Id::Invalid );
 
-        return this->hasPrimaryField() ? this->value( static_cast<Row>( index.row()), this->primaryField()->id()).toInt() : -1;
+        return this->hasPrimaryField() ? this->value( static_cast<Row>( index.row()),
+                                                      this->primaryField()->id()).toInt() : -1;
     }
 
     return QSqlTableModel::data( index, role );
@@ -171,7 +173,8 @@ Field Table::field( int id ) const {
  * @param unique
  * @param autoValue
  */
-void Table::addField( int id, const QString &fieldName, QVariant::Type type, const QString &format, bool unique, bool autoValue ) {
+void Table::addField( int id, const QString &fieldName, QVariant::Type type, const QString &format, bool unique,
+                      bool autoValue ) {
     if ( this->fields.contains( id ))
         return;
 
@@ -194,13 +197,15 @@ Row Table::add( const QVariantList &arguments ) {
         return Row::Invalid;
 
     if ( this->fields.count() != arguments.count())
-        qCCritical( Database_::Debug ) << this->tr( "argument count mismatch - %1, required - %2" ).arg( arguments.count()).arg( this->fields.count());
+        qCCritical( Database_::Debug )
+            << Table::tr( "argument count mismatch - %1, required - %2" ).arg( arguments.count()).arg(
+                    this->fields.count());
 
     // insert empty row
     const int row = this->count();
     this->beginInsertRows( QModelIndex(), this->count(), this->count());
     if ( !this->insertRow( this->count())) {
-        qCCritical( Database_::Debug ) << this->tr( "cannot insert row into table \"%1\"" ).arg( this->tableName());
+        qCCritical( Database_::Debug ) << Table::tr( "cannot insert row into table \"%1\"" ).arg( this->tableName());
         this->endInsertRows();
         return Row::Invalid;
     }
@@ -216,7 +221,9 @@ Row Table::add( const QVariantList &arguments ) {
 
         // compare types
         if ( field->type() != argument.type()) {
-            qCCritical( Database_::Debug ) << this->tr( "incompatible field type - %1 for argument %2 (%3), required - %4" ).arg( argument.type()).arg( y ).arg( field->format()).arg( field->type());
+            qCCritical( Database_::Debug )
+                << Table::tr( "incompatible field type - %1 for argument %2 (%3), required - %4" ).arg(
+                        argument.type()).arg( y ).arg( field->format()).arg( field->type());
             this->revert();
             this->endInsertRows();
             return Row::Invalid;
@@ -226,8 +233,8 @@ Row Table::add( const QVariantList &arguments ) {
         if ( field->isUnique() && !field->isAutoValue()) {
             if ( this->contains( field, argument )) {
                 qCWarning( Database_::Debug )
-                        << this->tr( "table already has a unique field \"%1\" with value - \"%2\", aborting addition" )
-                           .arg( field->name()).arg( argument.toString());
+                    << Table::tr( "table already has a unique field \"%1\" with value - \"%2\", aborting addition" )
+                            .arg( field->name()).arg( argument.toString());
                 this->revert();
                 this->endInsertRows();
                 return Row::Invalid;
@@ -265,7 +272,7 @@ QSqlQuery Table::prepare() const {
 
         const bool last = ( y == this->fields.count() - 1 );
 
-        values.append( " :_" + field->name() + + ( last ? " )" : "," ));
+        values.append( " :_" + field->name() + +( last ? " )" : "," ));
         statement.append( " " + field->name() + ( last ? " ) values(" + values : "," ));
     }
     QSqlQuery query;
@@ -285,7 +292,9 @@ void Table::bind( QSqlQuery &query, const QVariantList &arguments ) {
 
     const int numFields = this->fields.count() - ( this->hasPrimaryField() ? 1 : 0 );
     if ( numFields != arguments.count())
-        qCCritical( Database_::Debug ) << this->tr( "argument count mismatch - %1, required - %2" ).arg( arguments.count()).arg( this->fields.count());
+        qCCritical( Database_::Debug )
+            << Table::tr( "argument count mismatch - %1, required - %2" ).arg( arguments.count()).arg(
+                    this->fields.count());
 
     // prepare statement
     int y = 0;
@@ -297,8 +306,9 @@ void Table::bind( QSqlQuery &query, const QVariantList &arguments ) {
 
         // compare types
         if ( field->type() != argument.type()) {
-            qCCritical( Database_::Debug ) << this->tr( "incompatible field type - %1 for argument %2 (%3), required - %4" )
-                                              .arg( argument.type()).arg( y ).arg( field->format()).arg( field->type());
+            qCCritical( Database_::Debug )
+                << Table::tr( "incompatible field type - %1 for argument %2 (%3), required - %4" )
+                        .arg( argument.type()).arg( y ).arg( field->format()).arg( field->type());
             return;
         }
 

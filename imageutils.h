@@ -28,8 +28,9 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class ImageUtils;
-static const int MaxImageSize = 512;
+    class ImageUtils;
+
+    static const int MaxImageSize = 512;
 }
 
 /**
@@ -39,12 +40,13 @@ class ImageUtils : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0, bool view = false );
-    ~ImageUtils();
+    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0,
+                         bool view = false );
+    ~ImageUtils() override;
     QPixmap pixmap;
 
     static QPixmap autoCropPixmap( const QPixmap &pixmap, const QColor &key = Qt::white );
-    static QPixmap brightenPixmap( const QPixmap &pixmap, const int factor = 150 );
+    [[maybe_unused]] static QPixmap brightenPixmap( const QPixmap &pixmap, int factor = 150 );
     static QPixmap invertPixmap( const QPixmap &pixmap );
 
 signals:

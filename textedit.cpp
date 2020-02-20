@@ -26,12 +26,10 @@
 #include <QMimeDatabase>
 #include <QMimeData>
 #include <QDropEvent>
-#include <QDebug>
 #include <QRegularExpression>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <QtWin>
-#include <QWinMime>
 #endif
 #include "property.h"
 #include "propertydock.h"
@@ -68,7 +66,7 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
         buffer.close();
 
         // insert in textEdit
-        this->textCursor().insertHtml( QString( "<img width=\"%1\" height=\"%2\" src=\"data:image/png;base64,%3\">" ).arg( out.width()).arg( out.height()).arg( bytes.toBase64().constData()));
+        this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( out.width()).arg( out.height()).arg( bytes.toBase64().constData()));
     }
 }
 
@@ -99,7 +97,7 @@ void TextEdit::dropEvent( QDropEvent *event ) {
     if ( this->isSimpleEditor())
         return;
 
-    // move cursot to drop position
+    // move cursor to drop position
     this->setTextCursor( this->cursorForPosition( event->pos()));
 
     // insert image
@@ -264,7 +262,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     }
 #endif
 
-    // check droped items for images
+    // check dropped items for images
     for ( const QUrl &url : source->urls()) {
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
             QPixmap pixmap;
@@ -319,6 +317,6 @@ void TextEdit::setCompleter( QCompleter *completer ) {
     this->completer()->setWidget(this);
     this->completer()->setCompletionMode( QCompleter::PopupCompletion );
     this->completer()->setCaseSensitivity( Qt::CaseInsensitive );
-    this->completer()->connect( this->completer(), QOverload<const QString &>::of( &QCompleter::activated ), [ this ]( const QString &completion ) { this->setHtml( completion ); } );
+    QCompleter::connect( this->completer(), QOverload<const QString &>::of( &QCompleter::activated ), [ this ]( const QString &completion ) { this->setHtml( completion ); } );
 }
 

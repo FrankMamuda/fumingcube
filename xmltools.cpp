@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2013-2019 Armands Aleksejevs
+ * Copyright (C) 2013-2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ void XMLTools::read() {
 
 #ifdef QT_DEBUG
     // announce
-    qCInfo( XMLTools_::Debug ) << this->tr( "reading configuration" );
+    qCInfo( XMLTools_::Debug ) << XMLTools::tr( "reading configuration" );
 #endif
 
     if ( !configDir.exists())
@@ -54,7 +54,7 @@ void XMLTools::read() {
     // load xml file
     QFile xmlFile( path );
     if ( !xmlFile.exists() || !xmlFile.open( QFile::ReadOnly | QFile::Text )) {
-        qCCritical( XMLTools_::Debug ) << this->tr( "no configuration file found" );
+        qCCritical( XMLTools_::Debug ) << XMLTools::tr( "no configuration file found" );
         return;
     }
 
@@ -81,7 +81,7 @@ void XMLTools::read() {
                 }
 
                 if ( Variable::instance()->contains( key ) && !key.isEmpty())
-                    Variable::instance()->setValue( key, value, true );
+                    Variable::setValue( key, value, true );
             }
         }
         node = qAsConst( node ).nextSibling();
@@ -101,7 +101,7 @@ void XMLTools::write() {
 
 #ifdef QT_DEBUG
     // announce
-    qCInfo( XMLTools_::Debug ) << this->tr( "writing configuration" );
+    qCInfo( XMLTools_::Debug ) << XMLTools::tr( "writing configuration" );
 #endif
 
     if ( !configDir.exists())
@@ -132,7 +132,7 @@ void XMLTools::write() {
 
         if ( !var->value().canConvert<QString>()) {
             QByteArray array;
-            QBuffer buffer(&array);
+            QBuffer buffer( &array );
 
             buffer.open( QIODevice::WriteOnly );
             QDataStream out( &buffer );
@@ -171,7 +171,7 @@ void XMLTools::write() {
     if ( QString::compare( savedData, newData )) {
         // write out as binary (not QIODevice::Text) to avoid CR line endings
         if ( !xmlFile.open( QFile::WriteOnly | QFile::Truncate )) {
-            qCCritical( XMLTools_::Debug ) << this->tr( "could not open configuration file \"%1\"" ).arg( path );
+            qCCritical( XMLTools_::Debug ) << XMLTools::tr( "could not open configuration file \"%1\"" ).arg( path );
             return;
         }
         xmlFile.write( newData.toUtf8().replace( "\r", "" ));

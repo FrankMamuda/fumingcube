@@ -28,7 +28,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class About;
+    class About;
 }
 
 /**
@@ -39,7 +39,7 @@ class About final : public QDialog {
 
 public:
     explicit About( QWidget *parent = nullptr );
-    ~About();
+    ~About() override;
 
 private:
     Ui::About *ui;

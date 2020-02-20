@@ -41,10 +41,10 @@ void NFPAWidget::setScale( const int &scale ) {
     this->m_scale = scale;
     this->m_vscale = qSqrt( 2 * ( this->scale() * this->scale()));
     this->rects = QList<QRectF>() <<
-                                     QRectF( -this->vscale(), -this->vscale() * 0.5, this->vscale(), this->vscale() ) <<
-                                     QRectF( -this->vscale() * 0.5, -this->vscale(), this->vscale(), this->vscale() ) <<
-                                     QRectF( 0, -this->vscale() * 0.5, this->vscale(), this->vscale() ) <<
-                                     QRectF( -this->vscale() * 0.5, 0, this->vscale(), this->vscale() );
+                                  QRectF( -this->vscale(), -this->vscale() * 0.5, this->vscale(), this->vscale()) <<
+                                  QRectF( -this->vscale() * 0.5, -this->vscale(), this->vscale(), this->vscale()) <<
+                                  QRectF( 0, -this->vscale() * 0.5, this->vscale(), this->vscale()) <<
+                                  QRectF( -this->vscale() * 0.5, 0, this->vscale(), this->vscale());
 }
 
 /**
@@ -62,13 +62,13 @@ void NFPAWidget::paintEvent( QPaintEvent * ) {
     // draw rects
     painter.setPen( QPen( Qt::black, 1 ));
     painter.setBrush( QColor::fromRgb( 255, 102, 102 ));
-    painter.drawRect( QRectF( -this->scale(), -this->scale(), this->scale(), this->scale() ));
+    painter.drawRect( QRectF( -this->scale(), -this->scale(), this->scale(), this->scale()));
     painter.setBrush( Qt::white );
-    painter.drawRect( QRectF( 0,      0,      this->scale(), this->scale() ));
+    painter.drawRect( QRectF( 0, 0, this->scale(), this->scale()));
     painter.setBrush( QColor::fromRgb( 102, 145, 255 ));
-    painter.drawRect( QRectF( -this->scale(), 0,      this->scale(), this->scale() ));
+    painter.drawRect( QRectF( -this->scale(), 0, this->scale(), this->scale()));
     painter.setBrush( QColor::fromRgb( 252, 255, 102 ));
-    painter.drawRect( QRectF( 0,      -this->scale(), this->scale(), this->scale() ));
+    painter.drawRect( QRectF( 0, -this->scale(), this->scale(), this->scale()));
 
     // draw outer grid
     painter.setBrush( Qt::transparent );
@@ -89,11 +89,13 @@ void NFPAWidget::paintEvent( QPaintEvent * ) {
             if ( !QString::compare( this->parameters().at( y ), "W" ))
                 font.setStrikeOut( true );
 
-            font.setPointSize(( y == 3 ) ? static_cast<int>( this->scales[parm.length()] ) : static_cast<int>( this->scale() * 0.5 ));
+            font.setPointSize(
+                    ( y == 3 ) ? static_cast<int>( this->scales[parm.length()] ) : static_cast<int>( this->scale() *
+                                                                                                     0.5 ));
             painter.setFont( font );
         }
 
-        painter.drawText( this->rects.at( y ), parm, { Qt::AlignCenter });
+        painter.drawText( this->rects.at( y ), parm, { Qt::AlignCenter } );
         painter.restore();
     }
 }

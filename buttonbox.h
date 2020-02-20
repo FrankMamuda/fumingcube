@@ -40,6 +40,7 @@ public:
     explicit ButtonBox( QWidget *parent = nullptr ) : QDialogButtonBox( parent ) {}
 
 public slots:
+
     void setStandardButtons( StandardButtons buttons ) {
         QDialogButtonBox::setStandardButtons( buttons );
         QPushButton *ok( this->button( QDialogButtonBox::Ok ));

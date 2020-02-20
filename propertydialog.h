@@ -28,19 +28,20 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class PropertyDialog;
+    class PropertyDialog;
 }
 
 /**
  * @brief The PropertyDialog class
  */
 class PropertyDialog : public QDialog {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-    explicit PropertyDialog( QWidget *parent = nullptr, const Id &tagId = Id::Invalid, const QString &defaultValue = QString());
-    ~PropertyDialog();
-    QVariant value() const;
+    explicit PropertyDialog( QWidget *parent = nullptr, const Id &tagId = Id::Invalid,
+                             const QString &defaultValue = QString());
+    ~PropertyDialog() override;
+    [[nodiscard]] QVariant value() const;
     static const int Advanced = QDialog::Accepted + 2;
 
 private slots:

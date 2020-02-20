@@ -29,7 +29,8 @@
  * @param parent
  * @param px
  */
-ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &preferredWidth, bool view ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
+ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &preferredWidth, bool view ) : QDialog(
+        parent ), ui( new Ui::ImageUtils ) {
     QPixmap scaledPixmap( pixmap );
 
     if ( preferredWidth > 0 )
@@ -95,10 +96,10 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &prefe
     // set maximum scaled size
     scalePixmap( 100.0 );
     this->ui->sizeSlider->repaint();
-    this->connect( this->ui->sizeSlider, &QSlider::valueChanged, scalePixmap );
+    ImageUtils::connect( this->ui->sizeSlider, &QSlider::valueChanged, scalePixmap );
 
     // connect ok button
-    this->connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this, pixmap ]() {
+    ImageUtils::connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this, pixmap ]() {
         this->pixmap = pixmap.scaled( this->size, Qt::KeepAspectRatio, Qt::SmoothTransformation );
     } );
 
@@ -111,8 +112,8 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &prefe
  * @brief ImageUtils::~ImageUtils
  */
 ImageUtils::~ImageUtils() {
-    this->disconnect( this->ui->sizeSlider, &QSlider::valueChanged, this, nullptr );
-    this->disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
+    ImageUtils::disconnect( this->ui->sizeSlider, &QSlider::valueChanged, this, nullptr );
+    ImageUtils::disconnect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, nullptr );
     delete this->ui;
 }
 
@@ -196,7 +197,7 @@ QPixmap ImageUtils::autoCropPixmap( const QPixmap &pixmap, const QColor &key ) {
 
         for ( int y = 0; y < 3; y++ ) {
             if ( colours[y] > keyColours[y] )
-                alpha[y] = ( colours[y]- keyColours[y] ) / ( 255.0 - keyColours[y] );
+                alpha[y] = ( colours[y] - keyColours[y] ) / ( 255.0 - keyColours[y] );
             else if ( colours[y] < keyColours[y] )
                 alpha[y] = ( keyColours[y] - colours[y] ) / ( keyColours[y] );
             else
@@ -212,9 +213,9 @@ QPixmap ImageUtils::autoCropPixmap( const QPixmap &pixmap, const QColor &key ) {
 
         if ( colours[3] > 1.0 ) {
             for ( int y = 0; y < 3; y++ )
-                colours[y] = qBound( 0.0, 255.0 * ( colours[y] - keyColours[y] )/ colours[3] + keyColours[y], 1.0 );
+                colours[y] = qBound( 0.0, 255.0 * ( colours[y] - keyColours[y] ) / colours[3] + keyColours[y], 1.0 );
 
-            colours[3] = qBound ( 0.0, colours[3] * colour.alphaF() / 255.0, 1.0 );
+            colours[3] = qBound( 0.0, colours[3] * colour.alphaF() / 255.0, 1.0 );
         }
 
         return QColor::fromRgbF( colours[0], colours[1], colours[2], colours[3] );

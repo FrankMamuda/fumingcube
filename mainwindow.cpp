@@ -52,10 +52,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     PropertyDock::instance()->setup( this->ui->actionProperties );
     LabelDock::instance()->setup( this->ui->actionLabels );
 
-    if ( !Variable::instance()->value<QVariant>( "mainWindow/geometry" ).isNull() &&
-         !Variable::instance()->value<QVariant>( "mainWindow/state" ).isNull()) {
-        this->restoreGeometry( Variable::instance()->compressedByteArray( "mainWindow/geometry" ));
-        this->restoreState( Variable::instance()->compressedByteArray( "mainWindow/state" ));
+    if ( !Variable::value<QVariant>( "mainWindow/geometry" ).isNull() &&
+         !Variable::value<QVariant>( "mainWindow/state" ).isNull()) {
+        this->restoreGeometry( Variable::compressedByteArray( "mainWindow/geometry" ));
+        this->restoreState( Variable::compressedByteArray( "mainWindow/state" ));
         this->restoreDockWidget( ReagentDock::instance());
         this->restoreDockWidget( PropertyDock::instance());
         this->restoreDockWidget( LabelDock::instance());
@@ -66,9 +66,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     font.setPointSizeF( font.pointSizeF() * 1.2 );
     this->ui->calcView->setFont( qAsConst( font ));
 
-    // resture previous calculations
+    // restore previous calculations
     this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; } ​p { margin: 0px; }​" );
-    this->ui->calcView->append( Variable::instance()->compressedString( "calculator/history" ));
+    this->ui->calcView->append( Variable::compressedString( "calculator/history" ));
 
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
@@ -78,15 +78,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         if ( args.count() < 2 || args.count() > 3 )
             return;
 
-        // resuse result
+        // reuse result
         if ( !QString::compare( args.first(), "ans" )) {
             this->insertCommand( args.at( 1 ) + " " );
             return;
         }
 
         // get all arguments - property name, reagent name and batch name
-        const QString& property( args.at( 0 ));
-        const QString& reagent( args.at( 1 ));
+        const QString &property( args.at( 0 ));
+        const QString &reagent( args.at( 1 ));
         const QString batch( args.count() == 3 ? args.at( 2 ) : "" );
 
         // get reagentId (parent)
@@ -104,7 +104,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         }
 
         // select reagent or batch
-        Variable::instance()->setValue<int>( "reagentDock/selection", static_cast<int>( qAsConst( reagentId )));
+        Variable::setValue<int>( "reagentDock/selection", static_cast<int>( qAsConst( reagentId )));
         ReagentDock::instance()->view()->restoreIndex();
 
         // get property tagId
@@ -125,7 +125,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         if ( propertyRow == Row::Invalid )
             return;
 
-        // select propery index
+        // select property index
         const QModelIndex index(
                 Property::instance()->index( static_cast<int>( propertyRow ), Property::PropertyData ));
         if ( !index.isValid())
@@ -204,12 +204,12 @@ void MainWindow::appendToCalculator( const QString &line ) {
         //       what it does is:
         //       1) finds function( args, .. )
         //       2) encloses this with an anchor
-        const QRegularExpression functionExpresstion(
+        const QRegularExpression functionExpression(
                 QString( R"((?<function>%1)\s*\(\s*(?<arguments>.+?(?=\)|\s*\)))\s*\))" ).arg(
                         functions.join( "|" )));
         QString replacedLine( line );
         replacedLine = replacedLine.remove( "\n" );
-        QRegularExpressionMatchIterator functionIterator( functionExpresstion.globalMatch( qAsConst( replacedLine )));
+        QRegularExpressionMatchIterator functionIterator( functionExpression.globalMatch( qAsConst( replacedLine )));
         QList<Match> matches;
 
         // first match the function + args
@@ -246,10 +246,10 @@ void MainWindow::appendToCalculator( const QString &line ) {
         this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
         if ( result.isError()) {
             this->ui->calcView->append( QString( "<span>%1</span><br>" ).arg( string ));
-            Variable::instance()->setString( "calculator/ans", "" );
+            Variable::setString( "calculator/ans", "" );
         } else {
             this->ui->calcView->append( QString( "<span>= <a href=\"ans;%1\">%1<\a></span><br>" ).arg( string ));
-            Variable::instance()->setString( "calculator/ans", string );
+            Variable::setString( "calculator/ans", string );
         }
     }
 
@@ -278,9 +278,9 @@ void MainWindow::insertCommand( const QString &command ) {
  */
 void MainWindow::saveHistory() {
     // save calculator view history
-    Variable::instance()->setCompressedString( "calculator/history", this->ui->calcView->toHtml());
+    Variable::setCompressedString( "calculator/history", this->ui->calcView->toHtml());
 
-    // save expression editor hidtory
+    // save expression editor history
     this->ui->calcEdit->saveHistory();
 }
 
@@ -312,8 +312,8 @@ void MainWindow::on_actionTags_triggered() {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
-    Variable::instance()->setCompressedByteArray( "mainWindow/geometry", MainWindow::instance()->saveGeometry());
-    Variable::instance()->setCompressedByteArray( "mainWindow/state", MainWindow::instance()->saveState());
+    Variable::setCompressedByteArray( "mainWindow/geometry", MainWindow::instance()->saveGeometry());
+    Variable::setCompressedByteArray( "mainWindow/state", MainWindow::instance()->saveState());
     QMainWindow::closeEvent( event );
 }
 

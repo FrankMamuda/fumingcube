@@ -34,11 +34,11 @@ class GHSBuilder : public QDialog {
 
 public:
     explicit GHSBuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
-    ~GHSBuilder();
-    QStringList parameters() const;
+    ~GHSBuilder() override;
+    [[nodiscard]] QStringList parameters() const;
 
 private:
-    QList<QToolButton*> buttons;
+    QList<QToolButton *> buttons;
     QGridLayout *grid = new QGridLayout();
     QDialogButtonBox *buttonBox = new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel );
 };

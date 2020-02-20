@@ -45,27 +45,27 @@ public:
      * @brief TreeModel
      * @param parent
      */
-    ReagentModel( QObject *parent = nullptr ) : QStandardItemModel( parent ) { this->setupModelData(); }
+    explicit ReagentModel( QObject *parent = nullptr ) : QStandardItemModel( parent ) { this->setupModelData(); }
 
     /**
      * @brief ~TreeModel
      */
-    ~ReagentModel() override {}
+    ~ReagentModel() override = default;
 
     /**
      * @brief columnCount
      * @param parent
      * @return
      */
-    QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
-    QVariant data( const QModelIndex &index, int role ) const override;
-    QModelIndex indexFromId( const Id &id ) const;
-    Id idFromIndex( const QModelIndex &index ) const;
+    [[nodiscard]] QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
+    [[nodiscard]] QVariant data( const QModelIndex &index, int role ) const override;
+    [[nodiscard]] QModelIndex indexFromId( const Id &id ) const;
+    [[nodiscard]] Id idFromIndex( const QModelIndex &index ) const;
     static QString generateName( const QString &name, const QString &reference = QString());
 
 public slots:
     void add( const Id &id );
-    void addItem( const Id &id, const Id &parentId, QStandardItem *parentItem );
+    static void addItem( const Id &id, const Id &parentId, QStandardItem *parentItem );
     void setupModelData();
 
     /**

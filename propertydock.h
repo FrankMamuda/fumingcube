@@ -31,7 +31,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class PropertyDock;
+    class PropertyDock;
 }
 
 /**
@@ -42,9 +42,12 @@ class PropertyDock final : public DockWidget {
     Q_DISABLE_COPY( PropertyDock )
 
 public:
-    static PropertyDock *instance() { static PropertyDock *reagentDock( new PropertyDock()); return reagentDock; }
-    ~PropertyDock();
-    int sectionSize( int column ) const;
+    static PropertyDock *instance() {
+        static auto *reagentDock( new PropertyDock());
+        return reagentDock;
+    }
+    ~PropertyDock() override;
+    [[nodiscard]] int sectionSize( int column ) const;
     QStringList hiddenTags;
 
 public slots:
@@ -67,5 +70,6 @@ private slots:
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;
-    QPair<QString, QVariant> getPropertyValue(const Id &reagentId, const Id &tagId = Id::Invalid, const Id &propertyId = Id::Invalid ) const;
+    [[nodiscard]] QPair<QString, QVariant>
+    getPropertyValue( const Id &reagentId, const Id &tagId = Id::Invalid, const Id &propertyId = Id::Invalid ) const;
 };

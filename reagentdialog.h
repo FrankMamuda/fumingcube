@@ -29,7 +29,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class ReagentDialog;
+    class ReagentDialog;
 }
 
 namespace ReagentTools {
@@ -38,23 +38,24 @@ namespace ReagentTools {
  * @param string
  * @return
  */
-const static QString DigitsToScript( const QString &string, bool subScript = false ) {
-    QString out( string );
+    static QString DigitsToScript( const QString &string, bool subScript = false ) {
+        QString out( string );
 
-    foreach ( const QChar &ch, out ) {
-        if ( ch.isDigit()) {
-            out.replace( ch, subScript ? QString( "<span style=\"vertical-align:sub;\">%1</span>" ).arg( ch ) : QString( "<span style=\"vertical-align:sup;\">%1</span>" ).arg( ch ));
+        for ( const QChar &ch : out ) {
+            if ( ch.isDigit()) {
+                out.replace( ch, subScript ? QString( "<span style=\"vertical-align:sub;\">%1</span>" ).arg( ch )
+                                           : QString( "<span style=\"vertical-align:sup;\">%1</span>" ).arg( ch ));
+            }
         }
+
+        return out;
     }
 
-    return out;
+    [[maybe_unused]]
+    static QString DigitsToSubscript( const QString &string ) { return DigitsToScript( string, true ); }
+    [[maybe_unused]]
+    static QString DigitsToSuperscript( const QString &string ) { return DigitsToScript( string, false ); }
 }
-
-[[maybe_unused]]
-static const QString DigitsToSubscript( const QString &string ) { return DigitsToScript( string, true ); }
-[[maybe_unused]]
-static const QString DigitsToSuperscript( const QString &string ) { return DigitsToScript( string, false ); }
-};
 
 /**
  * @brief The ReagentDialog class
@@ -69,10 +70,11 @@ public:
     };
     Q_ENUM( Modes )
 
-    explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(), const QString &reference = QString(), const Modes &mode = AddMode );
-    ~ReagentDialog();
-    QString name() const;
-    QString reference() const;
+    explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(),
+                            const QString &reference = QString(), const Modes &mode = AddMode );
+    ~ReagentDialog() override;
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] QString reference() const;
     QList<Id> labels;
 
 protected:

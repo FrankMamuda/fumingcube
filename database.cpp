@@ -19,11 +19,9 @@
 /*
  * includes
  */
-#include <QDebug>
 #include <QDir>
 #include <QSqlQuery>
 #include <QSqlError>
-#include <QSqlRecord>
 #include <QApplication>
 #include <QTime>
 #include "database.h"
@@ -34,7 +32,7 @@
 #include "mainwindow.h"
 
 /**
- * @brief Database::testPath checks if provided database path is valid and creates non-existant sub-directories
+ * @brief Database::testPath checks if provided database path is valid and creates non-existent sub-directories
  * @param path database path
  * @return success
  */
@@ -43,18 +41,18 @@ bool Database::testPath( const QString &path ) {
 
     // reject empty paths
     if ( path.isEmpty()) {
-        qCDebug( Database_::Debug ) << this->tr( "empty database path" );
+        qCDebug( Database_::Debug ) << Database::tr( "empty database path" );
         return false;
     }
 
     // only accept absolute paths
     if ( !dir.isAbsolute()) {
-        qCDebug( Database_::Debug ) << this->tr( "relative or invalid database path \"%1\"" ).arg( path );
+        qCDebug( Database_::Debug ) << Database::tr( "relative or invalid database path \"%1\"" ).arg( path );
         return false;
     }
 
     if ( !dir.exists()) {
-        qCDebug( Database_::Debug ) << this->tr( "making non-existant database path \"%1\"" ).arg( dir.absolutePath());
+        qCDebug( Database_::Debug ) << Database::tr( "making non-existant database path \"%1\"" ).arg( dir.absolutePath());
         dir.mkpath( dir.absolutePath());
 
         if ( !dir.exists())
@@ -72,37 +70,41 @@ Database::Database( QObject *parent ) : QObject( parent ) {
     QSqlDatabase database( QSqlDatabase::database());
 
     // validate path
-    if ( !testPath( Variable::instance()->string( "databasePath" ))) {
-        Variable::instance()->setString( "databasePath", QDir( QDir::homePath() + "/" + Main::Path ).absolutePath() + "/" + "database.db" );
+    if ( !testPath( Variable::string( "databasePath" ))) {
+        Variable::setString( "databasePath",
+                                         QDir( QDir::homePath() + "/" + Main::Path ).absolutePath() + "/" +
+                                         "database.db" );
 
-        if ( !this->testPath( Variable::instance()->string( "databasePath" )))
-            qFatal( QT_TR_NOOP_UTF8( "could not create database path" ));
+        if ( !this->testPath( Variable::string( "databasePath" )))
+            qFatal( QT_TR_NOOP_UTF8( "could not create database path" ) );
     }
 
     // failsafe
-    QFile file( Variable::instance()->string( "databasePath" ));
+    QFile file( Variable::string( "databasePath" ));
     if ( !file.exists()) {
-        if ( QFile::copy( ":/initial/database.db", Variable::instance()->string( "databasePath" ))) {
-            qCDebug( Database_::Debug ) << this->tr( "using built-in database" ) << Variable::instance()->string( "databasePath" );
+        if ( QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ))) {
+            qCDebug( Database_::Debug ) << Database::tr( "using built-in database" )
+                                        << Variable::string( "databasePath" );
         } else {
             // this should never happen, but just in case
             file.open( QFile::WriteOnly );
             file.close();
-            qCDebug( Database_::Debug ) << this->tr( "creating non-existant database" ) << Variable::instance()->string( "databasePath" );
+            qCDebug( Database_::Debug ) << Database::tr( "creating non-existant database" )
+                                        << Variable::string( "databasePath" );
         }
 
         if ( !file.exists())
-            qFatal( QT_TR_NOOP_UTF8( "unable to create database file" ));
+            qFatal( QT_TR_NOOP_UTF8( "unable to create database file" ) );
 
         file.setPermissions( QFileDevice::ReadOwner | QFileDevice::WriteOwner );
     }
 
     // announce
-    qCInfo( Database_::Debug ) << this->tr( "loading database" );
+    qCInfo( Database_::Debug ) << Database::tr( "loading database" );
 
     // failsafe
     if ( !database.isDriverAvailable( "QSQLITE" ))
-        qFatal( QT_TR_NOOP_UTF8( "sqlite not present on the system" ));
+        qFatal( QT_TR_NOOP_UTF8( "sqlite not present on the system" ) );
 
     // set sqlite driver
     database = QSqlDatabase::addDatabase( "QSQLITE" );
@@ -111,7 +113,7 @@ Database::Database( QObject *parent ) : QObject( parent ) {
 
     // set path and open
     if ( !database.open())
-        qFatal( QT_TR_NOOP_UTF8( "could not load database" ));
+        qFatal( QT_TR_NOOP_UTF8( "could not load database" ) );
 
     // done
     this->setInitialised();
@@ -136,12 +138,12 @@ Database::~Database() {
     this->removeOrphanedEntries();
 
     // announce
-    qCInfo( Database_::Debug ) << this->tr( "unloading database" );
+    qCInfo( Database_::Debug ) << Database::tr( "unloading database" );
     this->setInitialised( false );
 
     // unbind variables
-    //Variable::instance()->unbind( "report" );
-    qCInfo( Database_::Debug ) << this->tr( "clearing tables" );
+    //Variable::unbind( "report" );
+    qCInfo( Database_::Debug ) << Database::tr( "clearing tables" );
     for ( Table *table : this->tables )
         table->clear();
 
@@ -155,7 +157,7 @@ Database::~Database() {
             open = true;
             connectionName = database.connectionName();
 
-            qCInfo( Database_::Debug ) << this->tr( "closing database" );
+            qCInfo( Database_::Debug ) << Database::tr( "closing database" );
             database.close();
         }
     }
@@ -171,23 +173,25 @@ Database::~Database() {
  */
 bool Database::add( Table *table ) {
     QSqlDatabase database( QSqlDatabase::database());
-    const QStringList tables( database.tables());
+    const QStringList tableList( database.tables());
 
     // store table
     this->tables[table->tableName()] = table;
 
     // announce
-    if ( !tables.count())
-        qCInfo( Database_::Debug ) << this->tr( "creating an empty database" );
+    if ( !tableList.count())
+        qCInfo( Database_::Debug ) << Database::tr( "creating an empty database" );
 
     // validate schema
     bool found = false;
-    for ( const QString &tableName : tables ) {
+    for ( const QString &tableName : tableList ) {
         if ( !QString::compare( table->tableName(), tableName )) {
             for ( const Field &field : qAsConst( table->fields )) {
 
                 if ( !database.record( table->tableName()).contains( field->name())) {
-                    qCCritical( Database_::Debug ) << this->tr( "database field mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg( field->name());
+                    qCCritical( Database_::Debug )
+                        << Database::tr( "database field mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg(
+                                field->name());
                     return false;
                 } else {
                     // ignore unsigned ints for now
@@ -195,7 +199,9 @@ bool Database::add( Table *table ) {
                     const QVariant::Type databaseType = database.record( table->tableName()).field( field->id()).type();
 
                     if ( internalType != databaseType ) {
-                        qCCritical( Database_::Debug ) << this->tr( "database type mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg( field->name());
+                        qCCritical( Database_::Debug )
+                            << Database::tr( "database type mismatch in table \"%1\", field - \"%2\"" ).arg(
+                                    tableName ).arg( field->name());
                         return false;
                     }
                 }
@@ -209,7 +215,7 @@ bool Database::add( Table *table ) {
 
     if ( !found ) {
         // announce
-        qCInfo( Database_::Debug ) << this->tr( "creating an empty table - \"%1\"" ).arg( table->tableName());
+        qCInfo( Database_::Debug ) << Database::tr( "creating an empty table - \"%1\"" ).arg( table->tableName());
 
         // prepare statement
         for ( const Field &field : qAsConst( table->fields )) {
@@ -247,7 +253,9 @@ bool Database::add( Table *table ) {
         }
 
         if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName()).arg( statement )))
-            qCCritical( Database_::Debug ) << this->tr( "could not create table - \"%1\", reason - \"%2\"" ).arg( table->tableName()).arg( query.lastError().text());
+            qCCritical( Database_::Debug )
+                << Database::tr( "could not create table - \"%1\", reason - \"%2\"" ).arg( table->tableName()).arg(
+                        query.lastError().text());
     }
 
     // table has been verified and is marked as valid
@@ -258,7 +266,8 @@ bool Database::add( Table *table ) {
 
     // load data
     if ( !table->select()) {
-        qCCritical( Database_::Debug ) << this->tr( "could not initialize model for table - \"%1\"" ).arg( table->tableName());
+        qCCritical( Database_::Debug )
+            << Database::tr( "could not initialize model for table - \"%1\"" ).arg( table->tableName());
         table->setValid( false );
     }
 

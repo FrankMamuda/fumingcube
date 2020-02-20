@@ -24,6 +24,7 @@
  */
 #include <QSharedPointer>
 #include <QVariant>
+#include <utility>
 
 /**
  * @brief The Var class
@@ -31,23 +32,25 @@
 class Var final {
 public:
     enum class Flag {
-        NoFlags  = 0x0,
+        NoFlags = 0x0,
         ReadOnly = 0x1,
-        NoSave   = 0x2,
-        Hidden   = 0x4
+        NoSave = 0x2,
+        Hidden = 0x4
     };
     Q_DECLARE_FLAGS( Flags, Flag )
 
-    explicit Var( const QString &key = QString(), const QVariant &defaultValue = QVariant(), Flags flags = Flag::NoFlags ) : m_key( key ), m_value( defaultValue ), m_defaultValue( defaultValue ), m_flags( flags ) {}
+    explicit Var( QString key = QString(), const QVariant &defaultValue = QVariant(),
+                  Flags flags = Flag::NoFlags ) : m_key( std::move( key )), m_value( defaultValue ), m_defaultValue( defaultValue ),
+                                                  m_flags( flags ) {}
     virtual ~Var() = default;
-    QString key() const { return this->m_key; }
-    Flags flags() const { return this->m_flags; }
-    virtual QVariant value() const { return this->m_value; }
-    QVariant defaultValue() const { return this->m_defaultValue; }
+    [[nodiscard]] QString key() const { return this->m_key; }
+    [[nodiscard]] Flags flags() const { return this->m_flags; }
+    [[nodiscard]] virtual QVariant value() const { return this->m_value; }
+    [[nodiscard]] QVariant defaultValue() const { return this->m_defaultValue; }
     virtual void setValue( const QVariant &value ) { m_value = value; }
-    Var& operator = ( const Var & ) = default;
-    Var( const Var& ) = default;
-    virtual QSharedPointer<Var> copy() const { return QSharedPointer<Var>( new Var( *this )); }
+    Var &operator=( const Var & ) = default;
+    Var( const Var & ) = default;
+    [[nodiscard]] virtual QSharedPointer<Var> copy() const { return QSharedPointer<Var>( new Var( *this )); }
 
 private:
     QString m_key;

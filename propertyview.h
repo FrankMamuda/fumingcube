@@ -30,12 +30,12 @@
  * @brief The PropertyView class
  */
 class PropertyView : public QTableView {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-    PropertyView( QWidget *parent = nullptr );
+    explicit PropertyView( QWidget *parent = nullptr );
     ~PropertyView() override { delete this->delegate; }
-    bool isResizeInProgress() const { return this->m_resizeInProgress; }
+    [[nodiscard]] bool isResizeInProgress() const { return this->m_resizeInProgress; }
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;

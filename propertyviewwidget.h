@@ -32,7 +32,7 @@ class PropertyViewWidget : public QWidget {
 
 public:
     explicit PropertyViewWidget( QWidget *parent = nullptr, const QStringList & = QStringList()) : QWidget( parent ) {}
-    QStringList parameters() const { return this->m_parameters; }
+    [[nodiscard]] QStringList parameters() const { return this->m_parameters; }
 
 public slots:
     virtual void update( const QStringList &parms ) = 0;

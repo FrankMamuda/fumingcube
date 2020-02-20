@@ -35,12 +35,12 @@ GHSBuilder::GHSBuilder( QWidget *parent, const QStringList &parameters ) : QDial
         QImage image( name );
 
         for ( int w = 0; w < image.width(); w++ ) {
-             for ( int h = 0; h < image.height(); h++ ) {
-                 const int gray = qGray( image.pixel( w, h ));
-                 const int alpha = image.pixelColor( w, h ).alpha();
-                 image.setPixel( w, h, qRgba( gray, gray, gray, alpha ));
-             }
-         }
+            for ( int h = 0; h < image.height(); h++ ) {
+                const int gray = qGray( image.pixel( w, h ));
+                const int alpha = image.pixelColor( w, h ).alpha();
+                image.setPixel( w, h, qRgba( gray, gray, gray, alpha ));
+            }
+        }
 
         return QPixmap::fromImage( qAsConst( image ));
     };
@@ -56,7 +56,7 @@ GHSBuilder::GHSBuilder( QWidget *parent, const QStringList &parameters ) : QDial
             icon.addPixmap( QPixmap( ":/pictograms/" + iconName ), QIcon::Normal, QIcon::On );
 
             // set up tool button
-            QToolButton *button( new QToolButton());
+            auto *button( new QToolButton());
             button->setCheckable( true );
             button->setIcon( icon );
             button->setIconSize( { 64, 64 } );
@@ -79,17 +79,17 @@ GHSBuilder::GHSBuilder( QWidget *parent, const QStringList &parameters ) : QDial
     }
 
     // setup dialog buttonbox
-    QDialogButtonBox *buttonBox( new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel ));
-    buttonBox->connect( buttonBox, SIGNAL( accepted()), this, SLOT( accept()));
-    buttonBox->connect( buttonBox, SIGNAL( rejected()), this, SLOT( reject()));
-    grid->addWidget( buttonBox, 3, 0, 1, 3 );
+    //auto *buttonBox( new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel ));
+    QDialogButtonBox::connect( this->buttonBox, SIGNAL( accepted()), this, SLOT( accept()));
+    QDialogButtonBox::connect( this->buttonBox, SIGNAL( rejected()), this, SLOT( reject()));
+    grid->addWidget( this->buttonBox, 3, 0, 1, 3 );
 
     // set grid as the dialog's layout
     this->setLayout( grid );
 
     // setup dialog
     this->setWindowIcon( QIcon::fromTheme( "hazard" ));
-    this->setWindowTitle( this->tr( "Select pictograms" ));
+    this->setWindowTitle( GHSBuilder::tr( "Select pictograms" ));
 }
 
 /**

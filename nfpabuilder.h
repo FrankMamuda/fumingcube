@@ -27,7 +27,7 @@
  * The Ui namespace
  */
 namespace Ui {
-class NFPABuilder;
+    class NFPABuilder;
 }
 
 /**
@@ -38,8 +38,8 @@ class NFPABuilder : public QDialog {
 
 public:
     explicit NFPABuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
-    ~NFPABuilder();
-    QStringList parameters() const;
+    ~NFPABuilder() override;
+    [[nodiscard]] QStringList parameters() const;
 
 public slots:
     void updateNFPA();

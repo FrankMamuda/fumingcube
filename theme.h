@@ -35,11 +35,11 @@ class Theme : public QObject {
     Q_OBJECT
 
 public:
-    Theme( const QString &fileName = QString());
-    QPalette palette() const;
-    QColor syntaxColour( const QString &key ) const;
-    bool isDark() const { return this->m_dark; }
-    QStyle *style() const { return this->m_style; }
+    explicit Theme( const QString &fileName = QString());
+    [[nodiscard]] QPalette palette() const;
+    [[maybe_unused]][[nodiscard]] QColor syntaxColour( const QString &key ) const;
+    [[nodiscard]] bool isDark() const { return this->m_dark; }
+    [[nodiscard]] QStyle *style() const { return this->m_style; }
 
 private slots:
     void readThemeFile( const QString &fileName );

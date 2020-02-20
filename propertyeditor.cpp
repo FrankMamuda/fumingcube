@@ -25,12 +25,10 @@
 #include <QPainter>
 #include <QDebug>
 #include <QColorDialog>
-#include <QFileDialog>
 #include <QBitmap>
 #include <QMenu>
 #include <QStandardItem>
 #include <QListWidgetItem>
-#include "ghspictograms.h"
 #include "charactermap.h"
 
 //
@@ -47,7 +45,7 @@
 bool PropertyEditor::eventFilter( QObject *object, QEvent *event ) {
     if ( object == this->ui->name ) {
         if ( event->type() == QEvent::KeyPress ) {
-            const QKeyEvent *keyEvent( static_cast<QKeyEvent*>( event ));
+            const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
 
             if ( keyEvent->key() == Qt::Key_Tab ) {
                 this->ui->value->setFocus();
@@ -79,7 +77,8 @@ QString PropertyEditor::value() const {
  * @brief PropertyEditor::PropertyEditor
  * @param parent
  */
-PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog( parent ), ui( new Ui::PropertyEditor ), mode( mode ) {
+PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name, const QString &value ) : QDialog(
+        parent ), ui( new Ui::PropertyEditor ), mode( mode ) {
     // set up ui
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
@@ -107,13 +106,13 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
     this->ui->valueToolBar->installFeature( EditorToolbar::CleanHTML );
 
     // actions performed upon entering property name editor
-    this->connect( this->ui->name, &TextEdit::entered, [ this ]() {
+    PropertyEditor::connect( this->ui->name, &TextEdit::entered, [ this ]() {
         this->ui->nameToolBar->show();
         this->ui->valueToolBar->hide();
     } );
 
     // actions performed upon entering property value editor
-    this->connect( this->ui->value, &TextEdit::entered, [ this ]() {
+    PropertyEditor::connect( this->ui->value, &TextEdit::entered, [ this ]() {
         this->ui->valueToolBar->show();
         this->ui->nameToolBar->hide();
     } );
@@ -143,8 +142,8 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
  */
 PropertyEditor::~PropertyEditor() {
     // disconnects
-    this->disconnect( this->ui->name, &TextEdit::entered, this, nullptr );
-    this->disconnect( this->ui->value, &TextEdit::entered, this, nullptr );
+    PropertyEditor::disconnect( this->ui->name, &TextEdit::entered, this, nullptr );
+    PropertyEditor::disconnect( this->ui->value, &TextEdit::entered, this, nullptr );
 
     delete this->ui;
 }
@@ -156,16 +155,16 @@ PropertyEditor::~PropertyEditor() {
  */
 void PropertyEditor::setText( Editors editor, const QString &text ) {
     switch ( editor ) {
-    case Name:
-        this->ui->name->setHtml( text );
-        break;
+        case Name:
+            this->ui->name->setHtml( text );
+            break;
 
-    case Value:
-        this->ui->value->setHtml( text );
-        break;
+        case Value:
+            this->ui->value->setHtml( text );
+            break;
 
-    case NoEditor:
-        break;
+        case NoEditor:
+            break;
     }
 }
 
@@ -173,7 +172,7 @@ void PropertyEditor::setText( Editors editor, const QString &text ) {
  * @brief PropertyEditor::showEvent
  * @param event
  */
-void PropertyEditor::showEvent(QShowEvent *event) {
+void PropertyEditor::showEvent( QShowEvent *event ) {
     QDialog::showEvent( event );
     this->ui->name->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->lineEdit->hide();

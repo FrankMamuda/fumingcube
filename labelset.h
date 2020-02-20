@@ -49,14 +49,17 @@ public:
      * @brief instance
      * @return
      */
-    static LabelSet *instance() { static LabelSet *labelSet( new LabelSet()); return labelSet; }
+    static LabelSet *instance() {
+        static auto *labelSet( new LabelSet());
+        return labelSet;
+    }
     ~LabelSet() override = default;
     Row add( const Id &labelId, const Id &reagentId );
     void remove( const Id &labelId, const Id &reagentId );
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id, ID,        id )
-    INITIALIZE_FIELD( Id,LabelId,   labelId )
+    INITIALIZE_FIELD( Id, ID, id )
+    INITIALIZE_FIELD( Id, LabelId, labelId )
     INITIALIZE_FIELD( Id, ReagentId, reagentId )
 
 public slots:

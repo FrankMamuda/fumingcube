@@ -32,7 +32,7 @@ Theme::Theme( const QString &fileName ) {
     this->m_style = qApp->style();
 
     if ( fileName.isEmpty()) {
-        this->m_dark = Variable::instance()->isEnabled( "darkMode" );
+        this->m_dark = Variable::isEnabled( "darkMode" );
         this->initializeSyntaxColours();
     } else
         this->readThemeFile( fileName );

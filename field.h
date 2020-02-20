@@ -22,16 +22,19 @@
  * includes
  */
 #include <QSqlField>
+#include <utility>
 
 /**
  * @brief The Field class
  */
 class Field_ : public QSqlField {
 public:
-    Field_( int id = 0, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid, const QString &format = QString( "text" ), bool unique = false, bool autoValue = false ) : QSqlField( fieldName, type ), m_id( id ), m_unique( unique ), m_format( format ) { this->setAutoValue( autoValue ); }
-    bool isUnique() const { return this->m_unique; }
-    QString format() const { return m_format; }
-    int id() const { return this->m_id; }
+    explicit Field_( int id = 0, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid,
+            QString format = QString( "text" ), bool unique = false, bool autoValue = false ) : QSqlField(
+            fieldName, type ), m_id( id ), m_unique( unique ), m_format( std::move( format )) { this->setAutoValue( autoValue ); }
+    [[nodiscard]] bool isUnique() const { return this->m_unique; }
+    [[nodiscard]] QString format() const { return m_format; }
+    [[nodiscard]] int id() const { return this->m_id; }
     bool isPrimary() { return this->isAutoValue() && this->format().contains( "primary key" ); }
 
 private:

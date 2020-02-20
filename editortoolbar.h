@@ -38,7 +38,7 @@ public:
      * @brief editor
      * @return
      */
-    TextEdit *editor() const { return this->m_editor; }
+    [[nodiscard]] TextEdit *editor() const { return this->m_editor; }
 
     /**
      * @brief The Feature enum
@@ -73,16 +73,16 @@ private slots:
     void mergeFormat( const QTextCharFormat &format );
 
 private:
-    QAction *actionSubScript;
-    QAction *actionSuperScript;
-    QAction *actionBold;
-    QAction *actionItalic;
-    QAction *actionUnderlined;
-    QAction *actionColour;
-    QAction *actionImage;
-    QAction *actionGHS;
-    QAction *actionCharacterMap;
-    QAction *actionCleanHTML;
+    QAction *actionSubScript = nullptr;
+    QAction *actionSuperScript = nullptr;
+    QAction *actionBold = nullptr;
+    QAction *actionItalic = nullptr;
+    QAction *actionUnderlined = nullptr;
+    QAction *actionColour = nullptr;
+    QAction *actionImage = nullptr;
+    QAction *actionGHS = nullptr;
+    QAction *actionCharacterMap = nullptr;
+    QAction *actionCleanHTML = nullptr;
 
     TextEdit *m_editor = nullptr;
     Features m_features;

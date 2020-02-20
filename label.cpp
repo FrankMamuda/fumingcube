@@ -30,9 +30,9 @@
  * @brief Label::Label
  */
 Label::Label() : Table( "label" ) {
-    this->addField( PRIMARY_FIELD( ID ));
-    this->addField( FIELD( Name,   String ));
-    this->addField( FIELD( Colour, ByteArray ));
+    this->addField( PRIMARY_FIELD( ID ) );
+    this->addField( FIELD( Name, String ) );
+    this->addField( FIELD( Colour, ByteArray ) );
 }
 
 /**
@@ -102,17 +102,19 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
 
     if ( colourList.count() > 4 ) {
         QLinearGradient gradient( 0, 0, 12, 8 );
-        gradient.setColorAt( 0.0,       Qt::red );
+        gradient.setColorAt( 0.0, Qt::red );
         gradient.setColorAt( 1.0 / 6.0, QColor( 255, 100, 0 ));
         gradient.setColorAt( 2.0 / 6.0, Qt::yellow );
         gradient.setColorAt( 3.0 / 6.0, Qt::green );
         gradient.setColorAt( 4.0 / 6.0, Qt::cyan );
         gradient.setColorAt( 5.0 / 6.0, Qt::blue );
-        gradient.setColorAt( 1.0,       Qt::magenta );
+        gradient.setColorAt( 1.0, Qt::magenta );
         painter.setBrush( QBrush( gradient ));
         painter.drawRoundedRect( QRect( 0, 0, 12, 8 ), 3, 3 );
     } else {
-        const QMap<int,int> sizes { { 2, 6 }, { 3, 4 }, { 4, 3 } };
+        const QMap<int, int> sizes {{ 2, 6 },
+                                    { 3, 4 },
+                                    { 4, 3 }};
 
         int offset = 0;
         for ( const QColor &colour : colourList ) {
@@ -138,9 +140,9 @@ void Label::removeOrphanedEntries() {
  * @brief Label::populate
  */
 void Label::populate() {
-    this->add( this->tr( "Bases" ),      QColor::fromRgb( 218,  32,  32, 255/*32*/ ));
-    this->add( this->tr( "Acids" ),      QColor::fromRgb(  32,  218, 32, 255/*32*/ ));
-    this->add( this->tr( "Solvents" ),   QColor::fromRgb(  32,   32, 218, 255/*32*/ ));
-    this->add( this->tr( "Inorganics" ), QColor::fromRgb( 128,  128, 128, 255/*32*/ ));
-    this->add( this->tr( "Alcohols" ),   QColor::fromRgb(  66,  183, 255, 255/*32*/ ));
+    this->add( Label::tr( "Bases" ), QColor::fromRgb( 218, 32, 32, 255/*32*/ ));
+    this->add( Label::tr( "Acids" ), QColor::fromRgb( 32, 218, 32, 255/*32*/ ));
+    this->add( Label::tr( "Solvents" ), QColor::fromRgb( 32, 32, 218, 255/*32*/ ));
+    this->add( Label::tr( "Inorganics" ), QColor::fromRgb( 128, 128, 128, 255/*32*/ ));
+    this->add( Label::tr( "Alcohols" ), QColor::fromRgb( 66, 183, 255, 255/*32*/ ));
 }

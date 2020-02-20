@@ -26,7 +26,8 @@
  * @brief NFPABuilder::NFPABuilder
  * @param parent
  */
-NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDialog( parent ), ui( new Ui::NFPABuilder ) {
+NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDialog( parent ),
+                                                                             ui( new Ui::NFPABuilder ) {
     this->ui->setupUi( this );
 
     if ( parameters.count() >= 3 ) {
@@ -36,7 +37,7 @@ NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDi
         this->ui->reactSlider->setValue( parameters.at( 2 ).toInt());
 
         if ( parameters.count() == 4 ) {
-            const QString hazard( parameters.at( 3 ));
+            const QString& hazard( parameters.at( 3 ));
             if ( hazard.isEmpty())
                 this->ui->hazardCombo->setCurrentIndex( 0 );
             else if ( !QString::compare( hazard, "OX" ))
@@ -55,11 +56,13 @@ NFPABuilder::NFPABuilder( QWidget *parent, const QStringList &parameters ) : QDi
         this->updateNFPA();
     }
 
-    this->ui->flameSlider->connect( this->ui->flameSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
-    this->ui->healthSlider->connect( this->ui->healthSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
-    this->ui->reactSlider->connect( this->ui->reactSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
-    this->ui->hazardCombo->connect( this->ui->hazardCombo, SIGNAL( currentIndexChanged( int )), this, SLOT( updateNFPA()));
-    this->ui->customHazard->connect( this->ui->customHazard, SIGNAL( textChanged( QString )), this, SLOT( updateNFPA()));
+    QSlider::connect( this->ui->flameSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
+    QSlider::connect( this->ui->healthSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
+    QSlider::connect( this->ui->reactSlider, SIGNAL( valueChanged( int )), this, SLOT( updateNFPA()));
+    QComboBox::connect( this->ui->hazardCombo, SIGNAL( currentIndexChanged( int )), this,
+                        SLOT( updateNFPA()));
+    QLineEdit::connect( this->ui->customHazard, SIGNAL( textChanged( QString )), this,
+                        SLOT( updateNFPA()));
 
 }
 
@@ -82,40 +85,40 @@ QStringList NFPABuilder::parameters() const {
  * @brief NFPABuilder::updateNFPA
  */
 void NFPABuilder::updateNFPA() {
-    const QRegularExpression reProp( "(\\d)\\s(\\d)\\s(\\d)(?:.+?(?=(OX|W|SA)))?" );
+    const QRegularExpression reProp( R"((\d)\s(\d)\s(\d)(?:.+?(?=(OX|W|SA)))?)" );
 
     if ( this->ui->hazardCombo->currentIndex() != 4 )
         this->ui->customHazard->setEnabled( false );
 
     QString hazard;
     switch ( this->ui->hazardCombo->currentIndex()) {
-    case 1:
-        hazard = "OX";
-        break;
+        case 1:
+            hazard = "OX";
+            break;
 
-    case 2:
-        hazard = "W";
-        break;
+        case 2:
+            hazard = "W";
+            break;
 
-    case 3:
-        hazard = "SA";
-        break;
+        case 3:
+            hazard = "SA";
+            break;
 
-    case 4:
-        if ( !this->ui->customHazard->isEnabled())
-             this->ui->customHazard->setEnabled( true );
+        case 4:
+            if ( !this->ui->customHazard->isEnabled())
+                this->ui->customHazard->setEnabled( true );
 
-        hazard = this->ui->customHazard->text();
-        break;
+            hazard = this->ui->customHazard->text();
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     this->ui->nfpaWidget->update( QString( "%1 %2 %3 %4" )
-                                  .arg( this->ui->healthSlider->value())
-                                  .arg( this->ui->flameSlider->value())
-                                  .arg( this->ui->reactSlider->value())
-                                  .arg( qAsConst( hazard )).split( " " )
-                                  );
+                                          .arg( this->ui->healthSlider->value())
+                                          .arg( this->ui->flameSlider->value())
+                                          .arg( this->ui->reactSlider->value())
+                                          .arg( qAsConst( hazard )).split( " " )
+    );
 }

@@ -32,7 +32,7 @@
 CharacterMap::CharacterMap( QWidget *parent ) : QDialog( parent ), blockId( qMakePair( -1, -1 )) {
     // this->size
     this->setWindowFlags( this->windowFlags() | Qt::Tool );
-    this->setWindowTitle( this->tr( "Character selector" ));
+    this->setWindowTitle( CharacterMap::tr( "Character selector" ));
 
     // get character list
     this->characters = CharacterNamespace::SpecialChars;
@@ -54,22 +54,25 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
         this->setFixedSize( CharacterNamespace::GridSize * blocks + 1, CharacterNamespace::GridSize * blocks + 1 );
 
         // paint gray lines
-        painter.setPen( qApp->palette().color( QPalette::Mid ));
+        painter.setPen( QApplication::palette().color( QPalette::Mid ));
         for ( y = 0; y <= blocks; y++ ) {
-            painter.drawLine( 0, y * CharacterNamespace::GridSize, CharacterNamespace::GridSize * blocks, y * CharacterNamespace::GridSize );
-            painter.drawLine( y * CharacterNamespace::GridSize, 0, y * CharacterNamespace::GridSize, CharacterNamespace::GridSize * blocks );
+            painter.drawLine( 0, y * CharacterNamespace::GridSize, CharacterNamespace::GridSize * blocks,
+                              y * CharacterNamespace::GridSize );
+            painter.drawLine( y * CharacterNamespace::GridSize, 0, y * CharacterNamespace::GridSize,
+                              CharacterNamespace::GridSize * blocks );
         }
 
         // draw characters
         painter.setFont( font );
-        painter.setPen( qApp->palette().color( QPalette::Text ));
+        painter.setPen( QApplication::palette().color( QPalette::Text ));
         for ( y = 0; y < this->characters.count(); y++ ) {
             // get block coordinates
             const int hBlock = y % blocks;
-            const int vBlock = qFloor( y / blocks );
+            const int vBlock = qFloor( static_cast<float>( y ) / static_cast<float>( blocks ));
 
             // draw highlight rect
-            const QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize );
+            const QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize,
+                              CharacterNamespace::GridSize, CharacterNamespace::GridSize );
             if ( this->blockId == qMakePair( hBlock, vBlock ))
                 painter.fillRect( rect, QColor::fromRgb( 255, 0, 0, 128 ));
 
@@ -100,9 +103,10 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
         for ( y = 0; y < this->characters.count(); y++ ) {
             // get block coordinates
             const int hBlock = y % blocks;
-            const int vBlock = qFloor( y / blocks );
+            const int vBlock = qFloor( static_cast<float>( y ) / static_cast<float>( blocks ));
 
-            if ( QRect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize, CharacterNamespace::GridSize, CharacterNamespace::GridSize ).contains( event->pos())) {
+            if ( QRect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize,
+                        CharacterNamespace::GridSize, CharacterNamespace::GridSize ).contains( event->pos())) {
 
                 // set blockId, repaint the widget and insert character in the parent widget
                 this->blockId = qMakePair( hBlock, vBlock );

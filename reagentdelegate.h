@@ -43,10 +43,10 @@ public slots:
     void clearCache() { this->cache.clear(); }
 
 protected:
-    void paint( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-    QSize sizeHint( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 
 private:
     QSortFilterProxyModel *m_model = nullptr;
-    mutable QMap<QString, QTextDocument*> cache;
+    mutable QMap<QString, QTextDocument *> cache;
 };

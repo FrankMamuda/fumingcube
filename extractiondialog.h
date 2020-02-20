@@ -42,7 +42,7 @@ class ExtractionModel;
  * @brief The Ui namespace
  */
 namespace Ui {
-class ExtractionDialog;
+    class ExtractionDialog;
 }
 
 /**
@@ -87,11 +87,12 @@ public:
     int readData( const QByteArray &uncompressed ) const;
 
 public slots:
-    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void
+    replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types, const QString & );
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );
-    void getSimilar( const QList<int> cidListInt );
+    void getSimilar( const QList<int> &cidListInt );
 
 private slots:
     void on_extractButton_clicked();

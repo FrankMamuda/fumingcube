@@ -39,10 +39,14 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
     this->ui->labelView->setModel( Label::instance());
     this->ui->labelView->setModelColumn( Label::Name );
 
-    this->ui->allButton->connect( this->ui->allButton, &QPushButton::clicked, [ this ]() { this->ui->labelView->setCurrentIndex( QModelIndex()); } );
-    this->ui->labelView->selectionModel()->connect( this->ui->labelView->selectionModel(), &QItemSelectionModel::selectionChanged, [ this ]( const QItemSelection &, const QItemSelection & ) {
-        this->setFilter( this->ui->labelView->selectionModel()->selectedRows());
-    } );
+    QPushButton::connect( this->ui->allButton, &QPushButton::clicked,
+                          [ this ]() { this->ui->labelView->setCurrentIndex( QModelIndex()); } );
+    QItemSelectionModel::connect( this->ui->labelView->selectionModel(),
+                                  &QItemSelectionModel::selectionChanged,
+                                  [ this ]( const QItemSelection &, const QItemSelection & ) {
+                                      LabelDock::setFilter(
+                                              this->ui->labelView->selectionModel()->selectedRows());
+                                  } );
 }
 
 LabelDock::~LabelDock() {
@@ -78,9 +82,11 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
             labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
 
 
-        QString whereStatement( QString( "select %1.%2 from %1 " ).arg( LabelSet::instance()->tableName()).arg( LabelSet::instance()->fieldName( LabelSet::ReagentId )));
+        QString whereStatement( QString( "select %1.%2 from %1 " ).arg( LabelSet::instance()->tableName()).arg(
+                LabelSet::instance()->fieldName( LabelSet::ReagentId )));
         for ( int y = 0; y < labelIds.count(); y++ )
-            whereStatement.append( QString( QString(( y == 0 ) ? "where" : "or" ) + " %1=%2 " ).arg( LabelSet::instance()->fieldName( LabelSet::LabelId )).arg( static_cast<int>( labelIds.at( y ))));
+            whereStatement.append( QString( QString(( y == 0 ) ? "where" : "or" ) + " %1=%2 " ).arg(
+                    LabelSet::instance()->fieldName( LabelSet::LabelId )).arg( static_cast<int>( labelIds.at( y ))));
 
         /*QList<Id> reagentList;
         QSqlQuery query;
@@ -98,17 +104,18 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
         }*/
 
         QString reagentStatement( QString( "select distinct %1 from %2 where "
-                                     "%1 in ( %3 ) "
-                                     "or "
-                                     "%4 in ( %3 ) " )
-                            .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                            .arg( Reagent::instance()->tableName())
-                            .arg( whereStatement )
-                            .arg( Reagent::instance()->fieldName( Reagent::ParentId )));
+                                           "%1 in ( %3 ) "
+                                           "or "
+                                           "%4 in ( %3 ) " )
+                                          .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                                          .arg( Reagent::instance()->tableName())
+                                          .arg( whereStatement )
+                                          .arg( Reagent::instance()->fieldName( Reagent::ParentId )));
 
         // qDebug() << "REAGENTS" << reagentList;
 
-        Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" ).arg( Reagent::instance()->tableName()).arg( Reagent::instance()->fieldName( Reagent::ID )).arg( reagentStatement ));
+        Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" ).arg( Reagent::instance()->tableName()).arg(
+                Reagent::instance()->fieldName( Reagent::ID )).arg( reagentStatement ));
     }
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();
@@ -123,14 +130,14 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
         return;
 
     QMenu menu;
-    menu.addAction( QIcon::fromTheme( "add" ), this->tr( "Add new label" ), [ this ]() {
+    menu.addAction( QIcon::fromTheme( "add" ), LabelDock::tr( "Add new label" ), [ this ]() {
         LabelDialog ld( this );
         if ( ld.exec() == QDialog::Accepted ) {
             Label::instance()->add( ld.name(), ld.colour());
             ReagentDock::instance()->view()->updateView();
         }
     } );
-    menu.addAction( QIcon::fromTheme( "remove" ), this->tr( "Remove label" ), [ this ]() {
+    menu.addAction( QIcon::fromTheme( "remove" ), LabelDock::tr( "Remove label" ), [ this ]() {
         if ( !this->ui->labelView->currentIndex().isValid())
             return;
 
@@ -141,7 +148,7 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
         // remove orphans
         LabelSet::instance()->removeOrphanedEntries();
     } );
-    menu.addAction( QIcon::fromTheme( "edit" ), this->tr( "Edit label" ), [ this ]() {
+    menu.addAction( QIcon::fromTheme( "edit" ), LabelDock::tr( "Edit label" ), [ this ]() {
         if ( !this->ui->labelView->currentIndex().isValid())
             return;
 

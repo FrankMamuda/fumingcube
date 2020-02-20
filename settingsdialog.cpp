@@ -33,32 +33,34 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
     this->ui->setupUi( this );
 
     // handle database path
-    this->connect( this->ui->pathButton, &QPushButton::clicked, [ this ]() {
+    SettingsDialog::connect( this->ui->pathButton, &QPushButton::clicked, [ this ]() {
         const QString fileName( QFileDialog::getSaveFileName
-                                ( this, this->tr( "Open database" ),
-                                  QFileInfo( Variable::instance()->string( "databasePath" )).absolutePath(),
-                                  this->tr( "Database (*.db *.sqlite)" ), nullptr, QFileDialog::DontConfirmOverwrite ));
+                                        ( this, SettingsDialog::tr( "Open database" ),
+                                          QFileInfo( Variable::string( "databasePath" )).absolutePath(),
+                                          SettingsDialog::tr( "Database (*.db *.sqlite)" ), nullptr,
+                                          QFileDialog::DontConfirmOverwrite ));
 
         if ( fileName.isEmpty()) {
             QMessageBox::warning( this,
-                                  this->tr( "Settings" ),
-                                  this->tr( "Invalid database selection" ),
+                                  SettingsDialog::tr( "Settings" ),
+                                  SettingsDialog::tr( "Invalid database selection" ),
                                   QMessageBox::Close );
             return;
         }
 
         QMessageBox::warning( this,
-                              this->tr( "Settings" ),
-                              this->tr( "Application must be restarted" ),
+                              SettingsDialog::tr( "Settings" ),
+                              SettingsDialog::tr( "Application must be restarted" ),
                               QMessageBox::Ok );
-        Variable::instance()->setString( "databasePath", fileName );
+        Variable::setString( "databasePath", fileName );
         QApplication::quit();
 
     } );
 
     this->ui->themeCombo->model()->setData( this->ui->themeCombo->model()->index( 0, 0 ), "light", Qt::UserRole );
     this->ui->themeCombo->model()->setData( this->ui->themeCombo->model()->index( 1, 0 ), "dark", Qt::UserRole );
-    this->connect( this->ui->overrideCheck, &QCheckBox::toggled, [ this ]( bool checked ) { this->ui->themeCombo->setEnabled( checked ); } );
+    SettingsDialog::connect( this->ui->overrideCheck, &QCheckBox::toggled,
+                   [ this ]( bool checked ) { this->ui->themeCombo->setEnabled( checked ); } );
 
     // bind database path to edit
     this->variables << Variable::instance()->bind( "overrideTheme", this->ui->overrideCheck );

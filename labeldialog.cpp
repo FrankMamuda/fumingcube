@@ -33,7 +33,7 @@ LabelDialog::LabelDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Lab
     this->ui->setupUi( this );
 
     this->setColour( QColor::fromRgb( 128, 128, 128, 32 ));
-    this->ui->colourButton->connect( this->ui->colourButton, &QToolButton::clicked, [ this ]() {
+    QToolButton::connect( this->ui->colourButton, &QToolButton::clicked, [ this ]() {
         QColorDialog cd( this );
         cd.setCurrentColor( this->colour());
         if ( cd.exec() == QDialog::Accepted ) {

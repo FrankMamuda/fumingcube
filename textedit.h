@@ -33,12 +33,12 @@ class TextEdit : public QTextEdit {
     Q_PROPERTY( bool cleanHTML READ cleanHTML WRITE setCleanHTML )
 
 public:
-    TextEdit( QWidget *parent = nullptr ) : QTextEdit( parent ), m_cleanHTML( true ) {}
-    void insertPixmap( const QPixmap &image, const int forcedSize = -1 );
-    bool cleanHTML() const { return this->m_cleanHTML; }
+    explicit TextEdit( QWidget *parent = nullptr ) : QTextEdit( parent ) {}
+    void insertPixmap( const QPixmap &image, int forcedSize = -1 );
+    [[nodiscard]] bool cleanHTML() const { return this->m_cleanHTML; }
     static QString stripHTML( const QString &input );
-    bool isSimpleEditor() const { return this->m_simpleEditor; }
-    QCompleter *completer() const { return this->m_completer; }
+    [[nodiscard]] bool isSimpleEditor() const { return this->m_simpleEditor; }
+    [[nodiscard]] QCompleter *completer() const { return this->m_completer; }
 
 signals:
     void entered();
@@ -56,7 +56,7 @@ public slots:
     void setCompleter( QCompleter *completer );
 
 private:
-    bool m_cleanHTML;
+    bool m_cleanHTML = true;
     bool m_simpleEditor = false;
     QCompleter *m_completer = nullptr;
 };

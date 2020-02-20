@@ -22,7 +22,6 @@
 #include "tagdialog.h"
 #include "ui_tagdialog.h"
 #include "tag.h"
-#include "charactermap.h"
 #include <QMessageBox>
 #include <QKeyEvent>
 #include "property.h"
@@ -93,10 +92,10 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         if ( index == Tag::Real )
             this->ui->precisionSpin->setEnabled( true );
     };
-    this->ui->typeCombo->connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), widgetText );
+    QComboBox::connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), widgetText );
     widgetText( this->ui->typeCombo->currentIndex());
 
-    this->ui->buttonBox->connect( this->ui->buttonBox, &QDialogButtonBox::clicked, [ this ]( QAbstractButton *button ) {
+    QDialogButtonBox::connect( this->ui->buttonBox, &QDialogButtonBox::clicked, [ this ]( QAbstractButton *button ) {
         const QDialogButtonBox::ButtonRole role = this->ui->buttonBox->buttonRole( button );
 
         if ( role == QDialogButtonBox::AcceptRole ) {
@@ -206,10 +205,10 @@ void TagDialog::on_actionRemove_triggered() {
         if ( row == Row::Invalid )
             return;
 
-        if ( QMessageBox::warning( this, this->tr( "Confirm removal" ), this->tr( "Remove '%1' tag?\nThis will irreversibly remove all associated properties." ).arg( Tag::instance()->name( row )), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+        if ( QMessageBox::warning( this, TagDialog::tr( "Confirm removal" ), TagDialog::tr( "Remove '%1' tag?\nThis will irreversibly remove all associated properties." ).arg( Tag::instance()->name( row )), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
             removeTags( QModelIndexList() << this->ui->tagView->currentIndex());
     } else if ( indexes.count() > 1 ) {
-        if ( QMessageBox::warning( this, this->tr( "Confirm removal" ), this->tr( "Remove %1 tags?\nThis will irreversibly remove all associated properties." ).arg( indexes.count()), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+        if ( QMessageBox::warning( this, TagDialog::tr( "Confirm removal" ), TagDialog::tr( "Remove %1 tags?\nThis will irreversibly remove all associated properties." ).arg( indexes.count()), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
             removeTags( indexes );
     }
 }
@@ -275,7 +274,7 @@ bool TagDialog::eventFilter( QObject *object, QEvent *event ) {
 
     if ( object == this->ui->unitsEdit ) {
         if ( event->type() == QEvent::KeyPress ) {
-            const QKeyEvent *keyEvent( static_cast<QKeyEvent*>( event ));
+            const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent*>( event ));
 
             if ( keyEvent->key() == Qt::Key_Tab || keyEvent->key() == Qt::Key_Return )
                 return true;

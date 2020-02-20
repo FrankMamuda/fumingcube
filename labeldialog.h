@@ -27,7 +27,7 @@
  * @brief The Ui namespace
  */
 namespace Ui {
-class LabelDialog;
+    class LabelDialog;
 }
 
 /**
@@ -38,14 +38,14 @@ class LabelDialog : public QDialog {
 
 public:
     explicit LabelDialog( QWidget *parent = nullptr );
-    ~LabelDialog();
-    QString name() const;
+    ~LabelDialog() override;
+    [[nodiscard]] QString name() const;
 
     /**
      * @brief colour
      * @return
      */
-    QColor colour() const { return this->m_colour; }
+    [[nodiscard]] QColor colour() const { return this->m_colour; }
 
 public slots:
     void setName( const QString &name );

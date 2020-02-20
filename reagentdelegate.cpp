@@ -30,17 +30,18 @@
  * @param option
  * @param index
  */
-void ReagentDelegate::paint( QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
+void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
     if ( this->model() == nullptr || !index.isValid())
         return QStyledItemDelegate::paint( painter, option, index );
 
-    const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
+    const QString html(
+            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
     if ( !this->cache.contains( html ))
         return QStyledItemDelegate::paint( painter, option, index );
 
     // draw custom selection highlight
     if ( option.state & QStyle::State_Selected ) {
-        QColor highlight( qApp->palette().highlight().color());
+        QColor highlight( QApplication::palette().highlight().color());
         highlight.setAlpha( 128 );
         painter->fillRect( option.rect, QBrush( qAsConst( highlight )));
     }
@@ -49,11 +50,15 @@ void ReagentDelegate::paint( QPainter* painter, const QStyleOptionViewItem &opti
     QTextDocument *document( this->cache[html] );
     painter->save();
 
-    const QPixmap pixmap( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
+    const auto pixmap(
+            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
     if ( !pixmap.isNull())
-        painter->drawPixmap( QRect( option.rect.left(), option.rect.top() + option.rect.height() / 2 - pixmap.height() / 2, pixmap.width(), pixmap.height()), pixmap );
+        painter->drawPixmap(
+                QRect( option.rect.left(), option.rect.top() + option.rect.height() / 2 - pixmap.height() / 2,
+                       pixmap.width(), pixmap.height()), pixmap );
 
-    painter->translate( option.rect.left() + ( pixmap.isNull() ? 0 : pixmap.width() ), option.rect.top() + option.rect.height() / 2 - document->size().height() / 2 );
+    painter->translate( option.rect.left() + ( pixmap.isNull() ? 0 : pixmap.width()),
+                        option.rect.top() + static_cast<int>( option.rect.height() / 2 ) - document->size().height() / 2 );
     document->drawContents( painter );
     painter->restore();
 }
@@ -64,16 +69,20 @@ void ReagentDelegate::paint( QPainter* painter, const QStyleOptionViewItem &opti
  * @param index
  * @return
  */
-QSize ReagentDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const {
+QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const {
     if ( this->model() == nullptr || !index.isValid())
         return QStyledItemDelegate::sizeHint( option, index );
 
     const QFont font( option.font );
-    const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
-    QTextDocument *document( new QTextDocument());
-    document->setHtml( QString( "<p style=\"font-size: %1pt; font-family: '%2'\">%3<\\p>" ).arg( font.pointSize()).arg( font.family()).arg( html ));
+    const QString html(
+            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
+    auto *document( new QTextDocument());
+    document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3<\p>)" ).arg( font.pointSize()).arg(
+            font.family()).arg( html ));
     this->cache[html] = document;
 
-    const QPixmap pixmap( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
-    return QSizeF( document->idealWidth() + ( pixmap.isNull() ? 0 : pixmap.width() ), document->size().height()).toSize();
+    const auto pixmap(
+            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
+    return QSizeF( document->idealWidth() + ( pixmap.isNull() ? 0 : pixmap.width()),
+                   document->size().height()).toSize();
 }
