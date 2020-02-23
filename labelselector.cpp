@@ -38,7 +38,7 @@ LabelSelector::LabelSelector( QWidget *parent, QList<Id> selected ) : QDialog( p
 
     auto *labels = new NoCloseMenu();
     for ( int y = 0; y < Label::instance()->count(); y++ ) {
-        const Row row = static_cast<Row>( y );
+        const auto row = static_cast<Row>( y );
         const Id id = Label::instance()->id( row );
         QAction *action( labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))),
                                             Label::instance()->name( row )));

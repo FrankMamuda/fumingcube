@@ -46,10 +46,12 @@ QVariant Table::value( const Row &row, int fieldId ) const {
 
     const QModelIndex index( this->index( static_cast<int>( row ), fieldId ));
     if ( row == Row::Invalid || !index.isValid() || index.row() < 0 || index.row() >= this->count()) {
-        qWarning( Database_::Debug ) << Table::tr( "could not retrieve field \"%1\" value from table \"%2\"" )
-                .arg( this->field( fieldId )->name())
-                .arg( this->tableName()) << !index.isValid()
-                                     << ( index.row() < 0 ) << ( index.row() >= this->count()) << row;
+        qWarning( Database_::Debug ) << Table::tr( R"(could not retrieve field "%1" value from table "%2")" )
+                .arg( this->field( fieldId )->name(),
+                      this->tableName())
+                                     << !index.isValid()
+                                     << ( index.row() < 0 )
+                                     << ( index.row() >= this->count()) << row;
         return -1;
     }
 
@@ -72,10 +74,10 @@ QVariant Table::value( const Id &id, int fieldId ) const {
 
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %1=%4" )
-                        .arg( this->fieldName( this->primaryField()->id()))
-                        .arg( this->fieldName( fieldId ))
-                        .arg( this->tableName())
-                        .arg( static_cast<int>( id )));
+                        .arg( this->fieldName( this->primaryField()->id()),
+                              this->fieldName( fieldId ),
+                              this->tableName(),
+                              QString::number( static_cast<int>( id ))));
 
     return query.next() ? query.value( 1 ) : "";
 }
@@ -123,7 +125,7 @@ QVariant Table::data( const QModelIndex &index, int role ) const {
     if ( !Database::instance()->hasInitialised())
         return QVariant();
 
-    if ( role == IDRole || role == Qt::UserRole ) {
+    if ( role == IDRole ) {
         if ( !index.isValid())
             return static_cast<int>( Id::Invalid );
 
@@ -233,8 +235,8 @@ Row Table::add( const QVariantList &arguments ) {
         if ( field->isUnique() && !field->isAutoValue()) {
             if ( this->contains( field, argument )) {
                 qCWarning( Database_::Debug )
-                    << Table::tr( "table already has a unique field \"%1\" with value - \"%2\", aborting addition" )
-                            .arg( field->name()).arg( argument.toString());
+                    << Table::tr( R"(table already has a unique field "%1" with value - "%2", aborting addition)" )
+                            .arg( field->name(), argument.toString());
                 this->revert();
                 this->endInsertRows();
                 return Row::Invalid;
@@ -302,7 +304,7 @@ void Table::bind( QSqlQuery &query, const QVariantList &arguments ) {
         if ( field->isPrimary())
             continue;
 
-        const QVariant argument( arguments.at( y ));
+        const QVariant& argument( arguments.at( y ));
 
         // compare types
         if ( field->type() != argument.type()) {

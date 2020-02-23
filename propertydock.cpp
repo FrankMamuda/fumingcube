@@ -193,7 +193,8 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 int result = pd.exec();
                 if ( result == QDialog::Accepted )
                     return { QString(), pd.value() };
-                else if ( result == PropertyDialog::Rejected )
+
+                if ( result == PropertyDialog::Rejected )
                     return values;
 
                 break;
@@ -692,7 +693,7 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
             parents = QString( R"("%1", "%2")" ).arg(
-                    QTextEdit( Reagent::instance()->reference( parentId )).toPlainText()).arg(
+                    QTextEdit( Reagent::instance()->reference( parentId )).toPlainText(),
                     QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
             //qDebug() << "has parent";
         } else {
@@ -700,7 +701,7 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         }
 
         // paste
-        const QString completed( QString( "%1( %2 ) " ).arg( functionName ).arg( qAsConst( parents )));
+        const QString completed( QString( "%1( %2 ) " ).arg( functionName, qAsConst( parents )));
         MainWindow::instance()->insertCommand( completed );
     }
 }

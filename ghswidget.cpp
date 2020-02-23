@@ -38,7 +38,8 @@ constexpr const int GHSWidget::scale = 48;
 GHSWidget::GHSWidget( QWidget *parent, const QStringList &parms ) : PropertyViewWidget( parent, parms ) {
     this->update( parms );
 
-    for ( const QString &key : GHSHazards::Hazards.keys()) {
+    const QStringList keys( GHSHazards::Hazards.keys());
+    for ( const QString &key : keys ) {
         if ( !this->parameters().contains( key ))
             this->parameters().removeAll( key );
     }

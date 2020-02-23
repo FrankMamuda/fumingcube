@@ -54,6 +54,7 @@ database:
  - check API
  - crash on argument count mismatch
  - alias->reference
+ - use bind in queries
 
 i18n:
  - tags
@@ -182,13 +183,13 @@ int main( int argc, char *argv[] ) {
     Variable::add( "decimalSeparator", ",", Var::Flag::Hidden );
 
     // read configuration
-    XMLTools::instance()->read();
+    XMLTools::read();
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
         PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();
-        XMLTools::instance()->write();
+        XMLTools::write();
 
         GarbageMan::instance()->clear();
         delete GarbageMan::instance();
@@ -201,7 +202,7 @@ int main( int argc, char *argv[] ) {
     } );
 
     // check for previous crashes
-    if ( QFileInfo( apiFileName ).exists()) {
+    if ( QFileInfo::exists( apiFileName )) {
         const QFileInfo info( Variable::string( "databasePath" ));
 
         // just change path

@@ -50,7 +50,7 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
         font.setPixelSize( static_cast<int>( CharacterNamespace::GridSize * 0.8 ));
 
         // get minimum block size to display all characters
-        const int blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
+        const auto blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
         this->setFixedSize( CharacterNamespace::GridSize * blocks + 1, CharacterNamespace::GridSize * blocks + 1 );
 
         // paint gray lines
@@ -97,13 +97,13 @@ void CharacterMap::mouseReleaseEvent( QMouseEvent *event ) {
     // insert char on mouse press
     if ( event->button() == Qt::LeftButton ) {
         // get block size
-        const int blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
+        const auto blocks = static_cast<int>( qCeil( qSqrt( this->characters.count())));
 
         // find block under mouse cursor
         for ( y = 0; y < this->characters.count(); y++ ) {
             // get block coordinates
             const int hBlock = y % blocks;
-            const int vBlock = qFloor( static_cast<float>( y ) / static_cast<float>( blocks ));
+            const int vBlock = qFloor( static_cast<qreal>( y ) / static_cast<qreal>( blocks ));
 
             if ( QRect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize,
                         CharacterNamespace::GridSize, CharacterNamespace::GridSize ).contains( event->pos())) {

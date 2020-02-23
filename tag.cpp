@@ -70,9 +70,9 @@ void Tag::removeOrphanedEntries() {
  */
 void Tag::populate() {
     this->add( Tag::tr( "Molar mass" ), Real, Tag::tr( "&nbsp;g/mol" ), 1.0, "", 18.0, 2, "molarMass", 1.00,
-               QStringList() << "Molecular Weight" << QString() << "((?:\\d+,)?(?:\\d+.)?\\d+)(\\sg\\/mol)?" );
+               QStringList() << "Molecular Weight" << QString() << R"(((?:\d+,)?(?:\d+.)?\d+)(\sg\/mol)?)" );
     this->add( Tag::tr( "Density" ), Real, Tag::tr( "&nbsp;g/cm<sup>3</sup>" ), 0.001, 100.0, 1.0, 3, "density", 1.00,
-               QStringList() << "Density" << QString() << "(\\d+(?:\\.\\d+)?)(?!\\)$)(\\sg\\/[\\w|\\d]+)?" );
+               QStringList() << "Density" << QString() << R"((\d+(?:\.\d+)?)(?!\)$)(\sg\/[\w|\d]+)?)" );
     this->add( Tag::tr( "Assay" ), Real, Tag::tr( "&percnt;" ), 0.0, 110.0, 100.0, 3, "assay", 0.01 );
     this->add( Tag::tr( "State" ), State );
     this->add( Tag::tr( "Analysis id" ));
@@ -85,22 +85,22 @@ void Tag::populate() {
     this->add( Tag::tr( "Water content" ), Real, Tag::tr( "&percnt;" ), 0.0, 1000.0, 0.0, 2, "waterContent", 0.01 );
     this->add( Tag::tr( "Concentration" ), Real, Tag::tr( "&percnt;" ), 0.0, 110.0, 100.0, 5, "concentration", 0.01 );
     this->add( Tag::tr( "Boiling point" ), Real, Tag::tr( "&deg;C" ), -273.15, "", 100.0, 1, "boilingPoint", 1.00,
-               QStringList() << "Boiling Point" << QString() << "(-?(?:\\d+,)?(?:\\d+.)?\\d+\\s?(?!\\)$))(°?[CFK])?" );
+               QStringList() << "Boiling Point" << QString() << R"((-?(?:\d+,)?(?:\d+.)?\d+\s?(?!\)$))(°?[CFK])?)");
     this->add( Tag::tr( "Melting point" ), Real, Tag::tr( "&deg;C" ), -273.15, "", 0.0, 1, "meltingPoint", 1.00,
-               QStringList() << "Melting Point" << QString() << "(-?(?:\\d+,)?(?:\\d+.)?\\d+\\s?(?!\\)$))(°?[CFK])?" );
+               QStringList() << "Melting Point" << QString() << R"((-?(?:\d+,)?(?:\d+.)?\d+\s?(?!\)$))(°?[CFK])?)");
     this->add( Tag::tr( "Flash point" ), Real, Tag::tr( "&deg;C" ), -273.15, "", 50.0, 1, "flashPoint", 1.00,
-               QStringList() << "Flash Point" << QString() << "(-?(?:\\d+,)?(?:\\d+.)?\\d+\\s?(?!\\)$))(°?[CFK])?)" );
+               QStringList() << "Flash Point" << QString() << R"((-?(?:\d+,)?(?:\d+.)?\d+\s?(?!\)$))(°?[CFK])?))");
     this->add( Tag::tr( "CAS number" ), CAS, "", "", "", "", 0, "", 1.00,
-               QStringList() << "CAS" << QString() << "(\\d+-\\d+-\\d+)" );
+               QStringList() << "CAS" << QString() << R"((\d+-\d+-\d+))" );
     this->add( Tag::tr( "Viscosity" ), Real, Tag::tr( "&nbsp;mPa·s" ), "", "", 1.00, 3, "viscosity", 1.00 );
     this->add( Tag::tr( "Refractive index" ), Real, "", 1.0, 10.0, 1.00, 3, "", 1.00,
                QStringList() << "Refractive Index" << QString() << "([1234]\\.\\d+)" );
     this->add( Tag::tr( "GHS pictograms" ), GHS, "", 0, 0, 0, 0, "", 0,
                QStringList() << "GHS Classification" << "Pictogram(s)"
-                             << "([Ee]xplosive|[Ff]lammable|[Oo]xidizing|[Cc]ompressed\\s[Gg]as|[Cc]orrosive|[Tt]oxic|[Hh]armful|[Hh]ealth\\s[Hh]azard|[Ee]nvironmental\\s[Hh]azard|[Ii]rritant)"
+                             << R"(([Ee]xplosive|[Ff]lammable|[Oo]xidizing|[Cc]ompressed\s[Gg]as|[Cc]orrosive|[Tt]oxic|[Hh]armful|[Hh]ealth\s[Hh]azard|[Ee]nvironmental\s[Hh]azard|[Ii]rritant))"
                              << "1" );
     this->add( Tag::tr( "NFPA 704" ), NFPA, "", 0, 0, 0, 0, "", 0,
-               QStringList() << "NFPA Hazard Classification" << "NFPA 704 Diamond" << "(\\d)(?:-(\\d))(?:-(\\d))" );
+               QStringList() << "NFPA Hazard Classification" << "NFPA 704 Diamond" << R"((\d)(?:-(\d))(?:-(\d)))" );
     this->add( Tag::tr( "Acidity (pKa)" ), Real, "", -100.0, 100.0, 14.0, 2, "pKa" );
     this->add( Tag::tr( "Basicity (pKb)" ), Real, "", -100.0, 100.0, 0.0, 2, "pKb" );
     this->add( Tag::tr( "Producer" ));

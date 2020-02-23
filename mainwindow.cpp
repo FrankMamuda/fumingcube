@@ -115,7 +115,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         // find property
         Row propertyRow = Row::Invalid;
         for ( int y = 0; y < Property::instance()->count(); y++ ) {
-            const Row row = static_cast<Row>( y );
+            const auto row = static_cast<Row>( y );
             if ( Property::instance()->tagId( row ) == tagId ) {
                 propertyRow = row;
                 break;
@@ -136,8 +136,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         // add an option to paste reference to calculator
         QMenu menu( this->ui->calcView );
         menu.addAction( MainWindow::tr( "Paste" ), [ this, property, reagent, batch ]() {
-            this->insertCommand( QString( "%1( \"%2\"%3 )" ).arg( property ).arg( reagent ).arg(
-                    batch.isEmpty() ? "" : ", \"" + batch + "\"" ));
+            this->insertCommand( QString( "%1( \"%2\"%3 )" )
+                                 .arg( property, reagent,
+                                       batch.isEmpty() ?
+                                           "" :
+                                           ", \"" + batch + "\"" ));
         } );
         QTimer::singleShot( 2000, &menu, SLOT( close()));
         menu.exec( QCursor::pos());
@@ -179,9 +182,9 @@ void MainWindow::appendToCalculator( const QString &line ) {
         QStringList functions;
         QSqlQuery query;
         query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                            .arg( Tag::instance()->fieldName( Tag::ID ))
-                            .arg( Tag::instance()->fieldName( Tag::Function ))
-                            .arg( Tag::instance()->tableName()));
+                            .arg( Tag::instance()->fieldName( Tag::ID ),
+                                  Tag::instance()->fieldName( Tag::Function ),
+                                  Tag::instance()->tableName()));
         while ( query.next()) {
             const QString functionName( query.value( 1 ).toString());
             if ( !functionName.isEmpty())

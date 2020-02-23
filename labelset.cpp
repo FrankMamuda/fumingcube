@@ -54,11 +54,11 @@ Row LabelSet::add( const Id &labelId, const Id &reagentId ) {
  */
 void LabelSet::remove( const Id &labelId, const Id &reagentId ) {
     QSqlQuery().exec( QString( "delete from %1 where %2=%3 and %4=%5" )
-                              .arg( this->tableName())
-                              .arg( this->fieldName( LabelId ))
-                              .arg( static_cast<int>( labelId ))
-                              .arg( this->fieldName( ReagentId ))
-                              .arg( static_cast<int>( reagentId )));
+                              .arg( this->tableName(),
+                                    this->fieldName( LabelId ),
+                                    QString::number( static_cast<int>( labelId )),
+                                    this->fieldName( ReagentId ),
+                                    QString::number( static_cast<int>( reagentId ))));
 }
 
 /**
@@ -67,15 +67,15 @@ void LabelSet::remove( const Id &labelId, const Id &reagentId ) {
 void LabelSet::removeOrphanedEntries() {
     // remove if label has been deleted
     QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
-                              .arg( this->tableName())
-                              .arg( this->fieldName( LabelId ))
-                              .arg( Label::instance()->fieldName( Label::ID ))
-                              .arg( Label::instance()->tableName()));
+                              .arg( this->tableName(),
+                                    this->fieldName( LabelId ),
+                                    Label::instance()->fieldName( Label::ID ),
+                                    Label::instance()->tableName()));
 
     // remove if reagent has been deleted
     QSqlQuery().exec( QString( "delete from %1 where %2 not in ( select %3 from %4 )" )
-                              .arg( this->tableName())
-                              .arg( this->fieldName( ReagentId ))
-                              .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                              .arg( Reagent::instance()->tableName()));
+                              .arg( this->tableName(),
+                                    this->fieldName( ReagentId ),
+                                    Reagent::instance()->fieldName( Reagent::ID ),
+                                    Reagent::instance()->tableName()));
 }

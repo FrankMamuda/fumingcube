@@ -103,7 +103,7 @@ Database::Database( QObject *parent ) : QObject( parent ) {
     qCInfo( Database_::Debug ) << Database::tr( "loading database" );
 
     // failsafe
-    if ( !database.isDriverAvailable( "QSQLITE" ))
+    if ( !QSqlDatabase::isDriverAvailable( "QSQLITE" ))
         qFatal( QT_TR_NOOP_UTF8( "sqlite not present on the system" ) );
 
     // set sqlite driver
@@ -190,20 +190,19 @@ bool Database::add( Table *table ) {
 
                 if ( !database.record( table->tableName()).contains( field->name())) {
                     qCCritical( Database_::Debug )
-                        << Database::tr( "database field mismatch in table \"%1\", field - \"%2\"" ).arg( tableName ).arg(
-                                field->name());
+                        << Database::tr( R"(database field mismatch in table "%1", field - "%2")" ).arg( tableName, field->name());
                     return false;
-                } else {
-                    // ignore unsigned ints for now
-                    const QVariant::Type internalType = field->type() == QVariant::UInt ? QVariant::Int : field->type();
-                    const QVariant::Type databaseType = database.record( table->tableName()).field( field->id()).type();
+                }
 
-                    if ( internalType != databaseType ) {
-                        qCCritical( Database_::Debug )
-                            << Database::tr( "database type mismatch in table \"%1\", field - \"%2\"" ).arg(
-                                    tableName ).arg( field->name());
-                        return false;
-                    }
+                // ignore unsigned ints for now
+                const QVariant::Type internalType = field->type() == QVariant::UInt ? QVariant::Int : field->type();
+                const QVariant::Type databaseType = database.record( table->tableName()).field( field->id()).type();
+
+                if ( internalType != databaseType ) {
+                    qCCritical( Database_::Debug )
+                        << Database::tr( R"(database type mismatch in table "%1", field - "%2")" ).arg(
+                                tableName, field->name());
+                    return false;
                 }
             }
             found = true;
@@ -219,7 +218,7 @@ bool Database::add( Table *table ) {
 
         // prepare statement
         for ( const Field &field : qAsConst( table->fields )) {
-            statement.append( QString( "%1 %2" ).arg( field->name()).arg( field->format()));
+            statement.append( QString( "%1 %2" ).arg( field->name(), field->format()));
 
             if ( field->isUnique())
                 statement.append( " unique" );
@@ -252,10 +251,9 @@ bool Database::add( Table *table ) {
             statement.append( constraints );
         }
 
-        if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName()).arg( statement )))
+        if ( !query.exec( QString( "create table if not exists %1 ( %2 )" ).arg( table->tableName(), statement )))
             qCCritical( Database_::Debug )
-                << Database::tr( "could not create table - \"%1\", reason - \"%2\"" ).arg( table->tableName()).arg(
-                        query.lastError().text());
+                << Database::tr( R"(could not create table - "%1", reason - "%2")" ).arg( table->tableName(), query.lastError().text());
     }
 
     // table has been verified and is marked as valid

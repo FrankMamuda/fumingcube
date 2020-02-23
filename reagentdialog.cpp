@@ -260,7 +260,8 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
         }
 
         QString match;
-        for ( const QString &key : reagentReferences.keys()) {
+        const QStringList list( reagentReferences.keys());
+        for ( const QString &key : list ) {
             if ( !QString::compare( key, plain, Qt::CaseInsensitive )) {
                 match = key;
                 break;

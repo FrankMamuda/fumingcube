@@ -69,8 +69,9 @@ QJSValue Script::evaluate( const QString &script ) {
         QStringList functions;
         QSqlQuery query;
         query.exec(
-                QString( "select %1 from %2 where %1 not null" ).arg( Tag::instance()->fieldName( Tag::Function )).arg(
-                        Tag::instance()->tableName()));
+                QString( "select %1 from %2 where %1 not null" )
+                    .arg( Tag::instance()->fieldName( Tag::Function ),
+                          Tag::instance()->tableName()));
         while ( query.next()) {
             const QString functionName( query.value( 0 ).toString());
             if ( !functionName.isEmpty())
@@ -82,10 +83,10 @@ QJSValue Script::evaluate( const QString &script ) {
         //  2) replace comma decimal separator with a dot
         //  3) simplify string to remove trailing whitespace and newline
         const QString processed( QString( script ).replace(
-                QRegularExpression( QString( "(%1)\\s*\\(\\s*\\\"" ).arg( functions.join( "|" ))),
-                "JS.getProperty( \"\\1\", \"" ).replace(
-                QRegularExpression( "(\\d+),(\\d+)(?=(?:[^\"]|\"[^\"]*\")*$)" ), "\\1.\\2" ).replace(
-                QRegularExpression( "(?<!\")\\b(ans)\\b(?!\")" ), "JS.ans()" ).simplified());
+                QRegularExpression( QString( R"((%1)\s*\(\s*\")" ).arg( functions.join( "|" ))),
+                R"(JS.getProperty( "\1", ")" ).replace(
+                QRegularExpression( R"((\d+),(\d+)(?=(?:[^"]|"[^"]*")*$))" ), "\\1.\\2" ).replace(
+                QRegularExpression( R"((?<!")\b(ans)\b(?!"))" ), "JS.ans()" ).simplified());
 
         // evaluate script
         result = this->engine.evaluate( processed );
@@ -193,8 +194,9 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
     // get property value
     if ( propertyValue.isNull()) {
         this->engine.throwError( QJSValue::TypeError,
-                                 Script::tr( "property \"%1\" is not defined for \"%2\"" ).arg( functionName ).arg(
-                                         batchName.isEmpty() ? reference : batchName ));
+                                 Script::tr( R"(property "%1" is not defined for "%2")" )
+                                 .arg( functionName,
+                                       batchName.isEmpty() ? reference : batchName ));
         return QJSValue();
     }
 
@@ -203,9 +205,10 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
     const qreal value = propertyValue.toReal( &ok );
     if ( !ok ) {
         this->engine.throwError( QJSValue::TypeError,
-                                 Script::tr( "%1( %2 ) does not evaluate to a valid number" ).arg( functionName ).arg(
-                                         reference ) +
-                                 ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
+                                 Script::tr( "%1( %2 ) does not evaluate to a valid number" )
+                                 .arg( functionName,
+                                       reference ) +
+                                       ( batchName.isEmpty() ? "" : QString( ", %1" ).arg( batchName )));
         return QJSValue();
     }
 
@@ -221,10 +224,10 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
 Id Script::getPropertyId( const QString &name ) const {
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where %3='%4'" )
-                        .arg( Tag::instance()->fieldName( Tag::ID ))
-                        .arg( Tag::instance()->tableName())
-                        .arg( Tag::instance()->fieldName( Tag::Function ))
-                        .arg( name )
+                        .arg( Tag::instance()->fieldName( Tag::ID ),
+                              Tag::instance()->tableName(),
+                              Tag::instance()->fieldName( Tag::Function ),
+                              name )
     );
     return query.next() ? query.value( 0 ).value<Id>() : Id::Invalid;
 }
@@ -239,13 +242,13 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     // first pass (no rich text)
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
-                        .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                        .arg( Reagent::instance()->tableName())
-                        .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                        .arg( reference )
-                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                        .arg( static_cast<int>( parentId ))
+                        .arg( Reagent::instance()->fieldName( Reagent::ID ),
+                              Reagent::instance()->tableName(),
+                              Reagent::instance()->fieldName( Reagent::Alias ),
+                              reference,
+                              Reagent::instance()->fieldName( Reagent::Name ),
+                              Reagent::instance()->fieldName( Reagent::ParentId ),
+                              QString::number( static_cast<int>( parentId )))
     );
 
     if ( query.next())
@@ -257,12 +260,12 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     //
     // get all names and reference
     query.exec( QString( "select %1, %2, %3 from %4 where %5=%6" )
-                        .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                        .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                        .arg( Reagent::instance()->tableName())
-                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                        .arg( static_cast<int>( parentId ))
+                        .arg( Reagent::instance()->fieldName( Reagent::ID ),
+                              Reagent::instance()->fieldName( Reagent::Name ),
+                              Reagent::instance()->fieldName( Reagent::Alias ),
+                              Reagent::instance()->tableName(),
+                              Reagent::instance()->fieldName( Reagent::ParentId ),
+                              QString::number( static_cast<int>( parentId )))
     );
 
     // build a map of plainText names as keys and ids as values
@@ -293,13 +296,13 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
     QSqlQuery query;
     query.exec( QString( "select %1 from %2 where ( %3=%4 and %5=%6 ) "
                          "or ( %3=%4 and %5=%7 and ( select count(*) from %2 where ( %3=%4 and %5=%6 )) = 0 )" )
-                        .arg( Property::instance()->fieldName( Property::PropertyData ))       // 1
-                        .arg( Property::instance()->tableName())                        // 2
-                        .arg( Property::instance()->fieldName( Property::TagId ))       // 3
-                        .arg( static_cast<int>( tagId ))                                // 4
-                        .arg( Property::instance()->fieldName( Property::ReagentId ))   // 5
-                        .arg( static_cast<int>( reagentId ))                            // 6
-                        .arg( static_cast<int>( parentId ))                             // 7
+                        .arg( Property::instance()->fieldName( Property::PropertyData ),// 1
+                              Property::instance()->tableName(),                        // 2
+                              Property::instance()->fieldName( Property::TagId ),       // 3
+                              QString( static_cast<int>( tagId )),                      // 4
+                              Property::instance()->fieldName( Property::ReagentId ),   // 5
+                              QString::number( static_cast<int>( reagentId )),          // 6
+                              QString::number( static_cast<int>( parentId )))           // 7
     );
 
     return query.next() ? query.value( 0 ) : QVariant();

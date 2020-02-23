@@ -121,7 +121,7 @@ void NodeHistory::loadHistory() {
     const auto list( Variable::value<QStringList>( "reagentDock/openNodes" ));
     for ( const QString &n : list ) {
         bool ok;
-        const Id id = static_cast<Id>( n.toInt( &ok ));
+        const auto id = static_cast<Id>( n.toInt( &ok ));
         if ( ok )
             this->openNodes << id;
     }

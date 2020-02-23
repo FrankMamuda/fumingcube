@@ -46,8 +46,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     this->ui->setupUi( this );
     this->ui->propertyView->verticalHeader()->hide();
 
-    this->connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-    this->connect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+    NetworkManager::connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+    NetworkManager::connect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
     // make cache dir
     this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
@@ -60,7 +60,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 
     this->ui->nameEdit->setText( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
-    this->ui->nameEdit->connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
+    QLineEdit::connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();
 
     auto addProperties = [ this ]( bool all = false ) {
@@ -79,7 +79,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
                         return;
 
                     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
-                        const Row r = static_cast<Row>( y );
+                        const auto r = static_cast<Row>( y );
                         if ( Tag::instance()->type( r ) == Tag::Formula ) {
                             row = r;
                             break;
@@ -101,16 +101,16 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
         this->accept();
     };
 
-    this->ui->addAllButton->connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
-    this->ui->addSelectedButton->connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
+    QPushButton::connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
+    QPushButton::connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
 }
 
 /**
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
-    this->disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-    this->disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+    NetworkManager::disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+    NetworkManager::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
     delete this->ui;
 }
 
@@ -124,7 +124,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
 
     // get cid
     int cid = -1;
-    const QRegularExpression re( "\"RecordNumber\":\\s(\\d+)" );
+    const QRegularExpression re( R"("RecordNumber":\s(\d+))" );
     const QRegularExpressionMatch match( re.match( QString( uncompressed.constData())));
     if ( match.hasMatch())
         cid = match.captured( 1 ).toInt();
@@ -137,13 +137,14 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
         if ( value.isObject()) {
             const QJsonObject object( value.toObject());
 
-            for ( const QString &key : object.keys()) {
+            const QStringList keys( object.keys());
+            for ( const QString &key : keys ) {
                 const QJsonValue keyValue( object.value( key ));
 
                 if ( !QString::compare( key, "TOCHeading" )) {
                     if ( !keyValue.isArray() && !keyValue.isObject()) {
                         if ( !QString::compare( keyValue.toVariant().toString(), heading )) {
-                            if ( object.keys().contains( "Information" )) {
+                            if ( object.contains( "Information" )) {
                                 const QJsonValue infoValue( object.value( "Information" ));
                                 if ( infoValue.isArray())
                                     matches << infoValue.toArray();
@@ -173,7 +174,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                 if ( info.isObject()) {
                     const QJsonObject infoObject( info.toObject());
 
-                    if ( !name.isEmpty() && infoObject.keys().contains( "Name" )) {
+                    if ( !name.isEmpty() && infoObject.contains( "Name" )) {
                         const QJsonValue nameValue( infoObject["Name"] );
                         if ( !nameValue.isArray() && !nameValue.isObject()) {
                             if ( QString::compare( nameValue.toString(), name ))
@@ -181,42 +182,42 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                         }
                     }
 
-                    if ( infoObject.keys().contains( "Value" )) {
+                    if ( infoObject.contains( "Value" )) {
                         const QJsonValue value( infoObject["Value"] );
 
                         if ( value.isObject()) {
                             const QJsonObject valueObject( value.toObject());
                             QString units;
-                            if ( valueObject.keys().contains( "Unit" ))
+                            if ( valueObject.contains( "Unit" ))
                                 units = valueObject["Unit"].toVariant().toString();
 
-                            if ( valueObject.keys().contains( "Number" )) {
+                            if ( valueObject.contains( "Number" )) {
                                 const QJsonValue numberTag( valueObject["Number"] );
                                 if ( numberTag.isArray()) {
                                     const QJsonArray numberArray( numberTag.toArray());
                                     for ( const QJsonValue &number : numberArray )
                                         values << QString( "%1 %2" ).arg( number.toDouble()).arg( qAsConst( units ));
                                 }
-                            } else if ( valueObject.keys().contains( "StringWithMarkup" )) {
-                                const QJsonValue stringTag( valueObject["StringWithMarkup"] );
+                            } else if ( valueObject.contains( "StringWithMarkup" )) {
+                                const QJsonValue &stringTag( valueObject["StringWithMarkup"] );
                                 if ( stringTag.isArray()) {
 
-                                    const QJsonArray stringArray( stringTag.toArray());
+                                    const QJsonArray &stringArray( stringTag.toArray());
                                     for ( const QJsonValue &stringValue : stringArray ) {
                                         if ( stringValue.isObject()) {
-                                            const QJsonObject stringObject( stringValue.toObject());
+                                            const QJsonObject &stringObject( stringValue.toObject());
                                             QStringList extra;
                                             if ( stringObject.keys().contains( "Markup" )) {
-                                                const QJsonValue markupTag( stringObject["Markup"] );
+                                                const QJsonValue &markupTag( stringObject["Markup"] );
                                                 if ( markupTag.isArray()) {
-                                                    const QJsonArray markupArray( markupTag.toArray());
+                                                    const QJsonArray &markupArray( markupTag.toArray());
                                                     if ( markupArray.count()) {
-                                                        for ( const QJsonValue markupValue : markupArray ) {
+                                                        for ( const QJsonValue &markupValue : markupArray ) {
                                                             if ( markupValue.isObject()) {
-                                                                const QJsonObject markupObject( markupValue.toObject());
+                                                                const QJsonObject &markupObject( markupValue.toObject());
 
-                                                                if ( markupObject.keys().contains( "Type" )) {
-                                                                    const QJsonValue typeValue( markupObject["Type"] );
+                                                                if ( markupObject.contains( "Type" )) {
+                                                                    const QJsonValue &typeValue( markupObject["Type"] );
                                                                     if ( !typeValue.isArray() && !typeValue.isObject()) {
                                                                         if ( !QString::compare( typeValue.toString(), "PubChem Internal Link" )) {
                                                                             continue;
@@ -224,8 +225,8 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                                                                     }
                                                                 }
 
-                                                                if ( markupObject.keys().contains( "Extra" )) {
-                                                                    const QJsonValue extraValue( markupObject["Extra"] );
+                                                                if ( markupObject.contains( "Extra" )) {
+                                                                    const QJsonValue &extraValue( markupObject["Extra"] );
                                                                     if ( !extraValue.isArray() && !extraValue.isObject()) {
                                                                         extra << extraValue.toString();
                                                                     }
@@ -241,7 +242,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                                                 continue;
                                             }
 
-                                            if ( stringObject.keys().contains( "String" ))
+                                            if ( stringObject.contains( "String" ))
                                                 values << QString( "%1" ).arg( stringObject["String"].toVariant().toString());
                                         }
                                     }
@@ -264,7 +265,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
             for ( const QString &value : values ) {
                 QStringList captured;
 
-                const QString stripped( QString( value ).remove( QRegularExpression( "\\(\\w+, \\d{4}\\)" )));
+                const QString stripped( QString( value ).remove( QRegularExpression( R"(\(\w+, \d{4}\))" )));
                 auto matcher = [ &captured, stripped, re, global, value ]( const QRegularExpressionMatch &match ) {
                     if ( match.hasMatch()) {
                         int k = 0;
@@ -320,7 +321,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
     QMap<QString, PropertyWidget*>propList;
 
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
-        const Row row = static_cast<Row>( y );
+        const auto row = static_cast<Row>( y );
 
         const QString script( Tag::instance()->script( row ).toString());
         if ( !script.isEmpty()) {
@@ -345,8 +346,9 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
 
 
     int row = this->ui->propertyView->rowCount();
-    this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propList.keys().count());
-    for ( const QString &name : propList.keys()) {
+    QStringList propListKeys( propList.keys());
+    this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propListKeys.count());
+    for ( const QString &name : propListKeys ) {
         this->ui->propertyView->setItem( row, 0, new QTableWidgetItem( name ));
         this->ui->propertyView->setCellWidget( row, 1, propList[name] );
         row++;
@@ -385,7 +387,7 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
  */
 void ExtractionDialog::getFormula( const QString &cid ) {
     // get formula
-    if ( QFileInfo( this->cache() + ".png" ).exists()) {
+    if ( QFileInfo::exists( this->cache() + ".png" )) {
         QFile file( this->cache() + ".png" );
         if ( file.open( QIODevice::ReadOnly )) {
             this->readFormula( file.readAll());
@@ -428,7 +430,7 @@ void ExtractionDialog::on_extractButton_clicked() {
     if ( this->cache().isEmpty())
         return;
 
-    if ( QFileInfo( this->cache()).exists()) {
+    if ( QFileInfo::exists( this->cache())) {
         this->ui->cidEdit->setText( ExtractionDialog::tr( "Reading from cache" ));
 
         QFile file( this->cache());
@@ -472,7 +474,7 @@ void ExtractionDialog::on_clearCacheButton_clicked() {
  * @brief ExtractionDialog::generateCacheName
  */
 void ExtractionDialog::generateCacheName() {
-    this->m_cache = this->path() + "/" + QString( QCryptographicHash( QCryptographicHash::Md5 ).hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
+    this->m_cache = this->path() + "/" + QString( QCryptographicHash::hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
 }
 
 /**
@@ -573,7 +575,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
         this->ui->cidEdit->setText( ExtractionDialog::tr( "Could not get a valid CID, trying similar" ));
 
             // get formula
-            if ( QFileInfo( this->cache() + ".cid" ).exists()) {
+            if ( QFileInfo::exists( this->cache() + ".cid" )) {
                 QFile file( this->cache() + ".cid" );
                 if ( file.open( QIODevice::ReadOnly )) {
                     this->cidList = QString( file.readAll()).split( "\n" );

@@ -85,8 +85,6 @@ QStringList NFPABuilder::parameters() const {
  * @brief NFPABuilder::updateNFPA
  */
 void NFPABuilder::updateNFPA() {
-    const QRegularExpression reProp( R"((\d)\s(\d)\s(\d)(?:.+?(?=(OX|W|SA)))?)" );
-
     if ( this->ui->hazardCombo->currentIndex() != 4 )
         this->ui->customHazard->setEnabled( false );
 

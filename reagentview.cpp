@@ -42,14 +42,12 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
 
     // set html delegate
     // TODO: delete me
-    ReagentDelegate *delegate = new ReagentDelegate();
+    auto *delegate = new ReagentDelegate();
     delegate->setModel( this->filterModel());
     this->setItemDelegate( delegate );
 
     this->m_nodeHistory = new NodeHistory( this );
-    this->connect( this, SIGNAL( clicked(
-                                         const QModelIndex & )), this, SLOT( selectReagent(
-                                                                                     const QModelIndex & )));
+    ReagentView::connect( this, SIGNAL( clicked( const QModelIndex & )), this, SLOT( selectReagent( const QModelIndex & )));
 }
 
 /**
@@ -93,12 +91,12 @@ void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
     //qDebug() << PropertyDock::instance()->hiddenTags.join( ", " ).append( " ) " ).prepend( "not in ( ");
     Property::instance()->setFilter( QString(
             "( %1=%2 and %1>-1 and %4 %6 ) or ( %1=%3 and %1>-1 and %4 %6 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
-                                             .arg( Property::instance()->fieldName( Property::ReagentId ))   // 1
-                                             .arg( reagentId )                                               // 2
-                                             .arg( item->data( ReagentModel::ParentId ).toInt())             // 3
-                                             .arg( Property::instance()->fieldName( Property::TagId ))       // 4
-                                             .arg( Property::instance()->tableName())                        // 5
-                                             .arg( PropertyDock::instance()->hiddenTags.join( ", " ).append(
+                                             .arg( Property::instance()->fieldName( Property::ReagentId ),   // 1
+                                                   QString::number( reagentId ),                             // 2
+                                                   item->data( ReagentModel::ParentId ).toString(),          // 3
+                                                   Property::instance()->fieldName( Property::TagId ),       // 4
+                                                   Property::instance()->tableName(),                        // 5
+                                                   PropertyDock::instance()->hiddenTags.join( ", " ).append(
                                                      " ) " ).prepend( "not in ( " ))    // 6
     );
     Property::instance()->sort( Property::TableOrder, Qt::AscendingOrder );
@@ -113,7 +111,7 @@ void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
  */
 void ReagentView::restoreIndex() {
     // get id list from variable
-    const Id id( Variable::value<Id>( "reagentDock/selection" ));
+    const auto id( Variable::value<Id>( "reagentDock/selection" ));
     if ( id != Id::Invalid ) {
         const Id parentId( Reagent::instance()->parentId( id ));
         if ( parentId != Id::Invalid )

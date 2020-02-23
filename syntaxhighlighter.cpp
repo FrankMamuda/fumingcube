@@ -36,9 +36,9 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
     QSqlQuery query;
 
     query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                        .arg( Tag::instance()->fieldName( Tag::ID ))
-                        .arg( Tag::instance()->fieldName( Tag::Function ))
-                        .arg( Tag::instance()->tableName()));
+                        .arg( Tag::instance()->fieldName( Tag::ID ),
+                              Tag::instance()->fieldName( Tag::Function ),
+                              Tag::instance()->tableName()));
     while ( query.next())
         this->keywords << qAsConst( query ).value( 1 ).toString();
 }

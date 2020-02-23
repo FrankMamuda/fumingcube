@@ -149,22 +149,22 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
     if ( reagentId == Id::Invalid ) {
         // reagent does not exist yet
         query.exec( QString( "select %1, %2 from %3 where %4=%5" )
-                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                            .arg( Reagent::instance()->tableName())
-                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                            .arg( static_cast<int>( Id::Invalid ))
+                            .arg( Reagent::instance()->fieldName( Reagent::Name ),
+                                  Reagent::instance()->fieldName( Reagent::Alias ),
+                                  Reagent::instance()->tableName(),
+                                  Reagent::instance()->fieldName( Reagent::ParentId ),
+                                  QString::number( static_cast<int>( Id::Invalid )))
         );
     } else {
         // reagent does exist, we're just renaming it
         query.exec( QString( "select %1, %2, %6 from %3 where %4=%5 and %6!=%7" )
-                            .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                            .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                            .arg( Reagent::instance()->tableName())
-                            .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                            .arg( static_cast<int>( Id::Invalid ))
-                            .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                            .arg( static_cast<int>( reagentId ))
+                            .arg( Reagent::instance()->fieldName( Reagent::Name ),
+                                  Reagent::instance()->fieldName( Reagent::Alias ),
+                                  Reagent::instance()->tableName(),
+                                  Reagent::instance()->fieldName( Reagent::ParentId ),
+                                  QString::number( static_cast<int>( Id::Invalid )),
+                                  Reagent::instance()->fieldName( Reagent::ID ),
+                                  QString::number( static_cast<int>( reagentId )))
         );
     }
 
@@ -195,11 +195,11 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
 bool ReagentDock::checkBatchForDuplicates( const QString &name, const Id parentId ) const {
     QSqlQuery query;
     query.exec( QString( "select %4 from %1 where %2=%3 and %4='%5'" )
-                        .arg( Reagent::instance()->tableName())
-                        .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                        .arg( static_cast<int>( parentId ))
-                        .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                        .arg( name )
+                        .arg( Reagent::instance()->tableName(),
+                              Reagent::instance()->fieldName( Reagent::ParentId ),
+                              QString::number( static_cast<int>( parentId )),
+                              Reagent::instance()->fieldName( Reagent::Name ),
+                              name )
     );
 
     if ( query.next()) {
@@ -322,7 +322,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
     if ( index.isValid()) {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
-        const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
+        const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
         menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId ==
@@ -339,9 +339,9 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 QMenu *labels( menu->addMenu( ReagentDock::tr( "Labels" )));
                 labels->setIcon( QIcon::fromTheme( "label" ));
                 for ( int y = 0; y < Label::instance()->count(); y++ ) {
-                    const Row row = static_cast<Row>( y );
+                    const auto row = static_cast<Row>( y );
                     const Id menuLabelId = Label::instance()->id( row );
-                    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+                    const auto reagentId = item->data( ReagentModel::ID ).value<Id>();
 
                     const QList<Id> labelIds( Reagent::instance()->labelIds( Reagent::instance()->row( reagentId )));
                     bool hasLabel = false;
@@ -376,7 +376,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         }
 
         if ( context ) {
-            const Id id = item->data( ReagentModel::ID ).value<Id>();
+            const auto id = item->data( ReagentModel::ID ).value<Id>();
             const QString reagentName( QTextEdit( Reagent::instance()->name(
                     Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))).toPlainText());
 
@@ -455,7 +455,7 @@ void ReagentDock::on_removeButton_clicked() {
      * removeReagentsAndBatches lambda
      */
     auto removeReagentsAndBatches = [ this ]( const QStandardItem *item ) {
-        const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+        const auto reagentId = item->data( ReagentModel::ID ).value<Id>();
         const Row reagentRow = Reagent::instance()->row( reagentId );
         if ( reagentRow == Row::Invalid )
             return;
@@ -508,7 +508,7 @@ void ReagentDock::on_removeButton_clicked() {
         // get current item
         // remove reagent and batches
         const QStandardItem *item( this->view()->itemFromIndex( index ));
-        const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
+        const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
                                   "Remove reagent '%1' and its batches" :
                                   "Remove batch '%1'"
@@ -570,8 +570,8 @@ void ReagentDock::on_editButton_clicked() {
         return;
 
     // get current item
-    const QStandardItem *item( this->view()->itemFromIndex( index ));
-    const Id reagentId = item->data( ReagentModel::ID ).value<Id>();
+    QStandardItem *item( this->view()->itemFromIndex( index ));
+    const auto reagentId = item->data( ReagentModel::ID ).value<Id>();
     if ( reagentId == Id::Invalid )
         return;
 
@@ -579,7 +579,7 @@ void ReagentDock::on_editButton_clicked() {
     if ( reagentRow == Row::Invalid )
         return;
 
-    const Id parentId = item->data( ReagentModel::ParentId ).value<Id>();
+    const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
     const QString previousName( Reagent::instance()->name( reagentId ));
     const QString previousReference( Reagent::instance()->reference( reagentId ));
 
@@ -597,9 +597,8 @@ void ReagentDock::on_editButton_clicked() {
 
             // rename without resetting the model
             const QString generatedName( ReagentModel::generateName( name ));
-            auto *modelItem = const_cast<QStandardItem *>( item );
-            modelItem->setText( QTextEdit( generatedName ).toPlainText());
-            modelItem->setData( generatedName, ReagentModel::HTML );
+            item->setText( QTextEdit( generatedName ).toPlainText());
+            item->setData( generatedName, ReagentModel::HTML );
         }
     } else {
         ReagentDialog rd( this, previousName, previousReference, ReagentDialog::EditMode );
@@ -615,8 +614,7 @@ void ReagentDock::on_editButton_clicked() {
 
         // rename without resetting the model
         const QString generatedName( ReagentModel::generateName( name, reference ));
-        auto *modelItem = const_cast<QStandardItem *>( item );
-        modelItem->setText( QTextEdit( generatedName ).toPlainText());
-        modelItem->setData( generatedName, ReagentModel::HTML );
+        item->setText( QTextEdit( generatedName ).toPlainText());
+        item->setData( generatedName, ReagentModel::HTML );
     }
 }

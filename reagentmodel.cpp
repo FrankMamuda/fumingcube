@@ -60,7 +60,7 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         if ( !pixmap.isNull())
             return pixmap;
 
-        const Id reagentId = item->data( ID ).value<Id>();
+        const auto reagentId = item->data( ID ).value<Id>();
         if ( reagentId == Id::Invalid )
             return QVariant();
 
@@ -131,15 +131,14 @@ void ReagentModel::setupModelData() {
 QModelIndex ReagentModel::indexFromId( const Id &id ) const {
     for ( int y = 0; y < this->invisibleRootItem()->rowCount(); y++ ) {
         const QStandardItem *reagent( this->invisibleRootItem()->child( y ));
-        if ( reagent->data( ID ).value<Id>() == id ) {
+        if ( reagent->data( ID ).value<Id>() == id )
             return reagent->index();
-        } else {
-            for ( int k = 0; k < reagent->rowCount(); k++ ) {
-                const QStandardItem *batch( reagent->child( k ));
-                {
-                    if ( batch->data( ID ).value<Id>() == id )
-                        return batch->index();
-                }
+
+        for ( int k = 0; k < reagent->rowCount(); k++ ) {
+            const QStandardItem *batch( reagent->child( k ));
+            {
+                if ( batch->data( ID ).value<Id>() == id )
+                    return batch->index();
             }
         }
     }
@@ -170,7 +169,7 @@ QString ReagentModel::generateName( const QString &name, const QString &referenc
     if ( reference.isEmpty())
         return name;
 
-    return ( !QString::compare( name, reference ) ? name : QString( "%1 (%2)" ).arg( name ).arg( reference ));
+    return ( !QString::compare( name, reference ) ? name : QString( "%1 (%2)" ).arg( name, reference ));
 }
 
 /**

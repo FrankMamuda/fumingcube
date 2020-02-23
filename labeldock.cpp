@@ -82,11 +82,13 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
             labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
 
 
-        QString whereStatement( QString( "select %1.%2 from %1 " ).arg( LabelSet::instance()->tableName()).arg(
-                LabelSet::instance()->fieldName( LabelSet::ReagentId )));
+        QString whereStatement( QString( "select %1.%2 from %1 " )
+                                .arg( LabelSet::instance()->tableName(),
+                                      LabelSet::instance()->fieldName( LabelSet::ReagentId )));
         for ( int y = 0; y < labelIds.count(); y++ )
-            whereStatement.append( QString( QString(( y == 0 ) ? "where" : "or" ) + " %1=%2 " ).arg(
-                    LabelSet::instance()->fieldName( LabelSet::LabelId )).arg( static_cast<int>( labelIds.at( y ))));
+            whereStatement.append( QString( QString(( y == 0 ) ? "where" : "or" ) + " %1=%2 " )
+                                   .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ),
+                                         QString::number( static_cast<int>( labelIds.at( y )))));
 
         /*QList<Id> reagentList;
         QSqlQuery query;
@@ -107,15 +109,17 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
                                            "%1 in ( %3 ) "
                                            "or "
                                            "%4 in ( %3 ) " )
-                                          .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                                          .arg( Reagent::instance()->tableName())
-                                          .arg( whereStatement )
-                                          .arg( Reagent::instance()->fieldName( Reagent::ParentId )));
+                                          .arg( Reagent::instance()->fieldName( Reagent::ID ),
+                                                Reagent::instance()->tableName(),
+                                                whereStatement,
+                                                Reagent::instance()->fieldName( Reagent::ParentId )));
 
         // qDebug() << "REAGENTS" << reagentList;
 
-        Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" ).arg( Reagent::instance()->tableName()).arg(
-                Reagent::instance()->fieldName( Reagent::ID )).arg( reagentStatement ));
+        Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" )
+                                        .arg( Reagent::instance()->tableName(),
+                                              Reagent::instance()->fieldName( Reagent::ID ),
+                                              reagentStatement ));
     }
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();

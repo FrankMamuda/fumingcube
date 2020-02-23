@@ -48,7 +48,9 @@ void EditorToolbar::setEditor( TextEdit *editor ) {
 
 
     // make sure to change ui elements on active editor switch
-    TextEdit::connect( this->editor(), SIGNAL( currentCharFormatChanged( QTextCharFormat )), this,
+    TextEdit::connect( this->editor(),
+                       SIGNAL( currentCharFormatChanged( QTextCharFormat )),
+                       this,
                        SLOT( formatChanged( QTextCharFormat )));
     this->formatChanged( this->editor()->currentCharFormat());
 }
@@ -179,7 +181,8 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
             QAction::connect( this->actionGHS, &QAction::triggered, [ this ]() {
                 auto *menu( new QMenu());
 
-                for ( const QString &key : GHSHazards::Hazards.keys()) {
+                const QStringList keys( GHSHazards::Hazards.keys());
+                for ( const QString &key : keys ) {
                     const QIcon icon( GHSPictograms::icon( key ));
                     menu->addAction( icon, GHSHazards::Hazards[key], [ this, key ]() {
                         const QPixmap pixmap( GHSPictograms::pixmap( key, 48 ));

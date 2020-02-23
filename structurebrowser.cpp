@@ -151,7 +151,7 @@ void StructureBrowser::replyReceived( const QString &, NetworkManager::Types typ
  */
 void StructureBrowser::getFormula( const int cid ) {
     const QString cache( this->path() + "/" + QString::number( cid ) + ".png" );
-    if ( QFileInfo( cache ).exists()) {
+    if ( QFileInfo::exists( cache )) {
         QFile file( cache );
         if ( file.open( QIODevice::ReadOnly )) {
             this->readFormula( file.readAll());
@@ -176,7 +176,7 @@ void StructureBrowser::getFormula( const int cid ) {
  */
 void StructureBrowser::getName( const int cid ) {
     const QString cache( this->path() + "/" + QString::number( cid ));
-    if ( QFileInfo( cache ).exists()) {
+    if ( QFileInfo::exists( cache )) {
         QFile file( cache );
         if ( file.open( QIODevice::ReadOnly )) {
             this->ui->name->setText( QString( file.readAll()));

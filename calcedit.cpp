@@ -40,9 +40,9 @@ bool CalcEdit::completeCommand() {
     QStringList functions;
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                        .arg( Tag::instance()->fieldName( Tag::ID ))
-                        .arg( Tag::instance()->fieldName( Tag::Function ))
-                        .arg( Tag::instance()->tableName()));
+                        .arg( Tag::instance()->fieldName( Tag::ID ),
+                              Tag::instance()->fieldName( Tag::Function ),
+                              Tag::instance()->tableName()));
     while ( query.next()) {
         const QString functionName( query.value( 1 ).toString());
         if ( !functionName.isEmpty())
@@ -123,12 +123,12 @@ bool CalcEdit::completeCommand() {
             Id parentId = Id::Invalid;
             if ( !parent.isEmpty()) {
                 query.exec( QString( "select %1, %2, %6 from %3 where %4=%5" )
-                                    .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                                    .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                                    .arg( Reagent::instance()->tableName())
-                                    .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                                    .arg( static_cast<int>( Id::Invalid ))
-                                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                                    .arg( Reagent::instance()->fieldName( Reagent::Name ),
+                                          Reagent::instance()->fieldName( Reagent::Alias ),
+                                          Reagent::instance()->tableName(),
+                                          Reagent::instance()->fieldName( Reagent::ParentId ),
+                                          QString::number( static_cast<int>( Id::Invalid )),
+                                          Reagent::instance()->fieldName( Reagent::ID ))
                 );
 
                 // append plainText names
@@ -149,11 +149,11 @@ bool CalcEdit::completeCommand() {
             //
             QStringList reagents;
             query.exec( QString( "select %1, %2 from %3 where %4=%5" )
-                                .arg( Reagent::instance()->fieldName( Reagent::Name ))
-                                .arg( Reagent::instance()->fieldName( Reagent::Alias ))
-                                .arg( Reagent::instance()->tableName())
-                                .arg( Reagent::instance()->fieldName( Reagent::ParentId ))
-                                .arg( static_cast<int>( parentId ))
+                                .arg( Reagent::instance()->fieldName( Reagent::Name ),
+                                      Reagent::instance()->fieldName( Reagent::Alias ),
+                                      Reagent::instance()->tableName(),
+                                      Reagent::instance()->fieldName( Reagent::ParentId ),
+                                      QString::number( static_cast<int>( parentId )))
             );
 
             // append plainText names
@@ -280,7 +280,7 @@ void CalcEdit::saveHistory() {
 bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
     if ( this->hasFocus()) {
         if ( event->type() == QEvent::KeyPress ) {
-            QKeyEvent *keyEvent( static_cast<QKeyEvent *>( event ));
+            auto *keyEvent( dynamic_cast<QKeyEvent *>( event ));
 
             if ( keyEvent->key() == Qt::Key_Up ) {
                 if ( !this->history.isEmpty()) {
@@ -291,7 +291,9 @@ bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
                     this->setText( offset > 0 ? this->history.at( offset ) : this->history.first());
                 }
                 return true;
-            } else if ( keyEvent->key() == Qt::Key_Down ) {
+            }
+
+            if ( keyEvent->key() == Qt::Key_Down ) {
                 if ( !this->history.isEmpty()) {
                     if ( this->offset() > 0 )
                         this->pop();
@@ -305,7 +307,9 @@ bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
                     this->setText( offset < this->history.count() ? this->history.at( offset ) : this->history.last());
                 }
                 return true;
-            } else if ( keyEvent->key() == Qt::Key_Tab ) {
+            }
+
+            if ( keyEvent->key() == Qt::Key_Tab ) {
                 if ( this->text().isEmpty())
                     return true;
 
@@ -326,7 +330,7 @@ CalcEdit::CalcEdit( QWidget *parent ) : QLineEdit( parent ) {
     this->installEventFilter( this );
     this->history = Variable::compressedString( "calculator/commands" ).split( ";" );
 
-    this->connect( this, &QLineEdit::returnPressed, [ this ]() {
+    CalcEdit::connect( this, &QLineEdit::returnPressed, [ this ]() {
         const QString st( this->text().simplified());
         MainWindow::instance()->appendToCalculator( st );
         this->add( st );

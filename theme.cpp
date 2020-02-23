@@ -24,12 +24,13 @@
 #include <QSettings>
 #include "variable.h"
 #include <QApplication>
+#include <utility>
 
 /**
  * @brief Theme::Theme
  */
 Theme::Theme( const QString &fileName ) {
-    this->m_style = qApp->style();
+    this->m_style = QApplication::style();
 
     if ( fileName.isEmpty()) {
         this->m_dark = Variable::isEnabled( "darkMode" );
@@ -47,8 +48,8 @@ QPalette Theme::palette() const {
      * @brief The ThemeColour struct
      */
     struct ThemeColour {
-        ThemeColour( const QString &key, const QPalette::ColorRole &role, const QPalette::ColorGroup &group, bool isBrush ) :
-            m_key( key ), m_role( role ), m_group( group ), m_brush( isBrush ) {}
+        ThemeColour( QString key, const QPalette::ColorRole &role, const QPalette::ColorGroup &group, bool isBrush ) :
+            m_key( std::move( key )), m_role( role ), m_group( group ), m_brush( isBrush ) {}
 
         bool isBrush() const { return this->m_brush; }
         QString key() const { return this->m_key; }
@@ -102,7 +103,7 @@ QPalette Theme::palette() const {
                                            ThemeColour( "PaletteShadow",                    QPalette::Shadow,           QPalette::All,      false ) <<
                                            ThemeColour( "PaletteShadowDisabled",            QPalette::Shadow,           QPalette::Disabled, false ));
 
-    QPalette palette( qApp->palette());
+    QPalette palette( QApplication::palette());
     for ( const ThemeColour &themeColour : themeColours ) {
         if ( this->paletteMap.contains( themeColour.key())) {
             const QColor colour( this->paletteMap[themeColour.key()] );

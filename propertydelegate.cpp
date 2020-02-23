@@ -92,7 +92,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                 // calculate the preferred with (to fit property value column)
                 const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth : originalSize.width();
-                const int scaledHeight = static_cast<int>(
+                const auto scaledHeight = static_cast<int>(
                         ( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) *
                         static_cast<qreal>( originalSize.height()));
                 scaledSize = QSize( scaledWidth, scaledHeight );
@@ -204,9 +204,10 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                     qAsConst( stringData ) + units )));
         }
 
-        document->setHtml(
-                QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3<\p>)" ).arg( font.pointSize()).arg(
-                        font.family()).arg( qAsConst( html )));
+        document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3<\p>)" )
+                           .arg( QString::number( font.pointSize()),
+                                 font.family(),
+                                 qAsConst( html )));
     }
 
     document->setDocumentMargin( 2 );
@@ -264,7 +265,7 @@ QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModel
     if ( row == Row::Invalid )
         return QSize();
 
-    const Id reagentId = Variable::value<Id>( "reagentDock/selection" );
+    const auto reagentId = Variable::value<Id>( "reagentDock/selection" );
     const Id parentId = Reagent::instance()->parentId( reagentId );
     const Id propertyParentId = Property::instance()->reagentId( row );
     if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
