@@ -35,9 +35,15 @@ namespace Ui {
  */
 class NFPABuilder : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( NFPABuilder )
 
 public:
     explicit NFPABuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
+
+    // disable move
+    NFPABuilder( NFPABuilder&& ) = delete;
+    NFPABuilder& operator=( NFPABuilder&& ) = delete;
+
     ~NFPABuilder() override;
     [[nodiscard]] QStringList parameters() const;
 

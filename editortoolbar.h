@@ -65,7 +65,7 @@ public:
 
 public slots:
     void setEditor( TextEdit *editor );
-    void installFeature( const Feature &feature );
+    void installFeature( const EditorToolbar::Feature &feature );
 
 private slots:
     void colourChanged( const QColor &colour );

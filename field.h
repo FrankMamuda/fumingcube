@@ -29,12 +29,40 @@
  */
 class Field_ : public QSqlField {
 public:
+    /**
+     * @brief Field_
+     * @param id
+     * @param fieldName
+     * @param type
+     * @param format
+     * @param unique
+     * @param autoValue
+     */
     explicit Field_( int id = 0, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid,
             QString format = QString( "text" ), bool unique = false, bool autoValue = false ) : QSqlField(
             fieldName, type ), m_id( id ), m_unique( unique ), m_format( std::move( format )) { this->setAutoValue( autoValue ); }
+    /**
+     * @brief isUnique
+     * @return
+     */
     [[nodiscard]] bool isUnique() const { return this->m_unique; }
+
+    /**
+     * @brief format
+     * @return
+     */
     [[nodiscard]] QString format() const { return m_format; }
+
+    /**
+     * @brief id
+     * @return
+     */
     [[nodiscard]] int id() const { return this->m_id; }
+
+    /**
+     * @brief isPrimary
+     * @return
+     */
     bool isPrimary() { return this->isAutoValue() && this->format().contains( "primary key" ); }
 
 private:
@@ -46,4 +74,4 @@ private:
 /**
  * @brief Field a shared pointer to the field class
  */
-typedef QSharedPointer<Field_> Field;
+using Field = QSharedPointer<Field_>;

@@ -38,7 +38,17 @@ public:
     explicit Theme( const QString &fileName = QString());
     [[nodiscard]] QPalette palette() const;
     [[maybe_unused]][[nodiscard]] QColor syntaxColour( const QString &key ) const;
+
+    /**
+     * @brief isDark
+     * @return
+     */
     [[nodiscard]] bool isDark() const { return this->m_dark; }
+
+    /**
+     * @brief style
+     * @return
+     */
     [[nodiscard]] QStyle *style() const { return this->m_style; }
 
 private slots:

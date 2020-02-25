@@ -47,6 +47,13 @@ class PropertyEditor : public QDialog {
     Q_DISABLE_COPY( PropertyEditor )
 
 public:
+    // disable move
+    PropertyEditor( PropertyEditor&& ) = delete;
+    PropertyEditor& operator=( PropertyEditor&& ) = delete;
+
+    /**
+     * @brief The Editors enum
+     */
     enum Editors {
         NoEditor = -1,
         Name,
@@ -54,6 +61,9 @@ public:
     };
     Q_ENUM( Editors )
 
+    /**
+     * @brief The Modes enum
+     */
     enum Modes {
         NoMode = -1,
         Add,
@@ -64,12 +74,12 @@ public:
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(),
                              const QString &value = QString());
     ~PropertyEditor() override;
-    bool eventFilter( QObject *watched, QEvent *event ) override;
+    bool eventFilter( QObject *object, QEvent *event ) override;
     [[nodiscard]] QString name() const;
     [[nodiscard]] QString value() const;
 
 private slots:
-    void setText( Editors editor, const QString &text );
+    void setText( PropertyEditor::Editors editor, const QString &text );
 
 protected:
     void showEvent( QShowEvent *event ) override;

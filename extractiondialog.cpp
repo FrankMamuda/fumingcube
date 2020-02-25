@@ -262,7 +262,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
             if ( !re.isValid())
                 return;
 
-            for ( const QString &value : values ) {
+            for ( const QString &value : qAsConst( values )) {
                 QStringList captured;
 
                 const QString stripped( QString( value ).remove( QRegularExpression( R"(\(\w+, \d{4}\))" )));
@@ -293,7 +293,7 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
                     out.append( captured );
             }
         } else {
-            for ( const QString &value : values )
+            for ( const QString &value : qAsConst( values ))
                 out << ( QStringList() << value << value );
         }
 
@@ -516,7 +516,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         }
 
         QList<int> cidListInt;
-        for ( const QString &cid : this->cidList )
+        for ( const QString &cid : qAsConst( this->cidList ))
             cidListInt << cid.toInt();
         cidListInt.removeAll( 0 );
         std::sort( cidListInt.begin(), cidListInt.end());
@@ -582,7 +582,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     file.close();
 
                     QList<int> cidListInt;
-                    for ( const QString &cid : this->cidList )
+                    for ( const QString &cid : qAsConst( this->cidList ))
                         cidListInt << cid.toInt();
                     cidListInt.removeAll( 0 );
                     std::sort( cidListInt.begin(), cidListInt.end());

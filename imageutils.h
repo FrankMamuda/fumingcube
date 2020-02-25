@@ -38,10 +38,16 @@ namespace Ui {
  */
 class ImageUtils : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( ImageUtils )
 
 public:
     explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0,
                          bool view = false );
+
+    // disable move
+    ImageUtils( ImageUtils&& ) = delete;
+    ImageUtils& operator=( ImageUtils&& ) = delete;
+
     ~ImageUtils() override;
     QPixmap pixmap;
 

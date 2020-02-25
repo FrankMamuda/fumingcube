@@ -45,6 +45,11 @@ class XMLTools final : public QObject {
 
 public:
     ~XMLTools() override = default;
+
+    /**
+     * @brief instance
+     * @return
+     */
     static XMLTools *instance() {
         static auto *instance( new XMLTools());
         return instance;
@@ -53,6 +58,10 @@ public:
     static void read();
 
 private:
+    /**
+     * @brief XMLTools
+     * @param parent
+     */
     explicit XMLTools( QObject *parent = nullptr ) : QObject( parent ) {
         this->setObjectName( "XMLTools" );
         GarbageMan::instance()->add( this );

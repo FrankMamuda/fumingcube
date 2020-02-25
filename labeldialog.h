@@ -35,10 +35,17 @@ namespace Ui {
  */
 class LabelDialog : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( LabelDialog )
 
 public:
     explicit LabelDialog( QWidget *parent = nullptr );
+
+    // disable move
+    LabelDialog( LabelDialog&& ) = delete;
+    LabelDialog& operator=( LabelDialog&& ) = delete;
+
     ~LabelDialog() override;
+
     [[nodiscard]] QString name() const;
 
     /**

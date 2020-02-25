@@ -32,9 +32,13 @@
  * @brief The NetworkManager class
  */
 class NetworkManager : public QObject {
-Q_OBJECT
+    Q_OBJECT
+    Q_DISABLE_COPY( NetworkManager )
 
 public:
+    /**
+     * @brief The Types enum
+     */
     enum Types {
         NoType = -1,
         CIDRequestInitial,
@@ -45,6 +49,10 @@ public:
         IUPACName
     };
     Q_ENUM( Types )
+
+    // disable move
+    NetworkManager( NetworkManager&& ) = delete;
+    NetworkManager& operator=( NetworkManager&& ) = delete;
 
     /**
      * @brief instance
@@ -65,7 +73,7 @@ signals:
     void error( const QString &url, NetworkManager::Types type, const QString &errorString );
 
 public slots:
-    void execute( const QString &url, Types type, const QVariant &userData = QVariant());
+    void execute( const QString &url, NetworkManager::Types type, const QVariant &userData = QVariant());
 
 private:
     /**

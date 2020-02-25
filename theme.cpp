@@ -51,10 +51,10 @@ QPalette Theme::palette() const {
         ThemeColour( QString key, const QPalette::ColorRole &role, const QPalette::ColorGroup &group, bool isBrush ) :
             m_key( std::move( key )), m_role( role ), m_group( group ), m_brush( isBrush ) {}
 
-        bool isBrush() const { return this->m_brush; }
-        QString key() const { return this->m_key; }
-        QPalette::ColorRole role() const { return this->m_role; }
-        QPalette::ColorGroup group() const { return this->m_group; }
+        [[nodiscard]] bool isBrush() const { return this->m_brush; }
+        [[nodiscard]] QString key() const { return this->m_key; }
+        [[nodiscard]] QPalette::ColorRole role() const { return this->m_role; }
+        [[nodiscard]] QPalette::ColorGroup group() const { return this->m_group; }
 
     private:
         QString m_key;

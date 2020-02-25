@@ -35,9 +35,15 @@ namespace Ui {
  */
 class SettingsDialog : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( SettingsDialog )
 
 public:
     explicit SettingsDialog( QWidget *parent = nullptr );
+
+    // disable move
+    SettingsDialog( SettingsDialog&& ) = delete;
+    SettingsDialog& operator=( SettingsDialog&& ) = delete;
+
     ~SettingsDialog() override;
 
 private:

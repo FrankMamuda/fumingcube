@@ -173,13 +173,14 @@ bool CalcEdit::completeCommand() {
 
             reagents.removeDuplicates();
             QStringList reagentsCaseInsensitive;
-            for ( const QString &reagent : reagents )
+            for ( const QString &reagent : qAsConst( reagents ))
                 reagentsCaseInsensitive << reagent.toLower();
             reagentsCaseInsensitive.removeDuplicates();
 
             // complete to the shortest string
             QString completion;
-            int matchPos, y;
+            int matchPos;
+            int y;
             if ( reagentsCaseInsensitive.count() == 1 ) {
                 // append extra space (since it's the only match that will likely be followed by an argument)
                 completion = reagents.first();
@@ -228,7 +229,8 @@ bool CalcEdit::completeCommand() {
 
             // complete to the shortest string
             QString completion;
-            int matchPos, y;
+            int matchPos;
+            int y;
             if ( filtered.count() == 1 ) {
                 // append extra space (since it's the only match that will likely be followed by an argument)
                 completion = filtered.first();

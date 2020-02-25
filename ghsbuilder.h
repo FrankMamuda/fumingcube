@@ -31,10 +31,21 @@
  */
 class GHSBuilder : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( GHSBuilder )
 
 public:
     explicit GHSBuilder( QWidget *parent = nullptr, const QStringList &parameters = QStringList());
+
+    // disable move
+    GHSBuilder( GHSBuilder&& ) = delete;
+    GHSBuilder& operator=( GHSBuilder&& ) = delete;
+
     ~GHSBuilder() override;
+
+    /**
+     * @brief parameters
+     * @return
+     */
     [[nodiscard]] QStringList parameters() const;
 
 private:

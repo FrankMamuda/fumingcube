@@ -41,12 +41,25 @@ class LabelDock final : public DockWidget {
     Q_DISABLE_COPY( LabelDock )
 
 public:
+    // disable move
+    LabelDock( LabelDock&& ) = delete;
+    LabelDock& operator=( LabelDock&& ) = delete;
+
+    /**
+     * @brief instance
+     * @return
+     */
     static LabelDock *instance() {
         static auto *labelDock( new LabelDock());
         return labelDock;
     }
     ~LabelDock() override;
     [[nodiscard]] Id currentLabel() const;
+
+    /**
+     * @brief setFilter
+     * @param list
+     */
     static void setFilter( const QModelIndexList &list = QModelIndexList());
 
 private slots:

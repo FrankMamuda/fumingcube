@@ -69,8 +69,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             auto setupPixmap = [ this, data, tagId, &scaledSize, &pixmapData ]() {
                 // get pixmap data and calculate a quick checksum for cache access
                 const QByteArray storedData( data.toByteArray());
-                const quint32 checksum = Cache::checksum( storedData.constData(),
-                                                          static_cast<size_t>( storedData.length()));
+                const QString checksum( Cache::checksum( storedData ));
 
                 // get sectionWidth (property value column width)
                 const int sectionWidth = PropertyDock::instance()->sectionSize( Property::PropertyData );

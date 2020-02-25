@@ -96,7 +96,6 @@ void XMLTools::read() {
  * @param mode
  */
 void XMLTools::write() {
-    QString savedData, newData;
     const QDir configDir( QDir::homePath() + "/" + Main::Path );
 
 #ifdef QT_DEBUG
@@ -156,19 +155,21 @@ void XMLTools::write() {
     xmlBuffer.close();
 
     // read existing config from file
+    QString savedData;
     if ( xmlFile.open( QFile::ReadOnly | QIODevice::Text )) {
         savedData = xmlFile.readAll();
         xmlFile.close();
     }
 
     // read new config from buffer
+    QString newData;
     if ( xmlBuffer.open( QFile::ReadOnly | QIODevice::Text )) {
         newData = xmlBuffer.readAll();
         xmlBuffer.close();
     }
 
     // compare data
-    if ( QString::compare( savedData, newData )) {
+    if ( QString::compare( qAsConst( savedData ), qAsConst( newData ))) {
         // write out as binary (not QIODevice::Text) to avoid CR line endings
         if ( !xmlFile.open( QFile::WriteOnly | QFile::Truncate )) {
             qCCritical( XMLTools_::Debug ) << XMLTools::tr( "could not open configuration file \"%1\"" ).arg( path );

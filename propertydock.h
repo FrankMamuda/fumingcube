@@ -42,6 +42,14 @@ class PropertyDock final : public DockWidget {
     Q_DISABLE_COPY( PropertyDock )
 
 public:
+    // disable move
+    PropertyDock( PropertyDock&& ) = delete;
+    PropertyDock& operator=( PropertyDock&& ) = delete;
+
+    /**
+     * @brief instance
+     * @return
+     */
     static PropertyDock *instance() {
         static auto *reagentDock( new PropertyDock());
         return reagentDock;
@@ -70,6 +78,7 @@ private slots:
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;
+
     [[nodiscard]] QPair<QString, QVariant>
     getPropertyValue( const Id &reagentId, const Id &tagId = Id::Invalid, const Id &propertyId = Id::Invalid ) const;
 };

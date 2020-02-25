@@ -31,15 +31,18 @@
  * @brief The PropertyDelegate class
  */
 class PropertyDelegate : public QStyledItemDelegate {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
-    QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const override;
     mutable QMap<QModelIndex, QTextDocument *> documentMap;
 
 public slots:
+    /**
+     * @brief clearDocumentCache
+     */
     void clearDocumentCache() {
         qDeleteAll( this->documentMap );
         this->documentMap.clear();
@@ -49,6 +52,6 @@ private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
 
 private:
-    mutable QMap<quint32, QMap<int, QByteArray>> cache;
-    mutable QMap<quint32, QSize> sizeCache;
+    mutable QMap<QString, QMap<int, QByteArray>> cache;
+    mutable QMap<QString, QSize> sizeCache;
 };

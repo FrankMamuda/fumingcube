@@ -99,7 +99,7 @@ ImageUtils::ImageUtils( QWidget *parent, const QPixmap &pixmap, const int &prefe
     ImageUtils::connect( this->ui->sizeSlider, &QSlider::valueChanged, scalePixmap );
 
     // connect ok button
-    ImageUtils::connect( this->ui->buttonBox, &QDialogButtonBox::accepted, [ this, pixmap ]() {
+    ImageUtils::connect( this->ui->buttonBox, &QDialogButtonBox::accepted, this, [ this, pixmap ]() {
         this->pixmap = pixmap.scaled( this->size, Qt::KeepAspectRatio, Qt::SmoothTransformation );
     } );
 
@@ -127,7 +127,10 @@ QPixmap ImageUtils::autoCropPixmap( const QPixmap &pixmap, const QColor &key ) {
     const QImage image( pixmap.toImage());
 
     // check left
-    int left = 0, right = 0, top = 0, bottom = 0;
+    int left = 0;
+    int right = 0;
+    int top = 0;
+    int bottom = 0;
     for ( int x = 0; x < image.width(); x++ ) {
         bool found = false;
 

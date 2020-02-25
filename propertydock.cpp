@@ -43,6 +43,7 @@
 #include <QMessageBox>
 #include <QClipboard>
 #include <QTimer>
+#include <QSqlQuery>
 
 /**
  * @brief PropertyDock::PropertyDock
@@ -108,7 +109,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
             // reorder tasks according to id list
             y = 0;
-            for ( const Id id : idList ) {
+            for ( const Id id : qAsConst( idList )) {
                 Property::instance()->setTableOrder( Property::instance()->row( id ), y );
                 y++;
             }
@@ -165,7 +166,8 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 QPair<QString, QVariant>
 PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &propertyId ) const {
     QPair<QString, QVariant> values;
-    QString name, value;
+    QString name;
+    QString value;
     PropertyEditor::Modes mode = PropertyEditor::Add;
 
     if ( reagentId == Id::Invalid )
@@ -209,19 +211,37 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
             case Tag::GHS: {
                 GHSBuilder ghs( PropertyDock::instance(), value.split( " " ));
-                return ( ghs.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(),
-                                                                                       ghs.parameters().join( " " ))
-                                                           : values;
+                return ( ghs.exec() == QDialog::Accepted ) ?
+                         QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) :
+                         values;
             }
 
-            case Tag::Formula:
+            case Tag::Formula: {
+                // FIXME: dup code
+                const QString fileName(
+                QFileDialog::getOpenFileName( PropertyDock::instance(), PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
+                if ( fileName.isEmpty())
+                    break;
+
+                // load image
+                const QPixmap pixmap( fileName );
+                if ( !pixmap.isNull()) {
+                    QByteArray bytes;
+                    QBuffer buffer( &bytes );
+                    buffer.open( QIODevice::WriteOnly );
+                    QPixmap( pixmap ).save( &buffer, "PNG" );
+                    buffer.close();
+                    return QPair<QString, QVariant>( QString(), qAsConst( bytes ));
+                }
+                break;
+            }
+
             case Tag::NoType:
                 return values;
         }
     }
 
-    auto *pe(
-            new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
+    auto *pe( new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
     if ( pe->exec() == QDialog::Accepted ) {
         const QString strippedName( TextEdit::stripHTML( pe->name()));
 
@@ -289,26 +309,34 @@ void PropertyDock::on_addPropButton_clicked() {
     const QString reagentName(
             QTextEdit( Reagent::instance()->name( Reagent::instance()->row( reagentId ))).toPlainText());
 
-    // get all tags that have already been set
-    QList<Id> tags;
-    for ( int y = 0; y < Property::instance()->count(); y++ ) {
-        const Row row = Property::instance()->row( y );
-        const Id tagId = Property::instance()->tagId( row );
-        if ( tagId != Id::Invalid )
-            tags << tagId;
-    }
+    // get UNFILTERED tags that have been set
+    QSqlQuery query;
+    query.exec( QString( "select %1 from %2 where %3=%4" )
+                        .arg( Property::instance()->fieldName( Property::TagId ),
+                              Property::instance()->tableName(),
+                              Property::instance()->fieldName( Property::ReagentId ),
+                              QString::number( static_cast<int>( reagentId ))));
+    QList<Id> allSetTags;
+    while ( query.next())
+        allSetTags << query.value( 0 ).value<Id>();
 
     // add built-in properties to menu
     QMenu menu;
     QMenu *subMenu( menu.addMenu( PropertyDock::tr( "Add property" )));
-    for ( int y = 0; y < Tag::instance()->count(); y++ ) {
-        const Row tagRow = Tag::instance()->row( y );
-        const Id tagId = Tag::instance()->id( tagRow );
 
-        if ( tags.contains( tagId ))
+    // get UNFILTERED tag list
+    query.exec( QString( "select %1 from %2" )
+                        .arg( Tag::instance()->fieldName( Tag::ID ),
+                              Tag::instance()->tableName()));
+    QList<Id> allTags;
+    while ( query.next())
+        allTags << query.value( 0 ).value<Id>();
+
+    for ( const Id tagId : qAsConst( allTags )) {
+        if ( qAsConst( allSetTags ).contains( tagId ))
             continue;
 
-        subMenu->addAction( Tag::instance()->name( tagRow ), [ this, reagentId, tagId ]() {
+        subMenu->addAction( Tag::instance()->name( tagId ), this, [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
             this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
         } );
@@ -317,13 +345,13 @@ void PropertyDock::on_addPropButton_clicked() {
     subMenu->setIcon( QIcon::fromTheme( "add" ));
 
     // add an option to add custom properties
-    menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( reagentName ), this, [ this, reagentId ]() {
         const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Id::Invalid ));
         this->addProperty( values.first, values.second, reagentId );
     } )->setIcon( QIcon::fromTheme( "star" ));
 
     // add an option to embed images
-    menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( reagentName ), [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( reagentName ), this, [ this, reagentId ]() {
         const QString fileName(
                 QFileDialog::getOpenFileName( this, PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
         if ( fileName.isEmpty())
@@ -349,7 +377,7 @@ void PropertyDock::on_addPropButton_clicked() {
     } )->setIcon( QIcon::fromTheme( "image" ));
 
     // add an option to get properties from the internet
-    menu.addAction( PropertyDock::tr( "Get properties from the internet" ), [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Get properties from the internet" ), this, [ this, reagentId ]() {
         const Id parentId = Reagent::instance()->parentId( reagentId );
 
         ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
@@ -379,7 +407,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
         if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS ||
              type == Tag::Formula || tagId == Id::Invalid ) {
-            menu.addAction( PropertyDock::tr( "Copy" ), [ row, type ]() {
+            menu.addAction( PropertyDock::tr( "Copy" ), this, [ row, type ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
 
                 if ( type == Tag::Formula )
@@ -397,7 +425,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         }
 
         if ( type == Tag::Formula || tagId == PixmapTag ) {
-            menu.addAction( PropertyDock::tr( "View" ), [ this, row ]() {
+            menu.addAction( PropertyDock::tr( "View" ), this, [ this, row ]() {
                 QPixmap pixmap;
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
@@ -407,7 +435,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));
 
-            menu.addAction( PropertyDock::tr( "Replace" ), [ this, row ]() {
+            menu.addAction( PropertyDock::tr( "Replace" ), this, [ this, row ]() {
                 this->replacePixmap( row );
             } )->setIcon( QIcon::fromTheme( "replace" ));
         }
@@ -429,14 +457,14 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 // tag.
                 QMenu *subMenu2( menu.addMenu( PropertyDock::tr( "Paste to calculator" )));
                 subMenu2->setIcon( QIcon::fromTheme( "paste" ));
-                subMenu2->addAction( PropertyDock::tr( "Reference" ), [ this ]() {
+                subMenu2->addAction( PropertyDock::tr( "Reference" ), this, [ this ]() {
                     this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex());
                 } )->setIcon( QIcon::fromTheme( "clean" ));
-                subMenu2->addAction( PropertyDock::tr( "Value" ), paste )->setIcon( QIcon::fromTheme( "paste" ));
+                subMenu2->addAction( PropertyDock::tr( "Value" ), this, paste )->setIcon( QIcon::fromTheme( "paste" ));
             }
 
 
-            menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), [ this, tagId ]() {
+            menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), this, [ this, tagId ]() {
                 this->hiddenTags << QString::number( static_cast<int>( tagId ));
                 this->hiddenTags.removeAll( "" );
                 ReagentDock::instance()->view()->updateView();
@@ -445,7 +473,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
     }
 
     if ( !this->hiddenTags.isEmpty()) {
-        menu.addAction( PropertyDock::tr( "Show all properties" ), [ this ]() {
+        menu.addAction( PropertyDock::tr( "Show all properties" ), this, [ this ]() {
             this->hiddenTags.clear();
             ReagentDock::instance()->view()->updateView();
         } )->setIcon( QIcon::fromTheme( "show" ));
@@ -479,7 +507,7 @@ void PropertyDock::on_removePropButton_clicked() {
             idList << Property::instance()->id( row );
         }
 
-        for ( const Id &id : idList )
+        for ( const Id &id : qAsConst( idList ))
             Property::instance()->remove( Property::instance()->row( id ));
     };
 

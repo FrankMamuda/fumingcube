@@ -68,7 +68,7 @@ void CharacterMap::paintEvent( QPaintEvent *event ) {
         for ( y = 0; y < this->characters.count(); y++ ) {
             // get block coordinates
             const int hBlock = y % blocks;
-            const int vBlock = qFloor( static_cast<float>( y ) / static_cast<float>( blocks ));
+            const int vBlock = qFloor( static_cast<qreal>( y ) / static_cast<qreal>( blocks ));
 
             // draw highlight rect
             const QRect rect( hBlock * CharacterNamespace::GridSize, vBlock * CharacterNamespace::GridSize,

@@ -135,7 +135,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // add an option to paste reference to calculator
         QMenu menu( this->ui->calcView );
-        menu.addAction( MainWindow::tr( "Paste" ), [ this, property, reagent, batch ]() {
+        menu.addAction( MainWindow::tr( "Paste" ), this, [ this, property, reagent, batch ]() {
             this->insertCommand( QString( "%1( \"%2\"%3 )" )
                                  .arg( property, reagent,
                                        batch.isEmpty() ?
@@ -236,7 +236,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
         // perform string replacement
         int offset = 0;
-        for ( const Match &match : matches ) {
+        for ( const Match &match : qAsConst( matches )) {
             const QString link( QString( "<a href=\"%1\">" ).arg( match.args ));
             replacedLine.insert( match.start + offset, link );
             offset += link.length();

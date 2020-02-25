@@ -32,9 +32,25 @@ class ExtractionModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
+    /**
+     * @brief ExtractionModel
+     * @param parent
+     * @param entries
+     */
     explicit ExtractionModel( QObject *parent = nullptr, QStringList entries = QStringList())
             : QAbstractListModel( parent ), list( std::move( entries )) {}
+    /**
+     * @brief rowCount
+     * @return
+     */
     [[nodiscard]] int rowCount( const QModelIndex & = QModelIndex()) const override { return this->list.count(); }
+
+    /**
+     * @brief data
+     * @param index
+     * @param role
+     * @return
+     */
     [[nodiscard]] QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override {
         if ( index.row() < 0 || index.row() >= this->list.count())
             return QVariant();
@@ -45,6 +61,10 @@ public:
         return QVariant();
     }
 
+    /**
+     * @brief reset
+     * @param entries
+     */
     [[maybe_unused]] void reset( const QStringList &entries = QStringList()) {
         this->beginResetModel();
         this->list = entries;

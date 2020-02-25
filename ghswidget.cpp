@@ -41,7 +41,7 @@ GHSWidget::GHSWidget( QWidget *parent, const QStringList &parms ) : PropertyView
     const QStringList keys( GHSHazards::Hazards.keys());
     for ( const QString &key : keys ) {
         if ( !this->parameters().contains( key ))
-            this->parameters().removeAll( key );
+            this->m_parameters.removeAll( key );
     }
 }
 

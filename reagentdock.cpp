@@ -228,7 +228,8 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
     auto addReagent = [ this ]( const Id &parentId ) {
-        QString name, reference;
+        QString name;
+        QString reference;
         bool ok;
 
         //
@@ -276,7 +277,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
                 // add labels if any
                 //qDebug() << "got labels" << labels;
-                for ( const Id &id : labels ) {
+                for ( const Id &id : qAsConst( labels )) {
                     if ( id == Id::Invalid )
                         continue;
 
@@ -316,7 +317,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         }
     };
 
-    menu->addAction( ReagentDock::tr( "Add new reagent" ), std::bind( addReagent, Id::Invalid ))->setIcon(
+    menu->addAction( ReagentDock::tr( "Add new reagent" ), this, std::bind( addReagent, Id::Invalid ))->setIcon(
             QIcon::fromTheme( "reagent" ));
 
     const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
@@ -325,13 +326,14 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
-        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( name ), std::bind( addReagent, ( parentId ==
-                                                                                                             Id::Invalid )
-                                                                                                           ? static_cast<Id>( item->data(
-                        ReagentModel::ID ).toInt()) : parentId ))->setIcon( QIcon::fromTheme( "add" ));
+        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( name ), this,
+                         std::bind( addReagent,
+                                    ( parentId == Id::Invalid ) ?
+                                        static_cast<Id>( item->data( ReagentModel::ID ).toInt())
+                                      : parentId ))->setIcon( QIcon::fromTheme( "add" ));
 
         if ( context ) {
-            menu->addAction( ReagentDock::tr( "Copy name" ),
+            menu->addAction( ReagentDock::tr( "Copy name" ), this,
                              [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } )->setIcon(
                     QIcon::fromTheme( "copy" ));
 
@@ -396,30 +398,30 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             const QString queryName( QString( reagentName ).replace( " ", "+" ));
 
             // TODO: search engines should be moved to XML, not hardcoded
-            searchMenu->addAction( ReagentDock::tr( "Google" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Google" ), this, [ queryName ]() {
                 QDesktopServices::openUrl( "https://www.google.com/search?q=" + queryName );
             } )->setIcon( simpleSmallIcon( "G" ));
-            searchMenu->addAction( ReagentDock::tr( "DuckDuckGo" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "DuckDuckGo" ), this, [ queryName ]() {
                 QDesktopServices::openUrl( "https://duckduckgo.com/?q=" + queryName );
             } )->setIcon( simpleSmallIcon( "D" ));
-            searchMenu->addAction( ReagentDock::tr( "Wikipedia" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Wikipedia" ), this, [ queryName ]() {
                 QDesktopServices::openUrl( "https://en.wikipedia.org/w/index.php?sort=relevance&search=" + queryName );
             } )->setIcon( simpleSmallIcon( "W" ));
-            searchMenu->addAction( ReagentDock::tr( "Alfa Aesar" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Alfa Aesar" ), this, [ queryName ]() {
                 QDesktopServices::openUrl(
                         "https://www.alfa.com/en/search/?search-tab=product-search-container&type=SEARCH_CHOICE_ITEM_NUM&q=" +
                         queryName );
             } )->setIcon( simpleSmallIcon( "AA" ));
-            searchMenu->addAction( ReagentDock::tr( "Acros" ), [ reagentName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Acros" ), this, [ reagentName ]() {
                 QDesktopServices::openUrl(
                         "https://www.acros.com/DesktopModules/Acros_Search_Results/Acros_Search_Results.aspx?search_type=PartOfName&SearchString=" +
                         QString( reagentName ).replace( " ", "%20 " ));
             } )->setIcon( simpleSmallIcon( "A" ));
-            searchMenu->addAction( ReagentDock::tr( "Sigma Aldrich" ), [ queryName ]() {
+            searchMenu->addAction( ReagentDock::tr( "Sigma Aldrich" ), this, [ queryName ]() {
                 QDesktopServices::openUrl(
                         "https://www.sigmaaldrich.com/catalog/search?term=" + queryName + "&interface=All" );
             } )->setIcon( simpleSmallIcon( "SA" ));
-            searchMenu->addAction( ReagentDock::tr( "fluorochem" ), [ reagentName ]() {
+            searchMenu->addAction( ReagentDock::tr( "fluorochem" ), this, [ reagentName ]() {
                 QDesktopServices::openUrl( "http://www.fluorochem.co.uk/Products/Search?searchType=N&searchText=" +
                                            QString( reagentName ).replace( " ", "%20 " ));
             } )->setIcon( simpleSmallIcon( "FC" ));
@@ -484,7 +486,7 @@ void ReagentDock::on_removeButton_clicked() {
     // remove reagents and batches (list)
     if ( list.count() > 1 ) {
         menu.addAction( ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count()),
-                        [ this, list, removeReagentsAndBatches ]() {
+                         this, [ this, list, removeReagentsAndBatches ]() {
                             QModelIndexList sourceList;
                             for ( const QModelIndex &filter : list ) {
                                 const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
@@ -512,7 +514,7 @@ void ReagentDock::on_removeButton_clicked() {
         menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
                                   "Remove reagent '%1' and its batches" :
                                   "Remove batch '%1'"
-        ).arg( item->text()), [ this, item, index, parentId, removeReagentsAndBatches ]() {
+        ).arg( item->text()), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
             removeReagentsAndBatches( item );
 
             // remove items without resetting model

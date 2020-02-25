@@ -95,6 +95,9 @@ future:
  - common reaction browser
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
+ - theme browser
+ - menu option to add image from clipboard
+ - all fileOpen dialogs must remember last location
 
 unsorted:
   - cut/paste properties from reagents
@@ -104,6 +107,11 @@ unsorted:
     add property
     (the property is added to the reagent selected with the right click, not the one displayed in property screen)
   - allow to display treeView in multiple columns
+  - ability to hide some reagents (like props)
+  - lock icon/button in reagent dialog to freeze reference name
+  - remove extra <br> at the end of some properties
+  - implement TAB in add reagent texedit
+  - double check all add/edit/delete buttons for when they should be enabled or not
 */
 
 /**

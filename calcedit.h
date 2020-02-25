@@ -35,14 +35,39 @@ class CalcEdit final : public QLineEdit {
 
 public:
     explicit CalcEdit( QWidget *parent = nullptr );
+
+    /**
+     * @brief ~CalcEdit
+     */
     ~CalcEdit() override { this->history.clear(); }
-    [[nodiscard]] int offset() const { return this->m_historyOffset; }
+
+    /**
+     * @brief offset
+     * @return
+     */
+    [[nodiscard]]  int offset() const { return this->m_historyOffset; }
     bool completeCommand();
 
 public slots:
+    /**
+     * @brief set
+     * @param offset
+     */
     void set( int offset = 0 ) { this->m_historyOffset = offset; }
+
+    /**
+     * @brief reset
+     */
     void reset() { this->set(); }
+
+    /**
+     * @brief push
+     */
     void push() { this->m_historyOffset++; }
+
+    /**
+     * @brief pop
+     */
     void pop() { this->m_historyOffset--; }
 
     /**

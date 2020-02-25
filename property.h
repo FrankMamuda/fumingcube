@@ -31,6 +31,13 @@ class Property final : public Table {
     Q_DISABLE_COPY( Property )
 
 public:
+    // disable move
+    Property( Property&& ) = delete;
+    Property& operator=( Property&& ) = delete;
+
+    /**
+     * @brief The StateOfMatter enum
+     */
     enum StateOfMatter {
         NoState = -1,
         Solid,
@@ -55,7 +62,7 @@ public:
         TableOrder,
 
         // count (DO NOT REMOVE)
-                Count
+        Count
     };
     Q_ENUM( Fields )
 
@@ -72,12 +79,12 @@ public:
              const QVariant &value = QVariant(), const Id &reagentId = Id::Invalid );
 
     // initialize field setters and getters
-INITIALIZE_FIELD( Id, ID, id )
-INITIALIZE_FIELD( QString, Name, name )
-INITIALIZE_FIELD( Id, TagId, tagId )
-INITIALIZE_FIELD( QVariant, PropertyData, propertyData )
-INITIALIZE_FIELD( Id, ReagentId, reagentId )
-INITIALIZE_FIELD( int, TableOrder, tableOrder )
+    INITIALIZE_FIELD( Id, ID, id )
+    INITIALIZE_FIELD( QString, Name, name )
+    INITIALIZE_FIELD( Id, TagId, tagId )
+    INITIALIZE_FIELD( QVariant, PropertyData, propertyData )
+    INITIALIZE_FIELD( Id, ReagentId, reagentId )
+    INITIALIZE_FIELD( int, TableOrder, tableOrder )
 
 protected:
     [[nodiscard]] QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;

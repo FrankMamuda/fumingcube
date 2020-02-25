@@ -36,16 +36,31 @@ class TagDialog;
  */
 class TagDialog : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( TagDialog )
 
 public:
     explicit TagDialog( QWidget *parent = nullptr );
+
+    // disable move
+    TagDialog( TagDialog&& ) = delete;
+    TagDialog& operator=( TagDialog&& ) = delete;
+
     ~TagDialog() override;
+
+    /**
+     * @brief The Modes enum
+     */
     enum Modes {
         NoMode = -1,
         Add,
         Edit
     };
     Q_ENUM( Modes )
+
+    /**
+     * @brief mode
+     * @return
+     */
     [[nodiscard]] Modes mode() const { return this->m_mode; }
     static QString captureBody( const QString &input );
 
@@ -54,7 +69,12 @@ private slots:
     void on_actionRemove_triggered();
     void on_actionEdit_triggered();
     void clear();
-    void setMode( const Modes &mode = NoMode ) { this->m_mode = mode; }
+
+    /**
+     * @brief setMode
+     * @param mode
+     */
+    void setMode( const TagDialog::Modes &mode = NoMode ) { this->m_mode = mode; }
 
 protected:
     bool eventFilter( QObject *object, QEvent *event ) override;

@@ -34,7 +34,17 @@ Q_OBJECT
 
 public:
     explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
+
+    /**
+     * @brief scale
+     * @return
+     */
     [[nodiscard]] int scale() const { return this->m_scale; }
+
+    /**
+     * @brief vscale
+     * @return
+     */
     [[nodiscard]] qreal vscale() const { return this->m_vscale; }
 
 public slots:

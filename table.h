@@ -77,6 +77,10 @@ class Table : public QSqlTableModel {
     friend class Database;
 
 public:
+    // disable move
+    Table( Table&& ) = delete;
+    Table& operator=( Table&& ) = delete;
+
     enum Roles {
         IDRole = Qt::UserRole
     };
@@ -87,43 +91,83 @@ public:
         this->setValid( false );
         this->clear();
     }
+
+    /**
+     * @brief isValid
+     * @return
+     */
     [[nodiscard]] bool isValid() const { return this->m_valid; }
+
+    /**
+     * @brief hasPrimaryField
+     * @return
+     */
     [[nodiscard]] bool hasPrimaryField() const { return this->m_hasPrimary; }
     Q_INVOKABLE [[nodiscard]] int count() const;
 
-    //template<typename Type>
-    //Type value( const Row &row, int fieldId ) const { return this->value( row, fieldId )}
-
     [[nodiscard]] virtual QVariant value( const Row &row, int fieldId ) const;
     [[nodiscard]] virtual QVariant value( const Id &id, int fieldId ) const;
+
+    /**
+     * @brief contains
+     * @param fieldId
+     * @param value
+     * @return
+     */
     [[nodiscard]] bool contains( int fieldId, const QVariant &value ) const {
         return this->contains( this->field( fieldId ), value );
     }
     bool select() override;
+
+    /**
+     * @brief primaryField
+     * @return
+     */
     [[nodiscard]] QSharedPointer<Field_> primaryField() const { return this->m_primaryField; }
     [[nodiscard]] QVariant data( const QModelIndex &index, int role ) const override;
     void setFilter( const QString &filter ) override;
     [[nodiscard]] QString fieldName( int id ) const;
+
+    /**
+     * @brief row
+     * @param index
+     * @return
+     */
     [[nodiscard]] Row row( const int index ) const {
         if ( index < 0 || index >= this->count()) return Row::Invalid;
         return static_cast<Row>( index );
     }
+
+    /**
+     * @brief row
+     * @param index
+     * @return
+     */
     [[nodiscard]] Row row( const QModelIndex &index ) const {
         if ( index.row() < 0 || index.row() >= this->count() || index.model() != this )return Row::Invalid;
         return static_cast<Row>( index.row());
     }
     [[nodiscard]] Row row( const Id &id ) const;
+
     [[maybe_unused]] void addUniqueConstraint( const QList<QSharedPointer<Field_>> &constrainedFields );
     [[maybe_unused]][[nodiscard]] QSqlQuery prepare() const;
     [[maybe_unused]] void bind( QSqlQuery &query, const QVariantList &arguments );
 
 public slots:
+    /**
+     * @brief setValid
+     * @param valid
+     */
     void setValid( bool valid = true ) { this->m_valid = valid; }
     void addField( int id, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid,
                    const QString &format = QString( "text" ), bool unique = false, bool autoValue = false );
     Row add( const QVariantList &arguments );
     void remove( const Row &row );
     void setValue( const Row &row, int fieldId, const QVariant &value );
+
+    /**
+     * @brief removeOrphanedEntries
+     */
     virtual void removeOrphanedEntries() {}
 
 protected:

@@ -50,28 +50,34 @@ namespace Ui {
  */
 class ExtractionDialog : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( ExtractionDialog )
 
 public:
     explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+
+    // disable move
+    ExtractionDialog( ExtractionDialog&& ) = delete;
+    ExtractionDialog& operator=( ExtractionDialog&& ) = delete;
+
     ~ExtractionDialog() override;
 
     /**
      * @brief reagentId
      * @return
      */
-    Id reagentId() const { return this->m_reagentId; }
+    [[nodiscard]] Id reagentId() const { return this->m_reagentId; }
 
     /**
      * @brief path
      * @return
      */
-    QString path() const { return this->m_path; }
+    [[nodiscard]] QString path() const { return this->m_path; }
 
     /**
      * @brief cache
      * @return
      */
-    QString cache() const { return this->m_cache; }
+    [[nodiscard]] QString cache() const { return this->m_cache; }
 
     /**
      * @brief The RequestTypes enum
@@ -87,8 +93,7 @@ public:
     int readData( const QByteArray &uncompressed ) const;
 
 public slots:
-    void
-    replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
+    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types, const QString & );
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );

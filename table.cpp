@@ -300,7 +300,7 @@ void Table::bind( QSqlQuery &query, const QVariantList &arguments ) {
 
     // prepare statement
     int y = 0;
-    for ( const Field &field : this->fields ) {
+    for ( const Field &field : qAsConst( this->fields )) {
         if ( field->isPrimary())
             continue;
 

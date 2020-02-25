@@ -34,10 +34,25 @@ class TextEdit : public QTextEdit {
 
 public:
     explicit TextEdit( QWidget *parent = nullptr ) : QTextEdit( parent ) {}
-    void insertPixmap( const QPixmap &image, int forcedSize = -1 );
+    void insertPixmap( const QPixmap &pixmap, int preferredWidth = -1 );
+
+    /**
+     * @brief cleanHTML
+     * @return
+     */
     [[nodiscard]] bool cleanHTML() const { return this->m_cleanHTML; }
     static QString stripHTML( const QString &input );
+
+    /**
+     * @brief isSimpleEditor
+     * @return
+     */
     [[nodiscard]] bool isSimpleEditor() const { return this->m_simpleEditor; }
+
+    /**
+     * @brief completer
+     * @return
+     */
     [[nodiscard]] QCompleter *completer() const { return this->m_completer; }
 
 signals:
@@ -51,7 +66,16 @@ protected:
     void keyPressEvent( QKeyEvent *event ) override;
 
 public slots:
+    /**
+     * @brief setCleanHTML
+     * @param enable
+     */
     void setCleanHTML( bool enable ) { this->m_cleanHTML = enable; }
+
+    /**
+     * @brief setSimpleEditor
+     * @param simple
+     */
     void setSimpleEditor( bool simple ) { this->m_simpleEditor = simple; }
     void setCompleter( QCompleter *completer );
 

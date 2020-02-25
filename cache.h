@@ -31,20 +31,27 @@ class Cache : public QObject {
 Q_OBJECT
 
 public:
+    /**
+     * @brief The Types enum
+     */
     enum Types {
         NoType = -1,
     };
 
     Q_ENUM( Types )
 
+    /**
+     * @brief instance
+     * @return
+     */
     static Cache *instance() {
         static auto *instance( new Cache());
         return instance;
     }
 
     [[nodiscard]] QVariant data( const Types &type, const QString &key ) const;
-    static quint32 checksum( const char *data, size_t len );
+    static QString checksum( const QByteArray &array );
 
-private:
+private:\
     explicit Cache();
 };

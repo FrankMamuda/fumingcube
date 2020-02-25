@@ -31,9 +31,14 @@
  */
 class ReagentView : public QTreeView {
     Q_OBJECT
+    Q_DISABLE_COPY( ReagentView )
 
 public:
     explicit ReagentView( QWidget *parent = nullptr );
+
+    // disable move
+    ReagentView( ReagentView&& ) = delete;
+    ReagentView& operator=( ReagentView&& ) = delete;
 
     /**
      * @brief ~ReagentView::~ReagentView
@@ -44,7 +49,7 @@ public:
      * @brief model
      * @return
      */
-    ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->filterModel()->sourceModel()); }
+    [[nodiscard]] ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->filterModel()->sourceModel()); }
 
     /**
      * @brief filterModel

@@ -33,6 +33,10 @@ class Label final : public Table {
     Q_DISABLE_COPY( Label )
 
 public:
+    // disable move
+    Label( Label&& ) = delete;
+    Label& operator=( Label&& ) = delete;
+
     /**
      * @brief The Fields enum
      */
@@ -63,9 +67,9 @@ public:
     INITIALIZE_FIELD( QString, Name, name )
     INITIALIZE_FIELD( QColor, Colour, colour )
 
-    QVariant data( const QModelIndex &index, int role ) const override;
-    QPixmap pixmap( const QColor &colour ) const;
-    QPixmap pixmap( const QList<QColor> &colourList ) const;
+    [[nodiscard]] QVariant data( const QModelIndex &index, int role ) const override;
+    [[nodiscard]] QPixmap pixmap( const QColor &colour ) const;
+    [[nodiscard]] QPixmap pixmap( const QList<QColor> &colourList ) const;
 
 public slots:
     void removeOrphanedEntries() override;

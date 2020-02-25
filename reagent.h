@@ -31,6 +31,10 @@ class Reagent final : public Table {
     Q_DISABLE_COPY( Reagent )
 
 public:
+    // disable move
+    Reagent( Reagent&& ) = delete;
+    Reagent& operator=( Reagent&& ) = delete;
+
     /**
      * @brief The Fields enum
      */

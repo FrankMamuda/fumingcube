@@ -21,6 +21,7 @@
  */
 #include "cache.h"
 #include "main.h"
+#include <QCryptographicHash>
 
 /**
  * @brief Cache::Cache
@@ -50,33 +51,16 @@ QVariant Cache::data( const Cache::Types &type, const QString &key ) const {
  * @param len
  * @return
  */
-quint32 Cache::checksum( const char *data, size_t len ) {
-    const quint32 m = 0x5bd1e995, r = 24;
-    quint32 h = 0, w;
-    const char *l = data + len;
+QString Cache::checksum( const QByteArray &array ) {
+    QByteArray data( array );
 
-    while ( data + 4 <= l ) {
-        w = *( reinterpret_cast<const quint32 *>( data ));
-        data += 4;
-        h += w;
-        h *= m;
-        h ^= ( h >> 16 );
+    // if array is larger than 1K, take samples from start, mid and end
+    if ( array.size() > 1024 ) {
+        data.clear();
+        data.append( array.left( 32 ));
+        data.append( array.mid( array.size() / 2, 32 ));
+        data.append( array.mid( array.length() - 32 - 1, 32 ));
     }
 
-    switch ( l - data ) {
-        case 3:
-            h += static_cast<quint32>( data[2] << 16 );
-            [[fallthrough]];
-
-        case 2:
-            h += static_cast<quint32>( data[1] << 8 );
-            [[fallthrough]];
-
-        case 1:
-            h += static_cast<quint32>( data[0] );
-            h *= m;
-            h ^= ( h >> r );
-            break;
-    }
-    return h;
+    return QString( QCryptographicHash::hash( data, QCryptographicHash::Md5 ).toHex());
 }

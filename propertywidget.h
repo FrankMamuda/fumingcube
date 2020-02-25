@@ -34,16 +34,36 @@
  */
 class PropertyWidget : public QWidget {
     Q_OBJECT
+    Q_DISABLE_COPY( PropertyWidget )
 
 public:
     explicit PropertyWidget( QWidget *parent = nullptr, const QList<QStringList> &values = QList<QStringList>(),
                              const Id &tagId = Id::Invalid );
     explicit PropertyWidget( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap());
+
+    // disable move
+    PropertyWidget( PropertyWidget&& ) = delete;
+    PropertyWidget& operator=( PropertyWidget&& ) = delete;
+
     ~PropertyWidget() override;
 
+    /**
+     * @brief position
+     * @return
+     */
     [[nodiscard]] int position() const { return this->m_position; }
+
+    /**
+     * @brief tagId
+     * @return
+     */
     [[nodiscard]] Id tagId() const { return this->m_tagId; }
 
+    /**
+     * @brief parseGHS
+     * @param list
+     * @return
+     */
     static QStringList parseGHS( const QStringList &list ) {
         QStringList parms;
         for ( const QString &parm : list ) {
@@ -70,6 +90,10 @@ public:
         return qAsConst( parms );
     }
 
+    /**
+     * @brief pixmap
+     * @return
+     */
     [[nodiscard]] QPixmap pixmap() const { return this->m_pixmap; }
 
 public slots:

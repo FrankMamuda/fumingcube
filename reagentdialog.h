@@ -33,11 +33,11 @@ namespace Ui {
 }
 
 namespace ReagentTools {
-/**
- * @brief DigitsToScript
- * @param string
- * @return
- */
+    /**
+     * @brief DigitsToScript
+     * @param string
+     * @return
+     */
     static QString DigitsToScript( const QString &string, bool subScript = false ) {
         QString out( string );
 
@@ -62,8 +62,12 @@ namespace ReagentTools {
  */
 class ReagentDialog : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( ReagentDialog )
 
 public:
+    /**
+     * @brief The Modes enum
+     */
     enum Modes {
         AddMode,
         EditMode
@@ -72,6 +76,11 @@ public:
 
     explicit ReagentDialog( QWidget *parent = nullptr, const QString &name = QString(),
                             const QString &reference = QString(), const Modes &mode = AddMode );
+
+    // disable move
+    ReagentDialog( ReagentDialog&& ) = delete;
+    ReagentDialog& operator=( ReagentDialog&& ) = delete;
+
     ~ReagentDialog() override;
     [[nodiscard]] QString name() const;
     [[nodiscard]] QString reference() const;

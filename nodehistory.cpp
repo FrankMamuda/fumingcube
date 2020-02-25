@@ -108,7 +108,7 @@ void NodeHistory::restoreNodeState() {
  */
 void NodeHistory::saveHistory() {
     QStringList list;
-    for ( const Id &id : this->openNodes )
+    for ( const Id &id : qAsConst( this->openNodes ))
         list << QString::number( static_cast<int>( id ));
     Variable::setValue( "reagentDock/openNodes", list );
 }

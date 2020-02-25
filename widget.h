@@ -49,10 +49,18 @@ class Variable;
  */
 class Widget final : public QObject {
     Q_OBJECT
+    Q_DISABLE_COPY( Widget )
 
     friend class Variable;
 
 public:
+    // disable move
+    Widget( Widget&& ) = delete;
+    Widget& operator=( Widget&& ) = delete;
+
+    /**
+     * @brief The Types enum
+     */
     enum class Types {
         NoType = -1,
         CheckBox,
@@ -166,6 +174,10 @@ public:
     }
 
 public slots:
+    /**
+     * @brief setValue
+     * @param value
+     */
     void setValue( const QVariant &value ) {
         if ( this->widget == nullptr )
             return;
@@ -221,6 +233,9 @@ public slots:
     }
 
 private slots:
+    /**
+     * @brief valueChanged
+     */
     void valueChanged() { emit this->changed( this->value()); }
 
 signals:

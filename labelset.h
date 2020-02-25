@@ -31,6 +31,10 @@ class LabelSet final : public Table {
     Q_DISABLE_COPY( LabelSet )
 
 public:
+    // disable move
+    LabelSet( LabelSet&& ) = delete;
+    LabelSet& operator=( LabelSet&& ) = delete;
+
     /**
      * @brief The Fields enum
      */

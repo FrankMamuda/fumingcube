@@ -64,7 +64,7 @@ public slots:
         this->m_action = action;
         if ( this->action() != nullptr ) {
             this->action()->setChecked( this->isVisible());
-            this->action()->connect( this->action(), SIGNAL( toggled( bool )), this, SLOT( setVisible( bool )));
+            QAction::connect( this->action(), SIGNAL( toggled( bool )), this, SLOT( setVisible( bool )));
         }
     }
 

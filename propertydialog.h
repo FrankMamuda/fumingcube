@@ -35,11 +35,17 @@ namespace Ui {
  * @brief The PropertyDialog class
  */
 class PropertyDialog : public QDialog {
-Q_OBJECT
+    Q_OBJECT
+    Q_DISABLE_COPY( PropertyDialog )
 
 public:
     explicit PropertyDialog( QWidget *parent = nullptr, const Id &tagId = Id::Invalid,
                              const QString &defaultValue = QString());
+
+    // disable move
+    PropertyDialog( PropertyDialog&& ) = delete;
+    PropertyDialog& operator=( PropertyDialog&& ) = delete;
+
     ~PropertyDialog() override;
     [[nodiscard]] QVariant value() const;
     static const int Advanced = QDialog::Accepted + 2;

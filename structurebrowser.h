@@ -36,9 +36,15 @@ namespace Ui {
  */
 class StructureBrowser : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( StructureBrowser )
 
 public:
     explicit StructureBrowser( QList<int> cidList, QWidget *parent = nullptr );
+
+    // disable move
+    StructureBrowser( StructureBrowser&& ) = delete;
+    StructureBrowser& operator=( StructureBrowser&& ) = delete;
+
     ~StructureBrowser() override;
 
     /**
@@ -56,7 +62,7 @@ public:
      * @brief status
      * @return
      */
-    Status status() const { return this->m_status; }
+    [[nodiscard]] Status status() const { return this->m_status; }
     [[nodiscard]] int cid() const;
 
 public slots:
@@ -73,7 +79,7 @@ private slots:
      * @brief setStatus
      * @param status
      */
-    void setStatus( const Status &status ) { this->m_status = status; }
+    void setStatus( const StructureBrowser::Status &status ) { this->m_status = status; }
     void buttonTest();
 
 private:

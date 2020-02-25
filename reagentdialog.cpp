@@ -191,7 +191,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
  */
 ReagentDialog::~ReagentDialog() {
     // unbind vars
-    for ( const QString &key : this->variables )
+    for ( const QString &key : qAsConst( this->variables ))
         Variable::instance()->unbind( key );
 
     delete this->completer;
@@ -245,12 +245,12 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
 
     // force widget to resize to minimum
     QApplication::processEvents();
-    QTimer::singleShot( 0, [ this ]() {
+    QTimer::singleShot( 0, this, [ this ]() {
         this->resize( this->minimumSizeHint());
     } );
 
     // copy reference from name by default
-    ReagentDialog::connect( this->ui->nameEdit, &TextEdit::textChanged, [ this ]() {
+    ReagentDialog::connect( this->ui->nameEdit, &TextEdit::textChanged, this, [ this ]() {
         const QString plain( this->ui->nameEdit->toPlainText());
         const QString html( this->ui->nameEdit->toHtml());
 

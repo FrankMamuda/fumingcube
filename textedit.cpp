@@ -184,36 +184,29 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
         // check clipBoard for metaFiles
         if ( IsClipboardFormatAvailable( CF_ENHMETAFILE )) {
-            HENHMETAFILE metaFile;
-            ENHMETAHEADER header;
-            HGLOBAL global;
-
             // get metaFile from clipBoard
-            metaFile = reinterpret_cast<HENHMETAFILE>( GetClipboardData( CF_ENHMETAFILE ));
+            const auto metaFile = static_cast<HENHMETAFILE>( GetClipboardData( CF_ENHMETAFILE ));
+            ENHMETAHEADER header;
             memset( &header, 0, sizeof( ENHMETAHEADER ));
 
             // lockMemory
-            global = GlobalAlloc( GMEM_MOVEABLE, sizeof( CF_ENHMETAFILE ));
-            if ( global == nullptr ) {
+            const HGLOBAL global = GlobalAlloc( GMEM_MOVEABLE, 8 );
+            if ( static_cast<LPBYTE>( GlobalLock( global )) == nullptr ) {
                 CloseClipboard();
                 return;
             }
 
             // get metaFile header
             if ( GetEnhMetaFileHeader( metaFile, sizeof( ENHMETAHEADER ), &header ) != 0 ) {
-                HDC deviceContext, memDC;
-                RECT rect;
-                HBITMAP bitmap;
-                HBRUSH brush;
-                int width, height;
                 const qreal scaleFactor = 0.125;
 
                 // get metaFile dimensions
-                width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ) * scaleFactor );
-                height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ) * scaleFactor );
+                const int width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ) * scaleFactor );
+                const int height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ) * scaleFactor );
                 endWidth = static_cast<int>( width * static_cast<qreal>( header.szlMillimeters.cx ) / static_cast<qreal>( header.szlDevice.cx ));
 
                 // construct rectangle
+                RECT rect;
                 memset( &rect, 0, sizeof( RECT ));
                 rect.right = width;
                 rect.bottom = height;
@@ -221,15 +214,15 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
                 // proceed with valid sizes
                 if ( width > 0 && height > 0 ) {
                     // get device context
-                    deviceContext = GetDC( nullptr );
-                    memDC = CreateCompatibleDC( deviceContext );
+                    const HDC deviceContext = GetDC( nullptr );
+                    const HDC memDC = CreateCompatibleDC( deviceContext );
 
                     // create bitmap
-                    bitmap = CreateCompatibleBitmap( memDC, width, height );
+                    const HBITMAP bitmap = CreateCompatibleBitmap( memDC, width, height );
                     SelectObject( memDC, bitmap );
 
                     // fill white background
-                    brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
+                    const HBRUSH brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
                     FillRect( memDC, &rect, brush );
                     DeleteObject( brush );
 

@@ -58,6 +58,9 @@ public:
     };
     Q_ENUM( Fields )
 
+    /**
+     * @brief The Types enum
+     */
     enum Types {
         NoType = -1,
         Text,

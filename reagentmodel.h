@@ -31,8 +31,12 @@
  */
 class ReagentModel : public QStandardItemModel {
     Q_OBJECT
+    Q_DISABLE_COPY( ReagentModel )
 
 public:
+    /**
+     * @brief The Data enum
+     */
     enum Data {
         NoData = Qt::UserRole,
         ID,
@@ -46,6 +50,10 @@ public:
      * @param parent
      */
     explicit ReagentModel( QObject *parent = nullptr ) : QStandardItemModel( parent ) { this->setupModelData(); }
+
+    // disable move
+    ReagentModel( ReagentModel&& ) = delete;
+    ReagentModel& operator=( ReagentModel&& ) = delete;
 
     /**
      * @brief ~TreeModel

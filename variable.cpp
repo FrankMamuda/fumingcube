@@ -93,7 +93,7 @@ QString Variable::bind( const QString &key, QObject *object ) {
     auto *boundWidget( new Widget( object ));
 
     boundWidget->setValue( Variable::value<QVariant>( key ));
-    Variable::connect( boundWidget, &Widget::changed, [ this, key, boundWidget ]( const QVariant &value ) {
+    Variable::connect( boundWidget, &Widget::changed, this, [ this, key, boundWidget ]( const QVariant &value ) {
         emit this->widgetChanged( key, boundWidget, value );
     } );
     this->boundVariables.insert( key, boundWidget );

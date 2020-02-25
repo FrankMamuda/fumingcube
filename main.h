@@ -44,8 +44,12 @@ public:
         static auto *instance( new GarbageMan());
         return instance;
     }
+
+    // disable copy and move
     GarbageMan( const GarbageMan & ) = delete;
     ~GarbageMan() = default;
+    GarbageMan( GarbageMan&& ) = delete;
+    GarbageMan& operator=( GarbageMan&& ) = delete;
 
     /**
      * @brief add adds pointers (singletons) to garbage collection list
@@ -61,7 +65,7 @@ public:
      */
     void clear() {
         std::reverse( this->garbage.begin(), this->garbage.end());
-        for ( QObject *object : this->garbage ) {
+        for ( QObject *object : qAsConst( this->garbage )) {
             if ( object != nullptr ) {
                 delete object;
                 object = nullptr;

@@ -123,7 +123,7 @@ Database::Database( QObject *parent ) : QObject( parent ) {
  * @brief Database::removeOrphanedEntries removes orphaned entries in database tables
  */
 void Database::removeOrphanedEntries() {
-    for ( Table *table : this->tables )
+    for ( Table *table : qAsConst( this->tables ))
         table->removeOrphanedEntries();
 }
 
@@ -144,7 +144,7 @@ Database::~Database() {
     // unbind variables
     //Variable::unbind( "report" );
     qCInfo( Database_::Debug ) << Database::tr( "clearing tables" );
-    for ( Table *table : this->tables )
+    for ( Table *table : qAsConst( this->tables ))
         table->clear();
 
     // delete all tables

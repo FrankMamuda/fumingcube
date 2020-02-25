@@ -33,16 +33,27 @@ class GHSWidget final : public PropertyViewWidget {
 
 public:
     explicit GHSWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
-    int iconsPerRow() const { return this->m_iconsPerRow; }
+
+    /**
+     * @brief iconsPerRow
+     * @return
+     */
+    [[nodiscard]] int iconsPerRow() const { return this->m_iconsPerRow; }
     static const int scale;
 
 public slots:
+    /**
+     * @brief update
+     * @param parms
+     */
     void update( const QStringList &parms ) override {
-        //if ( this->parameters() == parms )
-        //     return;
         this->m_parameters = parms;
         this->repaint();
     }
+
+    /**
+     * @brief setLinear
+     */
     void setLinear() { this->m_linear = true; }
 
 protected:
@@ -52,13 +63,13 @@ protected:
      * @brief sizeHint
      * @return
      */
-    QSize sizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
 
     /**
      * @brief minimumSizeHint
      * @return
      */
-    QSize minimumSizeHint() const override { return this->sizeHint(); }
+    [[nodiscard]] QSize minimumSizeHint() const override { return this->sizeHint(); }
 
 private:
     mutable int m_iconsPerRow = 0;

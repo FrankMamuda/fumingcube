@@ -42,12 +42,20 @@ class ReagentDock final : public DockWidget {
     Q_DISABLE_COPY( ReagentDock )
 
 public:
+    // disable move
+    ReagentDock( ReagentDock&& ) = delete;
+    ReagentDock& operator=( ReagentDock&& ) = delete;
+
+    /**
+     * @brief instance
+     * @return
+     */
     static ReagentDock *instance() {
         static auto *reagentDock( new ReagentDock());
         return reagentDock;
     }
     ~ReagentDock() override;
-    [[nodiscard]] bool checkForDuplicates( const QString &name, const QString &alias, Id reagentId = Id::Invalid ) const;
+    [[nodiscard]] bool checkForDuplicates( const QString &name, const QString &reference, Id reagentId = Id::Invalid ) const;
     [[nodiscard]] bool checkBatchForDuplicates( const QString &name, Id parentId ) const;
     [[nodiscard]] ReagentView *view() const;
     QMenu *buildMenu( bool context = true );

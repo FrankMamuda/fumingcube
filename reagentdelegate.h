@@ -35,16 +35,33 @@ class ReagentDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
 public:
-    QSortFilterProxyModel *model() const { return this->m_model; }
-    ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->m_model->sourceModel()); }
+    /**
+     * @brief model
+     * @return
+     */
+    [[nodiscard]] QSortFilterProxyModel *model() const { return this->m_model; }
+
+    /**
+     * @brief sourceModel
+     * @return
+     */
+    [[nodiscard]] ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->m_model->sourceModel()); }
 
 public slots:
+    /**
+     * @brief setModel
+     * @param model
+     */
     void setModel( QSortFilterProxyModel *model ) { this->m_model = model; }
+
+    /**
+     * @brief clearCache
+     */
     void clearCache() { this->cache.clear(); }
 
 protected:
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
-    QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 
 private:
     QSortFilterProxyModel *m_model = nullptr;

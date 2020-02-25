@@ -48,6 +48,10 @@ class Database final : public QObject {
     Q_DISABLE_COPY( Database )
 
 public:
+    // disable move
+    Database( Database&& ) = delete;
+    Database& operator=( Database&& ) = delete;
+
     /**
      * @brief instance
      * @return
@@ -58,6 +62,11 @@ public:
     }
     ~Database() override;
     bool add( Table *table );
+
+    /**
+     * @brief hasInitialised
+     * @return
+     */
     [[nodiscard]] bool hasInitialised() const { return this->m_initialised; }
 
 public slots:
@@ -66,6 +75,11 @@ public slots:
 private:
     explicit Database( QObject *parent = nullptr );
     bool testPath( const QString &path );
+
+    /**
+     * @brief setInitialised
+     * @param initialised
+     */
     void setInitialised( bool initialised = true ) { this->m_initialised = initialised; }
 
     /**

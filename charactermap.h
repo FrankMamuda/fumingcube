@@ -63,10 +63,19 @@ namespace CharacterNamespace {
  */
 class CharacterMap : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( CharacterMap )
 
 public:
     explicit CharacterMap( QWidget *parent = nullptr );
+
+    /**
+     * @brief ~CharacterMap
+     */
     ~CharacterMap() override { this->characters.clear(); }
+
+    // disable move
+    CharacterMap( CharacterMap&& ) = delete;
+    CharacterMap& operator=( CharacterMap&& ) = delete;
 
 protected:
     void paintEvent( QPaintEvent *event ) override;

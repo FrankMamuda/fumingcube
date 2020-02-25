@@ -189,7 +189,7 @@ void TagDialog::on_actionRemove_triggered() {
             idList << Tag::instance()->id( row );
         }
 
-        for ( const Id &id : idList )
+        for ( const Id &id : qAsConst( idList ))
             Tag::instance()->remove( Tag::instance()->row( id ));
 
         // remove all property orphans

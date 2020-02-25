@@ -30,11 +30,22 @@
  * @brief The PropertyView class
  */
 class PropertyView : public QTableView {
-Q_OBJECT
+    Q_OBJECT
+    Q_DISABLE_COPY( PropertyView )
 
 public:
     explicit PropertyView( QWidget *parent = nullptr );
+
+    // disable move
+    PropertyView( PropertyView&& ) = delete;
+    PropertyView& operator=( PropertyView&& ) = delete;
+
     ~PropertyView() override { delete this->delegate; }
+
+    /**
+     * @brief isResizeInProgress
+     * @return
+     */
     [[nodiscard]] bool isResizeInProgress() const { return this->m_resizeInProgress; }
 
 protected:
@@ -42,6 +53,10 @@ protected:
 
 public slots:
     void resizeToContents();
+
+    /**
+     * @brief clearDocumentCache
+     */
     void clearDocumentCache() { this->delegate->clearDocumentCache(); }
 
 private:

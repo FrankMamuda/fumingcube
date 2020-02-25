@@ -39,13 +39,27 @@ namespace Ui {
  */
 class MainWindow : public QMainWindow {
     Q_OBJECT
+    Q_DISABLE_COPY( MainWindow )
 
 public:
+    // disable move
+    MainWindow( MainWindow&& ) = delete;
+    MainWindow& operator=( MainWindow&& ) = delete;
+
+    /**
+     * @brief instance
+     * @return
+     */
     static MainWindow *instance() {
         static auto *instance( new MainWindow());
         return instance;
     }
     ~MainWindow() override;
+
+    /**
+     * @brief theme
+     * @return
+     */
     [[nodiscard]] auto *theme() const { return this->m_theme; }
 
 public slots:

@@ -29,14 +29,34 @@
  */
 class NodeHistory : public QObject {
     Q_OBJECT
+    Q_DISABLE_COPY( NodeHistory )
 
 public:
     explicit NodeHistory( QTreeView *parent );
+
+    // disable move
+    NodeHistory( NodeHistory&& ) = delete;
+    NodeHistory& operator=( NodeHistory&& ) = delete;
+
     ~NodeHistory() override;
+
+    /**
+     * @brief treeParent
+     * @return
+     */
     [[nodiscard]] QTreeView *treeParent() const { return this->m_treeParent; }
+
+    /**
+     * @brief isEnabled
+     * @return
+     */
     [[nodiscard]] bool isEnabled() const { return this->m_enabled; }
 
 public slots:
+    /**
+     * @brief setEnabled
+     * @param enabled
+     */
     void setEnabled( bool enabled = true ) { this->m_enabled = enabled; }
     void restoreNodeState();
     void saveHistory();

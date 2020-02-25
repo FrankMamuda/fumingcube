@@ -41,6 +41,10 @@ class Script final : public QObject {
     Q_DISABLE_COPY( Script )
 
 public:
+    // disable move
+    Script( Script&& ) = delete;
+    Script& operator=( Script&& ) = delete;
+
     /**
      * @brief instance
      * @return
@@ -50,11 +54,11 @@ public:
         return instance;
     }
     ~Script() override = default;
-    QJSValue evaluate( const QString &script );
+    [[nodiscard]] QJSValue evaluate( const QString &script );
     Q_INVOKABLE QJSValue ans();
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference );
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference, const QString &batchName );
-    QJSValue
+    [[nodiscard]] QJSValue
     getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName = QString());
     [[nodiscard]] Id getPropertyId( const QString &name ) const;
     [[nodiscard]] Id getReagentId( const QString &reference, const Id &parentId = Id::Invalid ) const;

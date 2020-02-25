@@ -40,6 +40,10 @@ public:
     explicit NoCloseMenu( QWidget *parent = nullptr );
 
 protected:
+    /**
+     * @brief closeEvent
+     * @param event
+     */
     void closeEvent( QCloseEvent *event ) override {
         event->ignore();
     }
@@ -50,9 +54,15 @@ protected:
  */
 class LabelSelector : public QDialog {
     Q_OBJECT
+    Q_DISABLE_COPY( LabelSelector )
 
 public:
     explicit LabelSelector( QWidget *parent = nullptr, QList<Id> selected = QList<Id>());
+
+    // disable move
+    LabelSelector( LabelSelector&& ) = delete;
+    LabelSelector& operator=( LabelSelector&& ) = delete;
+
     ~LabelSelector() override;
     QList<Id> labelIds;
 
