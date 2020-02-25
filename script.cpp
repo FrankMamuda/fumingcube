@@ -299,7 +299,7 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
                         .arg( Property::instance()->fieldName( Property::PropertyData ),// 1
                               Property::instance()->tableName(),                        // 2
                               Property::instance()->fieldName( Property::TagId ),       // 3
-                              QString( static_cast<int>( tagId )),                      // 4
+                              QString::number( static_cast<int>( tagId )),              // 4
                               Property::instance()->fieldName( Property::ReagentId ),   // 5
                               QString::number( static_cast<int>( reagentId )),          // 6
                               QString::number( static_cast<int>( parentId )))           // 7
