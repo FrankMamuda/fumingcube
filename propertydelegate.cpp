@@ -160,7 +160,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     } else {
         QString html;
 
-        if ( tagId == Id::Invalid || pixmapTag ) {
+        if ( tagId == Id::Invalid || tagId == PixmapTag ) {
             // custom properties however do display their names
             html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
         } else {
