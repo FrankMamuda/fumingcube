@@ -21,6 +21,7 @@
  */
 #include "theme.h"
 #include <QColor>
+#include <QDir>
 #include <QSettings>
 #include "variable.h"
 #include <QApplication>
@@ -29,14 +30,15 @@
 /**
  * @brief Theme::Theme
  */
-Theme::Theme( const QString &fileName ) {
+Theme::Theme( const QString &name ) {
     this->m_style = QApplication::style();
 
-    if ( fileName.isEmpty()) {
+    const QMap<QString, QString> themes( this->availableThemes());
+    if ( !themes.contains( name )) {
         this->m_dark = Variable::isEnabled( "darkMode" );
         this->initializeSyntaxColours();
     } else
-        this->readThemeFile( fileName );
+        this->readThemeFile( themes[name] );
 }
 
 /**
@@ -126,6 +128,29 @@ QPalette Theme::palette() const {
  */
 QColor Theme::syntaxColour( const QString &key ) const {
     return this->syntaxMap.contains( key ) ? this->syntaxMap[key] : Qt::black;
+}
+
+/**
+ * @brief Theme::availableThemes
+ * @return
+ */
+QMap<QString, QString> Theme::availableThemes() {
+    QMap<QString, QString> themes;
+
+    QDir dir( QString( ":/themes/" ));
+    dir.setNameFilters( QStringList() << "*.theme" );
+
+    const QStringList internalList( dir.entryList( QDir::Files | QDir::NoDotDot ));
+    for ( const QString &name : internalList )
+        themes[QString( name ).remove( ".theme" )] = dir.filePath( name );
+
+    // extenal themes take priority (override internal themes)
+    dir.setPath( QDir::currentPath() + "/themes/" );
+    const QStringList externalList( dir.entryList( QDir::Files | QDir::NoDotDot ));
+    for ( const QString &name : externalList )
+        themes[QString( name ).remove( ".theme" )] = dir.absoluteFilePath( name );
+
+    return themes;
 }
 
 /**

@@ -285,7 +285,7 @@ int main( int argc, char *argv[] ) {
 
     if ( Variable::isEnabled( "overrideTheme" ) || darkModeWin10 ) {
         // load theme from file
-        auto *theme( new Theme( QString( ":/themes/%1.theme" ).arg( Variable::string( "theme" ))));
+        auto *theme( new Theme( Variable::string( "theme" )));
 
         // override the variable
         Variable::setEnabled( "darkMode", theme->isDark());

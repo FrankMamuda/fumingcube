@@ -35,9 +35,10 @@ class Theme : public QObject {
     Q_OBJECT
 
 public:
-    explicit Theme( const QString &fileName = QString());
+    explicit Theme( const QString &name = QString());
     [[nodiscard]] QPalette palette() const;
     [[maybe_unused]][[nodiscard]] QColor syntaxColour( const QString &key ) const;
+    [[maybe_unused]][[nodiscard]] static QMap<QString, QString> availableThemes();
 
     /**
      * @brief isDark

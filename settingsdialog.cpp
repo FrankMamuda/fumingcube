@@ -20,6 +20,7 @@
  * includes
  */
 #include "settingsdialog.h"
+#include "theme.h"
 #include "ui_settingsdialog.h"
 #include "variable.h"
 #include <QFileDialog>
@@ -57,8 +58,11 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
 
     } );
 
-    this->ui->themeCombo->model()->setData( this->ui->themeCombo->model()->index( 0, 0 ), "light", Qt::UserRole );
-    this->ui->themeCombo->model()->setData( this->ui->themeCombo->model()->index( 1, 0 ), "dark", Qt::UserRole );
+    const QStringList themes( Theme::availableThemes().keys());
+    this->ui->themeCombo->clear();
+    for ( const QString &themeName : themes )
+        this->ui->themeCombo->addItem( themeName, themeName );
+
     SettingsDialog::connect( this->ui->overrideCheck, &QCheckBox::toggled,
                    [ this ]( bool checked ) { this->ui->themeCombo->setEnabled( checked ); } );
 
