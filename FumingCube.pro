@@ -107,6 +107,7 @@ HEADERS += \
     propertydialog.h \
     propertydock.h \
     propertyeditor.h \
+    propertyinput.h \
     propertyview.h \
     propertyviewwidget.h \
     propertywidget.h \

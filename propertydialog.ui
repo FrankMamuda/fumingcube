@@ -75,7 +75,7 @@
    <item row="1" column="1">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="textEditPage">
       <layout class="QVBoxLayout" name="teLayout0">
@@ -95,7 +95,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLineEdit" name="textEdit"/>
+        <widget class="PropertyInput" name="textEdit"/>
        </item>
       </layout>
      </widget>
@@ -170,6 +170,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PropertyInput</class>
+   <extends>QLineEdit</extends>
+   <header>propertyinput.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

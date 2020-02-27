@@ -230,7 +230,6 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     this->ui->nameEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->nameEdit->setCleanHTML( true );
     this->ui->nameEdit->setSimpleEditor( true );
-    this->ui->nameEdit->installEventFilter( this );
 
     this->ui->referenceEdit->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->referenceEdit->document()->setDocumentMargin( 2 );
@@ -238,7 +237,6 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     this->ui->referenceEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->referenceEdit->setCleanHTML( true );
     this->ui->referenceEdit->setSimpleEditor( true );
-    this->ui->referenceEdit->installEventFilter( this );
 
     // dummy line edit widget is not needed anymore
     this->ui->lineEdit->hide();
@@ -271,22 +269,4 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     } );
 }
 
-/**
- * @brief ReagentDialog::eventFilter
- * @param object
- * @param event
- * @return
- */
-bool ReagentDialog::eventFilter( QObject *object, QEvent *event ) {
-    if ( object == this->ui->nameEdit || object == this->ui->referenceEdit ) {
-        if ( event->type() == QEvent::KeyPress ) {
-            const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
-
-            if ( keyEvent->key() == Qt::Key_Tab || keyEvent->key() == Qt::Key_Return )
-                return true;
-        }
-    }
-
-    return QDialog::eventFilter( object, event );
-}
 

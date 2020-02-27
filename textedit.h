@@ -33,7 +33,7 @@ class TextEdit : public QTextEdit {
     Q_PROPERTY( bool cleanHTML READ cleanHTML WRITE setCleanHTML )
 
 public:
-    explicit TextEdit( QWidget *parent = nullptr ) : QTextEdit( parent ) {}
+    explicit TextEdit( QWidget *parent = nullptr );
     void insertPixmap( const QPixmap &pixmap, int preferredWidth = -1 );
 
     /**
@@ -64,6 +64,7 @@ protected:
     void dropEvent( QDropEvent *event ) override;
     void focusInEvent( QFocusEvent *event ) override { emit this->entered(); QTextEdit::focusInEvent( event ); }
     void keyPressEvent( QKeyEvent *event ) override;
+    bool eventFilter( QObject *object, QEvent *event ) override;
 
 public slots:
     /**

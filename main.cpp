@@ -53,7 +53,6 @@ reagents:
 database:
  - check API
  - crash on argument count mismatch
- - alias->reference
  - use bind in queries
 
 i18n:
@@ -62,18 +61,14 @@ i18n:
  - language selector in settings
 
 properties:
- - for now we use built in property extractor from PubChem
-   in the future this should be fully scripted (per tag) and from multiple
-   sources
  - filter in dock
  - icons in "add property" menu
- - pre-capture paste and pre-parse input for property addition
-   example: 56.05 C gets stripped of units before passing
-   to validator
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
+ - lock ui when extraction button is pressed (avoid duplicate requests)
+   (the same functionality StructureBrowser has)
 
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:
@@ -84,23 +79,28 @@ scripting:
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
 
-settings:
+theming:
+ - separate app theme from calculator theme
+   (calculator window background styling to be defined independantly from
+    app window background)
  - option to change syntax highlighter (and font size) (partially supported)
 
-misc:
- - store variables (for example F = molarMass( "NaOH" )
-   (not sure how to get a list of vars from globalObject, though)
-
-future:
+future/non-priority:
  - common reaction browser
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
  - theme browser
  - menu option to add image from clipboard
  - all fileOpen dialogs must remember last location
+ - warning when added property tag is hidden
+ - first open dialog?
+ - android companion app
+ - scripted property extractor with multiple data sources
+ - store variables (for example F = molarMass( "NaOH" )
+   (not sure how to get a list of vars from globalObject, though)
 
-unsorted:
-  - cut/paste properties from reagents
+misc/unsorted:
+  - cut properties from reagents
   - Bad behaviour:
     right click on reagent, change label
     (the property view still displays the last selected reagent)
@@ -110,7 +110,6 @@ unsorted:
   - ability to hide some reagents (like props)
   - lock icon/button in reagent dialog to freeze reference name
   - remove extra <br> at the end of some properties
-  - implement TAB in add reagent texedit
   - double check all add/edit/delete buttons for when they should be enabled or not
 */
 
@@ -141,9 +140,6 @@ int main( int argc, char *argv[] ) {
     if ( !sharedMemory->lock())
         return 0;
 #endif
-
-    // dummy file
-    const QString apiFileName( QDir::currentPath() + "/badapi" );
 
     // register metaTypes
     //qRegisterMetaType<Reagent::Fields>();
@@ -210,6 +206,7 @@ int main( int argc, char *argv[] ) {
     } );
 
     // check for previous crashes
+    const QString apiFileName( QDir::currentPath() + "/badapi" );
     if ( QFileInfo::exists( apiFileName )) {
         const QFileInfo info( Variable::string( "databasePath" ));
 
@@ -254,7 +251,7 @@ int main( int argc, char *argv[] ) {
                                             "Please restart the application" ),
                                QMessageBox::Ok );
 
-        QFile badAPIFile( QDir::currentPath() + "/badapi" );
+        QFile badAPIFile( apiFileName );
         if ( badAPIFile.open( QIODevice::WriteOnly ))
             badAPIFile.close();
 
@@ -276,7 +273,7 @@ int main( int argc, char *argv[] ) {
             Variable::setString( "theme", "dark" );
     }
 #else
-    if ( qGray( qApp->palette().color( QPalette::Base ).rgb()) < 128 )
+    if ( qGray( QApplication::palette().color( QPalette::Base ).rgb()) < 128 )
         darkMode = true;
 #endif
 

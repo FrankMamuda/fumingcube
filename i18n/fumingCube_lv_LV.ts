@@ -83,17 +83,17 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Database</name>
     <message>
-        <location filename="../database.cpp" line="46"/>
+        <location filename="../database.cpp" line="44"/>
         <source>empty database path</source>
         <translation>tukša datubāzes atrašānās vieta</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="52"/>
+        <location filename="../database.cpp" line="50"/>
         <source>relative or invalid database path &quot;%1&quot;</source>
         <translation>relatīva vai nederīga datubāzes atrašānās vieta &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="57"/>
+        <location filename="../database.cpp" line="55"/>
         <source>making non-existant database path &quot;%1&quot;</source>
         <translation>tiek izveidota neeksistējoša datubāzes atrašānās vieta &quot;%1&quot;</translation>
     </message>
@@ -108,72 +108,72 @@ p, li { white-space: pre-wrap; }
         <translation>tiek izmantota iebūvētā datubāze</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="91"/>
+        <location filename="../database.cpp" line="92"/>
         <source>creating non-existant database</source>
         <translation>tiek izveidots jauns datubāzes fails</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="95"/>
+        <location filename="../database.cpp" line="97"/>
         <source>unable to create database file</source>
         <translation>nebija iespējams izveidot datubāzes failu</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="101"/>
+        <location filename="../database.cpp" line="103"/>
         <source>loading database</source>
         <translation>datubāze tiek ielādēta</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="105"/>
+        <location filename="../database.cpp" line="107"/>
         <source>sqlite not present on the system</source>
         <translation>sqlite nav pieejams uz šīs sistēmas</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="114"/>
+        <location filename="../database.cpp" line="116"/>
         <source>could not load database</source>
         <translation>nebija iespējams ielādēt datubāzi</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="139"/>
+        <location filename="../database.cpp" line="141"/>
         <source>unloading database</source>
         <translation>datubāze tiek atspējota</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="144"/>
+        <location filename="../database.cpp" line="146"/>
         <source>clearing tables</source>
         <translation>datubāzes tabulas tiek atspējotas</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="158"/>
+        <location filename="../database.cpp" line="160"/>
         <source>closing database</source>
         <translation>datubāze tiek atspējota</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="181"/>
+        <location filename="../database.cpp" line="183"/>
         <source>creating an empty database</source>
         <translation>tiek izveidota tukša datubāze</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="190"/>
+        <location filename="../database.cpp" line="193"/>
         <source>database field mismatch in table &quot;%1&quot;, field - &quot;%2&quot;</source>
         <translation>datubāzes lauka nesadarība tabulas &quot;%1&quot; laukā - &quot;%2&quot;</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="198"/>
+        <location filename="../database.cpp" line="203"/>
         <source>database type mismatch in table &quot;%1&quot;, field - &quot;%2&quot;</source>
         <translation>datubāzes lauka tipa nesadarība tabulas &quot;%1&quot; laukā - &quot;%2&quot;</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="212"/>
+        <location filename="../database.cpp" line="217"/>
         <source>creating an empty table - &quot;%1&quot;</source>
         <translation>tiek izveidota jauna tabula - &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="250"/>
+        <location filename="../database.cpp" line="256"/>
         <source>could not create table - &quot;%1&quot;, reason - &quot;%2&quot;</source>
         <translation>nebija iespējams izveidot tabulu - &quot;%1&quot;, iemesls - &quot;%2&quot;</translation>
     </message>
     <message>
-        <location filename="../database.cpp" line="261"/>
+        <location filename="../database.cpp" line="268"/>
         <source>could not initialize model for table - &quot;%1&quot;</source>
         <translation>nebija iespējams iespējot tablas &quot;%1&quot; modeli</translation>
     </message>
@@ -181,12 +181,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>EditorToolbar</name>
     <message>
-        <location filename="../editortoolbar.cpp" line="160"/>
+        <location filename="../editortoolbar.cpp" line="164"/>
         <source>Open Image</source>
         <translation>Atvērt attēlu</translation>
     </message>
     <message>
-        <location filename="../editortoolbar.cpp" line="160"/>
+        <location filename="../editortoolbar.cpp" line="165"/>
         <source>Images (*.png *.jpg)</source>
         <translation>Attēli (*.png *.jpg)</translation>
     </message>
@@ -262,43 +262,43 @@ p, li { white-space: pre-wrap; }
         <translation>Iegūt CID un izgūt reaģenta īpasības</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="99"/>
+        <location filename="../extractiondialog.cpp" line="95"/>
         <source>Structural formula</source>
         <translation>Struktūrformula</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="418"/>
-        <location filename="../extractiondialog.cpp" line="499"/>
+        <location filename="../extractiondialog.cpp" line="416"/>
+        <location filename="../extractiondialog.cpp" line="497"/>
         <source>Success: CID - %1</source>
         <translation>Veiksmīgi iegūts: CID - %1</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="436"/>
+        <location filename="../extractiondialog.cpp" line="434"/>
         <source>Reading from cache</source>
         <translation>Nolasīts no kešatmiņas</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="509"/>
+        <location filename="../extractiondialog.cpp" line="507"/>
         <source>Could not find the reagent</source>
         <translation>Nebija iespējams atrast reaģentu</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="577"/>
+        <location filename="../extractiondialog.cpp" line="575"/>
         <source>Could not get a valid CID, trying similar</source>
         <translation>Nebija iespējams iegūt CID, meklē līdzīgus reaģentus</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="610"/>
+        <location filename="../extractiondialog.cpp" line="608"/>
         <source>Could not get a valid CID</source>
         <translation>Nebija iespējams iegūt CID</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="614"/>
+        <location filename="../extractiondialog.cpp" line="612"/>
         <source>Could retrieve data associated with CID</source>
         <translation>Nebija iespējams iegūt datus ar šo CID</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="618"/>
+        <location filename="../extractiondialog.cpp" line="616"/>
         <source>Could retrieve formula associated with CID</source>
         <translation>Nebija iespējams iegūt formulu ar šo CID</translation>
     </message>
@@ -385,27 +385,27 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Label</name>
     <message>
-        <location filename="../label.cpp" line="141"/>
+        <location filename="../label.cpp" line="143"/>
         <source>Bases</source>
         <translation>Bāzes</translation>
     </message>
     <message>
-        <location filename="../label.cpp" line="142"/>
+        <location filename="../label.cpp" line="144"/>
         <source>Acids</source>
         <translation>Skābes</translation>
     </message>
     <message>
-        <location filename="../label.cpp" line="143"/>
+        <location filename="../label.cpp" line="145"/>
         <source>Solvents</source>
         <translation>Šķīdinātāji</translation>
     </message>
     <message>
-        <location filename="../label.cpp" line="144"/>
+        <location filename="../label.cpp" line="146"/>
         <source>Inorganics</source>
         <translation>Neorganika</translation>
     </message>
     <message>
-        <location filename="../label.cpp" line="145"/>
+        <location filename="../label.cpp" line="147"/>
         <source>Alcohols</source>
         <translation>Spirti</translation>
     </message>
@@ -446,17 +446,17 @@ p, li { white-space: pre-wrap; }
         <translation>Rādīt visus reaģentus</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="126"/>
+        <location filename="../labeldock.cpp" line="137"/>
         <source>Add new label</source>
         <translation>Pievienot jaunu birku</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="133"/>
+        <location filename="../labeldock.cpp" line="144"/>
         <source>Remove label</source>
         <translation>Noņemt birku</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="144"/>
+        <location filename="../labeldock.cpp" line="155"/>
         <source>Edit label</source>
         <translation>Rediģēt birku</translation>
     </message>
@@ -522,7 +522,7 @@ p, li { white-space: pre-wrap; }
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="135"/>
+        <location filename="../mainwindow.cpp" line="138"/>
         <source>Paste</source>
         <translation>Ielīmēt</translation>
     </message>
@@ -654,12 +654,12 @@ p, li { white-space: pre-wrap; }
         <translation>Gāzveida</translation>
     </message>
     <message>
-        <location filename="../propertydialog.cpp" line="127"/>
+        <location filename="../propertydialog.cpp" line="140"/>
         <source>Add</source>
         <translation>Pievienot</translation>
     </message>
     <message>
-        <location filename="../propertydialog.cpp" line="127"/>
+        <location filename="../propertydialog.cpp" line="140"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
@@ -679,115 +679,117 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="221"/>
+        <location filename="../propertydock.cpp" line="251"/>
         <source>Cannot add property</source>
         <translation>Nebija iespējams pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="221"/>
+        <location filename="../propertydock.cpp" line="252"/>
         <source>Property missing name</source>
         <translation>Nav izvēlēts īpašības nosaukums</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="289"/>
+        <location filename="../propertydock.cpp" line="325"/>
         <source>Add property</source>
         <translation>Pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="305"/>
+        <location filename="../propertydock.cpp" line="348"/>
         <source>Add custom property to &apos;%1&apos;</source>
         <translation>Pievienot nestandarta īpašību &apos;%1&apos;  reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="311"/>
+        <location filename="../propertydock.cpp" line="354"/>
         <source>Add image to &apos;%1&apos;</source>
         <translation>Pievienot attēlu &apos;%1&apos; reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="312"/>
-        <location filename="../propertydock.cpp" line="533"/>
+        <location filename="../propertydock.cpp" line="222"/>
+        <location filename="../propertydock.cpp" line="356"/>
+        <location filename="../propertydock.cpp" line="593"/>
         <source>Open Image</source>
         <translation>Atvērt attēlu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="312"/>
-        <location filename="../propertydock.cpp" line="533"/>
+        <location filename="../propertydock.cpp" line="222"/>
+        <location filename="../propertydock.cpp" line="356"/>
+        <location filename="../propertydock.cpp" line="593"/>
         <source>Images (*.png *.jpg)</source>
         <translation>Attēli (*.png *.jpg)</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="327"/>
+        <location filename="../propertydock.cpp" line="372"/>
         <source>Set title</source>
         <translation>Pievienot nosaukumu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="327"/>
+        <location filename="../propertydock.cpp" line="372"/>
         <source>Title:</source>
         <translation>Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="334"/>
+        <location filename="../propertydock.cpp" line="380"/>
         <source>Get properties from the internet</source>
         <translation>Izgūt īpašības no interneta</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="363"/>
+        <location filename="../propertydock.cpp" line="410"/>
         <source>Copy</source>
         <translation>Kopēt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="378"/>
+        <location filename="../propertydock.cpp" line="428"/>
         <source>View</source>
         <translation>Parādīt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="388"/>
+        <location filename="../propertydock.cpp" line="438"/>
         <source>Replace</source>
         <translation>Aizstāt ar citu attēlu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="394"/>
+        <location filename="../propertydock.cpp" line="444"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="406"/>
+        <location filename="../propertydock.cpp" line="458"/>
         <source>Paste to calculator</source>
         <translation>Ielīmēt kalkulatorā</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="408"/>
+        <location filename="../propertydock.cpp" line="460"/>
         <source>Reference</source>
         <translation>Atsauci</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="409"/>
+        <location filename="../propertydock.cpp" line="463"/>
         <source>Value</source>
         <translation>Vērtību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="413"/>
+        <location filename="../propertydock.cpp" line="467"/>
         <source>Hide property &quot;%1&quot;</source>
         <translation>Slēpt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="422"/>
+        <location filename="../propertydock.cpp" line="476"/>
         <source>Show all properties</source>
         <translation>Rādīt visas īpašības</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="465"/>
-        <location filename="../propertydock.cpp" line="468"/>
+        <location filename="../propertydock.cpp" line="519"/>
+        <location filename="../propertydock.cpp" line="523"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="465"/>
+        <location filename="../propertydock.cpp" line="519"/>
         <source>Remove selected property?</source>
         <translation>Dzēst izvēlēto īpašību?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="468"/>
+        <location filename="../propertydock.cpp" line="524"/>
         <source>Remove %1 properties?</source>
         <translation>Dzēst %1 īpašību(-as)?</translation>
     </message>
@@ -885,12 +887,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="244"/>
+        <location filename="../main.cpp" line="253"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="245"/>
+        <location filename="../main.cpp" line="254"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -945,7 +947,7 @@ Please restart the application</source>
         <translation>Izgūt reaģenta īpašības pēc pievienošanas</translation>
     </message>
     <message>
-        <location filename="../reagentdialog.cpp" line="165"/>
+        <location filename="../reagentdialog.cpp" line="166"/>
         <source>Edit reagent</source>
         <translation>Labot reaģentu</translation>
     </message>
@@ -964,7 +966,7 @@ Please restart the application</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="110"/>
+        <location filename="../reagentdock.cpp" line="116"/>
         <source>Ctrl+F</source>
         <comment>Find</comment>
         <translation></translation>
@@ -974,7 +976,7 @@ Please restart the application</source>
         <translation type="vanished">Nebija iespējams pārsaukt reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="298"/>
+        <location filename="../reagentdock.cpp" line="312"/>
         <source>Cannot add reagent</source>
         <translation>Nebija iespējams pievienot reaģentu</translation>
     </message>
@@ -987,78 +989,118 @@ Please restart the application</source>
         <translation type="vanished">Reaģents &apos;%1&apos; jau eksistē</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="172"/>
+        <location filename="../reagentdock.cpp" line="180"/>
         <source>Cannot add or rename reagent</source>
         <translation>Nebija iespējams pievienot vai pārsaukt reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="172"/>
+        <location filename="../reagentdock.cpp" line="181"/>
         <source>Name or reference already exists</source>
         <translation>Nosaukums vai atsauce jau eksistē</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="197"/>
+        <location filename="../reagentdock.cpp" line="206"/>
         <source>Cannot add or rename batch</source>
         <translation>Nebija iespējams pievienot vai pārsaukt sēriju</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="197"/>
+        <location filename="../reagentdock.cpp" line="207"/>
         <source>Batch &apos;%1&apos; already exists for this reagent</source>
         <translation>Sērija &apos;%1&apos; jau eksistē šim reaģentam</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="231"/>
+        <location filename="../reagentdock.cpp" line="242"/>
         <source>Add batch</source>
         <translation>Pievienot sēriju</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="231"/>
-        <location filename="../reagentdock.cpp" line="509"/>
+        <location filename="../reagentdock.cpp" line="242"/>
+        <location filename="../reagentdock.cpp" line="591"/>
         <source>Name:</source>
         <translation>Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="298"/>
+        <location filename="../reagentdock.cpp" line="313"/>
         <source>Batch</source>
         <translation>Sērija</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="298"/>
+        <location filename="../reagentdock.cpp" line="313"/>
         <source>Reagent</source>
         <translation>Reaģents</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="298"/>
+        <location filename="../reagentdock.cpp" line="314"/>
         <source> name is empty</source>
         <translation> nosaukums ir tukšs</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="304"/>
+        <location filename="../reagentdock.cpp" line="320"/>
         <source>Add new reagent</source>
         <translation>Pievienot jaunu reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="312"/>
+        <location filename="../reagentdock.cpp" line="329"/>
         <source>Add new batch to reagent &quot;%1&quot;</source>
         <translation>Pievienot sēriju &quot;%1&quot; reaģentam</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="315"/>
+        <location filename="../reagentdock.cpp" line="336"/>
         <source>Copy name</source>
         <translation>Kopēt nosaukumu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="318"/>
+        <location filename="../reagentdock.cpp" line="341"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="411"/>
+        <location filename="../reagentdock.cpp" line="396"/>
+        <source>Search online</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="401"/>
+        <source>Google</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="404"/>
+        <source>DuckDuckGo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="407"/>
+        <source>Wikipedia</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="410"/>
+        <source>Alfa Aesar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="415"/>
+        <source>Acros</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="420"/>
+        <source>Sigma Aldrich</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="424"/>
+        <source>fluorochem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="488"/>
         <source>Remove %1 selected reagents and their batches</source>
         <translation>Dzēst %1 izvēlētu(-os) reaģentus un tā/to sērijas</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="509"/>
+        <location filename="../reagentdock.cpp" line="591"/>
         <source>Rename batch</source>
         <translation>Pārsaukt sēriju</translation>
     </message>
@@ -1079,47 +1121,47 @@ Please restart the application</source>
         <translation>atslēgvārds &quot;%1&quot; nav atļauts</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="99"/>
+        <location filename="../script.cpp" line="106"/>
         <source>answer is empty</source>
         <translation>atbilde ir tukša</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="114"/>
+        <location filename="../script.cpp" line="123"/>
         <source>expected an argument for function &quot;%1&quot;</source>
         <translation>funkcijai &quot;%1&quot; trūkst argumenta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="131"/>
+        <location filename="../script.cpp" line="141"/>
         <source>expected arguments for function &quot;%1&quot;</source>
         <translation>funkcijai &quot;%1&quot; trūkst argumentu</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="148"/>
+        <location filename="../script.cpp" line="159"/>
         <source>function name expected</source>
         <translation>tika sagaidīts funkcijas nosaukums</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="155"/>
+        <location filename="../script.cpp" line="167"/>
         <source>function &quot;%1&quot; is not defined</source>
         <translation>funkcija &quot;%1&quot; nav definēta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="162"/>
+        <location filename="../script.cpp" line="175"/>
         <source>reagent &quot;%1&quot; is not defined</source>
         <translation>reaģents &quot;%1&quot; nav definēts</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="172"/>
+        <location filename="../script.cpp" line="186"/>
         <source>batch &quot;%1&quot; is not defined</source>
         <translation>sērija &quot;%1&quot; nav definēta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="182"/>
+        <location filename="../script.cpp" line="197"/>
         <source>property &quot;%1&quot; is not defined for &quot;%2&quot;</source>
         <translation>īpašība &quot;%1&quot; nav definēta &quot;%2&quot; reaģentam</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="190"/>
+        <location filename="../script.cpp" line="208"/>
         <source>%1( %2 ) does not evaluate to a valid number</source>
         <translation>%1( %2 ) nav evaluējams par skaitli</translation>
     </message>
@@ -1128,8 +1170,8 @@ Please restart the application</source>
     <name>SettingsDialog</name>
     <message>
         <location filename="../settingsdialog.ui" line="14"/>
-        <location filename="../settingsdialog.cpp" line="44"/>
-        <location filename="../settingsdialog.cpp" line="51"/>
+        <location filename="../settingsdialog.cpp" line="46"/>
+        <location filename="../settingsdialog.cpp" line="53"/>
         <source>Settings</source>
         <translation>Uzstādījumi</translation>
     </message>
@@ -1199,22 +1241,22 @@ Please restart the application</source>
         <translation>Aizvērt</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="38"/>
+        <location filename="../settingsdialog.cpp" line="39"/>
         <source>Open database</source>
         <translation>Atvērt datubāzi</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="40"/>
+        <location filename="../settingsdialog.cpp" line="41"/>
         <source>Database (*.db *.sqlite)</source>
         <translation>Datubāze (*.db *.sqlite)</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="45"/>
+        <location filename="../settingsdialog.cpp" line="47"/>
         <source>Invalid database selection</source>
         <translation>Nederīga datubāzes izvēle</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="52"/>
+        <location filename="../settingsdialog.cpp" line="54"/>
         <source>Application must be restarted</source>
         <translation>Progamma ir jārestartē</translation>
     </message>
@@ -1243,17 +1285,17 @@ Please restart the application</source>
         <translation>Nākamais</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="221"/>
+        <location filename="../structurebrowser.cpp" line="237"/>
         <source>Error</source>
         <translation>Kļūda</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="237"/>
+        <location filename="../structurebrowser.cpp" line="253"/>
         <source>loading...</source>
         <translation>gaida...</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="238"/>
+        <location filename="../structurebrowser.cpp" line="254"/>
         <source>fetching formula...</source>
         <translation>tiek iegūta formula...</translation>
     </message>
@@ -1266,24 +1308,24 @@ Please restart the application</source>
         <translation>nebija iespējams iegūt lauka &quot;%1&quot; vērtību no &quot;%2&quot; tabulas</translation>
     </message>
     <message>
-        <location filename="../table.cpp" line="197"/>
-        <location filename="../table.cpp" line="288"/>
+        <location filename="../table.cpp" line="203"/>
+        <location filename="../table.cpp" line="298"/>
         <source>argument count mismatch - %1, required - %2</source>
         <translation>argumentu skaita nesakritība - %1, bet nepieciešami - %2</translation>
     </message>
     <message>
-        <location filename="../table.cpp" line="203"/>
+        <location filename="../table.cpp" line="210"/>
         <source>cannot insert row into table &quot;%1&quot;</source>
         <translation>nebija iespējams ievietot jaunu ridu &quot;%1&quot; tabulā</translation>
     </message>
     <message>
-        <location filename="../table.cpp" line="219"/>
-        <location filename="../table.cpp" line="300"/>
+        <location filename="../table.cpp" line="227"/>
+        <location filename="../table.cpp" line="312"/>
         <source>incompatible field type - %1 for argument %2 (%3), required - %4</source>
         <translation>lauka tipa nesakritība - %1 argumentam %2 (%3), nepieciešams - %4</translation>
     </message>
     <message>
-        <location filename="../table.cpp" line="229"/>
+        <location filename="../table.cpp" line="238"/>
         <source>table already has a unique field &quot;%1&quot; with value - &quot;%2&quot;, aborting addition</source>
         <translation>tabulai jau ir unikāls lauks &quot;%1&quot; ar vērtību - &quot;%2&quot;, pievienošana tiek atcelta</translation>
     </message>
@@ -1291,181 +1333,185 @@ Please restart the application</source>
 <context>
     <name>Tag</name>
     <message>
-        <location filename="../tag.cpp" line="67"/>
+        <location filename="../tag.cpp" line="72"/>
         <source>Molar mass</source>
         <translation>Molmasa</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="67"/>
+        <location filename="../tag.cpp" line="72"/>
         <source>&amp;nbsp;g/mol</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="69"/>
+        <location filename="../tag.cpp" line="74"/>
         <source>Density</source>
         <translation>Blīvums</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="69"/>
+        <location filename="../tag.cpp" line="74"/>
         <source>&amp;nbsp;g/cm&lt;sup&gt;3&lt;/sup&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="71"/>
+        <location filename="../tag.cpp" line="76"/>
         <source>Assay</source>
         <translation>Kvantitatīvais saturs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="71"/>
-        <location filename="../tag.cpp" line="74"/>
-        <location filename="../tag.cpp" line="75"/>
         <location filename="../tag.cpp" line="76"/>
-        <location filename="../tag.cpp" line="77"/>
-        <location filename="../tag.cpp" line="78"/>
         <location filename="../tag.cpp" line="79"/>
         <location filename="../tag.cpp" line="80"/>
+        <location filename="../tag.cpp" line="81"/>
+        <location filename="../tag.cpp" line="82"/>
+        <location filename="../tag.cpp" line="84"/>
+        <location filename="../tag.cpp" line="85"/>
+        <location filename="../tag.cpp" line="86"/>
         <source>&amp;percnt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="72"/>
+        <location filename="../tag.cpp" line="77"/>
         <source>State</source>
         <translation>Agregātstāvoklis</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="73"/>
+        <location filename="../tag.cpp" line="78"/>
         <source>Analysis id</source>
         <translation>Analīzes nummurs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="74"/>
+        <location filename="../tag.cpp" line="79"/>
         <source>Loss on drying</source>
         <translation>Masas zudums žāvējot</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="75"/>
+        <location filename="../tag.cpp" line="80"/>
         <source>HPLC purity</source>
         <translation>AEŠH tīrība</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="76"/>
+        <location filename="../tag.cpp" line="81"/>
         <source>GC purity</source>
         <translation>GH tīrība</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="77"/>
+        <location filename="../tag.cpp" line="82"/>
         <source>Related substances</source>
         <translation>Radniecīgi piemaisījumi</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="78"/>
+        <location filename="../tag.cpp" line="84"/>
         <source>Impurities</source>
         <translation>Piemaisījumi</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="79"/>
+        <location filename="../tag.cpp" line="85"/>
         <source>Water content</source>
         <translation>Ūdens saturs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="80"/>
+        <location filename="../tag.cpp" line="86"/>
         <source>Concentration</source>
         <translation>Koncentrācija</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="81"/>
+        <location filename="../tag.cpp" line="87"/>
         <source>Boiling point</source>
         <translation>Viršanas temperatūra</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="81"/>
-        <location filename="../tag.cpp" line="83"/>
-        <location filename="../tag.cpp" line="85"/>
+        <location filename="../tag.cpp" line="87"/>
+        <location filename="../tag.cpp" line="89"/>
+        <location filename="../tag.cpp" line="91"/>
         <source>&amp;deg;C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="83"/>
+        <location filename="../tag.cpp" line="89"/>
         <source>Melting point</source>
         <translation>Kušanas temperatūra</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="85"/>
+        <location filename="../tag.cpp" line="91"/>
         <source>Flash point</source>
         <translation>Pašuzliesmošanas temperatūra</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="87"/>
+        <location filename="../tag.cpp" line="93"/>
         <source>CAS number</source>
         <translation>CAS numurs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="89"/>
+        <location filename="../tag.cpp" line="95"/>
         <source>Viscosity</source>
         <translation>Viskozitāte</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="89"/>
+        <location filename="../tag.cpp" line="95"/>
         <source>&amp;nbsp;mPa·s</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="90"/>
-        <source>Reftractive index</source>
-        <translation>Gaismas laušanas koeficients</translation>
+        <location filename="../tag.cpp" line="96"/>
+        <source>Refractive index</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="92"/>
+        <source>Reftractive index</source>
+        <translation type="vanished">Gaismas laušanas koeficients</translation>
+    </message>
+    <message>
+        <location filename="../tag.cpp" line="98"/>
         <source>GHS pictograms</source>
         <translation>GHS piktogrammas</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="94"/>
+        <location filename="../tag.cpp" line="102"/>
         <source>NFPA 704</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="96"/>
+        <location filename="../tag.cpp" line="104"/>
         <source>Acidity (pKa)</source>
         <translation>Skābums (pKa)</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="97"/>
+        <location filename="../tag.cpp" line="105"/>
         <source>Basicity (pKb)</source>
         <translation>Bāziskums (pKb)</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="98"/>
+        <location filename="../tag.cpp" line="106"/>
         <source>Producer</source>
         <translation>Ražotājs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="99"/>
+        <location filename="../tag.cpp" line="107"/>
         <source>Supplier</source>
         <translation>Piegādātājs</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="100"/>
+        <location filename="../tag.cpp" line="108"/>
         <source>Structural formula</source>
         <translation>Struktūrformula</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="101"/>
+        <location filename="../tag.cpp" line="109"/>
         <source>Physical description</source>
         <translation>Raksturojums</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="103"/>
+        <location filename="../tag.cpp" line="111"/>
         <source>Solubility</source>
         <translation>Šķīdība</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="105"/>
+        <location filename="../tag.cpp" line="113"/>
         <source>Synonyms</source>
         <translation>Sinonīmi</translation>
     </message>
     <message>
-        <location filename="../tag.cpp" line="107"/>
+        <location filename="../tag.cpp" line="115"/>
         <source>IUPAC Name</source>
         <translation>IUPAC nosakums</translation>
     </message>
@@ -1610,20 +1656,20 @@ Please restart the application</source>
         <translation type="vanished">Ievietot simbolu</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="209"/>
-        <location filename="../tagdialog.cpp" line="212"/>
+        <location filename="../tagdialog.cpp" line="208"/>
+        <location filename="../tagdialog.cpp" line="211"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="209"/>
+        <location filename="../tagdialog.cpp" line="208"/>
         <source>Remove &apos;%1&apos; tag?
 This will irreversibly remove all associated properties.</source>
         <translation>Dzēst &apos;%1&apos; raksturlielumu?
 Šī darbība neatgriezeniski izdzēsīs arī visas ar raksturlielumu saistītās īpašības.</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="212"/>
+        <location filename="../tagdialog.cpp" line="211"/>
         <source>Remove %1 tags?
 This will irreversibly remove all associated properties.</source>
         <translation>Dzēst &apos;%1&apos; raksturlielumu(-us)?
@@ -1633,7 +1679,7 @@ This will irreversibly remove all associated properties.</source>
 <context>
     <name>Widget</name>
     <message>
-        <location filename="../widget.h" line="107"/>
+        <location filename="../widget.h" line="124"/>
         <source>unsupported container &quot;%1&quot;</source>
         <translation>neatbalstīts konteiners &quot;%1&quot;</translation>
     </message>
@@ -1651,12 +1697,12 @@ This will irreversibly remove all associated properties.</source>
         <translation>konfigurācijas fails netika atrasts</translation>
     </message>
     <message>
-        <location filename="../xmltools.cpp" line="104"/>
+        <location filename="../xmltools.cpp" line="103"/>
         <source>writing configuration</source>
         <translation>konfigurācija tiek saglabāta</translation>
     </message>
     <message>
-        <location filename="../xmltools.cpp" line="174"/>
+        <location filename="../xmltools.cpp" line="175"/>
         <source>could not open configuration file &quot;%1&quot;</source>
         <translation>konfigurācijas failu &quot;%1&quot;  nebija iespējams atvērt</translation>
     </message>

@@ -38,6 +38,7 @@
 #include <QPalette>
 #include <QTableView>
 #include <QBuffer>
+#include <QSqlQuery>
 #include "propertydock.h"
 
 /**
@@ -56,6 +57,43 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
     const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula ||
                                                         tagId == PixmapTag ) : false;
     const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
+
+    // check for overrides
+    const Id reagentId = Property::instance()->reagentId( row );
+    const Id reagentParentId = Reagent::instance()->parentId( reagentId );
+
+    // check if property belongs to the batch
+    const bool isBatchProperty = Reagent::instance()->parentId( reagentId ) != Id::Invalid;
+    bool isOverridden = false;
+    if ( isBatchProperty ) {
+        QSqlQuery query;
+        query.exec( QString( "select * from %1 where %2=%3 and %4=%5" )
+                    .arg( Property::instance()->tableName(),
+                          Property::instance()->fieldName( Property::ReagentId ),
+                          QString::number( static_cast<int>( reagentParentId )),
+                          Property::instance()->fieldName( Property::TagId ),
+                          QString::number( static_cast<int>( tagId ))));
+        if ( query.next())
+            isOverridden = true;
+    }
+
+    bool isDuplicate = false;
+    if ( tagId != Id::Invalid ) {
+        if ( !Tag::instance()->function( tagId ).isEmpty()) {
+            // check backwards all scriptable tags for duplicates
+            const int startIndex = static_cast<int>( row ) - 1;
+            if ( startIndex > 0 ) {
+                for ( int y = startIndex; y >= 0; y-- ) {
+                    const Row propRow = static_cast<Row>( y );
+                    const Id dupTagId = Property::instance()->tagId( propRow );
+                    if ( dupTagId == tagId ) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     // create a new document
     auto *document( new QTextDocument());
@@ -201,9 +239,38 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
             html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML(
                     qAsConst( stringData ) + units )));
+
+
+            if ( index.column() == Property::Name ) {
+                // NOTE: batch properties are displayed in italic (at least for now)
+                if ( isBatchProperty && !isDuplicate ) {
+                    html.prepend( "<i>" );
+                    html.append( "</i>" );
+                }
+
+                if ( isDuplicate ) {
+                    // TODO: add hint?
+                    html.prepend( "<s>" );
+                    html.append( "</s>" );
+                }
+
+                // NOTE: overridden properties display a star icon (at least for now)
+                if ( isOverridden && !isDuplicate ) {
+                    // TODO: make global static -> pixmapToData
+                    //       also pre-cache this icon
+                    QPixmap overrideIcon( QIcon::fromTheme( "star" ).pixmap( 12, 12 ));
+                    QByteArray pixmapData;
+                    QBuffer buffer( &pixmapData );
+                    buffer.open( QIODevice::WriteOnly );
+                    overrideIcon.save( &buffer, "PNG" );
+                    buffer.close();
+                    html.prepend( QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" )
+                                  .arg( pixmapData.toBase64().constData()));
+                }
+            }
         }
 
-        document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3<\p>)" )
+        document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" )
                            .arg( QString::number( font.pointSize()),
                                  font.family(),
                                  qAsConst( html )));

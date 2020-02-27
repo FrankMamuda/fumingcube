@@ -37,27 +37,6 @@
 //
 
 /**
- * @brief PropertyEditor::eventFilter
- * @param watched
- * @param event
- * @return
- */
-bool PropertyEditor::eventFilter( QObject *object, QEvent *event ) {
-    if ( object == this->ui->name ) {
-        if ( event->type() == QEvent::KeyPress ) {
-            const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
-
-            if ( keyEvent->key() == Qt::Key_Tab ) {
-                this->ui->value->setFocus();
-                return true;
-            }
-        }
-    }
-
-    return QDialog::eventFilter( object, event );
-}
-
-/**
  * @brief PropertyEditor::name
  * @return
  */
@@ -84,7 +63,6 @@ PropertyEditor::PropertyEditor( QWidget *parent, Modes mode, const QString &name
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
     // setup name editor and toolbar
-    this->ui->name->installEventFilter( this );
     this->ui->name->setSimpleEditor( true );
     this->ui->name->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->name->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );

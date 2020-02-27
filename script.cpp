@@ -244,7 +244,7 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     query.exec( QString( "select %1 from %2 where ( %3='%4' or %5='%4' ) and ( %6=%7 )" )
                         .arg( Reagent::instance()->fieldName( Reagent::ID ),
                               Reagent::instance()->tableName(),
-                              Reagent::instance()->fieldName( Reagent::Alias ),
+                              Reagent::instance()->fieldName( Reagent::Reference ),
                               reference,
                               Reagent::instance()->fieldName( Reagent::Name ),
                               Reagent::instance()->fieldName( Reagent::ParentId ),
@@ -262,7 +262,7 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     query.exec( QString( "select %1, %2, %3 from %4 where %5=%6" )
                         .arg( Reagent::instance()->fieldName( Reagent::ID ),
                               Reagent::instance()->fieldName( Reagent::Name ),
-                              Reagent::instance()->fieldName( Reagent::Alias ),
+                              Reagent::instance()->fieldName( Reagent::Reference ),
                               Reagent::instance()->tableName(),
                               Reagent::instance()->fieldName( Reagent::ParentId ),
                               QString::number( static_cast<int>( parentId )))

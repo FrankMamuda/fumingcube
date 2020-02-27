@@ -124,7 +124,7 @@ bool CalcEdit::completeCommand() {
             if ( !parent.isEmpty()) {
                 query.exec( QString( "select %1, %2, %6 from %3 where %4=%5" )
                                     .arg( Reagent::instance()->fieldName( Reagent::Name ),
-                                          Reagent::instance()->fieldName( Reagent::Alias ),
+                                          Reagent::instance()->fieldName( Reagent::Reference ),
                                           Reagent::instance()->tableName(),
                                           Reagent::instance()->fieldName( Reagent::ParentId ),
                                           QString::number( static_cast<int>( Id::Invalid )),
@@ -150,7 +150,7 @@ bool CalcEdit::completeCommand() {
             QStringList reagents;
             query.exec( QString( "select %1, %2 from %3 where %4=%5" )
                                 .arg( Reagent::instance()->fieldName( Reagent::Name ),
-                                      Reagent::instance()->fieldName( Reagent::Alias ),
+                                      Reagent::instance()->fieldName( Reagent::Reference ),
                                       Reagent::instance()->tableName(),
                                       Reagent::instance()->fieldName( Reagent::ParentId ),
                                       QString::number( static_cast<int>( parentId )))

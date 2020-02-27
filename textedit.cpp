@@ -36,6 +36,15 @@
 #include <QAbstractItemView>
 
 /**
+ * @brief TextEdit::TextEdit
+ * @param parent
+ */
+TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
+   this->setTabChangesFocus( true );
+   this->installEventFilter( this );
+}
+
+/**
  * @brief TextEdit::insertPixmap
  * @param pixmap
  * @param preferredWidth
@@ -116,7 +125,7 @@ void TextEdit::dropEvent( QDropEvent *event ) {
 void TextEdit::keyPressEvent( QKeyEvent *event ) {
     if ( this->completer() != nullptr ) {
         if ( this->completer()->popup()->isVisible()) {
-            switch (event->key()) {
+            switch ( event->key()) {
             case Qt::Key_Enter:
             case Qt::Key_Return:
             case Qt::Key_Escape:
@@ -134,6 +143,25 @@ void TextEdit::keyPressEvent( QKeyEvent *event ) {
     }
 
     QTextEdit::keyPressEvent( event );
+}
+
+/**
+ * @brief TextEdit::eventFilter
+ * @param object
+ * @param event
+ * @return
+ */
+bool TextEdit::eventFilter(QObject *object, QEvent *event) {
+    if ( this->isSimpleEditor()) {
+        if ( event->type() == QEvent::KeyPress ) {
+            const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
+
+            if ( keyEvent->key() == Qt::Key_Return )
+                return true;
+        }
+    }
+
+    return QTextEdit::eventFilter( object, event );
 }
 
 /**

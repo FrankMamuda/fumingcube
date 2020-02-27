@@ -74,7 +74,6 @@ public:
     explicit PropertyEditor( QWidget *parent = nullptr, Modes mode = Modes::Add, const QString &name = QString(),
                              const QString &value = QString());
     ~PropertyEditor() override;
-    bool eventFilter( QObject *object, QEvent *event ) override;
     [[nodiscard]] QString name() const;
     [[nodiscard]] QString value() const;
 

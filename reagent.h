@@ -42,7 +42,7 @@ public:
         NoField = -1,
         ID,
         Name,
-        Alias,
+        Reference,
         ParentId,
 
         // count (DO NOT REMOVE)
@@ -66,12 +66,8 @@ public:
     // initialize field setters and getters
     INITIALIZE_FIELD( Id, ID, id )
     INITIALIZE_FIELD( QString, Name, name )
-    INITIALIZE_FIELD( QString, Alias, alias )
+    INITIALIZE_FIELD( QString, Reference, reference )
     INITIALIZE_FIELD( Id, ParentId, parentId )
-
-    // FIXME: temporary
-    [[nodiscard]] QString reference( const Row &row ) const { return this->alias( row ); }
-    [[nodiscard]] QString reference( const Id &id ) const { return this->alias( id ); }
 
 public slots:
     void removeOrphanedEntries() override;

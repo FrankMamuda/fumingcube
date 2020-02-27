@@ -67,6 +67,11 @@ public slots:
     void insertCommand( const QString &command );
     void saveHistory();
     void scrollToBottom();
+
+    /**
+     * @brief setTheme
+     * @param theme
+     */
     void setTheme( Theme *theme ) { this->m_theme = theme; }
 
 private slots:

@@ -44,6 +44,8 @@
 #include <QClipboard>
 #include <QTimer>
 #include <QSqlQuery>
+#include <QMimeData>
+#include <QSqlError>
 
 /**
  * @brief PropertyDock::PropertyDock
@@ -397,6 +399,20 @@ void PropertyDock::on_addPropButton_clicked() {
 void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos ) {
     QMenu menu;
     const QModelIndex index( this->ui->propertyView->indexAt( pos ));
+    constexpr const char *mimeTag = "application/x-fumingcube-tag";
+    constexpr const char *mimeData = "application/x-fumingcube-data";
+    constexpr const char *mimeName = "application/x-fumingcube-name";
+
+    // check reagent
+    const QModelIndex reagentIndex( ReagentDock::instance()->view()->filterModel()->mapToSource(
+            ReagentDock::instance()->view()->currentIndex()));
+    if ( !reagentIndex.isValid())
+        return;
+
+    // get reagent id
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex( reagentIndex );
+    if ( reagentId == Id::Invalid )
+        return;
 
     if ( index.isValid()) {
 
@@ -407,7 +423,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
         if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS ||
              type == Tag::Formula || tagId == Id::Invalid ) {
-            menu.addAction( PropertyDock::tr( "Copy" ), this, [ row, type ]() {
+            menu.addAction( PropertyDock::tr( "Copy" ), this, [ row, type, tagId ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
 
                 if ( type == Tag::Formula )
@@ -421,6 +437,14 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                     const QTextEdit edit( data.toString());
                     QGuiApplication::clipboard()->setText( edit.toPlainText());
                 }
+
+                QMimeData *propertyData = new QMimeData();
+                propertyData->setData( mimeTag, QString::number( static_cast<int>( tagId )).toLatin1().constData());
+                //propertyData->setData( mimeReagent, QString::number( static_cast<int>( reagentId )).toLatin1().constData());
+                propertyData->setData( mimeName, Property::instance()->name( row ).toLatin1().constData());
+                propertyData->setData( mimeData, data.toByteArray());
+
+                QGuiApplication::clipboard()->setMimeData( propertyData );
             } )->setIcon( QIcon::fromTheme( "copy" ));
         }
 
@@ -463,7 +487,6 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 subMenu2->addAction( PropertyDock::tr( "Value" ), this, paste )->setIcon( QIcon::fromTheme( "paste" ));
             }
 
-
             menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), this, [ this, tagId ]() {
                 this->hiddenTags << QString::number( static_cast<int>( tagId ));
                 this->hiddenTags.removeAll( "" );
@@ -477,6 +500,35 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             this->hiddenTags.clear();
             ReagentDock::instance()->view()->updateView();
         } )->setIcon( QIcon::fromTheme( "show" ));
+    }
+
+    // paste property from clipboard (paste between reagents)
+    if ( QGuiApplication::clipboard()->mimeData() != nullptr ) {
+        QByteArray tag( QGuiApplication::clipboard()->mimeData()->data( mimeTag ));
+        QByteArray data( QGuiApplication::clipboard()->mimeData()->data( mimeData ));
+        QByteArray name( QGuiApplication::clipboard()->mimeData()->data( mimeName ));
+
+        if ( !tag.isEmpty() && !data.isEmpty()) {
+            const Id tagId = static_cast<Id>( QString( tag.constData()).toInt());
+            bool ok = true;
+
+            if ( tagId != Id::Invalid ) {
+                QSqlQuery query;
+                query.exec( QString( "select %1 from %2 where %1=%3" ).arg(
+                                Tag::instance()->fieldName( Tag::ID ),
+                                Tag::instance()->tableName(),
+                                QString::number( static_cast<int>( tagId ))));
+
+                ok = query.next();
+            }
+
+            if ( ok ) {
+                const QString prettyName( PropertyDock::tr( R"(Paste property "%1")" ).arg( tagId != Id::Invalid ? Tag::instance()->name( tagId ) : name ));
+                menu.addAction( prettyName, this, [ this, name, tagId, reagentId, data ]() {
+                    this->addProperty( name.constData(), data, reagentId, tagId );
+                } )->setIcon( QIcon::fromTheme( "paste" ));
+            }
+        }
     }
 
     if ( !menu.actions().isEmpty())
@@ -682,8 +734,26 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     this->ui->propertyView->setUpdatesEnabled( false );
 
     bool pixmap = false;
-    if ( tagId != Id::Invalid )
+    if ( tagId != Id::Invalid ) {
         pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
+        // warn if already exists
+        QSqlQuery query;
+        query.exec( QString( "select * from %1 where %2=%3 and %4=%5" )
+                    .arg( Property::instance()->tableName(),
+                          Property::instance()->fieldName( Property::ReagentId ),
+                          QString::number( static_cast<int>( reagentId )),
+                          Property::instance()->fieldName( Property::TagId ),
+                          QString::number( static_cast<int>( tagId ))));
+        if ( query.next()) {
+            if ( QMessageBox::question( this, PropertyDock::tr( "Duplicate property" ),
+                                        PropertyDock::tr( "Reagent already has this property, add regardless?" )) == QMessageBox::No ) {
+                this->ui->propertyView->setUpdatesEnabled( true );
+                return;
+            }
+        }
+    }
+
 
     // add property
     Property::instance()->add(( tagId == Id::Invalid || pixmap ) ? name : QString(), tagId, value, reagentId );

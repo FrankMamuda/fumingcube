@@ -150,7 +150,7 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
         // reagent does not exist yet
         query.exec( QString( "select %1, %2 from %3 where %4=%5" )
                             .arg( Reagent::instance()->fieldName( Reagent::Name ),
-                                  Reagent::instance()->fieldName( Reagent::Alias ),
+                                  Reagent::instance()->fieldName( Reagent::Reference ),
                                   Reagent::instance()->tableName(),
                                   Reagent::instance()->fieldName( Reagent::ParentId ),
                                   QString::number( static_cast<int>( Id::Invalid )))
@@ -159,7 +159,7 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
         // reagent does exist, we're just renaming it
         query.exec( QString( "select %1, %2, %6 from %3 where %4=%5 and %6!=%7" )
                             .arg( Reagent::instance()->fieldName( Reagent::Name ),
-                                  Reagent::instance()->fieldName( Reagent::Alias ),
+                                  Reagent::instance()->fieldName( Reagent::Reference ),
                                   Reagent::instance()->tableName(),
                                   Reagent::instance()->fieldName( Reagent::ParentId ),
                                   QString::number( static_cast<int>( Id::Invalid )),
@@ -612,7 +612,7 @@ void ReagentDock::on_editButton_clicked() {
             return;
 
         Reagent::instance()->setName( reagentRow, name );
-        Reagent::instance()->setAlias( reagentRow, reference );
+        Reagent::instance()->setReference( reagentRow, reference );
 
         // rename without resetting the model
         const QString generatedName( ReagentModel::generateName( name, reference ));
