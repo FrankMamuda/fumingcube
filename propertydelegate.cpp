@@ -39,6 +39,8 @@
 #include <QTableView>
 #include <QBuffer>
 #include <QSqlQuery>
+#include "htmlutils.h"
+#include "pixmaputils.h"
 #include "propertydock.h"
 
 /**
@@ -143,9 +145,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                     // invert and autoCrop it if necessary
                     if ( Tag::instance()->type( tagId ) == Tag::Formula ) {
-                        pixmap = ImageUtils::autoCropPixmap( qAsConst( pixmap ));
+                        pixmap = PixmapUtils::autoCrop( qAsConst( pixmap ));
                         if ( Variable::isEnabled( "darkMode" ))
-                            pixmap = ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( qAsConst( pixmap )));
+                            pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( qAsConst( pixmap )));
                     }
 
                     // FAST downscale pixmap
@@ -157,10 +159,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                     pixmap = pixmap.scaled( qAsConst( scaledSize ), Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
 
                     // convert it back to buffer
-                    QBuffer buffer( &pixmapData );
-                    buffer.open( QIODevice::WriteOnly );
-                    pixmap.save( &buffer, "PNG" );
-                    buffer.close();
+                    pixmapData = PixmapUtils::convertToData( pixmap );
 
                     // insert data into the cache
                     this->cache[checksum][scaledSize.width()] = pixmapData;
@@ -237,9 +236,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 }
             }
 
-            html = ( index.column() == Property::Name ? Tag::instance()->name( tagId ) : ( TextEdit::stripHTML(
-                    qAsConst( stringData ) + units )));
-
+            html = ( index.column() == Property::Name ?
+                         Tag::instance()->name( tagId ) :
+                         ( HTMLUtils::simplify( qAsConst( stringData ) + units )));
 
             if ( index.column() == Property::Name ) {
                 // NOTE: batch properties are displayed in italic (at least for now)
@@ -256,16 +255,8 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                 // NOTE: overridden properties display a star icon (at least for now)
                 if ( isOverridden && !isDuplicate ) {
-                    // TODO: make global static -> pixmapToData
-                    //       also pre-cache this icon
-                    QPixmap overrideIcon( QIcon::fromTheme( "star" ).pixmap( 12, 12 ));
-                    QByteArray pixmapData;
-                    QBuffer buffer( &pixmapData );
-                    buffer.open( QIODevice::WriteOnly );
-                    overrideIcon.save( &buffer, "PNG" );
-                    buffer.close();
                     html.prepend( QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" )
-                                  .arg( pixmapData.toBase64().constData()));
+                                  .arg( PixmapUtils::convertToData( QIcon::fromTheme( "star" ).pixmap( 12, 12 ), "star_12" ).toBase64().constData()));
                 }
             }
         }

@@ -178,18 +178,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
     // output either error or result
     if ( !string.isEmpty()) {
-        // TODO: make a global static
-        QStringList functions;
-        QSqlQuery query;
-        query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                            .arg( Tag::instance()->fieldName( Tag::ID ),
-                                  Tag::instance()->fieldName( Tag::Function ),
-                                  Tag::instance()->tableName()));
-        while ( query.next()) {
-            const QString functionName( query.value( 1 ).toString());
-            if ( !functionName.isEmpty())
-                functions << functionName;
-        }
+        const QStringList functions( Tag::instance()->getFunctionList());
 
         /**
          * @brief The Match struct

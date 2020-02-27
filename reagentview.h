@@ -22,6 +22,7 @@
  * includes
  */
 #include "nodehistory.h"
+#include "reagentdelegate.h"
 #include "reagentmodel.h"
 #include <QSortFilterProxyModel>
 #include <QTreeView>
@@ -43,7 +44,11 @@ public:
     /**
      * @brief ~ReagentView::~ReagentView
      */
-    ~ReagentView() override { delete this->m_nodeHistory; }
+    ~ReagentView() override {
+        delete this->m_nodeHistory;
+        delete this->delegate;
+        delete this->reagentModel;
+    }
 
     /**
      * @brief model
@@ -94,4 +99,6 @@ protected:
 
 private:
     NodeHistory *m_nodeHistory;
+    ReagentModel *reagentModel = new ReagentModel();
+    ReagentDelegate *delegate = new ReagentDelegate();
 };

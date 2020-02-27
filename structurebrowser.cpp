@@ -26,6 +26,7 @@
  * includes
  */
 #include "imageutils.h"
+#include "pixmaputils.h"
 #include "structurebrowser.h"
 #include "ui_structurebrowser.h"
 #include "variable.h"
@@ -207,9 +208,9 @@ void StructureBrowser::readFormula( const QByteArray &data ) {
     if ( pixmap.isNull())
         return;
 
-    const QPixmap cropped( ImageUtils::autoCropPixmap( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const bool darkMode = Variable::isEnabled( "darkMode" );
-    this->ui->formula->setPixmap( darkMode ? ImageUtils::invertPixmap( cropped ) : cropped );
+    this->ui->formula->setPixmap( darkMode ? PixmapUtils::invert( cropped ) : cropped );
 }
 
 /**

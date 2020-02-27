@@ -37,6 +37,8 @@
 #include "propertywidget.h"
 #include "imageutils.h"
 #include "structurebrowser.h"
+#include "pixmaputils.h"
+#include "htmlutils.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
@@ -58,7 +60,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
             return;
     }
 
-    this->ui->nameEdit->setText( QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
+    this->ui->nameEdit->setText( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
     QLineEdit::connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();
@@ -86,14 +88,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
                         }
                     }
 
-                    if ( row != Row::Invalid ) {
-                        QByteArray bytes;
-                        QBuffer buffer( &bytes );
-                        buffer.open( QIODevice::WriteOnly );
-                        pixmap.save( &buffer, "PNG" );
-                        buffer.close();
-                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), bytes, this->reagentId());
-                    }
+                    if ( row != Row::Invalid )
+                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::convertToData( pixmap ), this->reagentId());
                 }
             }
         }
@@ -375,7 +371,7 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
     if ( pixmap.isNull())
         return;
 
-    const QPixmap cropped( ImageUtils::autoCropPixmap( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
     this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );

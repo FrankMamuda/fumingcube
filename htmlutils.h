@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019-2020 Armands Aleksejevs
+ * Copyright (C) 2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,39 +21,23 @@
 /*
  * includes
  */
-#include <QDialog>
+#include <QTextEdit>
 
 /**
- * @brief The Ui namespace
+ * @brief The HTMLUtils class
  */
-namespace Ui {
-    class ImageUtils;
-
-    static const int MaxImageSize = 512;
-}
-
-/**
- * @brief The ImageUtils class
- */
-class ImageUtils : public QDialog {
-    Q_OBJECT
-    Q_DISABLE_COPY( ImageUtils )
+class HTMLUtils final {
+    Q_DISABLE_COPY( HTMLUtils )
 
 public:
-    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0,
-                         bool view = false );
-
     // disable move
-    ImageUtils( ImageUtils&& ) = delete;
-    ImageUtils& operator=( ImageUtils&& ) = delete;
+    HTMLUtils( HTMLUtils&& ) = delete;
+    HTMLUtils& operator=( HTMLUtils&& ) = delete;
 
-    ~ImageUtils() override;
-    QPixmap pixmap;
-
-signals:
-    void accepted( const QPixmap &pixmap );
+    [[nodiscard]] static QString simplify( const QString &html );
+    [[nodiscard]] static QString convertToPlainText( const QString &html );
+    [[nodiscard]] static QString captureBody( const QString &html );
 
 private:
-    Ui::ImageUtils *ui;
-    QSize size;
+    explicit HTMLUtils() {}
 };

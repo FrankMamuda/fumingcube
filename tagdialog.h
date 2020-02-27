@@ -62,7 +62,6 @@ public:
      * @return
      */
     [[nodiscard]] Modes mode() const { return this->m_mode; }
-    static QString captureBody( const QString &input );
 
 private slots:
     void on_actionAdd_triggered();

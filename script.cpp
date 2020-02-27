@@ -28,6 +28,7 @@
 #include "tag.h"
 #include <QRegularExpression>
 #include <QSqlQuery>
+#include "htmlutils.h"
 #include "variable.h"
 
 /**
@@ -65,18 +66,7 @@ QJSValue Script::evaluate( const QString &script ) {
     // the other option (mapping globalObject properties via wrapper function is
     // also not the preferred way, since we also have to track tag updates)
     if ( !result.isError()) {
-        // TODO: make a global static
-        QStringList functions;
-        QSqlQuery query;
-        query.exec(
-                QString( "select %1 from %2 where %1 not null" )
-                    .arg( Tag::instance()->fieldName( Tag::Function ),
-                          Tag::instance()->tableName()));
-        while ( query.next()) {
-            const QString functionName( query.value( 0 ).toString());
-            if ( !functionName.isEmpty())
-                functions << functionName;
-        }
+        const QStringList functions( Tag::instance()->getFunctionList());
 
         // do replacement magic:
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
@@ -254,7 +244,6 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     if ( query.next())
         return query.value( 0 ).value<Id>();
 
-    // TODO: there must be a way to optimize this via caching
     //
     // second pass (handles rich text)
     //
@@ -271,9 +260,9 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     // build a map of plainText names as keys and ids as values
     QMap<QString, Id> map;
     while ( query.next()) {
-        map[QTextEdit( query.value( 1 ).toString()).toPlainText()] = query.value( 0 ).value<Id>();
+        map[HTMLUtils::convertToPlainText( query.value( 1 ).toString())] = query.value( 0 ).value<Id>();
 
-        const QString ref( QTextEdit( query.value( 2 ).toString()).toPlainText());
+        const QString ref( HTMLUtils::convertToPlainText( query.value( 2 ).toString()));
         if ( !ref.isEmpty())
             map[ref] = query.value( 0 ).value<Id>();
     }

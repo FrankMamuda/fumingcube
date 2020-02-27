@@ -33,18 +33,16 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
     // set a model to treeView
     this->setModel( new QSortFilterProxyModel());
 
-    // TODO: move to class and delete?
-    this->filterModel()->setSourceModel( new ReagentModel());
+    // setup model
+    this->filterModel()->setSourceModel( this->reagentModel );
     this->filterModel()->setRecursiveFilteringEnabled( true );
     this->filterModel()->setSortCaseSensitivity( Qt::CaseInsensitive );
     this->filterModel()->setFilterCaseSensitivity( Qt::CaseInsensitive );
     this->setRootIndex( this->sourceModel()->invisibleRootItem()->index());
 
     // set html delegate
-    // TODO: delete me
-    auto *delegate = new ReagentDelegate();
-    delegate->setModel( this->filterModel());
-    this->setItemDelegate( delegate );
+    this->delegate->setModel( this->filterModel());
+    this->setItemDelegate( this->delegate );
 
     this->m_nodeHistory = new NodeHistory( this );
     ReagentView::connect( this, SIGNAL( clicked( const QModelIndex & )), this, SLOT( selectReagent( const QModelIndex & )));

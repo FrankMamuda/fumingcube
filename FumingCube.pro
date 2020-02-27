@@ -40,6 +40,7 @@ SOURCES += \
     extractiondialog.cpp \
     ghsbuilder.cpp \
     ghswidget.cpp \
+    htmlutils.cpp \
     imageutils.cpp \
     label.cpp \
     labeldialog.cpp \
@@ -52,6 +53,7 @@ SOURCES += \
     networkmanager.cpp \
     nfpabuilder.cpp \
     nfpawidget.cpp \
+    pixmaputils.cpp \
     propertydelegate.cpp \
     propertydialog.cpp \
     propertydock.cpp \
@@ -91,6 +93,7 @@ HEADERS += \
     ghsbuilder.h \
     ghspictograms.h \
     ghswidget.h \
+    htmlutils.h \
     imageutils.h \
     label.h \
     labeldialog.h \
@@ -103,6 +106,7 @@ HEADERS += \
     networkmanager.h \
     nfpabuilder.h \
     nfpawidget.h \
+    pixmaputils.h \
     propertydelegate.h \
     propertydialog.h \
     propertydock.h \

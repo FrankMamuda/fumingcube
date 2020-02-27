@@ -36,6 +36,8 @@
 #include "ghsbuilder.h"
 #include "extractiondialog.h"
 #include "imageutils.h"
+#include "pixmaputils.h"
+#include "htmlutils.h"
 #include <QBuffer>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -227,14 +229,9 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
                 // load image
                 const QPixmap pixmap( fileName );
-                if ( !pixmap.isNull()) {
-                    QByteArray bytes;
-                    QBuffer buffer( &bytes );
-                    buffer.open( QIODevice::WriteOnly );
-                    QPixmap( pixmap ).save( &buffer, "PNG" );
-                    buffer.close();
-                    return QPair<QString, QVariant>( QString(), qAsConst( bytes ));
-                }
+                if ( !pixmap.isNull())
+                    return QPair<QString, QVariant>( QString(), PixmapUtils::convertToData( pixmap ));
+
                 break;
             }
 
@@ -245,7 +242,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
     auto *pe( new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
     if ( pe->exec() == QDialog::Accepted ) {
-        const QString strippedName( TextEdit::stripHTML( pe->name()));
+        const QString strippedName( HTMLUtils::convertToPlainText( pe->name()));
 
         QTextEdit ed;
         ed.setText( strippedName );
@@ -309,7 +306,7 @@ void PropertyDock::on_addPropButton_clicked() {
 
     // get reagent name
     const QString reagentName(
-            QTextEdit( Reagent::instance()->name( Reagent::instance()->row( reagentId ))).toPlainText());
+            HTMLUtils::convertToPlainText( Reagent::instance()->name( Reagent::instance()->row( reagentId ))));
 
     // get UNFILTERED tags that have been set
     QSqlQuery query;
@@ -362,19 +359,12 @@ void PropertyDock::on_addPropButton_clicked() {
         // load image
         const QPixmap pixmap( fileName );
         if ( !pixmap.isNull()) {
-            QByteArray bytes;
-            QBuffer buffer( &bytes );
-            buffer.open( QIODevice::WriteOnly );
-            //QPixmap( pixmap ).scaledToWidth( qMin( PropertyDock::instance()->sectionSize( Property::PropertyData ), pixmap.width()), Qt::SmoothTransformation ).save( &buffer, "PNG" );
-            QPixmap( pixmap ).save( &buffer, "PNG" );
-            buffer.close();
-
             bool ok;
             const QString title(
                     QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",
                                            &ok ));
             if ( ok && !title.isEmpty())
-                this->addProperty( title, bytes, reagentId, PixmapTag );
+                this->addProperty( title, PixmapUtils::convertToData( pixmap ), reagentId, PixmapTag );
         }
     } )->setIcon( QIcon::fromTheme( "image" ));
 
@@ -433,10 +423,8 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                             data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
                                                      QString( "\\1%1\\2" ).arg(
                                                              Variable::string( "decimalSeparator" ))));
-                else {
-                    const QTextEdit edit( data.toString());
-                    QGuiApplication::clipboard()->setText( edit.toPlainText());
-                }
+                else
+                    QGuiApplication::clipboard()->setText( HTMLUtils::convertToPlainText( data.toString()));
 
                 QMimeData *propertyData = new QMimeData();
                 propertyData->setData( mimeTag, QString::number( static_cast<int>( tagId )).toLatin1().constData());
@@ -649,13 +637,7 @@ void PropertyDock::replacePixmap( const Row &row ) {
     // load image
     const QPixmap pixmap( fileName );
     if ( !pixmap.isNull()) {
-        QByteArray bytes;
-        QBuffer buffer( &bytes );
-        buffer.open( QIODevice::WriteOnly );
-        QPixmap( pixmap ).save( &buffer, "PNG" );
-        buffer.close();
-
-        Property::instance()->setPropertyData( row, bytes );
+        Property::instance()->setPropertyData( row, PixmapUtils::convertToData( fileName ));
         this->updateView();
     }
 }
@@ -791,11 +773,11 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         const Id parentId = Reagent::instance()->parentId( reagentId );
         if ( parentId != Id::Invalid ) {
             parents = QString( R"("%1", "%2")" ).arg(
-                    QTextEdit( Reagent::instance()->reference( parentId )).toPlainText(),
-                    QTextEdit( Reagent::instance()->name( reagentId )).toPlainText());
+                    HTMLUtils::convertToPlainText( Reagent::instance()->reference( parentId )),
+                    HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
             //qDebug() << "has parent";
         } else {
-            parents = QString( "\"%1\"" ).arg( QTextEdit( Reagent::instance()->reference( reagentId )).toPlainText());
+            parents = QString( "\"%1\"" ).arg( HTMLUtils::convertToPlainText( Reagent::instance()->reference( reagentId )));
         }
 
         // paste

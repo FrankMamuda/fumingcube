@@ -98,6 +98,7 @@ future/non-priority:
  - scripted property extractor with multiple data sources
  - store variables (for example F = molarMass( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
+ - custom search engines in xml
 
 misc/unsorted:
   - cut properties from reagents

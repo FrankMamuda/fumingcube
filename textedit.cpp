@@ -31,9 +31,11 @@
 #include <windows.h>
 #include <QtWin>
 #endif
+#include "htmlutils.h"
 #include "property.h"
 #include "propertydock.h"
 #include <QAbstractItemView>
+#include "pixmaputils.h"
 
 /**
  * @brief TextEdit::TextEdit
@@ -62,20 +64,13 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
     }
 
     if ( accepted ) {
-        QByteArray bytes;
-        QBuffer buffer( &bytes );
-
         // abort on invalid pixmap
         if ( out.isNull())
             return;
 
-        // convert image to png internally
-        buffer.open( QIODevice::WriteOnly );
-        out.save( &buffer, "PNG" );
-        buffer.close();
-
         // insert in textEdit
-        this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( out.width()).arg( out.height()).arg( bytes.toBase64().constData()));
+        this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" )
+                                       .arg( out.width()).arg( out.height()).arg( PixmapUtils::convertToData( out ).toBase64().constData()));
     }
 }
 
@@ -301,7 +296,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         QString html( source->html());
 
         if ( this->cleanHTML())
-            html = TextEdit::stripHTML( html );
+            html = HTMLUtils::simplify( html );
 
         // insert clean html
         this->insertHtml( html );
@@ -310,17 +305,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // nothing valid found
     QTextEdit::insertFromMimeData( source );
-}
-
-/**
- * @brief TextEdit::stripHTML
- * @return
- */
-QString TextEdit::stripHTML( const QString &input ) {
-    // FIXME: don't strip tables as well?
-    const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
-    //const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|div|span|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
-    return QString( input ).replace( re, "" );
 }
 
 /**

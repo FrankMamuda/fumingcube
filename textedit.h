@@ -41,7 +41,6 @@ public:
      * @return
      */
     [[nodiscard]] bool cleanHTML() const { return this->m_cleanHTML; }
-    static QString stripHTML( const QString &input );
 
     /**
      * @brief isSimpleEditor

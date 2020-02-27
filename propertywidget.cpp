@@ -23,6 +23,7 @@
 #include "tag.h"
 #include "property.h"
 #include "imageutils.h"
+#include "pixmaputils.h"
 
 /**
  * @brief PropertyWidget::PropertyWidget
@@ -175,7 +176,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QPixmap &pixmap ) : QWidg
 
     const bool darkMode = Variable::isEnabled( "darkMode" );
     this->label = new QLabel();
-    this->label->setPixmap( darkMode ? ImageUtils::invertPixmap( ImageUtils::autoCropPixmap( pixmap )) : pixmap );
+    this->label->setPixmap( darkMode ? PixmapUtils::invert( PixmapUtils::autoCrop( pixmap )) : pixmap );
     this->label->setFixedSize( pixmap.width(), pixmap.height());
     this->layout->addWidget( label );
     this->setLayout( this->layout );

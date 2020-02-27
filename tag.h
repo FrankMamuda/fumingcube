@@ -99,6 +99,8 @@ public:
     INITIALIZE_FIELD( qreal,    Scale,        scale )
     INITIALIZE_FIELD( QVariant, Script,       script )
 
+    [[nodiscard]] QStringList getFunctionList() const;
+
 public slots:
     void removeOrphanedEntries() override;
     void populate();

@@ -24,6 +24,7 @@
 #include "tag.h"
 #include <QMessageBox>
 #include <QKeyEvent>
+#include "htmlutils.h"
 #include "property.h"
 
 /**
@@ -110,7 +111,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
             if ( this->mode() == Edit ) {
                 Tag::instance()->setType( row, static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()));
                 Tag::instance()->setName( row, this->ui->nameEdit->text());
-                Tag::instance()->setUnits( row, TagDialog::captureBody( this->ui->unitsEdit->toHtml()));
+                Tag::instance()->setUnits( row, HTMLUtils::captureBody( this->ui->unitsEdit->toHtml()));
                 Tag::instance()->setMinValue( row, this->ui->minEdit->text());
                 Tag::instance()->setMaxValue( row, this->ui->maxEdit->text());
                 Tag::instance()->setDefaultValue( row, this->ui->valueEdit->text());
@@ -123,7 +124,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                 Tag::instance()->add(
                             this->ui->nameEdit->text(),
                             static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()),
-                            TagDialog::captureBody( this->ui->unitsEdit->toHtml()),
+                            HTMLUtils::captureBody( this->ui->unitsEdit->toHtml()),
                             this->ui->minEdit->text(),
                             this->ui->maxEdit->text(),
                             this->ui->valueEdit->text(),
@@ -145,19 +146,6 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
  */
 TagDialog::~TagDialog() {
     delete this->ui;
-}
-
-/**
- * @brief TagDialog::captureBody
- * @param input
- * @return
- */
-QString TagDialog::captureBody( const QString &input ) {
-    // TODO: make global static with extended options to strip parts of html
-    const QString text( QString( input ).remove( "\n" ));
-    const QRegularExpression re( "<body.+?(?=<p)<p.+?(?=>)>(.+?)(?=<\\/p)" );
-    const QRegularExpressionMatch match = re.match( text );
-    return ( match.hasMatch()) ? match.captured( 1 ).remove( "<br>" ).remove( "<br />" ).remove( "<br/>" ) : text;
 }
 
 /**
@@ -230,7 +218,7 @@ void TagDialog::on_actionEdit_triggered() {
 
     this->ui->typeCombo->setCurrentIndex( static_cast<int>( Tag::instance()->type( row )));
     this->ui->nameEdit->setText( Tag::instance()->name( row ));
-    this->ui->unitsEdit->setHtml( TagDialog::captureBody( Tag::instance()->units( row )).replace( " ","&nbsp;" ));
+    this->ui->unitsEdit->setHtml( HTMLUtils::captureBody( Tag::instance()->units( row )).replace( " ","&nbsp;" ));
     this->ui->minEdit->setText( Tag::instance()->minValue( row ).toString());
     this->ui->maxEdit->setText( Tag::instance()->maxValue( row ).toString());
     this->ui->valueEdit->setText( Tag::instance()->defaultValue( row ).toString());

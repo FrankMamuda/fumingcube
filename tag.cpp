@@ -23,6 +23,8 @@
 #include "field.h"
 #include "database.h"
 
+#include <QSqlQuery>
+
 /**
  * @brief Tag::Tag
  */
@@ -55,7 +57,28 @@ Row Tag::add( const QString &name, const Types &type, const QString &units, cons
     return Table::add(
             QVariantList() << Database_::null << name << static_cast<int>( type ) << units << min.toByteArray()
                            << max.toByteArray() << value.toByteArray() << precision << function << scale
-                           << QByteArray( script.toStringList().join( ";" ).toUtf8().constData()));
+                << QByteArray( script.toStringList().join( ";" ).toUtf8().constData()));
+}
+
+/**
+ * @brief Tag::getFunctionList
+ * @return
+ */
+QStringList Tag::getFunctionList() const {
+    // NOTE: this is not very expensive so there is no need to optimize this yet
+    QStringList functions;
+    QSqlQuery query;
+    query.exec( QString( "select %1, %2 from %3 where %2 not null" )
+                        .arg( Tag::instance()->fieldName( Tag::ID ),
+                              Tag::instance()->fieldName( Tag::Function ),
+                              Tag::instance()->tableName()));
+    while ( query.next()) {
+        const QString functionName( query.value( 1 ).toString());
+        if ( !functionName.isEmpty())
+            functions << functionName;
+    }
+
+    return functions;
 }
 
 /**

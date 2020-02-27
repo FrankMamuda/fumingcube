@@ -24,6 +24,7 @@
 #include "label.h"
 #include "labeldock.h"
 #include "reagentdock.h"
+#include "htmlutils.h"
 #include <QDebug>
 #include <QTextEdit>
 
@@ -76,12 +77,6 @@ QVariant ReagentModel::data( const QModelIndex &index, int role ) const {
         return item->data( ReagentModel::Pixmap ).value<QPixmap>();
     }
 
-    // for search
-    /*if ( index.isValid() && role == Qt::DisplayRole ) {
-        QStandardItem *item( this->itemFromIndex( index ));
-        return QTextEdit( item->text()).toPlainText();
-    }*/
-
     return QStandardItemModel::data( index, role );
 }
 
@@ -106,7 +101,7 @@ void ReagentModel::setupModelData() {
         const Id reagentId = Reagent::instance()->id( row );
         const QString generatedName(
                 ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
-        auto *reagent( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
+        auto *reagent( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
         reagent->setData( generatedName, HTML );
@@ -202,7 +197,7 @@ void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *par
                                                                                        Reagent::instance()->reference(
                                                                                                id ))
                                                          : Reagent::instance()->name( id ));
-    auto *item( new QStandardItem( QTextEdit( generatedName ).toPlainText()));
+    auto *item( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
     item->setData( generatedName, HTML );

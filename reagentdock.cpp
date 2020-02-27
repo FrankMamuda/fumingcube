@@ -38,6 +38,7 @@
 #include "extractiondialog.h"
 #include "label.h"
 #include "labelset.h"
+#include "htmlutils.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -170,8 +171,8 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
 
     // check plainText names
     while ( query.next()) {
-        const QString name_( QTextEdit( query.value( 0 ).toString()).toPlainText());
-        const QString reference_( QTextEdit( query.value( 1 ).toString()).toPlainText());
+        const QString name_( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
+        const QString reference_( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
 
         if ( !QString::compare( name, name_, Qt::CaseInsensitive ) ||
              !QString::compare( name, reference_, Qt::CaseInsensitive ) ||
@@ -379,8 +380,8 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
         if ( context ) {
             const auto id = item->data( ReagentModel::ID ).value<Id>();
-            const QString reagentName( QTextEdit( Reagent::instance()->name(
-                    Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))).toPlainText());
+            const QString reagentName( HTMLUtils::convertToPlainText( Reagent::instance()->name(
+                    Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))));
 
             auto simpleSmallIcon = []( const QString &string ) {
                 QPixmap pixmap( 16, 16 );
@@ -599,7 +600,7 @@ void ReagentDock::on_editButton_clicked() {
 
             // rename without resetting the model
             const QString generatedName( ReagentModel::generateName( name ));
-            item->setText( QTextEdit( generatedName ).toPlainText());
+            item->setText( HTMLUtils::convertToPlainText( generatedName ));
             item->setData( generatedName, ReagentModel::HTML );
         }
     } else {
@@ -616,7 +617,7 @@ void ReagentDock::on_editButton_clicked() {
 
         // rename without resetting the model
         const QString generatedName( ReagentModel::generateName( name, reference ));
-        item->setText( QTextEdit( generatedName ).toPlainText());
+        item->setText( HTMLUtils::convertToPlainText( generatedName ));
         item->setData( generatedName, ReagentModel::HTML );
     }
 }

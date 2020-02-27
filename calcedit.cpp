@@ -26,6 +26,7 @@
 #include "mainwindow.h"
 #include "tag.h"
 #include "reagent.h"
+#include "htmlutils.h"
 #include <QComboBox>
 #include <QSqlQuery>
 #include <QStringListModel>
@@ -36,19 +37,7 @@
  */
 bool CalcEdit::completeCommand() {
     // NOTE: lots of duplicate code, but it works for now
-    // TODO: make a global static
-    QStringList functions;
-    QSqlQuery query;
-    query.exec( QString( "select %1, %2 from %3 where %2 not null" )
-                        .arg( Tag::instance()->fieldName( Tag::ID ),
-                              Tag::instance()->fieldName( Tag::Function ),
-                              Tag::instance()->tableName()));
-    while ( query.next()) {
-        const QString functionName( query.value( 1 ).toString());
-        if ( !functionName.isEmpty())
-            functions << functionName;
-    }
-
+    const QStringList functions( Tag::instance()->getFunctionList());
     const QString functionExpression( functions.join( "|" ));
     QString left( this->text().left( this->cursorPosition()));
     const QString mid( this->text().mid( this->cursorPosition(), this->text().length() - left.length()));
@@ -116,6 +105,7 @@ bool CalcEdit::completeCommand() {
         if ( match.hasMatch()/* && mid.contains( QRegularExpression( "^\\\"" ))*/) {
             const QString captured( match.captured( 2 ));
             const QString parent( match.captured( 1 ));
+            QSqlQuery query;
 
             if ( captured.isEmpty() && parent.isEmpty())
                 return true;
@@ -133,8 +123,8 @@ bool CalcEdit::completeCommand() {
 
                 // append plainText names
                 while ( query.next()) {
-                    const QString name( QTextEdit( query.value( 0 ).toString()).toPlainText());
-                    const QString reference( QTextEdit( query.value( 1 ).toString()).toPlainText());
+                    const QString name( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
+                    const QString reference( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
 
                     if ( !QString::compare( name, parent, Qt::CaseInsensitive ) ||
                          !QString::compare( reference, parent, Qt::CaseInsensitive )) {
@@ -158,8 +148,8 @@ bool CalcEdit::completeCommand() {
 
             // append plainText names
             while ( query.next()) {
-                const QString name( QTextEdit( query.value( 0 ).toString()).toPlainText());
-                const QString reference( QTextEdit( query.value( 1 ).toString()).toPlainText());
+                const QString name( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
+                const QString reference( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
 
                 if ( name.startsWith( captured, Qt::CaseInsensitive ))
                     reagents << name;

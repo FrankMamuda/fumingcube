@@ -29,6 +29,7 @@
 #include "labeldock.h"
 #include "label.h"
 #include "tagdialog.h"
+#include "htmlutils.h"
 
 /*
  * Reagent reference map
@@ -159,7 +160,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     // focus on the name editor to begin with
     this->ui->nameEdit->setFocus();
 
-    // TODO:
+    // set completer
     this->ui->nameEdit->setCompleter( completer );
 
     if ( mode == EditMode ) {
@@ -203,8 +204,7 @@ ReagentDialog::~ReagentDialog() {
  * @return
  */
 QString ReagentDialog::name() const {
-    // TODO: for now
-    return TagDialog::captureBody( this->ui->nameEdit->toHtml());
+    return HTMLUtils::captureBody( this->ui->nameEdit->toHtml());
 }
 
 /**
@@ -212,8 +212,7 @@ QString ReagentDialog::name() const {
  * @return
  */
 QString ReagentDialog::reference() const {
-    // TODO: for now
-    return TagDialog::captureBody( this->ui->referenceEdit->toHtml());
+    return HTMLUtils::captureBody( this->ui->referenceEdit->toHtml());
 }
 
 /**
