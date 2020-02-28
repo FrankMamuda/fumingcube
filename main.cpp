@@ -212,6 +212,13 @@ int main( int argc, char *argv[] ) {
                                                          + QDateTime::currentDateTime()
                                                                  .toString( "yyyyMMdd_hhmmss" ) +
                                                          ".db" );
+        // reset vars
+        Variable::reset( "calculator/commands" );
+        Variable::reset( "calculator/history" );
+        Variable::reset( "calculator/ans" );
+        Variable::reset( "reagentDock/selection" );
+        Variable::reset( "reagentDock/openNodes" );
+        Variable::reset( "propertyDock/hiddenTags" );
 
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));
