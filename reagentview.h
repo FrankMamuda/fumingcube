@@ -96,6 +96,7 @@ public slots:
 
 protected:
     void keyReleaseEvent( QKeyEvent *event ) override;
+    void mouseReleaseEvent( QMouseEvent *event ) override;
 
 private:
     NodeHistory *m_nodeHistory;

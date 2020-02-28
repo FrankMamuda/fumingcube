@@ -22,6 +22,7 @@
 #include "charactermap.h"
 #include "editortoolbar.h"
 #include "ghspictograms.h"
+#include "pixmaputils.h"
 #include <QBitmap>
 #include <QColorDialog>
 #include <QTextCharFormat>
@@ -161,14 +162,8 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
             this->actionImage = this->addAction( "" );
             this->actionImage->setIcon( QIcon::fromTheme( "image" ));
             QAction::connect( this->actionImage, &QAction::triggered, [ this ]() {
-                const QString fileName( QFileDialog::getOpenFileName( this, EditorToolbar::tr( "Open Image" ), "",
-                                                                      EditorToolbar::tr( "Images (*.png *.jpg)" )));
-
-                if ( fileName.isEmpty())
-                    return;
-
                 // load image
-                const QPixmap pixmap( fileName );
+                const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
                 if ( !pixmap.isNull())
                     this->editor()->insertPixmap( pixmap );
             } );

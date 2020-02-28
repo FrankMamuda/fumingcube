@@ -102,11 +102,6 @@ future/non-priority:
 
 misc/unsorted:
   - cut properties from reagents
-  - Bad behaviour:
-    right click on reagent, change label
-    (the property view still displays the last selected reagent)
-    add property
-    (the property is added to the reagent selected with the right click, not the one displayed in property screen)
   - allow to display treeView in multiple columns
   - ability to hide some reagents (like props)
   - lock icon/button in reagent dialog to freeze reference name
@@ -192,6 +187,7 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
+        ReagentDock::instance()->view()->nodeHistory()->saveHistory();
         PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();
         XMLTools::write();

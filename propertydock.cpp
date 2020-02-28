@@ -221,14 +221,8 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
             }
 
             case Tag::Formula: {
-                // FIXME: dup code
-                const QString fileName(
-                QFileDialog::getOpenFileName( PropertyDock::instance(), PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
-                if ( fileName.isEmpty())
-                    break;
-
                 // load image
-                const QPixmap pixmap( fileName );
+                const QPixmap pixmap( PixmapUtils::getOpenPixmap( PropertyDock::instance()));
                 if ( !pixmap.isNull())
                     return QPair<QString, QVariant>( QString(), PixmapUtils::convertToData( pixmap ));
 
@@ -351,13 +345,8 @@ void PropertyDock::on_addPropButton_clicked() {
 
     // add an option to embed images
     menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( reagentName ), this, [ this, reagentId ]() {
-        const QString fileName(
-                QFileDialog::getOpenFileName( this, PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
-        if ( fileName.isEmpty())
-            return;
-
         // load image
-        const QPixmap pixmap( fileName );
+        const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
         if ( !pixmap.isNull()) {
             bool ok;
             const QString title(
@@ -628,16 +617,10 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
  * @param row
  */
 void PropertyDock::replacePixmap( const Row &row ) {
-    // FIXME: dup code
-    const QString fileName(
-            QFileDialog::getOpenFileName( this, PropertyDock::tr( "Open Image" ), "", PropertyDock::tr( "Images (*.png *.jpg)" )));
-    if ( fileName.isEmpty())
-        return;
-
     // load image
-    const QPixmap pixmap( fileName );
+    const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
     if ( !pixmap.isNull()) {
-        Property::instance()->setPropertyData( row, PixmapUtils::convertToData( fileName ));
+        Property::instance()->setPropertyData( row, PixmapUtils::convertToData( pixmap ));
         this->updateView();
     }
 }

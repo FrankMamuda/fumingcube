@@ -78,6 +78,8 @@ public slots:
 private:
     explicit Label();
     mutable QMap<QString, QPixmap> cache;
+    static constexpr const int Width = 12;
+    static constexpr const int Height = 8;
 };
 
 // declare enums

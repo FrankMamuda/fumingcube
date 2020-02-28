@@ -20,7 +20,6 @@
  * includes
  */
 #include "htmlutils.h"
-
 #include <QRegularExpression>
 
 /**
@@ -54,7 +53,7 @@ QString HTMLUtils::convertToPlainText( const QString &html ) {
  * @return
  */
 QString HTMLUtils::simplify( const QString &html ) {
-    // FIXME: don't strip tables as well?
+    // TODO: don't strip tables as well?
     const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
     return QString( html ).replace( re, "" );
 }

@@ -23,6 +23,7 @@
 #include "reagentmodel.h"
 #include "reagentview.h"
 #include "variable.h"
+#include "listutils.h"
 #include <QStandardItem>
 
 /**
@@ -49,10 +50,6 @@ NodeHistory::NodeHistory( QTreeView *parent ) : m_treeParent( parent ) {
             this->openNodes << id;
         else
             this->openNodes.removeAll( id );
-
-
-        // FIXME: save on exit
-        this->saveHistory();
     };
 
     QTreeView::connect( this->treeParent(), &QTreeView::expanded, [ saveNodeState ]( const QModelIndex &index ) {
@@ -107,24 +104,13 @@ void NodeHistory::restoreNodeState() {
  * @brief NodeHistory::saveHistory
  */
 void NodeHistory::saveHistory() {
-    QStringList list;
-    for ( const Id &id : qAsConst( this->openNodes ))
-        list << QString::number( static_cast<int>( id ));
-    Variable::setValue( "reagentDock/openNodes", list );
+    Variable::setValue( "reagentDock/openNodes", ListUtils::toStringList<Id>( qAsConst( this->openNodes )));
 }
 
 /**
  * @brief NodeHistory::loadHistory
  */
 void NodeHistory::loadHistory() {
-    // TODO: add global static QStringList->QList<Id>
-    const auto list( Variable::value<QStringList>( "reagentDock/openNodes" ));
-    for ( const QString &n : list ) {
-        bool ok;
-        const auto id = static_cast<Id>( n.toInt( &ok ));
-        if ( ok )
-            this->openNodes << id;
-    }
-
+    this->openNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/openNodes" ));
     this->restoreNodeState();
 }

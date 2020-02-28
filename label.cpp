@@ -68,12 +68,12 @@ QPixmap Label::pixmap( const QColor &colour ) const {
     if ( this->cache.contains( colour.name()))
         return this->cache[colour.name()];
 
-    QPixmap pixmap( 12, 8 );
+    QPixmap pixmap( Label::Width, Label::Height );
     pixmap.fill( Qt::transparent );
     QPainter painter( &pixmap );
     painter.setPen( Qt::transparent );
     painter.setBrush( colour );// QColor::fromRgb( colour.red(), colour.green(), colour.blue(), 128 ));
-    painter.drawRoundedRect( QRect( 0, 0, 12, 8 ), 3, 3 );
+    painter.drawRoundedRect( QRect( 0, 0, Label::Width, Label::Height ), 3, 3 );
     this->cache[colour.name()] = pixmap;
     return pixmap;
 }
@@ -84,6 +84,7 @@ QPixmap Label::pixmap( const QColor &colour ) const {
  * @return
  */
 QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
+
     if ( colourList.count() <= 1 )
         return this->pixmap( colourList.isEmpty() ? QColor() : colourList.first());
 
@@ -94,14 +95,13 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
     if ( this->cache.contains( qAsConst( name )))
         return this->cache[qAsConst( name )];
 
-    // FIXME: hardcoded
-    QPixmap pixmap( 12, 8 );
+    QPixmap pixmap( Label::Width, Label::Height );
     pixmap.fill( Qt::transparent );
     QPainter painter( &pixmap );
     painter.setPen( Qt::transparent );
 
     if ( colourList.count() > 4 ) {
-        QLinearGradient gradient( 0, 0, 12, 8 );
+        QLinearGradient gradient( 0, 0, Label::Width, Label::Height );
         gradient.setColorAt( 0.0, Qt::red );
         gradient.setColorAt( 1.0 / 6.0, QColor( 255, 100, 0 ));
         gradient.setColorAt( 2.0 / 6.0, Qt::yellow );
@@ -110,7 +110,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
         gradient.setColorAt( 5.0 / 6.0, Qt::blue );
         gradient.setColorAt( 1.0, Qt::magenta );
         painter.setBrush( QBrush( gradient ));
-        painter.drawRoundedRect( QRect( 0, 0, 12, 8 ), 3, 3 );
+        painter.drawRoundedRect( QRect( 0, 0, Label::Width, Label::Height ), 3, 3 );
     } else {
         const QMap<int, int> sizes {{ 2, 6 },
                                     { 3, 4 },

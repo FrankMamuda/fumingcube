@@ -100,6 +100,7 @@ HEADERS += \
     labeldock.h \
     labelselector.h \
     labelset.h \
+    listutils.h \
     mainwindow.h \
     database.h \
     field.h \

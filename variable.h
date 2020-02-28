@@ -339,7 +339,6 @@ public slots:
      * @param widget
      * @return
      */
-    // FIXME: clazy recursion?
     QString bind( const QString &key, QWidget *widget ) { return this->bind( key, qobject_cast<QObject *>( widget )); }
     void unbind( const QString &key, QObject *object = nullptr );
 

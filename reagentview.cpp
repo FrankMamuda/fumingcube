@@ -24,6 +24,7 @@
 #include "reagentview.h"
 #include "reagent.h"
 #include "reagentdelegate.h"
+#include "reagentdock.h"
 
 /**
  * @brief ReagentView::ReagentView
@@ -137,4 +138,19 @@ void ReagentView::keyReleaseEvent( QKeyEvent *event ) {
     }
 
     QTreeView::keyReleaseEvent( event );
+}
+
+/**
+ * @brief ReagentView::mouseReleaseEvent
+ * @param event
+ */
+void ReagentView::mouseReleaseEvent( QMouseEvent *event ) {
+    if ( event->button() == Qt::RightButton ) {
+        const QModelIndex index( this->indexAt( event->pos()));
+
+        if ( index.isValid())
+            this->selectReagent( index );
+    }
+
+    QTreeView::mouseReleaseEvent( event );
 }

@@ -248,7 +248,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 }
 
                 if ( isDuplicate ) {
-                    // TODO: add hint?
+                    // TODO: add tooltip?
                     html.prepend( "<s>" );
                     html.append( "</s>" );
                 }

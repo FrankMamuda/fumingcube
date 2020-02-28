@@ -39,6 +39,7 @@
 #include "structurebrowser.h"
 #include "pixmaputils.h"
 #include "htmlutils.h"
+#include "listutils.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
@@ -511,9 +512,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
             file.close();
         }
 
-        QList<int> cidListInt;
-        for ( const QString &cid : qAsConst( this->cidList ))
-            cidListInt << cid.toInt();
+        QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( this->cidList )));
         cidListInt.removeAll( 0 );
         std::sort( cidListInt.begin(), cidListInt.end());
         cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
@@ -577,9 +576,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     this->cidList = QString( file.readAll()).split( "\n" );
                     file.close();
 
-                    QList<int> cidListInt;
-                    for ( const QString &cid : qAsConst( this->cidList ))
-                        cidListInt << cid.toInt();
+                    QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( this->cidList )));
                     cidListInt.removeAll( 0 );
                     std::sort( cidListInt.begin(), cidListInt.end());
                     cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());

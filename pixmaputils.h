@@ -47,10 +47,11 @@ public:
         return pu;
     }
 
-    static QPixmap autoCrop( const QPixmap &pixmap, const QColor &key = Qt::white );
-    [[maybe_unused]] static QPixmap brighten( const QPixmap &pixmap, int factor = 150 );
-    static QPixmap invert( const QPixmap &pixmap );
-    static QByteArray convertToData( const QPixmap &pixmap, const QString &key = QString());
+    [[nodiscard]] static QPixmap autoCrop( const QPixmap &pixmap, const QColor &key = Qt::white );
+    [[maybe_unused]][[nodiscard]] static QPixmap brighten( const QPixmap &pixmap, int factor = 150 );
+    [[nodiscard]] static QPixmap invert( const QPixmap &pixmap );
+    [[nodiscard]] static QByteArray convertToData( const QPixmap &pixmap, const QString &key = QString());
+    [[nodiscard]] static QPixmap getOpenPixmap( QWidget *context );
 
 private:
     explicit PixmapUtils() {}

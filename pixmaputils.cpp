@@ -21,6 +21,7 @@
  */
 #include "pixmaputils.h"
 #include <QBuffer>
+#include <QFileDialog>
 
 /**
  * @brief PixmapUtils::autoCrop
@@ -191,4 +192,17 @@ QByteArray PixmapUtils::convertToData( const QPixmap &pixmap, const QString &key
         PixmapUtils::instance()->cache[key] = data;
 
     return data;
+}
+
+/**
+ * @brief PixmapUtils::getOpenPixmap
+ * @param context
+ * @return
+ */
+QPixmap PixmapUtils::getOpenPixmap( QWidget *context ) {
+    const QString fileName( QFileDialog::getOpenFileName( context, QWidget::tr( "Open Image" ), "", QWidget::tr( "Images (*.png *.jpg)" )));
+    if ( fileName.isEmpty())
+        return QPixmap();
+
+    return QPixmap( fileName );
 }
