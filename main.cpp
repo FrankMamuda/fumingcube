@@ -107,6 +107,10 @@ misc/unsorted:
   - lock icon/button in reagent dialog to freeze reference name
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
+  - disallow some tokens in batch/reagent names, such as slashes and paranthesis,
+    quotes, etc.
+  - update CMakeLists
+  - diable edit button when multiple tags are selected
 */
 
 /**
