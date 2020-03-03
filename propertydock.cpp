@@ -38,6 +38,7 @@
 #include "imageutils.h"
 #include "pixmaputils.h"
 #include "htmlutils.h"
+#include "textutils.h"
 #include <QBuffer>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -338,13 +339,13 @@ void PropertyDock::on_addPropButton_clicked() {
     subMenu->setIcon( QIcon::fromTheme( "add" ));
 
     // add an option to add custom properties
-    menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( reagentName ), this, [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( TextUtils::elidedString( reagentName )), this, [ this, reagentId ]() {
         const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, Id::Invalid ));
         this->addProperty( values.first, values.second, reagentId );
     } )->setIcon( QIcon::fromTheme( "star" ));
 
     // add an option to embed images
-    menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( reagentName ), this, [ this, reagentId ]() {
+    menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( TextUtils::elidedString( reagentName )), this, [ this, reagentId ]() {
         // load image
         const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
         if ( !pixmap.isNull()) {

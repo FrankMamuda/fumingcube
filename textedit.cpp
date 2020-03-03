@@ -156,6 +156,13 @@ bool TextEdit::eventFilter(QObject *object, QEvent *event) {
         }
     }
 
+    if ( event->type() == QEvent::FocusIn ) {
+        QTextCursor cursor( this->textCursor());
+        cursor.movePosition( QTextCursor::End );
+        this->setTextCursor( cursor );
+    }
+
+
     return QTextEdit::eventFilter( object, event );
 }
 

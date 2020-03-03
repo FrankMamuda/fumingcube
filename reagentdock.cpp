@@ -39,6 +39,7 @@
 #include "label.h"
 #include "labelset.h"
 #include "htmlutils.h"
+#include "textutils.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -327,7 +328,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
-        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( name ), this,
+        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
                          std::bind( addReagent,
                                     ( parentId == Id::Invalid ) ?
                                         static_cast<Id>( item->data( ReagentModel::ID ).toInt())
@@ -515,7 +516,7 @@ void ReagentDock::on_removeButton_clicked() {
         menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
                                   "Remove reagent '%1' and its batches" :
                                   "Remove batch '%1'"
-        ).arg( item->text()), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
+        ).arg( TextUtils::elidedString( item->text())), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
             removeReagentsAndBatches( item );
 
             // remove items without resetting model

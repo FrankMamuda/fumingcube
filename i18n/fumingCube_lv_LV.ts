@@ -677,27 +677,27 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="244"/>
+        <location filename="../propertydock.cpp" line="245"/>
         <source>Cannot add property</source>
         <translation>Nebija iespējams pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="245"/>
+        <location filename="../propertydock.cpp" line="246"/>
         <source>Property missing name</source>
         <translation>Nav izvēlēts īpašības nosaukums</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="318"/>
+        <location filename="../propertydock.cpp" line="319"/>
         <source>Add property</source>
         <translation>Pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="341"/>
+        <location filename="../propertydock.cpp" line="342"/>
         <source>Add custom property to &apos;%1&apos;</source>
         <translation>Pievienot nestandarta īpašību &apos;%1&apos;  reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="347"/>
+        <location filename="../propertydock.cpp" line="348"/>
         <source>Add image to &apos;%1&apos;</source>
         <translation>Pievienot attēlu &apos;%1&apos; reaģentam</translation>
     </message>
@@ -710,93 +710,93 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Attēli (*.png *.jpg)</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="353"/>
+        <location filename="../propertydock.cpp" line="354"/>
         <source>Set title</source>
         <translation>Pievienot nosaukumu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="353"/>
+        <location filename="../propertydock.cpp" line="354"/>
         <source>Title:</source>
         <translation>Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="361"/>
+        <location filename="../propertydock.cpp" line="362"/>
         <source>Get properties from the internet</source>
         <translation>Izgūt īpašības no interneta</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="405"/>
+        <location filename="../propertydock.cpp" line="406"/>
         <source>Copy</source>
         <translation>Kopēt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="429"/>
+        <location filename="../propertydock.cpp" line="430"/>
         <source>View</source>
         <translation>Parādīt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="439"/>
+        <location filename="../propertydock.cpp" line="440"/>
         <source>Replace</source>
         <translation>Aizstāt ar citu attēlu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="445"/>
+        <location filename="../propertydock.cpp" line="446"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="459"/>
+        <location filename="../propertydock.cpp" line="460"/>
         <source>Paste to calculator</source>
         <translation>Ielīmēt kalkulatorā</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="461"/>
+        <location filename="../propertydock.cpp" line="462"/>
         <source>Reference</source>
         <translation>Atsauci</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="464"/>
+        <location filename="../propertydock.cpp" line="465"/>
         <source>Value</source>
         <translation>Vērtību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="467"/>
+        <location filename="../propertydock.cpp" line="468"/>
         <source>Hide property &quot;%1&quot;</source>
         <translation>Slēpt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="476"/>
+        <location filename="../propertydock.cpp" line="477"/>
         <source>Show all properties</source>
         <translation>Rādīt visas īpašības</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="503"/>
+        <location filename="../propertydock.cpp" line="504"/>
         <source>Paste property &quot;%1&quot;</source>
         <translation>Ielīmēt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="548"/>
-        <location filename="../propertydock.cpp" line="552"/>
+        <location filename="../propertydock.cpp" line="549"/>
+        <location filename="../propertydock.cpp" line="553"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="548"/>
+        <location filename="../propertydock.cpp" line="549"/>
         <source>Remove selected property?</source>
         <translation>Dzēst izvēlēto īpašību?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="553"/>
+        <location filename="../propertydock.cpp" line="554"/>
         <source>Remove %1 properties?</source>
         <translation>Dzēst %1 īpašību(-as)?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="714"/>
+        <location filename="../propertydock.cpp" line="715"/>
         <source>Duplicate property</source>
         <translation>Īpašība jau eksistē</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="715"/>
+        <location filename="../propertydock.cpp" line="716"/>
         <source>Reagent already has this property, add regardless?</source>
         <translation>Reaģentam šobrīd jau ir šī īpašība, pievienot vēlreiz?</translation>
     </message>
@@ -894,12 +894,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="250"/>
+        <location filename="../main.cpp" line="253"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="251"/>
+        <location filename="../main.cpp" line="254"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -967,7 +967,7 @@ Please restart the application</source>
         <translation>Izgūt reaģenta īpašības pēc pievienošanas</translation>
     </message>
     <message>
-        <location filename="../reagentdialog.cpp" line="167"/>
+        <location filename="../reagentdialog.cpp" line="168"/>
         <source>Edit reagent</source>
         <translation>Labot reaģentu</translation>
     </message>
@@ -986,7 +986,7 @@ Please restart the application</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="117"/>
+        <location filename="../reagentdock.cpp" line="118"/>
         <source>Ctrl+F</source>
         <comment>Find</comment>
         <translation></translation>
@@ -996,7 +996,7 @@ Please restart the application</source>
         <translation type="vanished">Nebija iespējams pārsaukt reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="313"/>
+        <location filename="../reagentdock.cpp" line="314"/>
         <source>Cannot add reagent</source>
         <translation>Nebija iespējams pievienot reaģentu</translation>
     </message>
@@ -1009,118 +1009,118 @@ Please restart the application</source>
         <translation type="vanished">Reaģents &apos;%1&apos; jau eksistē</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="181"/>
+        <location filename="../reagentdock.cpp" line="182"/>
         <source>Cannot add or rename reagent</source>
         <translation>Nebija iespējams pievienot vai pārsaukt reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="182"/>
+        <location filename="../reagentdock.cpp" line="183"/>
         <source>Name or reference already exists</source>
         <translation>Nosaukums vai atsauce jau eksistē</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="207"/>
+        <location filename="../reagentdock.cpp" line="208"/>
         <source>Cannot add or rename batch</source>
         <translation>Nebija iespējams pievienot vai pārsaukt sēriju</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="208"/>
+        <location filename="../reagentdock.cpp" line="209"/>
         <source>Batch &apos;%1&apos; already exists for this reagent</source>
         <translation>Sērija &apos;%1&apos; jau eksistē šim reaģentam</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="243"/>
+        <location filename="../reagentdock.cpp" line="244"/>
         <source>Add batch</source>
         <translation>Pievienot sēriju</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="243"/>
-        <location filename="../reagentdock.cpp" line="592"/>
+        <location filename="../reagentdock.cpp" line="244"/>
+        <location filename="../reagentdock.cpp" line="593"/>
         <source>Name:</source>
         <translation>Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="314"/>
+        <location filename="../reagentdock.cpp" line="315"/>
         <source>Batch</source>
         <translation>Sērija</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="314"/>
+        <location filename="../reagentdock.cpp" line="315"/>
         <source>Reagent</source>
         <translation>Reaģents</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="315"/>
+        <location filename="../reagentdock.cpp" line="316"/>
         <source> name is empty</source>
         <translation> nosaukums ir tukšs</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="321"/>
+        <location filename="../reagentdock.cpp" line="322"/>
         <source>Add new reagent</source>
         <translation>Pievienot jaunu reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="330"/>
+        <location filename="../reagentdock.cpp" line="331"/>
         <source>Add new batch to reagent &quot;%1&quot;</source>
         <translation>Pievienot sēriju &quot;%1&quot; reaģentam</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="337"/>
+        <location filename="../reagentdock.cpp" line="338"/>
         <source>Copy name</source>
         <translation>Kopēt nosaukumu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="342"/>
+        <location filename="../reagentdock.cpp" line="343"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="397"/>
+        <location filename="../reagentdock.cpp" line="398"/>
         <source>Search online</source>
         <translation>Meklēt tīmeklī</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="402"/>
+        <location filename="../reagentdock.cpp" line="403"/>
         <source>Google</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="405"/>
+        <location filename="../reagentdock.cpp" line="406"/>
         <source>DuckDuckGo</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="408"/>
+        <location filename="../reagentdock.cpp" line="409"/>
         <source>Wikipedia</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="411"/>
+        <location filename="../reagentdock.cpp" line="412"/>
         <source>Alfa Aesar</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="416"/>
+        <location filename="../reagentdock.cpp" line="417"/>
         <source>Acros</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="421"/>
+        <location filename="../reagentdock.cpp" line="422"/>
         <source>Sigma Aldrich</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="425"/>
+        <location filename="../reagentdock.cpp" line="426"/>
         <source>fluorochem</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="489"/>
+        <location filename="../reagentdock.cpp" line="490"/>
         <source>Remove %1 selected reagents and their batches</source>
         <translation>Dzēst %1 izvēlētu(-os) reaģentus un tā/to sērijas</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="592"/>
+        <location filename="../reagentdock.cpp" line="593"/>
         <source>Rename batch</source>
         <translation>Pārsaukt sēriju</translation>
     </message>
@@ -1676,20 +1676,20 @@ Please restart the application</source>
         <translation type="vanished">Ievietot simbolu</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="196"/>
-        <location filename="../tagdialog.cpp" line="199"/>
+        <location filename="../tagdialog.cpp" line="213"/>
+        <location filename="../tagdialog.cpp" line="216"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="196"/>
+        <location filename="../tagdialog.cpp" line="213"/>
         <source>Remove &apos;%1&apos; tag?
 This will irreversibly remove all associated properties.</source>
         <translation>Dzēst &apos;%1&apos; raksturlielumu?
 Šī darbība neatgriezeniski izdzēsīs arī visas ar raksturlielumu saistītās īpašības.</translation>
     </message>
     <message>
-        <location filename="../tagdialog.cpp" line="199"/>
+        <location filename="../tagdialog.cpp" line="216"/>
         <source>Remove %1 tags?
 This will irreversibly remove all associated properties.</source>
         <translation>Dzēst &apos;%1&apos; raksturlielumu(-us)?

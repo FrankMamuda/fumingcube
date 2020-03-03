@@ -16,6 +16,7 @@
       <file alias="16x16/info.png">icons/dark/16x16/info.png</file>
       <file alias="16x16/left.png">icons/dark/16x16/left.png</file>
       <file alias="16x16/lock.png">icons/dark/16x16/lock.png</file>
+	  <file alias="16x16/unlock.png">icons/dark/16x16/unlock.png</file>
       <file alias="16x16/property.png">icons/dark/16x16/property.png</file>
       <file alias="16x16/reagent.png">icons/dark/16x16/reagent.png</file>
       <file alias="16x16/remove.png">icons/dark/16x16/remove.png</file>
@@ -44,6 +45,7 @@
       <file alias="scalable/info.svg">icons/dark/scalable/info.svg</file>
       <file alias="scalable/left.svg">icons/dark/scalable/left.svg</file>
       <file alias="scalable/lock.svg">icons/dark/scalable/lock.svg</file>
+      <file alias="scalable/unlock.svg">icons/dark/scalable/unlock.svg</file>
       <file alias="scalable/property.svg">icons/dark/scalable/property.svg</file>
       <file alias="scalable/reagent.svg">icons/dark/scalable/reagent.svg</file>
       <file alias="scalable/remove.svg">icons/dark/scalable/remove.svg</file>

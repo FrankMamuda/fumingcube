@@ -86,11 +86,19 @@ public:
     [[nodiscard]] QString reference() const;
     QList<Id> labels;
 
+    /**
+     * @brief mode
+     * @return
+     */
+     [[nodiscard]] Modes mode() const { return this->m_mode; }
+
 protected:
+    bool eventFilter( QObject *object, QEvent *event ) override;
     void showEvent( QShowEvent *event ) override;
 
 private:
     Ui::ReagentDialog *ui;
     QCompleter *completer;
     QStringList variables;
+    Modes m_mode = AddMode;
 };

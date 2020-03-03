@@ -129,6 +129,7 @@ HEADERS += \
     tag.h \
     tagdialog.h \
     textedit.h \
+    textutils.h \
     theme.h \
     variable.h \
     variableentry.h \

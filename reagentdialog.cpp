@@ -25,6 +25,7 @@
 #include "ui_reagentdialog.h"
 #include "variable.h"
 #include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QTimer>
 #include "labeldock.h"
 #include "label.h"
@@ -136,7 +137,7 @@ const static QMap<QString, QString> reagentReferences {
  * @param parent
  */
 ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QString &reference, const Modes &mode )
-        : QDialog( parent ), ui( new Ui::ReagentDialog ) {
+        : QDialog( parent ), ui( new Ui::ReagentDialog ), m_mode( mode ) {
     this->completer = new QCompleter( reagentReferences.keys());
     this->completer->setCaseSensitivity( Qt::CaseInsensitive );
     this->ui->setupUi( this );
@@ -163,9 +164,17 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     // set completer
     this->ui->nameEdit->setCompleter( completer );
 
+    // setup reference lock button
+    auto checkState = [ this ]( bool checked ) {
+        this->ui->lockButton->setIcon( QIcon::fromTheme( checked ? "lock" : "unlock" ));
+    };
+    QToolButton::connect( this->ui->lockButton, &QToolButton::toggled, this, checkState );
+
     if ( mode == EditMode ) {
         this->setWindowTitle( ReagentDialog::tr( "Edit reagent" ));
-        this->ui->labelButton->hide();
+        this->ui->lockButton->setChecked( this->mode() == EditMode );
+    } else {
+        checkState( false );
     }
 
     if ( !name.isEmpty())
@@ -185,6 +194,31 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
         ls.exec();
         this->labels = ls.labelIds;
     } );
+
+    auto validate = []( const QString &text ) {
+        QString string( text );
+        int pos;
+        const QRegularExpression re( R"([\p{L}0-9-+,.\)\(\[\]\{\}\@\s\p{No}]+)" );
+        const QRegularExpressionValidator validator( re );
+        return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
+    };
+
+    auto checkInputs = [ this, validate ]() {
+        const bool validName = validate( this->ui->nameEdit->toPlainText());
+        const bool validReference = validate( this->ui->referenceEdit->toPlainText());
+        this->ui->nameEdit->setStyleSheet( validName ? "QTextEdit {}" : "QTextEdit { background-color: #ff5555; color: white; }" );
+        this->ui->referenceEdit->setStyleSheet( validReference ? "QTextEdit {}" : "QTextEdit { background-color: #ff5555; color: white; }" );
+
+        this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( validReference && validName );
+    };
+
+    // validate name & reference
+    TextEdit::connect( this->ui->nameEdit, &TextEdit::textChanged, this, checkInputs );
+    TextEdit::connect( this->ui->referenceEdit, &TextEdit::textChanged, this, checkInputs );
+
+    // handle return keys
+    this->ui->nameEdit->installEventFilter( this );
+    this->ui->referenceEdit->installEventFilter( this );
 }
 
 /**
@@ -213,6 +247,27 @@ QString ReagentDialog::name() const {
  */
 QString ReagentDialog::reference() const {
     return HTMLUtils::captureBody( this->ui->referenceEdit->toHtml());
+}
+
+/**
+ * @brief ReagentDialog::eventFilter
+ * @param object
+ * @param event
+ * @return
+ */
+bool ReagentDialog::eventFilter( QObject *object, QEvent *event ) {
+    if ( event->type() == QEvent::KeyPress && ( object == this->ui->nameEdit || object == this->ui->referenceEdit )) {
+        const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
+        if ( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ) {
+            if ( object == this->ui->nameEdit )
+                this->ui->referenceEdit->setFocus();
+            else if ( object == this->ui->referenceEdit && this->ui->buttonBox->button( QDialogButtonBox::Ok )->isEnabled())
+                this->ui->buttonBox->button( QDialogButtonBox::Ok )->animateClick();
+
+            return true;
+        }
+    }
+    return object->eventFilter( object, event );
 }
 
 /**
@@ -248,6 +303,9 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
 
     // copy reference from name by default
     ReagentDialog::connect( this->ui->nameEdit, &TextEdit::textChanged, this, [ this ]() {
+        if ( this->ui->lockButton->isChecked())
+            return;
+
         const QString plain( this->ui->nameEdit->toPlainText());
         const QString html( this->ui->nameEdit->toHtml());
 

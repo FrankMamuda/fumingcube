@@ -34,6 +34,8 @@
 TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDialog ) {
     this->ui->setupUi( this );
     this->ui->widget->setWindowFlags( Qt::Widget );
+
+    // setup defaults
     this->ui->unitsEdit->setFixedHeight( this->ui->nameEdit->height());
     this->ui->tagView->setModel( Tag::instance());
     this->ui->tagView->setModelColumn( Tag::Name );
@@ -60,7 +62,9 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                                    this->ui->precisionSpin <<
                                    this->ui->functionEdit <<
                                    this->ui->scaleSpin );
-    auto widgetText = [ this, widgets ]( int index ) {
+
+    // widget enabler/disabler
+    auto widgetTest = [ this, widgets ]( int index ) {
         for ( QWidget *widget : widgets )
             widget->setDisabled( true );
 
@@ -93,9 +97,22 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         if ( index == Tag::Real )
             this->ui->precisionSpin->setEnabled( true );
     };
-    QComboBox::connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), widgetText );
-    widgetText( this->ui->typeCombo->currentIndex());
+    QComboBox::connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), widgetTest );
+    widgetTest( this->ui->typeCombo->currentIndex());
 
+    // make sure edit button is visible only when one item is selected
+    // make sure remove button is invisible when no items are selected
+    QItemSelectionModel::connect( this->ui->tagView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [ this ]( const QItemSelection &, const QItemSelection & ) {
+        const QModelIndexList list( this->ui->tagView->selectionModel()->selectedRows());
+        this->ui->actionEdit->setDisabled( list.count() == 0 || list.count() > 1 );
+        this->ui->actionRemove->setDisabled( list.count() == 0 );
+    } );
+
+    // disable buttons by default
+    this->ui->actionEdit->setDisabled( true );
+    this->ui->actionRemove->setDisabled( true );
+
+    // handle save button when edit dock is open
     QDialogButtonBox::connect( this->ui->buttonBox, &QDialogButtonBox::clicked, [ this ]( QAbstractButton *button ) {
         const QDialogButtonBox::ButtonRole role = this->ui->buttonBox->buttonRole( button );
 
