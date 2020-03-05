@@ -66,6 +66,7 @@ SOURCES += \
     reagentmodel.cpp \
     reagentview.cpp \
     script.cpp \
+    searchengine.cpp \
     settingsdialog.cpp \
     structurebrowser.cpp \
     syntaxhighlighter.cpp \
@@ -122,6 +123,7 @@ HEADERS += \
     reagentmodel.h \
     reagentview.h \
     script.h \
+    searchengine.h \
     settingsdialog.h \
     structurebrowser.h \
     syntaxhighlighter.h \

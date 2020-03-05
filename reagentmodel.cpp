@@ -97,8 +97,14 @@ void ReagentModel::setupModelData() {
         if ( Reagent::instance()->parentId( row ) != Id::Invalid )
             continue;
 
-        // make a new reagent treeItem
+        // get reagent id
         const Id reagentId = Reagent::instance()->id( row );
+
+        // hide reagents
+        if ( NodeHistory::instance()->isHidden( reagentId ))
+            continue;
+
+        // make a new reagent treeItem
         const QString generatedName(
                 ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
         auto *reagent( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
@@ -107,8 +113,15 @@ void ReagentModel::setupModelData() {
         reagent->setData( generatedName, HTML );
 
         // go through batches (children of the reagent)
-        for ( const Row &child : Reagent::instance()->children( row ))
-            ReagentModel::addItem( Reagent::instance()->id( child ), reagentId, reagent );
+        for ( const Row &child : Reagent::instance()->children( row )) {
+            const Id batchId = Reagent::instance()->id( child );
+
+            // hide batches
+            if ( NodeHistory::instance()->isHidden( batchId ))
+                continue;
+
+            ReagentModel::addItem( batchId, reagentId, reagent );
+        }
 
         // add reagent to treeView
         this->invisibleRootItem()->appendRow( reagent );

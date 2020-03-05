@@ -32,8 +32,6 @@ class NodeHistory : public QObject {
     Q_DISABLE_COPY( NodeHistory )
 
 public:
-    explicit NodeHistory( QTreeView *parent );
-
     // disable move
     NodeHistory( NodeHistory&& ) = delete;
     NodeHistory& operator=( NodeHistory&& ) = delete;
@@ -52,6 +50,28 @@ public:
      */
     [[nodiscard]] bool isEnabled() const { return this->m_enabled; }
 
+    /**
+     * @brief isHidden
+     * @param id
+     * @return
+     */
+    [[nodiscard]] bool isHidden( const Id& id ) const { return this->hiddenNodes.contains( id ); }
+
+    /**
+     * @brief hiddenCount
+     * @return
+     */
+    [[nodiscard]] int hiddenCount() const { return this->hiddenNodes.count(); }
+
+    /**
+     * @brief instance
+     * @return
+     */
+    static NodeHistory *instance() {
+        static auto *instance( new NodeHistory());
+        return instance;
+    }
+
 public slots:
     /**
      * @brief setEnabled
@@ -62,8 +82,24 @@ public slots:
     void saveHistory();
     void loadHistory();
 
+    void setTreeParent( QTreeView *parent );
+
+    /**
+     * @brief hide
+     * @param id
+     */
+    void hide( const Id& id ) { if ( !this->hiddenNodes.contains( id )) this->hiddenNodes << id; }
+
+    /**
+     * @brief clearHiddenNodes
+     */
+    void clearHiddenNodes() { this->hiddenNodes.clear(); }
+
 private:
+    explicit NodeHistory();
+
     QTreeView *m_treeParent;
     bool m_enabled = true;
     QList<Id> openNodes;
+    QList<Id> hiddenNodes;
 };

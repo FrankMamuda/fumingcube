@@ -34,6 +34,7 @@
 #include "labeldock.h"
 #include "theme.h"
 #include "propertydock.h"
+#include "searchengine.h"
 #include <QApplication>
 #include <QDate>
 #include <QDir>
@@ -47,37 +48,21 @@
 /*
  TODO:
 
-reagents:
- - multiple references
-
 database:
- - check API
- - crash on argument count mismatch
- - use bind in queries
+ - fix crash on argument count mismatch
+ - expand built-in database with more reagents
 
 i18n:
- - tags
- - labels
  - language selector in settings
 
 properties:
  - filter in dock
- - icons in "add property" menu
 
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
  - lock ui when extraction button is pressed (avoid duplicate requests)
    (the same functionality StructureBrowser has)
-
-scripting:
- - add additional functions such as mol( mass, reagent ) which returns:
-   mol = mass * assay( reagent ) / molarMass( reagent )
- - add 'any' as batch name (a wildcard that chooses any batch with the
-   property)
- - implement Avogadro constant, etc.
- - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
-   in that order; useful when assay is not defined)
 
 theming:
  - separate app theme from calculator theme
@@ -86,6 +71,9 @@ theming:
  - option to change syntax highlighter (and font size) (partially supported)
 
 future/non-priority:
+ - icons in "add property" menu
+ - multiple references
+ - use bind in queries
  - common reaction browser
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
@@ -98,15 +86,23 @@ future/non-priority:
  - scripted property extractor with multiple data sources
  - store variables (for example F = molarMass( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
- - custom search engines in xml
+
+scripting/non-priority:
+ - add additional functions such as mol( mass, reagent ) which returns:
+   mol = mass * assay( reagent ) / molarMass( reagent )
+ - add 'any' as batch name (a wildcard that chooses any batch with the
+   property)
+ - implement Avogadro constant, etc.
+ - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
+   in that order; useful when assay is not defined)
 
 misc/unsorted:
   - cut properties from reagents
   - allow to display treeView in multiple columns
-  - ability to hide some reagents (like props)
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
   - update CMakeLists
+  - sort batches by addition date
 */
 
 /**
@@ -174,6 +170,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::add( "reagentDock/selection", -1, Var::Flag::Hidden );
     Variable::add( "reagentDock/openNodes", "", Var::Flag::Hidden );
+    Variable::add( "reagentDock/hiddenNodes", "", Var::Flag::Hidden );
     Variable::add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
     Variable::add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
@@ -187,7 +184,11 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
-        ReagentDock::instance()->view()->nodeHistory()->saveHistory();
+        NodeHistory::instance()->saveHistory();
+
+        // TODO: add to garbageman
+        delete NodeHistory::instance();
+
         PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();
         XMLTools::write();
@@ -219,6 +220,7 @@ int main( int argc, char *argv[] ) {
         Variable::reset( "reagentDock/selection" );
         Variable::reset( "reagentDock/openNodes" );
         Variable::reset( "propertyDock/hiddenTags" );
+        Variable::reset( "reagentDock/hiddenNodes" );
 
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));
@@ -328,6 +330,9 @@ int main( int argc, char *argv[] ) {
 
     // restore last reagent selection
     ReagentDock::instance()->view()->updateView();
+
+    // load search engines
+    SearchEngineManager::instance()->loadSearchEngines();
 
     return QApplication::exec();
 }

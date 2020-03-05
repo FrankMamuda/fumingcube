@@ -53,8 +53,10 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
         }
 
         // handle redirects
-        if ( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toUrl().isValid())
+        if ( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toUrl().isValid()) {
             this->execute( reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toString(), type, userData );
+            return;
+        }
 
         // emit downloaded data
         const QByteArray data( reply->readAll());

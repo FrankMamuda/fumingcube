@@ -40,6 +40,7 @@
 #include "labelset.h"
 #include "htmlutils.h"
 #include "textutils.h"
+#include "searchengine.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -322,7 +323,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     menu->addAction( ReagentDock::tr( "Add new reagent" ), this, std::bind( addReagent, Id::Invalid ))->setIcon(
             QIcon::fromTheme( "reagent" ));
 
-    const QModelIndex index( this->view()->filterModel()->mapToSource( this->view()->currentIndex()));
+    const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
     if ( index.isValid()) {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
@@ -384,50 +385,22 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             const QString reagentName( HTMLUtils::convertToPlainText( Reagent::instance()->name(
                     Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))));
 
-            auto simpleSmallIcon = []( const QString &string ) {
-                QPixmap pixmap( 16, 16 );
-                pixmap.fill( Qt::transparent );
-                QPainter painter( &pixmap );
-                QTextOption opt;
-                opt.setAlignment( Qt::AlignCenter );
-                painter.drawText( QRect( 0, 0, 16, 16 ), string, opt );
-                return QIcon( pixmap );
-            };
+            // search online            
+            SearchEngineManager::instance()->populateMenu( menu->addMenu( ReagentDock::tr( "Search online" )), reagentName );
 
-            // search online
-            QMenu *searchMenu( menu->addMenu( ReagentDock::tr( "Search online" )));
-            searchMenu->setIcon( QIcon::fromTheme( "find" ));
-            const QString queryName( QString( reagentName ).replace( " ", "+" ));
-
-            // TODO: search engines should be moved to XML, not hardcoded
-            searchMenu->addAction( ReagentDock::tr( "Google" ), this, [ queryName ]() {
-                QDesktopServices::openUrl( "https://www.google.com/search?q=" + queryName );
-            } )->setIcon( simpleSmallIcon( "G" ));
-            searchMenu->addAction( ReagentDock::tr( "DuckDuckGo" ), this, [ queryName ]() {
-                QDesktopServices::openUrl( "https://duckduckgo.com/?q=" + queryName );
-            } )->setIcon( simpleSmallIcon( "D" ));
-            searchMenu->addAction( ReagentDock::tr( "Wikipedia" ), this, [ queryName ]() {
-                QDesktopServices::openUrl( "https://en.wikipedia.org/w/index.php?sort=relevance&search=" + queryName );
-            } )->setIcon( simpleSmallIcon( "W" ));
-            searchMenu->addAction( ReagentDock::tr( "Alfa Aesar" ), this, [ queryName ]() {
-                QDesktopServices::openUrl(
-                        "https://www.alfa.com/en/search/?search-tab=product-search-container&type=SEARCH_CHOICE_ITEM_NUM&q=" +
-                        queryName );
-            } )->setIcon( simpleSmallIcon( "AA" ));
-            searchMenu->addAction( ReagentDock::tr( "Acros" ), this, [ reagentName ]() {
-                QDesktopServices::openUrl(
-                        "https://www.acros.com/DesktopModules/Acros_Search_Results/Acros_Search_Results.aspx?search_type=PartOfName&SearchString=" +
-                        QString( reagentName ).replace( " ", "%20 " ));
-            } )->setIcon( simpleSmallIcon( "A" ));
-            searchMenu->addAction( ReagentDock::tr( "Sigma Aldrich" ), this, [ queryName ]() {
-                QDesktopServices::openUrl(
-                        "https://www.sigmaaldrich.com/catalog/search?term=" + queryName + "&interface=All" );
-            } )->setIcon( simpleSmallIcon( "SA" ));
-            searchMenu->addAction( ReagentDock::tr( "fluorochem" ), this, [ reagentName ]() {
-                QDesktopServices::openUrl( "http://www.fluorochem.co.uk/Products/Search?searchType=N&searchText=" +
-                                           QString( reagentName ).replace( " ", "%20 " ));
-            } )->setIcon( simpleSmallIcon( "FC" ));
+            // hide reagent
+            menu->addAction( ReagentDock::tr( R"(Hide "%1")" ).arg( TextUtils::elidedString( HTMLUtils::convertToPlainText( Reagent::instance()->name( id )))), [ this, id ]() {
+                NodeHistory::instance()->hide( id );
+                this->view()->updateView();
+            } )->setIcon( QIcon::fromTheme( "hide" ));
         }
+    }
+
+    if ( NodeHistory::instance()->hiddenCount() > 0 && context ) {
+        menu->addAction( PropertyDock::tr( "Show all reagents" ), this, []() {
+            NodeHistory::instance()->clearHiddenNodes();
+            ReagentDock::instance()->view()->updateView();
+        } )->setIcon( QIcon::fromTheme( "show" ));
     }
 
     menu->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -542,7 +515,7 @@ void ReagentDock::on_buttonFind_clicked() {
 
     if ( this->ui->searchEdit->isVisible()) {
         // disable node history
-        this->view()->nodeHistory()->setEnabled( false );
+        NodeHistory::instance()->setEnabled( false );
 
         // focus on the searchBox
         this->ui->searchEdit->setFocus();
@@ -558,8 +531,8 @@ void ReagentDock::on_buttonFind_clicked() {
                     this->view()->filterModel()->mapToSource( list.first()))));
 
         this->ui->searchEdit->clear();
-        this->view()->nodeHistory()->setEnabled( true );
-        this->view()->nodeHistory()->restoreNodeState();
+        NodeHistory::instance()->setEnabled( true );
+        NodeHistory::instance()->restoreNodeState();
         this->view()->restoreIndex();
     }
 }

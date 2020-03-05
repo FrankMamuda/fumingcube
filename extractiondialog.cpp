@@ -554,6 +554,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     case NetworkManager::IUPACName:
     case NetworkManager::NoType:
     case NetworkManager::FormulaRequestBrowser:
+    case NetworkManager::FavIcon:
         break;
     }
 }
@@ -613,6 +614,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
     case NetworkManager::IUPACName:
     case NetworkManager::NoType:
     case NetworkManager::FormulaRequestBrowser:
+    case NetworkManager::FavIcon:
         break;
     }
 }

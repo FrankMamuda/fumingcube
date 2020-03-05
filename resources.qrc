@@ -27,4 +27,13 @@
     <qresource prefix="/i18n">
         <file alias="fumingCube_lv_LV">i18n/fumingCube_lv_LV.qm</file>
     </qresource>
+    <qresource prefix="/searchEngines">
+        <file alias="google.conf">searchEngines/google.conf</file>
+        <file alias="acros.conf">searchEngines/acros.conf</file>
+        <file alias="alfaaesar.conf">searchEngines/alfaaesar.conf</file>
+        <file alias="duckduckgo.conf">searchEngines/duckduckgo.conf</file>
+        <file alias="fluorochem.conf">searchEngines/fluorochem.conf</file>
+        <file alias="sigmaaldrich.conf">searchEngines/sigmaaldrich.conf</file>
+        <file alias="wikipedia.conf">searchEngines/wikipedia.conf</file>
+    </qresource>
 </RCC>

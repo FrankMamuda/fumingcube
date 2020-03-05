@@ -30,36 +30,7 @@
  * @brief NodeHistory::NodeHistory
  * @param parent
  */
-NodeHistory::NodeHistory( QTreeView *parent ) : m_treeParent( parent ) {
-    if ( parent == nullptr )
-        return;
-
-    auto saveNodeState = [ this ]( const QModelIndex &filtered, bool expanded ) {
-        if ( !this->isEnabled())
-            return;
-
-        const ReagentView *view( qobject_cast<ReagentView*>( this->treeParent()));
-        if ( view == nullptr )
-            return;
-
-        const Id id = view->idFromIndex( view->filterModel()->mapToSource( filtered ));
-        if ( id == Id::Invalid )
-            return;
-
-        if ( expanded && !this->openNodes.contains( id ))
-            this->openNodes << id;
-        else
-            this->openNodes.removeAll( id );
-    };
-
-    QTreeView::connect( this->treeParent(), &QTreeView::expanded, [ saveNodeState ]( const QModelIndex &index ) {
-        saveNodeState( index, true );
-    } );
-
-    QTreeView::connect( this->treeParent(), &QTreeView::collapsed, [ saveNodeState ]( const QModelIndex &index ) {
-        saveNodeState( index, false );
-    } );
-
+NodeHistory::NodeHistory() {
     this->loadHistory();
 }
 
@@ -105,6 +76,7 @@ void NodeHistory::restoreNodeState() {
  */
 void NodeHistory::saveHistory() {
     Variable::setValue( "reagentDock/openNodes", ListUtils::toStringList<Id>( qAsConst( this->openNodes )));
+    Variable::setValue( "reagentDock/hiddenNodes", ListUtils::toStringList<Id>( qAsConst( this->hiddenNodes )));
 }
 
 /**
@@ -112,5 +84,42 @@ void NodeHistory::saveHistory() {
  */
 void NodeHistory::loadHistory() {
     this->openNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/openNodes" ));
-    this->restoreNodeState();
+    this->hiddenNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/hiddenNodes" ));
+}
+
+/**
+ * @brief NodeHistory::setTreeParent
+ * @param parent
+ */
+void NodeHistory::setTreeParent( QTreeView *parent ) {
+    this->m_treeParent = parent;
+
+    if ( parent == nullptr )
+        return;
+
+    auto saveNodeState = [ this ]( const QModelIndex &filtered, bool expanded ) {
+        if ( !this->isEnabled())
+            return;
+
+        const ReagentView *view( qobject_cast<ReagentView*>( this->treeParent()));
+        if ( view == nullptr )
+            return;
+
+        const Id id = view->idFromIndex( view->filterModel()->mapToSource( filtered ));
+        if ( id == Id::Invalid )
+            return;
+
+        if ( expanded && !this->openNodes.contains( id ))
+            this->openNodes << id;
+        else
+            this->openNodes.removeAll( id );
+    };
+
+    QTreeView::connect( this->treeParent(), &QTreeView::expanded, [ saveNodeState ]( const QModelIndex &index ) {
+        saveNodeState( index, true );
+    } );
+
+    QTreeView::connect( this->treeParent(), &QTreeView::collapsed, [ saveNodeState ]( const QModelIndex &index ) {
+        saveNodeState( index, false );
+    } );
 }

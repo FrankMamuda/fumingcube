@@ -34,6 +34,9 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
     // set a model to treeView
     this->setModel( new QSortFilterProxyModel());
 
+    // setup node history
+    NodeHistory::instance()->setTreeParent( this );
+
     // setup model
     this->filterModel()->setSourceModel( this->reagentModel );
     this->filterModel()->setRecursiveFilteringEnabled( true );
@@ -45,7 +48,10 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
     this->delegate->setModel( this->filterModel());
     this->setItemDelegate( this->delegate );
 
-    this->m_nodeHistory = new NodeHistory( this );
+    // restore state
+    NodeHistory::instance()->restoreNodeState();
+
+    // make sure to change reagent on click
     ReagentView::connect( this, SIGNAL( clicked( const QModelIndex & )), this, SLOT( selectReagent( const QModelIndex & )));
 }
 
@@ -54,12 +60,12 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
  */
 void ReagentView::updateView() {
     qobject_cast<ReagentDelegate *>( this->itemDelegate())->clearCache();
-    this->nodeHistory()->setEnabled( false );
+    NodeHistory::instance()->setEnabled( false );
     this->sourceModel()->setupModelData();
 
     // clear selection
     this->filterModel()->sort( 0, Qt::AscendingOrder );
-    this->nodeHistory()->restoreNodeState();
+    NodeHistory::instance()->restoreNodeState();
     this->restoreIndex();
 }
 

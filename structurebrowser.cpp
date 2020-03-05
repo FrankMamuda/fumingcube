@@ -142,6 +142,7 @@ void StructureBrowser::replyReceived( const QString &, NetworkManager::Types typ
             break;
 
         case NetworkManager::CIDRequestSimilar:
+        case NetworkManager::FavIcon:
             break;
     }
 }

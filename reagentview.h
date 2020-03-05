@@ -45,7 +45,6 @@ public:
      * @brief ~ReagentView::~ReagentView
      */
     ~ReagentView() override {
-        delete this->m_nodeHistory;
         delete this->delegate;
         delete this->reagentModel;
     }
@@ -61,12 +60,6 @@ public:
      * @return
      */
     [[nodiscard]] QSortFilterProxyModel *filterModel() const { return qobject_cast<QSortFilterProxyModel *>( QTreeView::model()); }
-
-    /**
-     * @brief nodeHistory
-     * @return
-     */
-    NodeHistory *nodeHistory() { return this->m_nodeHistory; }
 
     /**
      * @brief idFromIndex
@@ -99,7 +92,6 @@ protected:
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
 private:
-    NodeHistory *m_nodeHistory;
     ReagentModel *reagentModel = new ReagentModel();
     ReagentDelegate *delegate = new ReagentDelegate();
 };

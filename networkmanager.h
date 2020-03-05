@@ -46,7 +46,8 @@ public:
         DataRequest,
         FormulaRequest,
         FormulaRequestBrowser,
-        IUPACName
+        IUPACName,
+        FavIcon
     };
     Q_ENUM( Types )
 
