@@ -70,14 +70,15 @@ StructureBrowser::StructureBrowser( QList<int> list, QWidget *parent ) : QDialog
         this->getInfo();
     } );
 
-    StructureBrowser::connect( NetworkManager::instance(), SIGNAL( finished(
-                                                               const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
-                   this, SLOT( replyReceived(
-                                       const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-    StructureBrowser::connect( NetworkManager::instance(), SIGNAL( error(
-                                                               const QString &, NetworkManager::Types, const QString & )),
-                   this, SLOT( error(
-                                       const QString &, NetworkManager::Types, const QString & )));
+    StructureBrowser::connect( NetworkManager::instance(),
+                               SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
+                               this,
+                               SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+
+    StructureBrowser::connect( NetworkManager::instance(),
+                               SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
+                               this,
+                               SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
     this->getInfo();
 }
@@ -160,13 +161,10 @@ void StructureBrowser::getFormula( const int cid ) {
             file.close();
             this->setStatus( this->status() & ~FetchFormula );
             this->buttonTest();
-
-            qDebug() << "F FROM CACHE";
             return;
         }
     }
 
-    qDebug() << "F FROM THE INTERNET";
     NetworkManager::instance()->execute(
             QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid ),
             NetworkManager::FormulaRequestBrowser );
@@ -185,13 +183,10 @@ void StructureBrowser::getName( const int cid ) {
             file.close();
             this->setStatus( this->status() & ~FetchName );
             this->buttonTest();
-
-            qDebug() << "N FROM CACHE";
             return;
         }
     }
 
-    qDebug() << "N FROM THE INTERNET";
     NetworkManager::instance()->execute(
             QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( cid ),
             NetworkManager::IUPACName );

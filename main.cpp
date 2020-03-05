@@ -61,8 +61,6 @@ properties:
 extraction:
  - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
- - lock ui when extraction button is pressed (avoid duplicate requests)
-   (the same functionality StructureBrowser has)
 
 theming:
  - separate app theme from calculator theme
@@ -185,9 +183,6 @@ int main( int argc, char *argv[] ) {
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
         NodeHistory::instance()->saveHistory();
-
-        // TODO: add to garbageman
-        delete NodeHistory::instance();
 
         PropertyDock::instance()->saveHiddenTags();
         MainWindow::instance()->saveHistory();

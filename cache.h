@@ -28,7 +28,7 @@
  * @brief The Cache class
  */
 class Cache : public QObject {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     /**
@@ -52,6 +52,6 @@ public:
     [[nodiscard]] QVariant data( const Types &type, const QString &key ) const;
     static QString checksum( const QByteArray &array );
 
-private:\
+private:
     explicit Cache();
 };

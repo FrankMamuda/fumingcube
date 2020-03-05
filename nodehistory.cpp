@@ -24,6 +24,7 @@
 #include "reagentview.h"
 #include "variable.h"
 #include "listutils.h"
+#include "main.h"
 #include <QStandardItem>
 
 /**
@@ -32,6 +33,9 @@
  */
 NodeHistory::NodeHistory() {
     this->loadHistory();
+
+    // add to garbage collector
+    GarbageMan::instance()->add( this );
 }
 
 /**

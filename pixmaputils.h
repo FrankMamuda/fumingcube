@@ -21,6 +21,8 @@
 /*
  * includes
  */
+#include "main.h"
+
 #include <QPixmap>
 #include <QByteArray>
 #include <QMap>
@@ -28,7 +30,8 @@
 /**
  * @brief The PixmapUtils class
  */
-class PixmapUtils final {
+class PixmapUtils final : public QObject {
+    Q_OBJECT
     Q_DISABLE_COPY( PixmapUtils )
 
 public:
@@ -54,5 +57,8 @@ public:
     [[nodiscard]] static QPixmap getOpenPixmap( QWidget *context );
 
 private:
-    explicit PixmapUtils() {}
+    explicit PixmapUtils() {
+        // add to garbage collector
+        GarbageMan::instance()->add( this );
+    }
 };

@@ -62,6 +62,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     }
 
     this->ui->nameEdit->setText( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+
+    // NOTE: this also re-enables extract button after unsuccessful query
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
     QLineEdit::connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();
@@ -100,6 +102,8 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
 
     QPushButton::connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
     QPushButton::connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
+
+    this->buttonTest();
 }
 
 /**
@@ -416,9 +420,33 @@ void ExtractionDialog::getSimilar( const QList<int> &cidListInt ) {
 }
 
 /**
+ * @brief ExtractionDialog::buttonTest
+ */
+void ExtractionDialog::buttonTest() {
+    this->ui->addAllButton->setDisabled( true );
+    this->ui->addSelectedButton->setDisabled( true );
+    this->ui->clearCacheButton->setDisabled( true );
+    this->ui->extractButton->setDisabled( true );
+
+    if ( this->status() == Idle ) {
+        if ( this->ui->propertyView->model()->rowCount() > 1 ) {
+            this->ui->addAllButton->setEnabled( true );
+            this->ui->addSelectedButton->setEnabled( true );
+        }
+
+        this->ui->clearCacheButton->setEnabled( true );
+        this->ui->extractButton->setEnabled( true );
+        return;
+    }
+}
+
+/**
  * @brief ExtractionDialog::on_extractButton_clicked
  */
 void ExtractionDialog::on_extractButton_clicked() {
+    this->setStatus( Busy );
+    this->buttonTest();
+
     this->ui->propertyView->clear();
     this->ui->propertyView->setRowCount( 0 );
     this->ui->propertyView->setColumnCount( 2 );
@@ -487,6 +515,9 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     {
         this->cidList << QString( data ).split( "\n" );
         if ( this->cidList.isEmpty()) {
+            this->setStatus( Idle );
+            this->buttonTest();
+
             return;
         }
 
@@ -502,6 +533,9 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         this->cidList << QString( data ).split( "\n" );
         if ( this->cidList.isEmpty()) {
             this->ui->nameEdit->setText( ExtractionDialog::tr( "Could not find the reagent" ));
+            this->setStatus( Idle );
+            this->buttonTest();
+
             return;
         }
 
@@ -536,6 +570,7 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         }
 
         this->readData( data );
+        this->setStatus( Idle );
     }
         break;
 
@@ -557,13 +592,17 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     case NetworkManager::FavIcon:
         break;
     }
+
+    this->buttonTest();
 }
 
 /**
  * @brief ExtractionDialog::error
  */
-void ExtractionDialog::error( const QString &, NetworkManager::Types type, const QString &errorMessage ) {
-    qDebug() << errorMessage;
+void ExtractionDialog::error( const QString &, NetworkManager::Types type, const QString &/*errorMessage*/ ) {
+    //qDebug() << errorMessage;
+    this->setStatus( Error );
+    this->buttonTest();
 
     switch ( type ) {
     case NetworkManager::CIDRequestInitial:

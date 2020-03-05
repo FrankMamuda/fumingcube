@@ -137,7 +137,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 scaledSize = QSize( scaledWidth, scaledHeight );
 
                 // generateMipMap lambda - downscales, inverts and crops pixmap
-                auto generateMipMap = [ this, /*scaledWidth,*/ checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
+                auto generateMipMap = [ this, checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
                     if ( pixmap.isNull()) {
                         if ( !pixmap.loadFromData( qAsConst( storedData )))
                             return false;

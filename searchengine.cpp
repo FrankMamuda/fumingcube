@@ -44,7 +44,7 @@ SearchEngineManager::SearchEngineManager() {
             return;
     }
 
-    // add to garbage man
+    // add to garbage collector
     GarbageMan::instance()->add( this );
 }
 

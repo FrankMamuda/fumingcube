@@ -49,10 +49,12 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
                                   } );
 }
 
+/**
+ * @brief LabelDock::~LabelDock
+ */
 LabelDock::~LabelDock() {
     delete this->ui;
 }
-
 
 /**
  * @brief LabelDock::currentLabel

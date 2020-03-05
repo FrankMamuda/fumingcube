@@ -80,15 +80,20 @@ public:
     [[nodiscard]] QString cache() const { return this->m_cache; }
 
     /**
-     * @brief The RequestTypes enum
+     * @brief The StatusOption enum
      */
-    enum RequestTypes {
-        NoType = -1,
-        CIDRequest,
-        DataRequest,
-        FormulaRequest
+    enum StatusOption {
+        Idle = 0x0,
+        Busy = 0x1,
+        Error = 0x2
     };
-    Q_ENUM( RequestTypes )
+    Q_DECLARE_FLAGS( Status, StatusOption )
+
+    /**
+     * @brief status
+     * @return
+     */
+    [[nodiscard]] Status status() const { return this->m_status; }
 
     int readData( const QByteArray &uncompressed ) const;
 
@@ -98,11 +103,18 @@ public slots:
     void readFormula( const QByteArray &data );
     void getFormula( const QString &cid );
     void getSimilar( const QList<int> &cidListInt );
+    void buttonTest();
 
 private slots:
     void on_extractButton_clicked();
     void on_clearCacheButton_clicked();
     void generateCacheName();
+
+    /**
+     * @brief setStatus
+     * @param status
+     */
+    void setStatus( const ExtractionDialog::Status &status ) { this->m_status = status; }
 
 private:
     Ui::ExtractionDialog *ui;
@@ -113,4 +125,5 @@ private:
     QString m_path;
     QString m_cache;
     mutable QMutex mutex;
+    Status m_status = Idle;
 };
