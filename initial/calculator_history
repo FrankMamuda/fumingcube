@@ -9,8 +9,8 @@ Reagent properties can be easily fetched from the internet and used as reference
 Here, try this example,<br>
 */<br>
 <br>
-5.0 * <a href="assay;TmFPSA==;ZGVtbw==">assay( "NaOH", "demo" )</a> / <a href="molarMass;NaOH">molarMass( "NaOH" )</a><br>
-= <a href="ans;0.12475935695177139">0.12475935695177139</a><br>
+5.0 * <a href="assay;TmFPSA==;ZGVtbw==">assay( "NaOH", "demo" )</a> / <a href="molarMass;TmFPSA==">molarMass( "NaOH" )</a><br>
+= <a href="ans;0.124759356952">0.124759356952</a><br>
 <br>
 /*<br>
 where we get mol from 5 grams of Sodium hydroxide.<br>
