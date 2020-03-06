@@ -143,20 +143,22 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
-    // setup editor toolbar
-    this->ui->editorToolBar->installFeature( EditorToolbar::Font );
-    this->ui->editorToolBar->installFeature( EditorToolbar::VerticalAlignment );
-    this->ui->editorToolBar->installFeature( EditorToolbar::CharacterMap );
+    if ( this->mode() == AddMode || this->mode() == EditMode ) {
+        // setup editor toolbar
+        this->ui->editorToolBar->installFeature( EditorToolbar::Font );
+        this->ui->editorToolBar->installFeature( EditorToolbar::VerticalAlignment );
+        this->ui->editorToolBar->installFeature( EditorToolbar::CharacterMap );
 
-    // actions performed upon entering name editor
-    ReagentDialog::connect( this->ui->nameEdit, &TextEdit::entered, [ this ]() {
-        this->ui->editorToolBar->setEditor( this->ui->nameEdit );
-    } );
+        // actions performed upon entering name editor
+        ReagentDialog::connect( this->ui->nameEdit, &TextEdit::entered, [ this ]() {
+            this->ui->editorToolBar->setEditor( this->ui->nameEdit );
+        } );
 
-    // actions performed upon entering reference editor
-    ReagentDialog::connect( this->ui->referenceEdit, &TextEdit::entered, [ this ]() {
-        this->ui->editorToolBar->setEditor( this->ui->referenceEdit );
-    } );
+        // actions performed upon entering reference editor
+        ReagentDialog::connect( this->ui->referenceEdit, &TextEdit::entered, [ this ]() {
+            this->ui->editorToolBar->setEditor( this->ui->referenceEdit );
+        } );
+    }
 
     // focus on the name editor to begin with
     this->ui->nameEdit->setFocus();
@@ -170,11 +172,29 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     };
     QToolButton::connect( this->ui->lockButton, &QToolButton::toggled, this, checkState );
 
-    if ( mode == EditMode ) {
+    switch ( this->mode()) {
+    case AddMode:
+        checkState( false );
+        break;
+
+    case EditMode:
         this->setWindowTitle( ReagentDialog::tr( "Edit reagent" ));
         this->ui->lockButton->setChecked( this->mode() == EditMode );
-    } else {
-        checkState( false );
+        break;
+
+    case BatchMode:
+    case BatchEditMode:
+        this->ui->referenceLabel->hide();
+        this->ui->referenceEdit->hide();
+        this->ui->labelButton->hide();
+        this->ui->propertyCheck->hide();
+        this->ui->nameEdit->setPlaceholderText( TextEdit::tr( "Enter batch name" ));
+        this->ui->lockButton->hide();
+        this->ui->editorToolBar->hide();
+
+        this->setWindowTitle( this->mode() == BatchMode ? ReagentDialog::tr( "Add batch" ) : ReagentDialog::tr( "Rename batch" ));
+
+        break;
     }
 
     if ( !name.isEmpty())
@@ -259,9 +279,12 @@ bool ReagentDialog::eventFilter( QObject *object, QEvent *event ) {
     if ( event->type() == QEvent::KeyPress && ( object == this->ui->nameEdit || object == this->ui->referenceEdit )) {
         const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
         if ( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ) {
-            if ( object == this->ui->nameEdit )
-                this->ui->referenceEdit->setFocus();
-            else if ( object == this->ui->referenceEdit && this->ui->buttonBox->button( QDialogButtonBox::Ok )->isEnabled())
+            if ( object == this->ui->nameEdit ) {
+                if ( this->mode() == AddMode || this->mode() == EditMode )
+                    this->ui->referenceEdit->setFocus();
+                else
+                    this->ui->buttonBox->button( QDialogButtonBox::Ok )->animateClick();
+            } else if ( object == this->ui->referenceEdit && this->ui->buttonBox->button( QDialogButtonBox::Ok )->isEnabled())
                 this->ui->buttonBox->button( QDialogButtonBox::Ok )->animateClick();
 
             return true;

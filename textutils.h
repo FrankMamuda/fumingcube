@@ -45,6 +45,29 @@ public:
         return string.length() < length ? string : string.left( length - 3 ) + "...";
     }
 
+    /**
+     * @brief toBase64
+     * @param string
+     * @return
+     */
+    [[nodiscard]]
+    static QString toBase64( const QString &string ) {
+        return QByteArray( string.toUtf8().constData()).toBase64().constData();
+    }
+
+    /**
+     * @brief fromBase64
+     * @param string
+     * @return
+     */
+    [[nodiscard]]
+    static QString fromBase64( const QString &string ) {
+        if ( string.isEmpty())
+            return QString();
+
+        return QByteArray::fromBase64( string.toUtf8().constData()).constData();
+    }
+
 private:
     explicit TextUtils() {}
 };

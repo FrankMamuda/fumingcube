@@ -159,6 +159,7 @@ public:
      * @param string
      * @return
      */
+    [[nodiscard]]
     static QString compressString( const QString &string ) {
         return qCompress( QByteArray( string.toUtf8().constData())).toBase64().constData();
     }
@@ -168,6 +169,7 @@ public:
      * @param string
      * @return
      */
+    [[nodiscard]]
     static QString uncompressString( const QString &string ) {
         if ( string.isEmpty()) return QString();
         return qUncompress( QByteArray::fromBase64( string.toUtf8().constData())).constData();

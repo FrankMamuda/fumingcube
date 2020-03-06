@@ -9,7 +9,7 @@ Reagent properties can be easily fetched from the internet and used as reference
 Here, try this example,<br>
 */<br>
 <br>
-5.0 * <a href="assay;NaOH;demo">assay( "NaOH", "demo" )</a> / <a href="molarMass;NaOH">molarMass( "NaOH" )</a><br>
+5.0 * <a href="assay;TmFPSA==;ZGVtbw==">assay( "NaOH", "demo" )</a> / <a href="molarMass;NaOH">molarMass( "NaOH" )</a><br>
 = <a href="ans;0.12475935695177139">0.12475935695177139</a><br>
 <br>
 /*<br>

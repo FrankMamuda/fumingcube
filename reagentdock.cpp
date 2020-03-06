@@ -242,11 +242,14 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         //
         QList<Id> labels;
         if ( parentId != Id::Invalid ) {
-            name = QInputDialog::getText( this, ReagentDock::tr( "Add batch" ), ReagentDock::tr( "Name:" ), QLineEdit::Normal,
-                                          QString(), &ok );
+            ReagentDialog rd( this, "", "", ReagentDialog::BatchMode );
+            ok = ( rd.exec() == QDialog::Accepted );
+            name = HTMLUtils::convertToPlainText( rd.name());
 
-            if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
-                return;
+            if ( ok ) {
+                if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
+                    return;
+            }
         } else {
             ReagentDialog rd( this );
             ok = ( rd.exec() == QDialog::Accepted );
@@ -562,11 +565,11 @@ void ReagentDock::on_editButton_clicked() {
 
     bool ok;
     if ( parentId != Id::Invalid ) {
-        const QString name(
-                QInputDialog::getText( this, ReagentDock::tr( "Rename batch" ), ReagentDock::tr( "Name:" ), QLineEdit::Normal,
-                                       previousName, &ok ));
+        ReagentDialog rd( this, previousName, "", ReagentDialog::BatchEditMode );
+        ok = ( rd.exec() == QDialog::Accepted );
+        const QString name( HTMLUtils::convertToPlainText( rd.name()));
 
-        if ( !name.isEmpty()) {
+        if ( !name.isEmpty() && ok ) {
             if ( !this->checkBatchForDuplicates( name, parentId ))
                 return;
 

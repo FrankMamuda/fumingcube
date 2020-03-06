@@ -80,6 +80,10 @@ QJSValue Script::evaluate( const QString &script ) {
 
         // evaluate script
         result = this->engine.evaluate( processed );
+
+        // do some rounding up to avoid ugly numbers
+        if ( result.isNumber())
+            result = QString::number( result.toNumber(), 'g', 12 ).toDouble();
     }
 
     return result;

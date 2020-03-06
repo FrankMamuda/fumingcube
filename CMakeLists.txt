@@ -61,6 +61,9 @@ set( project_sources
     reagent.cpp
     property.cpp
     calcedit.cpp
+    htmlutils.cpp
+    pixmaputils.cpp
+    searchengine.cpp
     nodehistory.cpp
     editortoolbar.cpp )
 
@@ -116,6 +119,11 @@ set( project_headers
     reagent.h
     property.h
     calcedit.h
+    htmlutils.h
+    pixmaputils.h
+    searchengine.h
+    textutils.h
+    propertyinput.h
     nodehistory.h
     editortoolbar.h )
 

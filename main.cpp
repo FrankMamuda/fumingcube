@@ -99,7 +99,6 @@ misc/unsorted:
   - allow to display treeView in multiple columns
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
-  - update CMakeLists
   - sort batches by addition date
 */
 

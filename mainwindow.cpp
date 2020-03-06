@@ -31,6 +31,7 @@
 #include "tagdialog.h"
 #include "settingsdialog.h"
 #include "about.h"
+#include "textutils.h"
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
@@ -86,8 +87,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // get all arguments - property name, reagent name and batch name
         const QString &property( args.at( 0 ));
-        const QString &reagent( args.at( 1 ));
-        const QString batch( args.count() == 3 ? args.at( 2 ) : "" );
+        const QString &reagent( TextUtils::fromBase64( args.at( 1 )));
+        const QString batch( args.count() == 3 ? TextUtils::fromBase64( args.at( 2 )) : "" );
 
         // get reagentId (parent)
         Id reagentId = Script::instance()->getReagentId( reagent );
@@ -197,8 +198,10 @@ void MainWindow::appendToCalculator( const QString &line ) {
         //       1) finds function( args, .. )
         //       2) encloses this with an anchor
         const QRegularExpression functionExpression(
-                QString( R"((?<function>%1)\s*\(\s*(?<arguments>.+?(?=\)|\s*\)))\s*\))" ).arg(
-                        functions.join( "|" )));
+                  QString( "(?<function>%1)\\s*\\(\\s*(?<arguments>\".+?(?=\")\"(?:\\s*,\\s*?(?:\".+?(?=\"))\")?)\\s*\\)" )
+                    .arg( functions.join( "|" ))
+                    );
+
         QString replacedLine( line );
         replacedLine = replacedLine.remove( "\n" );
         QRegularExpressionMatchIterator functionIterator( functionExpression.globalMatch( qAsConst( replacedLine )));
@@ -215,7 +218,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
             QStringList args;
             while ( argsIterator.hasNext()) {
                 const QRegularExpressionMatch argsMatch( argsIterator.next());
-                args << argsMatch.captured( 1 );
+                args << TextUtils::toBase64( argsMatch.captured( 1 ));
             }
 
             // build a list of functionNames, args, capture start and end positions for proper string replacement
@@ -227,6 +230,7 @@ void MainWindow::appendToCalculator( const QString &line ) {
         int offset = 0;
         for ( const Match &match : qAsConst( matches )) {
             const QString link( QString( "<a href=\"%1\">" ).arg( match.args ));
+
             replacedLine.insert( match.start + offset, link );
             offset += link.length();
             replacedLine.insert( match.end + offset, "</a>" );

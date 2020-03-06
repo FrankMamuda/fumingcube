@@ -70,7 +70,9 @@ public:
      */
     enum Modes {
         AddMode,
-        EditMode
+        EditMode,
+        BatchMode,
+        BatchEditMode
     };
     Q_ENUM( Modes )
 

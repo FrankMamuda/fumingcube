@@ -456,7 +456,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                     MainWindow::instance()->insertCommand( value );
                 };
 
-                // tag.
+                // paste to calculator
                 QMenu *subMenu2( menu.addMenu( PropertyDock::tr( "Paste to calculator" )));
                 subMenu2->setIcon( QIcon::fromTheme( "paste" ));
                 subMenu2->addAction( PropertyDock::tr( "Reference" ), this, [ this ]() {
