@@ -100,6 +100,7 @@ misc/unsorted:
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
   - sort batches by addition date
+  - better i18n support
 */
 
 /**
@@ -147,11 +148,7 @@ int main( int argc, char *argv[] ) {
     QApplication::installTranslator( &translator );
 
     // read initial history
-#ifndef FORCE_LV_LOCALE
-    QFile file( ":/initial/calculator_history" );
-#else
-    QFile file( ":/initial/calculator_history_lv_LV" );
-#endif
+    QFile file( !QString::compare( locale, "lv_LV" ) ? ":/initial/calculator_history_lv_LV" : ":/initial/calculator_history" );
     QString history;
     if ( file.open( QIODevice::ReadOnly )) {
         history = Variable::compressString( file.readAll());
