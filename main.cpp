@@ -143,6 +143,7 @@ int main( int argc, char *argv[] ) {
     const QString locale( QLocale::system().name());
 #else
     const QString locale( "lv_LV" );
+    QLocale::setDefault( locale );
 #endif
     translator.load( ":/i18n/fumingCube_" + locale );
     QApplication::installTranslator( &translator );
@@ -171,7 +172,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "theme", "light", Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
-    Variable::add( "decimalSeparator", ",", Var::Flag::Hidden );
+    Variable::add( "decimalSeparator", QString( QLocale::system().decimalPoint()), Var::Flag::Hidden );
 
     // read configuration
     XMLTools::read();

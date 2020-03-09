@@ -82,8 +82,11 @@ QJSValue Script::evaluate( const QString &script ) {
         result = this->engine.evaluate( processed );
 
         // do some rounding up to avoid ugly numbers
-        if ( result.isNumber())
-            result = QString::number( result.toNumber(), 'g', 12 ).toDouble();
+        if ( result.isNumber()) {
+            result = QString::number( result.toNumber(), 'g', 12 )
+                    .replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
+                              QString( "\\1%1\\2" ).arg( Variable::string( "decimalSeparator" )));
+        }
     }
 
     return result;
