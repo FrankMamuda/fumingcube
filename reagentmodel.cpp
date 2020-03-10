@@ -105,9 +105,12 @@ void ReagentModel::setupModelData() {
             continue;
 
         // make a new reagent treeItem
-        const QString generatedName(
-                ReagentModel::generateName( Reagent::instance()->name( row ), Reagent::instance()->reference( row )));
+        // NOTE: for now use this i18n method, in future replace with something better
+        const QString generatedName( ReagentModel::generateName( QApplication::translate( "Reagent",
+                                         Reagent::instance()->name( row ).toUtf8().constData()),
+                                         Reagent::instance()->reference( row )));
         auto *reagent( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
+
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
         reagent->setData( generatedName, HTML );

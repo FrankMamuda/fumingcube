@@ -39,6 +39,7 @@
 #include <QTableView>
 #include <QBuffer>
 #include <QSqlQuery>
+#include <QTranslator>
 #include "htmlutils.h"
 #include "pixmaputils.h"
 #include "propertydock.h"
@@ -236,8 +237,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 }
             }
 
+            // NOTE: for now use this i18n method, in future replace with something better
             html = ( index.column() == Property::Name ?
-                         Tag::instance()->name( tagId ) :
+                         /*Tag::instance()->name( tagId )*/ QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
                          ( HTMLUtils::simplify( qAsConst( stringData ) + units )));
 
             if ( index.column() == Property::Name ) {

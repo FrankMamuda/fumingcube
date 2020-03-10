@@ -25,6 +25,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QSqlQuery>
+#include <QApplication>
 
 /**
  * @brief Label::Label
@@ -54,6 +55,12 @@ QVariant Label::data( const QModelIndex &index, int role ) const {
     if ( role == Qt::DecorationRole ) {
         const QColor colour( this->colour( static_cast<Row>( index.row())));
         return this->pixmap( colour );
+    }
+
+    if ( role == Qt::DisplayRole ) {
+        // NOTE: for now use this i18n method, in future replace with something better
+        const QString originalString( Table::data( index, role ).toString());
+        return QApplication::translate( "Label", originalString.toUtf8().constData());
     }
 
     return Table::data( index, role );
