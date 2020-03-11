@@ -82,6 +82,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSearch"/>
    <addaction name="actionReagents"/>
    <addaction name="actionProperties"/>
    <addaction name="actionLabels"/>
@@ -160,6 +161,14 @@
    </property>
    <property name="text">
     <string>Labels</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset theme="find"/>
+   </property>
+   <property name="text">
+    <string>Search</string>
    </property>
   </action>
  </widget>

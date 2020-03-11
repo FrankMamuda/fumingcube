@@ -63,6 +63,9 @@ public:
 signals:
     void currentIndexChanged( const QModelIndex &index );
 
+public slots:
+    void addReagent( const Id &parentId, const QString &reagentName = QString(), const int cid = 0 );
+
 private slots:
     void on_reagentView_customContextMenuRequested( const QPoint &pos );
     void on_addButton_clicked();

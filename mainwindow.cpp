@@ -32,11 +32,16 @@
 #include "settingsdialog.h"
 #include "about.h"
 #include "textutils.h"
+#include "networkmanager.h"
 #include <QScrollBar>
 #include <QMenu>
 #include <QSqlQuery>
 #include <QTimer>
 #include <utility>
+#include <QInputDialog>
+#include <QMessageBox>
+#include "listutils.h"
+#include "structurebrowser.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -325,4 +330,115 @@ void MainWindow::on_actionSettings_triggered() {
  */
 void MainWindow::on_actionAbout_triggered() {
     About( this ).exec();
+}
+
+/**
+ * @brief MainWindow::on_actionSearch_triggered
+ */
+void MainWindow::on_actionSearch_triggered() {
+    // TODO: add caching to this method
+
+    bool ok;
+    const QString identifier( QInputDialog::getText( this, MainWindow::tr( "Search" ), MainWindow::tr( "Name or CAS number" ), QLineEdit::Normal, QString(), &ok ));
+    if ( ok ) {
+        MainWindow::connect( NetworkManager::instance(),
+                                   &NetworkManager::finished,
+                                   this,
+                             [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+                QStringList cidList;
+
+                MainWindow::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
+
+                switch ( type ) {
+                case NetworkManager::NoType:
+                case NetworkManager::FormulaRequest:
+                case NetworkManager::FormulaRequestBrowser:
+                case NetworkManager::DataRequest:
+                case NetworkManager::IUPACName:
+                case NetworkManager::FavIcon:
+                    break;
+
+                case NetworkManager::CIDRequestInitial:
+                {
+                    qDebug() << "BEGIN CIDRequestInitial";
+
+                    cidList << QString( data ).split( "\n" );
+                    cidList.removeAll( "" );
+                    if ( cidList.isEmpty()) {
+                        QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
+                        return;
+                    }
+
+                    const QString cid( cidList.first());
+                    StructureBrowser sb( ListUtils::toNumericList<int>( cidList ), this );
+                    sb.setSearchMode();
+
+                    if ( sb.exec() != QDialog::Accepted )
+                        return;
+
+                    ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());
+                }
+                    break;
+
+                case NetworkManager::CIDRequestSimilar:
+                {
+                    qDebug() << "BEGIN CIDRequestSimilar";
+
+                    cidList << QString( data ).split( "\n" );
+                    cidList.removeAll( "" );
+
+                    if ( cidList.isEmpty()) {
+                        QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
+                        return;
+                    }
+
+                    QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( cidList )));
+                    cidListInt.removeAll( 0 );
+                    std::sort( cidListInt.begin(), cidListInt.end());
+                    cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
+
+                    StructureBrowser sb( cidListInt, this );
+                    sb.setSearchMode();
+                    if ( sb.exec() != QDialog::Accepted )
+                        return;
+
+                    ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());
+                }
+                    break;
+            }
+        } );
+
+        MainWindow::connect( NetworkManager::instance(),
+                             &NetworkManager::error,
+                             this,
+                       [ this, identifier ]( const QString &, NetworkManager::Types type, const QString & ) {
+
+            MainWindow::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
+
+            switch ( type ) {
+            case NetworkManager::NoType:
+            case NetworkManager::FormulaRequest:
+            case NetworkManager::FormulaRequestBrowser:
+            case NetworkManager::DataRequest:
+            case NetworkManager::IUPACName:
+            case NetworkManager::FavIcon:
+                break;
+
+            case NetworkManager::CIDRequestInitial:
+                qDebug() << "ERROR in CIDRequestInitial";
+
+                // initial failed to yield a list, proceed to similar search
+                NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( QString( identifier ).replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
+                break;
+
+            case NetworkManager::CIDRequestSimilar:
+                qDebug() << "ERROR in CIDRequestSimilar";
+
+                QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
+                break;
+           }
+        } );
+
+        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( QString( identifier ).replace( " ", "-" )), NetworkManager::CIDRequestInitial );
+    }
 }

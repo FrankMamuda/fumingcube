@@ -101,6 +101,9 @@ misc/unsorted:
   - double check all add/edit/delete buttons for when they should be enabled or not
   - sort batches by addition date
   - better i18n support
+  - caching for search dialog
+  - better ui for search dialog (less dialogs)
+    (currently four steps search->similar->add->extract)
 */
 
 /**

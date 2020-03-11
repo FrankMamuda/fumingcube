@@ -64,10 +64,12 @@ public:
      */
     [[nodiscard]] Status status() const { return this->m_status; }
     [[nodiscard]] int cid() const;
+    [[nodiscard]] QString name() const;
 
 public slots:
     void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types type, const QString &errorString );
+    void setSearchMode();
 
 private slots:
     void getInfo();

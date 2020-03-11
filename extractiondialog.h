@@ -53,7 +53,7 @@ class ExtractionDialog : public QDialog {
     Q_DISABLE_COPY( ExtractionDialog )
 
 public:
-    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid, const int cid = 0 );
 
     // disable move
     ExtractionDialog( ExtractionDialog&& ) = delete;

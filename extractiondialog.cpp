@@ -45,7 +45,7 @@
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
-ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
+ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const int cid ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     this->ui->setupUi( this );
     this->ui->propertyView->verticalHeader()->hide();
 
@@ -104,6 +104,19 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     QPushButton::connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );
 
     this->buttonTest();
+
+    // forced cid
+    if ( cid > 0 ) {
+        this->ui->nameEdit->setText( "cid_" + QString::number( cid ));
+        this->ui->nameEdit->hide();
+        this->ui->cidEdit->setText( QString::number( cid ));
+        this->ui->cidEdit->setDisabled( true );
+        this->generateCacheName();
+
+        // begin data request immediately
+        this->getFormula( QString::number( cid ));
+        NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
+    }
 }
 
 /**
@@ -469,6 +482,9 @@ void ExtractionDialog::on_extractButton_clicked() {
             file.close();
         }
 
+        this->setStatus( Idle );
+        this->buttonTest();
+
         return;
     }
 
@@ -514,6 +530,8 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     case NetworkManager::CIDRequestInitial:
     {
         this->cidList << QString( data ).split( "\n" );
+        this->cidList.removeAll( "" );
+
         if ( this->cidList.isEmpty()) {
             this->setStatus( Idle );
             this->buttonTest();
@@ -531,6 +549,8 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
     case NetworkManager::CIDRequestSimilar:
     {
         this->cidList << QString( data ).split( "\n" );
+        this->cidList.removeAll( "" );
+
         if ( this->cidList.isEmpty()) {
             this->ui->nameEdit->setText( ExtractionDialog::tr( "Could not find the reagent" ));
             this->setStatus( Idle );
@@ -539,7 +559,6 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
             return;
         }
 
-        qDebug() << "WRITE SIM CID LIST";
         QFile file( this->cache() + ".cid" );
         if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
             file.write( data.constData(), data.length());
@@ -551,7 +570,6 @@ void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types typ
         std::sort( cidListInt.begin(), cidListInt.end());
         cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
-        qDebug() << "FROM NET CIDLISTSIM" << cidListInt;
         if ( cidListInt.count() == 1 ) {
             this->getFormula( QString::number( cidListInt.first()));
             NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
@@ -621,7 +639,6 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
                     std::sort( cidListInt.begin(), cidListInt.end());
                     cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
-                    qDebug() << "FROM CACHE CIDLISTSIM";
                     if ( cidListInt.count() == 1 ) {
                         NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
                         this->getFormula( QString::number( cidListInt.first()));

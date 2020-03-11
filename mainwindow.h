@@ -80,6 +80,8 @@ private slots:
     void on_actionSettings_triggered();
     void on_actionAbout_triggered();
 
+    void on_actionSearch_triggered();
+
 protected:
     void closeEvent( QCloseEvent *event ) override;
 

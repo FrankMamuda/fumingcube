@@ -230,100 +230,7 @@ ReagentView *ReagentDock::view() const {
 QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
-    auto addReagent = [ this ]( const Id &parentId ) {
-        QString name;
-        QString reference;
-        bool ok;
-
-        //
-        // NOTE:
-        //  reagents can only have unique names and references
-        //  batches can be named anything and do not have references at all
-        //
-        QList<Id> labels;
-        if ( parentId != Id::Invalid ) {
-            ReagentDialog rd( this, "", "", ReagentDialog::BatchMode );
-            ok = ( rd.exec() == QDialog::Accepted );
-            name = HTMLUtils::convertToPlainText( rd.name());
-
-            if ( ok ) {
-                if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
-                    return;
-            }
-        } else {
-            ReagentDialog rd( this );
-            ok = ( rd.exec() == QDialog::Accepted );
-            name = rd.name();
-            reference = rd.reference();
-
-            if ( ok ) {
-                if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( reference )))
-                    return;
-
-                labels = rd.labels;
-            }
-        }
-
-        if ( ok ) {
-            if ( !name.isEmpty()) {
-                // save filter
-                // NOTE: why? because when we add a reagent when filtered the row will always be invalid
-                //       due to non-existent label sets
-                //       this way filter is temporarily removed and restore after addition
-                const QString oldFilter( Reagent::instance()->filter());
-                if ( !Reagent::instance()->filter().isEmpty())
-                    Reagent::instance()->setFilter( "" );
-
-                const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( reference ), parentId );
-                if ( row == Row::Invalid )
-                    return;
-
-                // get reagentId
-                const Id reagentId = Reagent::instance()->id( row );
-
-                // add labels if any
-                //qDebug() << "got labels" << labels;
-                for ( const Id &id : qAsConst( labels )) {
-                    if ( id == Id::Invalid )
-                        continue;
-
-                    LabelSet::instance()->add( id, reagentId );
-                }
-
-                // ... and add to treeView without resetting the model
-                this->view()->sourceModel()->add( reagentId );
-
-                // expand parent reagent
-                if ( parentId != Id::Invalid )
-                    this->view()->expand(
-                            this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
-
-                // select the newly added reagent or batch
-                this->view()->selectReagent(
-                        this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
-
-                // open extraction dialog if this feature is enabled
-                if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
-                    ExtractionDialog ed( this, reagentId );
-                    ed.exec();
-                    PropertyDock::instance()->updateView();
-                }
-
-                // restore filter
-                if ( !oldFilter.isEmpty()) {
-                    Reagent::instance()->setFilter( oldFilter );
-                    this->view()->updateView();
-                }
-            } else {
-                QMessageBox::warning( this, ReagentDock::tr( "Cannot add reagent" ),
-                                      ( parentId != Id::Invalid ? ReagentDock::tr( "Batch" ) : ReagentDock::tr( "Reagent" )) +
-                                      ReagentDock::tr( " name is empty" ));
-                return;
-            }
-        }
-    };
-
-    menu->addAction( ReagentDock::tr( "Add new reagent" ), this, std::bind( addReagent, Id::Invalid ))->setIcon(
+    menu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
             QIcon::fromTheme( "reagent" ));
 
     const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
@@ -333,10 +240,10 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
 
         menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
-                         std::bind( addReagent,
+                         [ this, parentId, item ]() { this->addReagent(
                                     ( parentId == Id::Invalid ) ?
                                         static_cast<Id>( item->data( ReagentModel::ID ).toInt())
-                                      : parentId ))->setIcon( QIcon::fromTheme( "add" ));
+                                      : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
 
         if ( context ) {
             menu->addAction( ReagentDock::tr( "Copy name" ), this,
@@ -411,6 +318,103 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 }
 
 /**
+ * @brief ReagentDock::addReagent
+ * @param parentId
+ */
+void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, const int cid ) {
+    QString name;
+    QString reference;
+    bool ok;
+
+    //
+    // NOTE:
+    //  reagents can only have unique names and references
+    //  batches can be named anything and do not have references at all
+    //
+    QList<Id> labels;
+    if ( parentId != Id::Invalid ) {
+        ReagentDialog rd( this, reagentName, reagentName, ReagentDialog::BatchMode );
+        ok = ( rd.exec() == QDialog::Accepted );
+        name = HTMLUtils::convertToPlainText( rd.name());
+
+        if ( ok ) {
+            if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
+                return;
+        }
+    } else {
+        ReagentDialog rd( this, reagentName, reagentName );
+        ok = ( rd.exec() == QDialog::Accepted );
+        name = rd.name();
+        reference = rd.reference();
+
+        if ( ok ) {
+            if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( reference )))
+                return;
+
+            labels = rd.labels;
+        }
+    }
+
+    if ( ok ) {
+        if ( !name.isEmpty()) {
+            // save filter
+            // NOTE: why? because when we add a reagent when filtered the row will always be invalid
+            //       due to non-existent label sets
+            //       this way filter is temporarily removed and restore after addition
+            const QString oldFilter( Reagent::instance()->filter());
+            if ( !Reagent::instance()->filter().isEmpty())
+                Reagent::instance()->setFilter( "" );
+
+            const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( reference ), parentId );
+            if ( row == Row::Invalid )
+                return;
+
+            // get reagentId
+            const Id reagentId = Reagent::instance()->id( row );
+
+            // add labels if any
+            //qDebug() << "got labels" << labels;
+            for ( const Id &id : qAsConst( labels )) {
+                if ( id == Id::Invalid )
+                    continue;
+
+                LabelSet::instance()->add( id, reagentId );
+            }
+
+            // ... and add to treeView without resetting the model
+            this->view()->sourceModel()->add( reagentId );
+
+            // expand parent reagent
+            if ( parentId != Id::Invalid )
+                this->view()->expand(
+                        this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
+
+            // select the newly added reagent or batch
+            this->view()->selectReagent(
+                        this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
+
+            // open extraction dialog if this feature is enabled
+            if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
+                ExtractionDialog ed( this, reagentId, cid );
+                ed.exec();
+                PropertyDock::instance()->updateView();
+            }
+
+            // restore filter
+            if ( !oldFilter.isEmpty()) {
+                Reagent::instance()->setFilter( oldFilter );
+                this->view()->updateView();
+            }
+        } else {
+            QMessageBox::warning( this, ReagentDock::tr( "Cannot add reagent" ),
+                                  ( parentId != Id::Invalid ? ReagentDock::tr( "Batch" ) : ReagentDock::tr( "Reagent" )) +
+                                  ReagentDock::tr( " name is empty" ));
+            return;
+        }
+    }
+}
+
+/**
  * @brief ReagentDock::on_reagentView_customContextMenuRequested
  * @param pos
  */
@@ -464,20 +468,20 @@ void ReagentDock::on_removeButton_clicked() {
     // remove reagents and batches (list)
     if ( list.count() > 1 ) {
         menu.addAction( ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count()),
-                         this, [ this, list, removeReagentsAndBatches ]() {
-                            QModelIndexList sourceList;
-                            for ( const QModelIndex &filter : list ) {
-                                const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
-                                sourceList << index;
+                        this, [ this, list, removeReagentsAndBatches ]() {
+            QModelIndexList sourceList;
+            for ( const QModelIndex &filter : list ) {
+                const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
+                sourceList << index;
 
-                                const QStandardItem *item( this->view()->itemFromIndex( index ));
-                                if ( item != nullptr )
-                                    removeReagentsAndBatches( item );
-                            }
+                const QStandardItem *item( this->view()->itemFromIndex( index ));
+                if ( item != nullptr )
+                    removeReagentsAndBatches( item );
+            }
 
-                            // remove items without resetting model
-                            this->view()->sourceModel()->remove( qAsConst( sourceList ));
-                        } )->setIcon( QIcon::fromTheme( "remove" ));
+            // remove items without resetting model
+            this->view()->sourceModel()->remove( qAsConst( sourceList ));
+        } )->setIcon( QIcon::fromTheme( "remove" ));
     } else {
         // remove just one entry
         // get current index
@@ -490,9 +494,9 @@ void ReagentDock::on_removeButton_clicked() {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
-                                  "Remove reagent '%1' and its batches" :
-                                  "Remove batch '%1'"
-        ).arg( TextUtils::elidedString( item->text())), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
+                                             "Remove reagent '%1' and its batches" :
+                                             "Remove batch '%1'"
+                                             ).arg( TextUtils::elidedString( item->text())), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
             removeReagentsAndBatches( item );
 
             // remove items without resetting model

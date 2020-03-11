@@ -80,7 +80,7 @@ StructureBrowser::StructureBrowser( QList<int> list, QWidget *parent ) : QDialog
                                this,
                                SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
-    this->getInfo();
+    this->getInfo();    
 }
 
 /**
@@ -210,6 +210,13 @@ void StructureBrowser::readFormula( const QByteArray &data ) {
 }
 
 /**
+ * @brief StructureBrowser::setSearchMode
+ */
+void StructureBrowser::setSearchMode() {
+    this->ui->buttonBox->setStandardButtons( QDialogButtonBox::Save | QDialogButtonBox::Close );
+}
+
+/**
  * @brief StructureBrowser::buttonTest
  */
 void StructureBrowser::buttonTest() {
@@ -241,6 +248,19 @@ void StructureBrowser::error( const QString &, NetworkManager::Types, const QStr
  */
 int StructureBrowser::cid() const {
     return this->cidList.isEmpty() ? -1 : this->cidList.at( this->index());
+}
+
+/**
+ * @brief StructureBrowser::name
+ * @return
+ */
+QString StructureBrowser::name() const {
+    QString name( this->ui->name->text().remove( "\n" ).simplified());
+
+    if ( !name.isEmpty())
+        name.replace( 0, 1, name.at( 0 ).toUpper());
+
+    return name;
 }
 
 /**
