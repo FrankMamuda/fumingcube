@@ -265,38 +265,38 @@ p, li { white-space: pre-wrap; }
         <translation>Struktūrformula</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="417"/>
-        <location filename="../extractiondialog.cpp" line="525"/>
+        <location filename="../extractiondialog.cpp" line="430"/>
+        <location filename="../extractiondialog.cpp" line="543"/>
         <source>Success: CID - %1</source>
         <translation>Veiksmīgi iegūts: CID - %1</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="459"/>
+        <location filename="../extractiondialog.cpp" line="472"/>
         <source>Reading from cache</source>
         <translation>Nolasīts no kešatmiņas</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="535"/>
+        <location filename="../extractiondialog.cpp" line="555"/>
         <source>Could not find the reagent</source>
         <translation>Nebija iespējams atrast reaģentu</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="610"/>
+        <location filename="../extractiondialog.cpp" line="628"/>
         <source>Could not get a valid CID, trying similar</source>
         <translation>Nebija iespējams iegūt CID, meklē līdzīgus reaģentus</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="641"/>
+        <location filename="../extractiondialog.cpp" line="658"/>
         <source>Could not get a valid CID</source>
         <translation>Nebija iespējams iegūt CID</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="645"/>
+        <location filename="../extractiondialog.cpp" line="662"/>
         <source>Could retrieve data associated with CID</source>
         <translation>Nebija iespējams iegūt datus ar šo CID</translation>
     </message>
     <message>
-        <location filename="../extractiondialog.cpp" line="649"/>
+        <location filename="../extractiondialog.cpp" line="666"/>
         <source>Could retrieve formula associated with CID</source>
         <translation>Nebija iespējams iegūt formulu ar šo CID</translation>
     </message>
@@ -485,44 +485,69 @@ p, li { white-space: pre-wrap; }
         <translation>Galvenā rīkjosla</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="102"/>
+        <location filename="../mainwindow.ui" line="103"/>
         <source>Reagents</source>
         <translation>Reaģenti</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="114"/>
+        <location filename="../mainwindow.ui" line="115"/>
         <source>Properties</source>
         <translation>Īpašības</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="123"/>
+        <location filename="../mainwindow.ui" line="124"/>
         <source>Clear</source>
         <translation>Notīrīt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="132"/>
+        <location filename="../mainwindow.ui" line="133"/>
         <source>Tags</source>
         <translation>Raksturlielumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="141"/>
+        <location filename="../mainwindow.ui" line="142"/>
         <source>Settings</source>
         <translation>Uzstādījumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="150"/>
+        <location filename="../mainwindow.ui" line="151"/>
         <source>About</source>
         <translation>Par</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="162"/>
+        <location filename="../mainwindow.ui" line="163"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="139"/>
+        <location filename="../mainwindow.ui" line="171"/>
+        <location filename="../mainwindow.cpp" line="342"/>
+        <source>Search</source>
+        <translation>Meklēšana</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="144"/>
         <source>Paste</source>
         <translation>Ielīmēt</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="342"/>
+        <source>Name or CAS number</source>
+        <translation>Nosaukums vai CAS numurs</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="368"/>
+        <location filename="../mainwindow.cpp" line="391"/>
+        <location filename="../mainwindow.cpp" line="437"/>
+        <source>Warning</source>
+        <translation>Brīdinājums</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="368"/>
+        <location filename="../mainwindow.cpp" line="391"/>
+        <location filename="../mainwindow.cpp" line="437"/>
+        <source>Could not find any reagents matching your identifier</source>
+        <translation>Reaģents nav atrodams</translation>
     </message>
 </context>
 <context>
@@ -801,7 +826,7 @@ p, li { white-space: pre-wrap; }
         <translation>Reaģentam šobrīd jau ir šī īpašība, pievienot vēlreiz?</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="403"/>
+        <location filename="../reagentdock.cpp" line="310"/>
         <source>Show all reagents</source>
         <translation>Rādīt visus reaģentus</translation>
     </message>
@@ -899,12 +924,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="246"/>
+        <location filename="../main.cpp" line="249"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="247"/>
+        <location filename="../main.cpp" line="250"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -1079,7 +1104,7 @@ Please restart the application</source>
         <translation type="vanished">Nebija iespējams pārsaukt reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="318"/>
+        <location filename="../reagentdock.cpp" line="409"/>
         <source>Cannot add reagent</source>
         <translation>Nebija iespējams pievienot reaģentu</translation>
     </message>
@@ -1120,52 +1145,52 @@ Please restart the application</source>
         <translation type="vanished">Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="319"/>
+        <location filename="../reagentdock.cpp" line="410"/>
         <source>Batch</source>
         <translation>Sērija</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="319"/>
+        <location filename="../reagentdock.cpp" line="410"/>
         <source>Reagent</source>
         <translation>Reaģents</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="320"/>
+        <location filename="../reagentdock.cpp" line="411"/>
         <source> name is empty</source>
         <translation> nosaukums ir tukšs</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="326"/>
+        <location filename="../reagentdock.cpp" line="233"/>
         <source>Add new reagent</source>
         <translation>Pievienot jaunu reaģentu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="335"/>
+        <location filename="../reagentdock.cpp" line="242"/>
         <source>Add new batch to reagent &quot;%1&quot;</source>
         <translation>Pievienot sēriju &quot;%1&quot; reaģentam</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="342"/>
+        <location filename="../reagentdock.cpp" line="249"/>
         <source>Copy name</source>
         <translation>Kopēt nosaukumu</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="347"/>
+        <location filename="../reagentdock.cpp" line="254"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="392"/>
+        <location filename="../reagentdock.cpp" line="299"/>
         <source>Search online</source>
         <translation>Meklēt tīmeklī</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="395"/>
+        <location filename="../reagentdock.cpp" line="302"/>
         <source>Hide &quot;%1&quot;</source>
         <translation>Slēpt &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="466"/>
+        <location filename="../reagentdock.cpp" line="470"/>
         <source>Remove %1 selected reagents and their batches</source>
         <translation>Dzēst %1 izvēlētu(-os) reaģentus un tā/to sērijas</translation>
     </message>
@@ -1354,17 +1379,17 @@ Please restart the application</source>
         <translation>Nākamais</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="234"/>
+        <location filename="../structurebrowser.cpp" line="241"/>
         <source>Error</source>
         <translation>Kļūda</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="250"/>
+        <location filename="../structurebrowser.cpp" line="270"/>
         <source>loading...</source>
         <translation>gaida...</translation>
     </message>
     <message>
-        <location filename="../structurebrowser.cpp" line="251"/>
+        <location filename="../structurebrowser.cpp" line="271"/>
         <source>fetching formula...</source>
         <translation>tiek iegūta formula...</translation>
     </message>

@@ -340,33 +340,34 @@ void MainWindow::on_actionSearch_triggered() {
 
     bool ok;
     const QString identifier( QInputDialog::getText( this, MainWindow::tr( "Search" ), MainWindow::tr( "Name or CAS number" ), QLineEdit::Normal, QString(), &ok ));
+
+    // NOTE: object facilitates safe disconnection of the following lambdas
+    QObject *object( new QObject());
+
     if ( ok ) {
-        MainWindow::connect( NetworkManager::instance(),
+        QObject::connect( NetworkManager::instance(),
                                    &NetworkManager::finished,
-                                   this,
-                             [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+                                   object,
+                             [ this, object, identifier ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
                 QStringList cidList;
 
-                MainWindow::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
-
                 switch ( type ) {
+                // ignore these events
                 case NetworkManager::NoType:
                 case NetworkManager::FormulaRequest:
                 case NetworkManager::FormulaRequestBrowser:
                 case NetworkManager::DataRequest:
                 case NetworkManager::IUPACName:
                 case NetworkManager::FavIcon:
-                    break;
+                    return;
 
                 case NetworkManager::CIDRequestInitial:
                 {
-                    qDebug() << "BEGIN CIDRequestInitial";
-
                     cidList << QString( data ).split( "\n" );
                     cidList.removeAll( "" );
                     if ( cidList.isEmpty()) {
                         QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
-                        return;
+                        break;
                     }
 
                     const QString cid( cidList.first());
@@ -374,7 +375,7 @@ void MainWindow::on_actionSearch_triggered() {
                     sb.setSearchMode();
 
                     if ( sb.exec() != QDialog::Accepted )
-                        return;
+                        break;
 
                     ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());
                 }
@@ -382,14 +383,12 @@ void MainWindow::on_actionSearch_triggered() {
 
                 case NetworkManager::CIDRequestSimilar:
                 {
-                    qDebug() << "BEGIN CIDRequestSimilar";
-
                     cidList << QString( data ).split( "\n" );
                     cidList.removeAll( "" );
 
                     if ( cidList.isEmpty()) {
                         QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
-                        return;
+                        break;
                     }
 
                     QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( cidList )));
@@ -400,45 +399,49 @@ void MainWindow::on_actionSearch_triggered() {
                     StructureBrowser sb( cidListInt, this );
                     sb.setSearchMode();
                     if ( sb.exec() != QDialog::Accepted )
-                        return;
+                        break;
 
                     ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());
                 }
                     break;
             }
+                // disconnect by deleting the object
+                if ( object != nullptr )
+                    object->deleteLater();
         } );
 
-        MainWindow::connect( NetworkManager::instance(),
+        QObject::connect( NetworkManager::instance(),
                              &NetworkManager::error,
-                             this,
-                       [ this, identifier ]( const QString &, NetworkManager::Types type, const QString & ) {
-
-            MainWindow::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
+                             object,
+                       [ this, identifier, object ]( const QString &, NetworkManager::Types type, const QString & ) {
 
             switch ( type ) {
+            // ignore these events
             case NetworkManager::NoType:
             case NetworkManager::FormulaRequest:
             case NetworkManager::FormulaRequestBrowser:
             case NetworkManager::DataRequest:
             case NetworkManager::IUPACName:
             case NetworkManager::FavIcon:
-                break;
+                return;
 
             case NetworkManager::CIDRequestInitial:
-                qDebug() << "ERROR in CIDRequestInitial";
-
                 // initial failed to yield a list, proceed to similar search
                 NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( QString( identifier ).replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
                 break;
 
             case NetworkManager::CIDRequestSimilar:
-                qDebug() << "ERROR in CIDRequestSimilar";
-
                 QMessageBox::warning( this, MainWindow::tr( "Warning" ), MainWindow::tr( "Could not find any reagents matching your identifier" ));
+
+                // disconnect by deleting the object
+                if ( object != nullptr )
+                    object->deleteLater();
+
                 break;
            }
         } );
 
+        // send the inital request
         NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( QString( identifier ).replace( " ", "-" )), NetworkManager::CIDRequestInitial );
     }
 }
