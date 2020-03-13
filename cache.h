@@ -49,9 +49,21 @@ public:
         return instance;
     }
 
+    /**
+     * @brief path
+     * @return
+     */
+    [[nodiscard]] QString path() const { return this->m_path; }
     [[nodiscard]] QVariant data( const Types &type, const QString &key ) const;
-    static QString checksum( const QByteArray &array );
+    [[nodiscard]] static QString checksum( const QByteArray &array );
+    [[nodiscard]] bool contains( const QString &context, const QString &key ) const;
+    [[nodiscard]] QByteArray getData( const QString &context, const QString &key, bool compressed = false ) const;
+    bool insert( const QString &context, const QString &key, const QByteArray &data, bool compress = false );
+    void clear( const QString &context, const QString &key );
+    [[nodiscard]] QString contextPath( const QString &context, const QString &key = QString()) const;
+    [[nodiscard]] static bool validate( const QString &context, const QString &key );
 
 private:
     explicit Cache();
+    QString m_path;
 };

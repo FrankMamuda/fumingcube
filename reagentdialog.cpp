@@ -219,7 +219,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     auto validate = []( const QString &text ) {
         QString string( text );
         int pos;
-        const QRegularExpression re( R"([\p{L}0-9-+,.\)\(\[\]\{\}\@\s\p{No}]+)" );
+        const QRegularExpression re( R"([\p{L}0-9-+,.\)\(\[\]\{\}\@\s\p{No}\/\\]+)" );
         const QRegularExpressionValidator validator( re );
         return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
     };

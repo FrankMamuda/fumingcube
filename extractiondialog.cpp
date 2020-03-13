@@ -28,7 +28,6 @@
 #include "ui_extractiondialog.h"
 #include <QBuffer>
 #include <QButtonGroup>
-#include <QCryptographicHash>
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -40,33 +39,35 @@
 #include "pixmaputils.h"
 #include "htmlutils.h"
 #include "listutils.h"
+#include "cache.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
 ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const int cid ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
+    // setup ui and get rid of verticalHeader in property view
     this->ui->setupUi( this );
     this->ui->propertyView->verticalHeader()->hide();
 
+    // setup connections to the NetworkManager
     NetworkManager::connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
     NetworkManager::connect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
-    // make cache dir
-    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
-    const QDir dir( this->path());
-    if ( !dir.exists()) {
-        dir.mkpath( dir.absolutePath());
-        if ( !dir.exists())
-            return;
-    }
+    // read id/name maps from disk if any
+    this->readCache();
 
+    // set reagent name
     this->ui->nameEdit->setText( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
 
+    // check name
     // NOTE: this also re-enables extract button after unsuccessful query
     auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
     QLineEdit::connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
     checkName();
+
+#if 0
+
 
     auto addProperties = [ this ]( bool all = false ) {
         if ( all )
@@ -111,21 +112,358 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
         this->ui->nameEdit->hide();
         this->ui->cidEdit->setText( QString::number( cid ));
         this->ui->cidEdit->setDisabled( true );
-        this->generateCacheName();
 
         // begin data request immediately
         this->getFormula( QString::number( cid ));
-        NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
-    }
+
+        // GET DATA
+        if ( !this->readFromCache())
+            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
+    } 
+#endif
 }
 
 /**
  * @brief ExtractionDialog::~ExtractionDialog
  */
 ExtractionDialog::~ExtractionDialog() {
+    // disconnect from the network manager
     NetworkManager::disconnect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
     NetworkManager::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )), this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+
+    // write out id cache
+    this->writeCache();
+
+    // delete ui
     delete this->ui;
+}
+
+/**
+ * @brief ExtractionDialog::name
+ * @return
+ */
+QString ExtractionDialog::name() const {
+    return this->ui->nameEdit->text();
+}
+
+/**
+ * @brief ExtractionDialog::id
+ * @return
+ */
+int ExtractionDialog::id() const {
+    return this->ui->cidEdit->text().toInt();
+}
+
+/**
+ * @brief ExtractionDialog::readCache
+ */
+void ExtractionDialog::readCache() {
+    // look for id map in cache
+    if ( Cache::instance()->contains( ExtractionDialog::IdMapContext, "data.map" )) {
+        // read serialized map
+        QByteArray byteArray( Cache::instance()->getData( ExtractionDialog::IdMapContext, "data.map", true ));
+        QBuffer buffer( &byteArray );
+        buffer.open( QIODevice::ReadOnly );
+        QDataStream in( &buffer );
+
+        // check version to avoid segfaults
+        // if we fail, new cache information will just be overwritten
+        int version;
+        in >> version;
+        if ( version != ExtractionDialog::Version )
+            return;
+
+        // finally read in the maps
+        in >> this->idNameMap >> this->nameIdMap;
+    }
+}
+
+/**
+ * @brief ExtractionDialog::writeCache
+ */
+void ExtractionDialog::writeCache() {
+    // serialize maps
+    QByteArray byteArray;
+    QBuffer buffer( &byteArray );
+    buffer.open( QIODevice::WriteOnly );
+    QDataStream out( &buffer );
+    out << ExtractionDialog::Version << this->idNameMap << this->nameIdMap;
+
+    // store maps into disk cache
+    Cache::instance()->insert( ExtractionDialog::IdMapContext, "data.map", byteArray, true );
+}
+
+/**
+ * @brief ExtractionDialog::replyReceived
+ * @param url
+ * @param type
+ * @param userData
+ * @param data
+ */
+void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+    switch ( type ) {
+    case NetworkManager::CIDRequestInitial:
+        qDebug() << "network->idList" << this->name();
+        if ( !this->parseIdListRequest( data )) {
+            qDebug() << "  parseIdListRequest failed";
+
+            // try similar structure search if initial request fails
+            this->sendSimilarRequest();
+            return;
+        }
+        break;
+
+    case NetworkManager::CIDRequestSimilar:
+        qDebug() << "network->idList (similar)" << this->name();
+        if ( !this->parseIdListRequest( data )) {
+            qDebug() << "  parseIdListRequest failed";
+
+            // TODO: report error
+            return;
+        }
+        break;
+
+    case NetworkManager::FormulaRequest:
+        this->parseFormulaRequest( data );
+        break;
+
+    case NetworkManager::DataRequest:
+        this->parseDataRequest( data );
+        break;
+
+    default:
+        ;
+    }
+}
+
+/**
+ * @brief ExtractionDialog::error
+ * @param type
+ */
+void ExtractionDialog::error( const QString &, NetworkManager::Types type, const QString & ) {
+    switch ( type ) {
+    case NetworkManager::CIDRequestInitial:
+        // try similar structure search if initial request fails
+        this->sendSimilarRequest();
+        break;
+
+    default:
+        ;
+    }
+}
+
+/**
+ * @brief ExtractionDialog::sendInitialRequest
+ */
+void ExtractionDialog::sendInitialRequest() {
+    // TODO: set status message
+    qDebug() << "  request initial" << this->name();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
+}
+
+/**
+ * @brief ExtractionDialog::sendSimilarRequest
+ */
+void ExtractionDialog::sendSimilarRequest() {
+    // TODO: set status message
+    qDebug() << "  request similar" << this->name();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
+}
+
+/**
+ * @brief ExtractionDialog::sendFormulaRequest
+ */
+void ExtractionDialog::sendFormulaRequest() {
+    qDebug() << "  request formula" << this->name();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->id()), NetworkManager::FormulaRequest );
+}
+
+/**
+ * @brief ExtractionDialog::sendDataRequest
+ */
+void ExtractionDialog::sendDataRequest(){
+    qDebug() << "  request data" << this->name();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( this->id()), NetworkManager::DataRequest );
+}
+
+/**
+ * @brief ExtractionDialog::parseFormulaRequest
+ * @param data
+ * @return
+ */
+bool ExtractionDialog::parseFormulaRequest( const QByteArray &data ) {
+    if ( !data.isEmpty()) {
+        qDebug() << "    network->formula" << this->name();
+        Cache::instance()->insert( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id()), data );
+        this->readFormula( data );
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief ExtractionDialog::parseDataRequest
+ * @param data
+ * @return
+ */
+bool ExtractionDialog::parseDataRequest( const QByteArray &data ) {
+    if ( !data.isEmpty()) {
+        qDebug() << "    network->data" << this->name();
+        Cache::instance()->insert( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()), data, true );
+        this->readData( data );
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief ExtractionDialog::parseIdListRequest
+ * @param data
+ * @return
+ */
+bool ExtractionDialog::parseIdListRequest( const QByteArray &data ) {
+    // get id list from data
+    const QList<int>idList( ListUtils::toNumericList<int>( QString( data ).split( "\n" )));
+
+    if ( idList.isEmpty())
+        return false;
+
+    // store ids into cache
+    for ( const int &id : idList )
+        this->nameIdMap.insert( this->name(), id );
+
+    // continue on
+    return this->parseIdList( idList );
+}
+
+/**
+ * @brief ExtractionDialog::parseIdList
+ * @param idList
+ */
+bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
+    qDebug() << "parseIdList";
+
+    // abort on empty id lists
+    if ( idList.isEmpty()) {
+        // TODO: update status
+        return false;
+    }
+
+    // select an id
+    int id = 0;
+    if ( idList.count() > 1 ) {
+        // if we have multiple ids in the list, open the StructureBrowser and let the user decide
+        StructureBrowser sb( idList, this );
+        if ( sb.exec() != QDialog::Accepted ) {
+            // TODO: update status - ABORT
+            return true;
+        }
+        id = sb.cid();
+    } else {
+        // if the list has only one entry, continue with that
+        id = idList.first();
+    }
+
+    // make sure it is a valid id
+    if ( id <= 0 ) {
+        // TODO: update status
+        return false;
+    }
+
+    // all ok, continue with data extraction
+    this->getDataAndFormula( id );
+
+    // return success
+    return true;
+}
+
+/**
+ * @brief ExtractionDialog::getDataAndFormula
+ * @param id
+ * @return
+ */
+bool ExtractionDialog::getDataAndFormula( const int &id ) {
+    this->ui->cidEdit->setText( QString::number( id ));
+
+    qDebug() << "  getDataAndFormula";
+
+    this->getFormula();
+    this->getData();
+
+    return true;
+}
+
+/**
+ * @brief ExtractionDialog::getFormula
+ */
+void ExtractionDialog::getFormula() {
+    if ( Cache::instance()->contains( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id()))) {
+        qDebug() << "    cache->formula" << this->name();
+        this->readFormula( Cache::instance()->getData( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id())));
+        return;
+    }
+
+    // formula not in the cache, fetch it
+    this->sendFormulaRequest();
+}
+
+/**
+ * @brief ExtractionDialog::getData
+ */
+void ExtractionDialog::getData() {
+    if ( Cache::instance()->contains( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()))) {
+        qDebug() << "    cache->data" << this->name();
+        this->readData( Cache::instance()->getData( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()), true ));
+        return;
+    }
+
+    // data not in the cache, fetch it
+    this->sendDataRequest();
+}
+
+/**
+ * @brief ExtractionDialog::on_extractButton_clicked
+ */
+void ExtractionDialog::on_extractButton_clicked() {
+    // TODO: clear previous
+    // TODO: completer for cached entries?
+
+    // check for id in cache
+    if ( this->nameIdMap.contains( this->name())) {
+        const QList<int> idList( this->nameIdMap.values( this->name()));
+        if ( !idList.isEmpty()) {
+            qDebug() << "cache->idList";
+            if ( this->parseIdList( idList ))
+                return;
+        }
+    }
+
+    // send initial search request to get an id
+    this->sendInitialRequest();
+}
+
+/**
+ * @brief ExtractionDialog::readFormula
+ * @param data
+ */
+void ExtractionDialog::readFormula( const QByteArray &data ) {
+    QMutexLocker lock( &this->mutex );
+
+    const int rows = this->ui->propertyView->rowCount();
+    this->ui->propertyView->setRowCount( rows + 1 );
+    QPixmap pixmap;
+    if ( !pixmap.loadFromData( data ))
+        return;
+
+    if ( pixmap.isNull())
+        return;
+
+    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
+    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
+    this->ui->propertyView->resizeRowToContents( rows );
 }
 
 /**
@@ -133,15 +471,8 @@ ExtractionDialog::~ExtractionDialog() {
  * @param uncompressed
  * @return
  */
-int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
+void ExtractionDialog::readData( const QByteArray &uncompressed ) const {
     QMutexLocker lock( &this->mutex );
-
-    // get cid
-    int cid = -1;
-    const QRegularExpression re( R"("RecordNumber":\s(\d+))" );
-    const QRegularExpressionMatch match( re.match( QString( uncompressed.constData())));
-    if ( match.hasMatch())
-        cid = match.captured( 1 ).toInt();
 
     /**
      * @brief findTag finds a TOCHeading in json document
@@ -370,67 +701,9 @@ int ExtractionDialog::readData( const QByteArray &uncompressed ) const {
 
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
-    return qAsConst( cid );
 }
 
-/**
- * @brief ExtractionDialog::readFormula
- * @param data
- */
-void ExtractionDialog::readFormula( const QByteArray &data ) {    
-    QMutexLocker lock( &this->mutex );
-
-    const int rows = this->ui->propertyView->rowCount();
-    this->ui->propertyView->setRowCount( rows + 1 );
-    QPixmap pixmap;
-    if ( !pixmap.loadFromData( data ))
-        return;
-
-    if ( pixmap.isNull())
-        return;
-
-    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
-    this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
-    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
-    this->ui->propertyView->resizeRowToContents( rows );
-}
-
-/**
- * @brief ExtractionDialog::getFormula
- * @param cid
- */
-void ExtractionDialog::getFormula( const QString &cid ) {
-    // get formula
-    if ( QFileInfo::exists( this->cache() + ".png" )) {
-        QFile file( this->cache() + ".png" );
-        if ( file.open( QIODevice::ReadOnly )) {
-            this->readFormula( file.readAll());
-            file.close();
-            return;
-        }
-    }
-
-    if ( !cid.isEmpty())
-        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid ), NetworkManager::FormulaRequest );
-}
-
-/**
- * @brief ExtractionDialog::getSimilar
- * @param cidListInt
- */
-void ExtractionDialog::getSimilar( const QList<int> &cidListInt ) {
-    StructureBrowser sb( cidListInt, this );
-    if ( sb.exec() != QDialog::Accepted )
-        return;
-
-    const int cid = sb.cid();
-    if ( cid == -1 )
-        return;
-
-    this->ui->cidEdit->setText( ExtractionDialog::tr( "Success: CID - %1" ).arg( cid ));
-    NetworkManager::instance()->execute(  QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
-    this->getFormula( QString::number( cid ));
-}
+#if 0
 
 /**
  * @brief ExtractionDialog::buttonTest
@@ -452,7 +725,6 @@ void ExtractionDialog::buttonTest() {
         return;
     }
 }
-
 /**
  * @brief ExtractionDialog::on_extractButton_clicked
  */
@@ -464,33 +736,10 @@ void ExtractionDialog::on_extractButton_clicked() {
     this->ui->propertyView->setRowCount( 0 );
     this->ui->propertyView->setColumnCount( 2 );
 
-    this->generateCacheName();
-    if ( this->cache().isEmpty())
-        return;
-
-    if ( QFileInfo::exists( this->cache())) {
-        this->ui->cidEdit->setText( ExtractionDialog::tr( "Reading from cache" ));
-
-        QFile file( this->cache());
-        if ( file.open( QIODevice::ReadOnly )) {
-            const QByteArray uncompressedData( qUncompress( file.readAll()));
-            const int cid = this->readData( uncompressedData );
-
-            if  ( cid != -1 )
-                this->getFormula( QString::number( cid ));
-
-            file.close();
-        }
-
-        this->setStatus( Idle );
-        this->buttonTest();
-
-        return;
+    if ( !this->readFromCache()) {
+        // get data by making an inital request
+        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
     }
-
-    // get data
-    //NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
 }
 
 /**
@@ -500,119 +749,11 @@ void ExtractionDialog::on_clearCacheButton_clicked() {
     if ( this->ui->nameEdit->text().isEmpty())
         return;
 
-    this->generateCacheName();
-    if ( this->cache().isEmpty())
-        return;
-
-    const QFileInfo info( this->cache());
-    if ( !info.exists() || !info.isFile())
-        return;
-
-    QFile::remove( this->cache());
+    const QString cachedName( this->cachedName());
+    Cache::instance()->clear( ExtractionDialog::FormulaContext, cachedName + ".png" );
+    Cache::instance()->clear( ExtractionDialog::DataContext, cachedName );
 }
 
-/**
- * @brief ExtractionDialog::generateCacheName
- */
-void ExtractionDialog::generateCacheName() {
-    this->m_cache = this->path() + "/" + QString( QCryptographicHash::hash( this->ui->nameEdit->text().toUtf8().constData(), QCryptographicHash::Md5 ).toHex());
-}
-
-/**
- * @brief ExtractionDialog::replyReceived
- * @param url
- * @param type
- * @param userData
- * @param data
- */
-void ExtractionDialog::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
-    switch ( type ) {
-    case NetworkManager::CIDRequestInitial:
-    {
-        this->cidList << QString( data ).split( "\n" );
-        this->cidList.removeAll( "" );
-
-        if ( this->cidList.isEmpty()) {
-            this->setStatus( Idle );
-            this->buttonTest();
-
-            return;
-        }
-
-        const QString cid( this->cidList.first());
-        this->ui->cidEdit->setText( ExtractionDialog::tr( "Success: CID - %1" ).arg( cid ));
-        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
-        this->getFormula( cid );
-    }
-        break;
-
-    case NetworkManager::CIDRequestSimilar:
-    {
-        this->cidList << QString( data ).split( "\n" );
-        this->cidList.removeAll( "" );
-
-        if ( this->cidList.isEmpty()) {
-            this->ui->nameEdit->setText( ExtractionDialog::tr( "Could not find the reagent" ));
-            this->setStatus( Idle );
-            this->buttonTest();
-
-            return;
-        }
-
-        QFile file( this->cache() + ".cid" );
-        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-            file.write( data.constData(), data.length());
-            file.close();
-        }
-
-        QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( this->cidList )));
-        cidListInt.removeAll( 0 );
-        std::sort( cidListInt.begin(), cidListInt.end());
-        cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
-
-        if ( cidListInt.count() == 1 ) {
-            this->getFormula( QString::number( cidListInt.first()));
-            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
-        } else
-            this->getSimilar( qAsConst( cidListInt ));
-    }
-        break;
-
-    case NetworkManager::DataRequest:
-    {
-        const QByteArray compressedData( qCompress( data ));
-        QFile file( this->cache());
-        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-            file.write( compressedData.constData(), compressedData.length());
-            file.close();
-        }
-
-        this->readData( data );
-        this->setStatus( Idle );
-    }
-        break;
-
-    case NetworkManager::FormulaRequest:
-    {
-        QFile file( this->cache() + ".png" );
-        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-            file.write( data.constData(), data.length());
-            file.close();
-        }
-
-        this->readFormula( data );
-    }
-        break;
-
-    case NetworkManager::IUPACName:
-    case NetworkManager::NoType:
-    case NetworkManager::FormulaRequestBrowser:
-    case NetworkManager::FavIcon:
-        break;
-    }
-
-    this->buttonTest();
-}
 
 /**
  * @brief ExtractionDialog::error
@@ -627,32 +768,29 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
     {
         this->ui->cidEdit->setText( ExtractionDialog::tr( "Could not get a valid CID, trying similar" ));
 
-            // get formula
-            if ( QFileInfo::exists( this->cache() + ".cid" )) {
-                QFile file( this->cache() + ".cid" );
-                if ( file.open( QIODevice::ReadOnly )) {
-                    this->cidList = QString( file.readAll()).split( "\n" );
-                    file.close();
+        // get formula
+        const QString cachedName( this->cachedName() + ".cid" );
+        if ( Cache::instance()->contains( ExtractionDialog::CIDContext, cachedName )) {
+            this->cidList = QString( Cache::instance()->getData( ExtractionDialog::CIDContext, cachedName )).split( "\n" );
 
-                    QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( this->cidList )));
-                    cidListInt.removeAll( 0 );
-                    std::sort( cidListInt.begin(), cidListInt.end());
-                    cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
+            QList<int> cidListInt( ListUtils::toNumericList<int>( qAsConst( this->cidList )));
+            cidListInt.removeAll( 0 );
+            std::sort( cidListInt.begin(), cidListInt.end());
+            cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
-                    if ( cidListInt.count() == 1 ) {
-                        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
-                        this->getFormula( QString::number( cidListInt.first()));
-                    } else
-                        this->getSimilar( qAsConst( cidListInt ));
+            if ( cidListInt.count() == 1 ) {
+                NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cidListInt.first()), NetworkManager::DataRequest );
+                this->getFormula( QString::number( cidListInt.first()));
+            } else
+                this->getSimilar( qAsConst( cidListInt ));
 
-                    return;
-                }
-            }
+            return;
+        }
 
-            // initial failed to yield a list, proceed to similar search
-            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
-       }
-            break;
+        // initial failed to yield a list, proceed to similar search
+        NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
+    }
+        break;
 
     case NetworkManager::CIDRequestSimilar:
         this->ui->cidEdit->setText( ExtractionDialog::tr( "Could not get a valid CID" ));
@@ -674,3 +812,4 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
         break;
     }
 }
+#endif

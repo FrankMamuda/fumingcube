@@ -35,6 +35,7 @@
 #include "theme.h"
 #include "propertydock.h"
 #include "searchengine.h"
+#include "cache.h"
 #include <QApplication>
 #include <QDate>
 #include <QDir>
@@ -328,6 +329,27 @@ int main( int argc, char *argv[] ) {
 
     // load search engines
     SearchEngineManager::instance()->loadSearchEngines();
+
+    // test cache
+    /*qDebug() << Cache::instance()->contains( "temp", "value" );
+
+    Cache::instance()->insert( "temp", "value", "testValue" );
+    qDebug() << Cache::instance()->getData( "temp", "value" );
+
+    qDebug() << Cache::instance()->contains( "temp", "value" );
+
+    Cache::instance()->insert( "temp", "value", "override" );
+    qDebug() << Cache::instance()->getData( "temp", "value" );
+
+    Cache::instance()->clear( "temp", "value" );
+
+    qDebug() << Cache::instance()->contains( "temp", "value" );
+    qDebug() << Cache::instance()->getData( "temp", "value" );
+
+    qDebug() << Cache::instance()->getData( "temp", "value" );
+    qDebug() << "validate 1" << ( Cache::validate( "penguin", "key" ));
+    qDebug() << "validate 2" << ( Cache::validate( "penguin", "ke%y" ));
+    */
 
     return QApplication::exec();
 }

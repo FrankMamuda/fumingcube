@@ -22,6 +22,9 @@
 #include "cache.h"
 #include "main.h"
 #include <QCryptographicHash>
+#include <QDir>
+#include <QDebug>
+#include <QRegularExpressionValidator>
 
 /**
  * @brief Cache::Cache
@@ -29,6 +32,15 @@
 Cache::Cache() {
     // add to garbage collector
     GarbageMan::instance()->add( this );
+
+    // make cache dir
+    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/" ).absolutePath();
+    const QDir dir( this->path());
+    if ( !dir.exists()) {
+        dir.mkpath( dir.absolutePath());
+        if ( !dir.exists())
+            return;
+    }
 }
 
 /**
@@ -63,4 +75,121 @@ QString Cache::checksum( const QByteArray &array ) {
     }
 
     return QString( QCryptographicHash::hash( data, QCryptographicHash::Md5 ).toHex());
+}
+
+/**
+ * @brief Cache::contains
+ * @param context
+ * @param key
+ * @return
+ */
+bool Cache::contains( const QString &context, const QString &key ) const {
+    // failsafe
+    if ( !Cache::validate( context, key ))
+        return false;
+
+    return QFileInfo::exists( this->contextPath( context, key ));
+}
+
+/**
+ * @brief Cache::getData
+ * @param context
+ * @param key
+ * @return
+ */
+QByteArray Cache::getData( const QString &context, const QString &key, bool compressed ) const {
+    if ( this->contains( context, key )) {
+        // read cache file
+        QFile file( this->contextPath( context, key ));
+        if ( file.open( QIODevice::ReadOnly )) {
+            const QByteArray data( file.readAll());
+
+            // close file and return data
+            file.close();
+            return compressed ? qUncompress( data ) : data;
+        }
+    }
+
+    return QByteArray();
+}
+
+/**
+ * @brief Cache::insert
+ * @param context
+ * @param key
+ * @param data
+ * @return
+ */
+bool Cache::insert( const QString &context, const QString &key, const QByteArray &data, bool compress ) {
+    // failsafe
+    if ( !Cache::validate( context, key ))
+        return false;
+
+    // make context path if non-existant
+    const QDir dir( this->contextPath( context ));
+    if ( !dir.exists()) {
+        dir.mkpath( dir.absolutePath());
+        if ( !dir.exists()) {
+            qCritical() << Cache::tr( R"(could not create context - "%1")" ).arg( context );
+            return false;
+        }
+    }
+
+    // write cache file
+    QFile file( this->contextPath( context, key ));
+    qDebug() << this->contextPath( context, key );
+    if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
+        QByteArray out( compress ? qCompress( data ) : data );
+        file.write( out.constData(), out.length());
+        file.close();
+
+        // close file
+        file.close();
+
+        // return success
+        return true;
+    }
+
+    qCritical() << Cache::tr( R"(could not write cache - "%1/%2")" ).arg( key, context );
+    return false;
+}
+
+/**
+ * @brief Cache::clear
+ * @param context
+ * @param key
+ */
+void Cache::clear( const QString &context, const QString &key ) {
+    // failsafe
+    if ( !Cache::validate( context, key ))
+        return;
+
+    if ( this->contains( context, key ))
+        QFile::remove( this->contextPath( context, key ));
+}
+
+/**
+ * @brief Cache::contextPath
+ * @param context
+ * @return
+ */
+QString Cache::contextPath( const QString &context, const QString &key ) const {
+    return QString( this->path() + "/" + context + "/" + ( key.isEmpty() ? "" : key ));
+}
+
+/**
+ * @brief Cache::validate
+ * @param text
+ * @param key
+ * @return
+ */
+bool Cache::validate( const QString &text, const QString &key ) {
+    if ( text.isEmpty() || key.isEmpty())
+        return false;
+
+    QString string( text + key );
+    int pos;
+    const QRegularExpression re( R"([a-zA-z0-9-+,.]+)" );
+    const QRegularExpressionValidator validator( re );
+    return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
 }

@@ -68,18 +68,6 @@ public:
     [[nodiscard]] Id reagentId() const { return this->m_reagentId; }
 
     /**
-     * @brief path
-     * @return
-     */
-    [[nodiscard]] QString path() const { return this->m_path; }
-
-    /**
-     * @brief cache
-     * @return
-     */
-    [[nodiscard]] QString cache() const { return this->m_cache; }
-
-    /**
      * @brief The StatusOption enum
      */
     enum StatusOption {
@@ -95,20 +83,41 @@ public:
      */
     [[nodiscard]] Status status() const { return this->m_status; }
 
-    int readData( const QByteArray &uncompressed ) const;
+    void readData( const QByteArray &uncompressed ) const;
+
+    [[nodiscard]] QString cachedName() const;
+
+    bool readFromCache();
+
+
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] int id() const;
+
 
 public slots:
     void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types, const QString & );
     void readFormula( const QByteArray &data );
-    void getFormula( const QString &cid );
+    /*void getFormula( const QString &cid );
     void getSimilar( const QList<int> &cidListInt );
-    void buttonTest();
+    void buttonTest();*/
+    void sendInitialRequest();
+    void sendSimilarRequest();
+    void sendFormulaRequest();
+    void sendDataRequest();
+    bool parseFormulaRequest( const QByteArray &data );
+    bool parseDataRequest( const QByteArray &data );
+    bool parseIdListRequest( const QByteArray &data );
+    bool parseIdList( const QList<int> &idList );
+    bool getDataAndFormula( const int &id );
+    void getFormula();
+    void getData();
 
 private slots:
+    void readCache();
+    void writeCache();
     void on_extractButton_clicked();
-    void on_clearCacheButton_clicked();
-    void generateCacheName();
+    //void on_clearCacheButton_clicked();
 
     /**
      * @brief setStatus
@@ -122,8 +131,15 @@ private:
     Id m_reagentId = Id::Invalid;
     QNetworkRequest request;
     QStringList cidList;
-    QString m_path;
-    QString m_cache;
     mutable QMutex mutex;
     Status m_status = Idle;
+    constexpr static const char *FormulaContext = "formula";
+    constexpr static const char *DataContext = "data";
+    constexpr static const char *CIDContext = "cid";
+
+    constexpr static const char *IdMapContext = "idMap";
+
+    QMultiMap<QString, int> nameIdMap;
+    QMultiMap<int, QString> idNameMap;
+    constexpr static const int Version = 1;
 };

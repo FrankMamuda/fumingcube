@@ -416,11 +416,12 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 else
                     QGuiApplication::clipboard()->setText( HTMLUtils::convertToPlainText( data.toString()));
 
-                QMimeData *propertyData = new QMimeData();
+
+                QMimeData *propertyData( new QMimeData());
                 propertyData->setData( mimeTag, QString::number( static_cast<int>( tagId )).toLatin1().constData());
-                //propertyData->setData( mimeReagent, QString::number( static_cast<int>( reagentId )).toLatin1().constData());
                 propertyData->setData( mimeName, Property::instance()->name( row ).toLatin1().constData());
                 propertyData->setData( mimeData, data.toByteArray());
+                propertyData->setText( QGuiApplication::clipboard()->text());
 
                 QGuiApplication::clipboard()->setMimeData( propertyData );
             } )->setIcon( QIcon::fromTheme( "copy" ));

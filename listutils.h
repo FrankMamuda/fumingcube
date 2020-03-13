@@ -39,8 +39,12 @@ public:
     static
     QList<T> toNumericList( const QStringList &list ) {
         QList<T> out;
-        for ( const QString &str : list )
+        for ( const QString &str : list ) {
+            if ( str.isEmpty())
+                continue;
+
             out << QVariant( str ).value<T>();
+        }
 
         return qAsConst( out );
     }
