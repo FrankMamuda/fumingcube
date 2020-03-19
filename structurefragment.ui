@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StructureFragment</class>
+ <widget class="QMainWindow" name="StructureFragment">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>427</width>
+    <height>340</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="structureLayout">
+   <layout class="QGridLayout" name="page1verticalLayout">
+    <item row="5" column="0">
+     <widget class="QLabel" name="cidLabel">
+      <property name="text">
+       <string>PubChem CID</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="queryLabel">
+      <property name="text">
+       <string>Query name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="IUPACLabel">
+      <property name="text">
+       <string>IUPAC name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" colspan="4">
+     <layout class="QHBoxLayout" name="structureTipLayout">
+      <item>
+       <widget class="QLabel" name="structureTipIcon">
+        <property name="maximumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="structureTipLabel">
+        <property name="text">
+         <string>This page displays similiar structures (in the case when exact match could not be found.
+Go through the reagent list using 'Next' and 'Previous' buttons and press 'Select' to continue with property extraction in the next page.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="cidEdit">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="4">
+     <widget class="Line" name="strucureLine">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QLabel" name="structurePixmap">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap>:/icons/ticl4.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <spacer name="cidSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QLineEdit" name="IUPACEdit">
+      <property name="text">
+       <string>titanium tetrachloride</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1" colspan="2">
+     <widget class="QLineEdit" name="queryEdit">
+      <property name="text">
+       <string>tetrachlorotitanium</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="3">
+     <spacer name="structureSpacer0">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="QLabel" name="structureLabel">
+      <property name="text">
+       <string>Structural formula</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="3">
+     <spacer name="structureSpacer1">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="structureToolbar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopToolBarArea</set>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddReagent"/>
+   <addaction name="actionAddIUPAC"/>
+   <addaction name="actionSelect"/>
+   <addaction name="actionPrevious"/>
+   <addaction name="actionNext"/>
+  </widget>
+  <action name="actionPrevious">
+   <property name="icon">
+    <iconset theme="left">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Previous</string>
+   </property>
+   <property name="toolTip">
+    <string>Previous reagent</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="icon">
+    <iconset theme="right">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Next</string>
+   </property>
+   <property name="toolTip">
+    <string>Next reagent</string>
+   </property>
+  </action>
+  <action name="actionSelect">
+   <property name="icon">
+    <iconset theme="accept">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Select current reagent and proceed with property retrieval</string>
+   </property>
+  </action>
+  <action name="actionAddReagent">
+   <property name="icon">
+    <iconset theme="add">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Add reagent</string>
+   </property>
+   <property name="toolTip">
+    <string>Add reagent</string>
+   </property>
+  </action>
+  <action name="actionAddIUPAC">
+   <property name="icon">
+    <iconset theme="add">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Add (IUPAC)</string>
+   </property>
+   <property name="toolTip">
+    <string>Add reagent using IUPAC name</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -58,6 +58,7 @@ SOURCES += \
     propertydialog.cpp \
     propertydock.cpp \
     propertyeditor.cpp \
+    propertyfragment.cpp \
     propertyview.cpp \
     propertywidget.cpp \
     reagentdelegate.cpp \
@@ -67,8 +68,9 @@ SOURCES += \
     reagentview.cpp \
     script.cpp \
     searchengine.cpp \
+    searchfragment.cpp \
     settingsdialog.cpp \
-    structurebrowser.cpp \
+    structurefragment.cpp \
     syntaxhighlighter.cpp \
     table.cpp \
     tag.cpp \
@@ -113,6 +115,7 @@ HEADERS += \
     propertydialog.h \
     propertydock.h \
     propertyeditor.h \
+    propertyfragment.h \
     propertyinput.h \
     propertyview.h \
     propertyviewwidget.h \
@@ -124,8 +127,9 @@ HEADERS += \
     reagentview.h \
     script.h \
     searchengine.h \
+    searchfragment.h \
     settingsdialog.h \
-    structurebrowser.h \
+    structurefragment.h \
     syntaxhighlighter.h \
     table.h \
     tag.h \
@@ -156,10 +160,12 @@ FORMS += \
         propertydialog.ui \
         propertydock.ui \
         propertyeditor.ui \
+        propertyfragment.ui \
         reagentdialog.ui \
         reagentdock.ui \
+        searchfragment.ui \
         settingsdialog.ui \
-        structurebrowser.ui \
+        structurefragment.ui \
         tagdialog.ui
 
 # Default rules for deployment.

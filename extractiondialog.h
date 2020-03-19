@@ -116,7 +116,7 @@ public slots:
 private slots:
     void readCache();
     void writeCache();
-    void on_extractButton_clicked();
+    void on_actionFetch_triggered();
     //void on_clearCacheButton_clicked();
 
     /**
@@ -124,7 +124,6 @@ private slots:
      * @param status
      */
     void setStatus( const ExtractionDialog::Status &status ) { this->m_status = status; }
-
 private:
     Ui::ExtractionDialog *ui;
     ExtractionModel *model = nullptr;

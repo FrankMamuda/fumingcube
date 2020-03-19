@@ -770,3 +770,23 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         MainWindow::instance()->insertCommand( completed );
     }
 }
+
+/**
+ * @brief PropertyDock::on_extractButton_clicked
+ */
+void PropertyDock::on_extractButton_clicked() {
+    // get reagent id
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex(
+            ReagentDock::instance()->view()->filterModel()->mapToSource(
+            ReagentDock::instance()->view()->currentIndex()));
+
+    if ( reagentId == Id::Invalid )
+        return;
+
+    const Id parentId = Reagent::instance()->parentId( reagentId );
+
+    // FIXME DUP CODE
+    ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
+    ed.exec();
+    this->updateView();
+}

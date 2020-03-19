@@ -40,8 +40,9 @@
 #include <utility>
 #include <QInputDialog>
 #include <QMessageBox>
+#include "extractiondialog.h"
 #include "listutils.h"
-#include "structurebrowser.h"
+#include "structurefragment.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -336,6 +337,10 @@ void MainWindow::on_actionAbout_triggered() {
  * @brief MainWindow::on_actionSearch_triggered
  */
 void MainWindow::on_actionSearch_triggered() {
+    ExtractionDialog ed( this );
+    ed.exec();
+
+#if 0
     // TODO: add caching to this method
 
     bool ok;
@@ -370,14 +375,14 @@ void MainWindow::on_actionSearch_triggered() {
                         break;
                     }
 
-                    const QString cid( cidList.first());
-                    StructureBrowser sb( ListUtils::toNumericList<int>( cidList ), this );
+                    /*const QString cid( cidList.first());
+                    StructureFragment sb( ListUtils::toNumericList<int>( cidList ), this );
                     sb.setSearchMode();
 
                     if ( sb.exec() != QDialog::Accepted )
                         break;
 
-                    ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());
+                    ReagentDock::instance()->addReagent( Id::Invalid, sb.name(), sb.cid());*/
                 }
                     break;
 
@@ -396,7 +401,7 @@ void MainWindow::on_actionSearch_triggered() {
                     std::sort( cidListInt.begin(), cidListInt.end());
                     cidListInt.erase( std::unique( cidListInt.begin(), cidListInt.end()), cidListInt.end());
 
-                    StructureBrowser sb( cidListInt, this );
+                    /StructureBrowser sb( cidListInt, this );
                     sb.setSearchMode();
                     if ( sb.exec() != QDialog::Accepted )
                         break;
@@ -444,4 +449,5 @@ void MainWindow::on_actionSearch_triggered() {
         // send the inital request
         NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( QString( identifier ).replace( " ", "-" )), NetworkManager::CIDRequestInitial );
     }
+#endif
 }

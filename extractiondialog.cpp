@@ -35,7 +35,7 @@
 #include "tag.h"
 #include "propertywidget.h"
 #include "imageutils.h"
-#include "structurebrowser.h"
+#include "structurefragment.h"
 #include "pixmaputils.h"
 #include "htmlutils.h"
 #include "listutils.h"
@@ -48,7 +48,9 @@
 ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const int cid ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     // setup ui and get rid of verticalHeader in property view
     this->ui->setupUi( this );
-    this->ui->propertyView->verticalHeader()->hide();
+    this->ui->ExtractionDialogContents->setWindowFlags( Qt::Widget );
+
+    //this->ui->propertyView->verticalHeader()->hide();
 
     // setup connections to the NetworkManager
     NetworkManager::connect( NetworkManager::instance(), SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )), this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
@@ -58,13 +60,13 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
     this->readCache();
 
     // set reagent name
-    this->ui->nameEdit->setText( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+    this->ui->searchPage->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
 
     // check name
     // NOTE: this also re-enables extract button after unsuccessful query
-    auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
-    QLineEdit::connect( this->ui->nameEdit, &QLineEdit::textChanged, checkName );
-    checkName();
+    //auto checkName = [ this ]() { this->ui->extractButton->setEnabled( !this->ui->nameEdit->text().isEmpty()); };
+    //QLineEdit::connect( this->ui->identifierEdit, &QLineEdit::textChanged, checkName );
+    //checkName();
 
 #if 0
 
@@ -121,6 +123,56 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
             NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
     } 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+   // const QPixmap pixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
+    //const QList<QLabel*> tips( QList<QLabel*>() << this->ui->cacheTipIcon << this->ui->searchTipIcon << this->ui->valuesTipIcon << this->ui->propertyTipIcon << this->ui->structureTipIcon );
+    //for ( QLabel *tip : tips )
+   //     tip->setPixmap( pixmap );
+
+    auto leftSpacer( new QWidget( this ));
+    leftSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    auto rightSpacer( new QWidget( this ));
+    rightSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+
+    QToolBar *toolbar( this->ui->navigationBar );
+    toolbar->insertWidget( this->ui->actionSearch, leftSpacer );
+    toolbar->insertWidget( this->ui->actionClose, rightSpacer );
+
+    const QList<QAction*> actions( QList<QAction*>() << this->ui->actionSearch << this->ui->actionStructureBrowser << this->ui->actionProperties );
+    auto checkState = [ this, actions ]( QAction *action, bool checked ) {
+        if ( !checked ) {
+            action->blockSignals( true );
+            action->setChecked( true );
+            action->blockSignals( false );
+            return;
+        }
+
+        for ( QAction *otherAction : actions ) {
+            if ( otherAction != action ) {
+                otherAction->blockSignals( true );
+                otherAction->setChecked( false );
+                otherAction->blockSignals( false );
+            }
+        }
+
+        this->ui->viewStack->setCurrentIndex( actions.indexOf( action ));
+        this->adjustSize();
+    };
+
+    for ( QAction *action : actions )
+        QAction::connect( action, &QAction::toggled, this, [ action, checkState ]( bool checked ) { checkState( action, checked ); } );
+
+    this->ui->actionSearch->setChecked( true );
 }
 
 /**
@@ -143,7 +195,7 @@ ExtractionDialog::~ExtractionDialog() {
  * @return
  */
 QString ExtractionDialog::name() const {
-    return this->ui->nameEdit->text();
+    return this->ui->searchPage->identifier();
 }
 
 /**
@@ -151,7 +203,7 @@ QString ExtractionDialog::name() const {
  * @return
  */
 int ExtractionDialog::id() const {
-    return this->ui->cidEdit->text().toInt();
+    return this->ui->structurePage->cid();// cidEdit->text().toInt();
 }
 
 /**
@@ -258,7 +310,7 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
 void ExtractionDialog::sendInitialRequest() {
     // TODO: set status message
     qDebug() << "  request initial" << this->name();
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->name().replace( " ", "-" )), NetworkManager::CIDRequestInitial );
 }
 
 /**
@@ -267,7 +319,7 @@ void ExtractionDialog::sendInitialRequest() {
 void ExtractionDialog::sendSimilarRequest() {
     // TODO: set status message
     qDebug() << "  request similar" << this->name();
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->ui->nameEdit->text().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->name().replace( " ", "-" )), NetworkManager::CIDRequestSimilar );
 }
 
 /**
@@ -343,6 +395,7 @@ bool ExtractionDialog::parseIdListRequest( const QByteArray &data ) {
  * @param idList
  */
 bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
+#if 0
     qDebug() << "parseIdList";
 
     // abort on empty id lists
@@ -355,7 +408,7 @@ bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
     int id = 0;
     if ( idList.count() > 1 ) {
         // if we have multiple ids in the list, open the StructureBrowser and let the user decide
-        StructureBrowser sb( idList, this );
+        //StructureBrowser sb( idList, this );
         if ( sb.exec() != QDialog::Accepted ) {
             // TODO: update status - ABORT
             return true;
@@ -374,7 +427,7 @@ bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
 
     // all ok, continue with data extraction
     this->getDataAndFormula( id );
-
+#endif
     // return success
     return true;
 }
@@ -385,7 +438,7 @@ bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
  * @return
  */
 bool ExtractionDialog::getDataAndFormula( const int &id ) {
-    this->ui->cidEdit->setText( QString::number( id ));
+    this->ui->structurePage->setup( QList<int>() << id );
 
     qDebug() << "  getDataAndFormula";
 
@@ -424,31 +477,11 @@ void ExtractionDialog::getData() {
 }
 
 /**
- * @brief ExtractionDialog::on_extractButton_clicked
- */
-void ExtractionDialog::on_extractButton_clicked() {
-    // TODO: clear previous
-    // TODO: completer for cached entries?
-
-    // check for id in cache
-    if ( this->nameIdMap.contains( this->name())) {
-        const QList<int> idList( this->nameIdMap.values( this->name()));
-        if ( !idList.isEmpty()) {
-            qDebug() << "cache->idList";
-            if ( this->parseIdList( idList ))
-                return;
-        }
-    }
-
-    // send initial search request to get an id
-    this->sendInitialRequest();
-}
-
-/**
  * @brief ExtractionDialog::readFormula
  * @param data
  */
 void ExtractionDialog::readFormula( const QByteArray &data ) {
+#if 0
     QMutexLocker lock( &this->mutex );
 
     const int rows = this->ui->propertyView->rowCount();
@@ -464,6 +497,7 @@ void ExtractionDialog::readFormula( const QByteArray &data ) {
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
     this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );
+#endif
 }
 
 /**
@@ -688,7 +722,7 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) const {
             propList[Tag::instance()->name( row )] = group;
         }
     }
-
+#if 0
 
     int row = this->ui->propertyView->rowCount();
     QStringList propListKeys( propList.keys());
@@ -701,6 +735,7 @@ void ExtractionDialog::readData( const QByteArray &uncompressed ) const {
 
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
+#endif
 }
 
 #if 0
@@ -813,3 +848,24 @@ void ExtractionDialog::error( const QString &, NetworkManager::Types type, const
     }
 }
 #endif
+
+/**
+ * @brief ExtractionDialog::on_actionFetch_triggered
+ */
+void ExtractionDialog::on_actionFetch_triggered() {
+    // TODO: clear previous
+    // TODO: completer for cached entries?
+
+    // check for id in cache
+    if ( this->nameIdMap.contains( this->name())) {
+        const QList<int> idList( this->nameIdMap.values( this->name()));
+        if ( !idList.isEmpty()) {
+            qDebug() << "cache->idList";
+            if ( this->parseIdList( idList ))
+                return;
+        }
+    }
+
+    // send initial search request to get an id
+    this->sendInitialRequest();
+}

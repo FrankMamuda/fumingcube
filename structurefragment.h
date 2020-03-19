@@ -21,31 +21,31 @@
 /*
  * includes
  */
-#include <QDialog>
+#include <QMainWindow>
 #include "networkmanager.h"
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-    class StructureBrowser;
+    class StructureFragment;
 }
 
 /**
- * @brief The StructureBrowser class
+ * @brief The StructureFragment class
  */
-class StructureBrowser : public QDialog {
+class StructureFragment : public QMainWindow {
     Q_OBJECT
-    Q_DISABLE_COPY( StructureBrowser )
+    Q_DISABLE_COPY( StructureFragment )
 
 public:
-    explicit StructureBrowser( QList<int> cidList, QWidget *parent = nullptr );
+    explicit StructureFragment( QWidget *parent = nullptr );
 
     // disable move
-    StructureBrowser( StructureBrowser&& ) = delete;
-    StructureBrowser& operator=( StructureBrowser&& ) = delete;
+    StructureFragment( StructureFragment&& ) = delete;
+    StructureFragment& operator=( StructureFragment&& ) = delete;
 
-    ~StructureBrowser() override;
+    ~StructureFragment() override;
 
     /**
      * @brief The StatusOption enum
@@ -70,6 +70,7 @@ public slots:
     void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types type, const QString &errorString );
     void setSearchMode();
+    void setup( QList<int> list );
 
 private slots:
     void getInfo();
@@ -81,7 +82,7 @@ private slots:
      * @brief setStatus
      * @param status
      */
-    void setStatus( const StructureBrowser::Status &status ) { this->m_status = status; }
+    void setStatus( const StructureFragment::Status &status ) { this->m_status = status; }
     void buttonTest();
 
 private:
@@ -97,11 +98,11 @@ private:
      */
     [[nodiscard]] QString path() const { return this->m_path; }
 
-    Ui::StructureBrowser *ui;
+    Ui::StructureFragment *ui;
     QList<int> cidList;
     int m_index = 0;
     QString m_path;
     Status m_status = Idle;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS( StructureBrowser::Status )
+Q_DECLARE_OPERATORS_FOR_FLAGS( StructureFragment::Status )

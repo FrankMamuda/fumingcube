@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SearchFragment</class>
+ <widget class="QMainWindow" name="SearchFragment">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>424</width>
+    <height>284</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="searchLayout">
+   <layout class="QGridLayout" name="page0verticalLayout">
+    <item row="4" column="0" colspan="3">
+     <widget class="Line" name="searchLine">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0" colspan="3">
+     <layout class="QHBoxLayout" name="cacheTipLayout">
+      <item>
+       <widget class="QLabel" name="cacheTipIcon">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cacheTipLabel">
+        <property name="text">
+         <string>Completed queries, including properties and formulas, are cached to disk to reduce data usage.
+To fetch up-to-date data, clear reagent cache and redo your search.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <spacer name="searchSpacer0">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <spacer name="searchSpacer1">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="5" column="0" colspan="3">
+     <layout class="QHBoxLayout" name="searchTipLayout">
+      <item>
+       <widget class="QLabel" name="searchTipIcon">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="searchTipLabel">
+        <property name="text">
+         <string>Search reagents by their identifiers, to retrieve their properties from PubChem database.
+You can use names, CAS numbers or any other synonyms the reagent might have (try 'ethanol' or '64-17-5').
+In the case of multiple matches, you will be able to narrow down your query using the Structure Browser in the next page.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="identifierLabel">
+      <property name="text">
+       <string>Identifier</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="identifierEdit">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>name or CAS number</string>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="searchToolbar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopToolBarArea</set>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionFetch"/>
+   <addaction name="actionClear"/>
+   <addaction name="actionDeleteCache"/>
+  </widget>
+  <action name="actionFetch">
+   <property name="icon">
+    <iconset theme="extract"/>
+   </property>
+   <property name="text">
+    <string>Fetch</string>
+   </property>
+   <property name="toolTip">
+    <string>Fetch properties from the internet</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="icon">
+    <iconset theme="remove"/>
+   </property>
+   <property name="text">
+    <string>Clear cache</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear cache for the current reagent</string>
+   </property>
+  </action>
+  <action name="actionDeleteCache">
+   <property name="icon">
+    <iconset theme="remove"/>
+   </property>
+   <property name="text">
+    <string>Delete all cache</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete all cache (including properties and formulas)</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

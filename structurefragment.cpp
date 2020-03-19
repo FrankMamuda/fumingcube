@@ -27,83 +27,42 @@
  */
 #include "imageutils.h"
 #include "pixmaputils.h"
-#include "structurebrowser.h"
-#include "ui_structurebrowser.h"
+#include "structurefragment.h"
+#include "ui_structurefragment.h"
 #include "variable.h"
 #include <QDir>
 #include <utility>
 
 /**
- * @brief StructureBrowser::StructureBrowser
+ * @brief StructureFragment::StructureFragment
  * @param cidList
  * @param parent
  */
-StructureBrowser::StructureBrowser( QList<int> list, QWidget *parent ) : QDialog( parent ),
-                                                                                ui( new Ui::StructureBrowser ),
-                                                                                cidList( std::move( list )) {
-    this->ui->setupUi( this );
-
-    // make cache dir
-    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/browser/" ).absolutePath();
-    const QDir dir( this->path());
-    if ( !dir.exists()) {
-        dir.mkpath( dir.absolutePath());
-        if ( !dir.exists())
-            return;
-    }
-
-    if ( this->cidList.isEmpty())
-        return;
-
-    this->ui->name->setText( QString::number( this->cidList.first()));
-    this->buttonTest();
-
-    QPushButton::connect( this->ui->prevButton, &QPushButton::clicked, [ this ]() {
-        this->m_index--;
-        this->buttonTest();
-        this->getInfo();
-    } );
-
-    QPushButton::connect( this->ui->nextButton, &QPushButton::clicked, [ this ]() {
-        this->m_index++;
-        this->buttonTest();
-        this->getInfo();
-    } );
-
-    StructureBrowser::connect( NetworkManager::instance(),
-                               SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
-                               this,
-                               SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-
-    StructureBrowser::connect( NetworkManager::instance(),
-                               SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
-                               this,
-                               SLOT( error( const QString &, NetworkManager::Types, const QString & )));
-
-    this->getInfo();    
+StructureFragment::StructureFragment( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::StructureFragment ) {
+    this->ui->setupUi( this );  
 }
 
 /**
- * @brief StructureBrowser::~StructureBrowser
+ * @brief StructureFragment::~StructureFragment
  */
-StructureBrowser::~StructureBrowser() {
-    StructureBrowser::disconnect( NetworkManager::instance(),
+StructureFragment::~StructureFragment() {
+    StructureFragment::disconnect( NetworkManager::instance(),
             SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
             this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-    StructureBrowser::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
+    StructureFragment::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
             this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
 
     delete this->ui;
 }
 
 /**
- * @brief StructureBrowser::replyReceived
+ * @brief StructureFragment::replyReceived
  * @param url
  * @param type
  * @param userData
  * @param data
  */
-void StructureBrowser::replyReceived( const QString &, NetworkManager::Types type, const QVariant &,
+void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &,
                                       const QByteArray &data ) {
     const QString cache( this->path() + "/" + QString::number( this->cidList.at( this->index())));
 
@@ -121,7 +80,7 @@ void StructureBrowser::replyReceived( const QString &, NetworkManager::Types typ
                 file.close();
             }
 
-            this->ui->name->setText( QString( data ));
+            this->ui->IUPACEdit->setText( QString( data ));
             this->setStatus( this->status() & ~FetchName );
             this->buttonTest();
             qDebug() << "status rmn" << this->status();
@@ -149,10 +108,10 @@ void StructureBrowser::replyReceived( const QString &, NetworkManager::Types typ
 }
 
 /**
- * @brief StructureBrowser::getFormula
+ * @brief StructureFragment::getFormula
  * @param cid
  */
-void StructureBrowser::getFormula( const int cid ) {
+void StructureFragment::getFormula( const int cid ) {
     const QString cache( this->path() + "/" + QString::number( cid ) + ".png" );
     if ( QFileInfo::exists( cache )) {
         QFile file( cache );
@@ -171,15 +130,15 @@ void StructureBrowser::getFormula( const int cid ) {
 }
 
 /**
- * @brief StructureBrowser::getName
+ * @brief StructureFragment::getName
  * @param cid
  */
-void StructureBrowser::getName( const int cid ) {
+void StructureFragment::getName( const int cid ) {
     const QString cache( this->path() + "/" + QString::number( cid ));
     if ( QFileInfo::exists( cache )) {
         QFile file( cache );
         if ( file.open( QIODevice::ReadOnly )) {
-            this->ui->name->setText( QString( file.readAll()));
+            this->ui->queryEdit->setText( QString( file.readAll()));
             file.close();
             this->setStatus( this->status() & ~FetchName );
             this->buttonTest();
@@ -193,10 +152,10 @@ void StructureBrowser::getName( const int cid ) {
 }
 
 /**
- * @brief StructureBrowser::readFormula
+ * @brief StructureFragment::readFormula
  * @param data
  */
-void StructureBrowser::readFormula( const QByteArray &data ) {
+void StructureFragment::readFormula( const QByteArray &data ) {
     QPixmap pixmap;
     if ( !pixmap.loadFromData( data ))
         return;
@@ -206,56 +165,103 @@ void StructureBrowser::readFormula( const QByteArray &data ) {
 
     const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const bool darkMode = Variable::isEnabled( "darkMode" );
-    this->ui->formula->setPixmap( darkMode ? PixmapUtils::invert( cropped ) : cropped );
+    this->ui->structurePixmap->setPixmap( darkMode ? PixmapUtils::invert( cropped ) : cropped );
 }
 
 /**
- * @brief StructureBrowser::setSearchMode
+ * @brief StructureFragment::setSearchMode
  */
-void StructureBrowser::setSearchMode() {
-    this->ui->buttonBox->setStandardButtons( QDialogButtonBox::Save | QDialogButtonBox::Close );
+void StructureFragment::setSearchMode() {
+    //this->ui->buttonBox->setStandardButtons( QDialogButtonBox::Save | QDialogButtonBox::Close );
 }
 
 /**
- * @brief StructureBrowser::buttonTest
+ * @brief StructureFragment::setup
+ * @param list
  */
-void StructureBrowser::buttonTest() {
+void StructureFragment::setup( QList<int> list ) {
+    this->cidList = std::move( list );
+
+    // make cache dir
+    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/browser/" ).absolutePath();
+    const QDir dir( this->path());
+    if ( !dir.exists()) {
+        dir.mkpath( dir.absolutePath());
+        if ( !dir.exists())
+            return;
+    }
+
+    if ( this->cidList.isEmpty())
+        return;
+
+    this->ui->cidEdit->setText( QString::number( this->cidList.first()));
+    this->buttonTest();
+
+    QAction::connect( this->ui->actionPrevious, &QAction::triggered, [ this ]() {
+        this->m_index--;
+        this->buttonTest();
+        this->getInfo();
+    } );
+
+    QAction::connect( this->ui->actionNext, &QAction::triggered, [ this ]() {
+        this->m_index++;
+        this->buttonTest();
+        this->getInfo();
+    } );
+
+    StructureFragment::connect( NetworkManager::instance(),
+                               SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
+                               this,
+                               SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+
+    StructureFragment::connect( NetworkManager::instance(),
+                               SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
+                               this,
+                               SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+
+    this->getInfo();
+}
+
+/**
+ * @brief StructureFragment::buttonTest
+ */
+void StructureFragment::buttonTest() {
     if ( this->cidList.count() <= 1 )
         return;
 
-    this->ui->prevButton->setDisabled( true );
-    this->ui->nextButton->setDisabled( true );
+    this->ui->actionPrevious->setDisabled( true );
+    this->ui->actionNext->setDisabled( true );
 
     if ( this->status() == Idle ) {
-        this->ui->prevButton->setEnabled( this->index() > 0 );
-        this->ui->nextButton->setEnabled( this->index() < this->cidList.count() - 1 );
+        this->ui->actionPrevious->setEnabled( this->index() > 0 );
+        this->ui->actionNext->setEnabled( this->index() < this->cidList.count() - 1 );
         return;
     }
 }
 
 /**
- * @brief StructureBrowser::error
+ * @brief StructureFragment::error
  */
-void StructureBrowser::error( const QString &, NetworkManager::Types, const QString &errorString ) {
+void StructureFragment::error( const QString &, NetworkManager::Types, const QString &errorString ) {
     this->setStatus( Error );
-    this->ui->name->setText( StructureBrowser::tr( "Error" ));
-    this->ui->formula->setText( errorString );
+    //this->ui->name->setText( StructureFragment::tr( "Error" ));
+    this->ui->structurePixmap->setText( errorString );
 }
 
 /**
- * @brief StructureBrowser::cid
+ * @brief StructureFragment::cid
  * @return
  */
-int StructureBrowser::cid() const {
+int StructureFragment::cid() const {
     return this->cidList.isEmpty() ? -1 : this->cidList.at( this->index());
 }
 
 /**
- * @brief StructureBrowser::name
+ * @brief StructureFragment::name
  * @return
  */
-QString StructureBrowser::name() const {
-    QString name( this->ui->name->text().remove( "\n" ).simplified());
+QString StructureFragment::name() const {
+    QString name( this->ui->queryEdit->text().remove( "\n" ).simplified());
 
     if ( !name.isEmpty())
         name.replace( 0, 1, name.at( 0 ).toUpper());
@@ -264,11 +270,11 @@ QString StructureBrowser::name() const {
 }
 
 /**
- * @brief StructureBrowser::getInfo
+ * @brief StructureFragment::getInfo
  */
-void StructureBrowser::getInfo() {
-    this->ui->name->setText( StructureBrowser::tr( "loading..." ));
-    this->ui->formula->setText( StructureBrowser::tr( "fetching formula..." ));
+void StructureFragment::getInfo() {
+    this->ui->IUPACEdit->setText( StructureFragment::tr( "loading..." ));
+    this->ui->structurePixmap->setText( StructureFragment::tr( "fetching formula..." ));
 
     this->setStatus( FetchName | FetchFormula );
 

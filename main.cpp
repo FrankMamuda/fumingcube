@@ -85,6 +85,10 @@ future/non-priority:
  - scripted property extractor with multiple data sources
  - store variables (for example F = molarMass( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
+ - property modifiers:
+   boiling point: 43C @1 atm
+                  11C @20 mbar
+ - aliases (display names for reagents)
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:
