@@ -89,6 +89,10 @@ future/non-priority:
    boiling point: 43C @1 atm
                   11C @20 mbar
  - aliases (display names for reagents)
+ - add some padding to formulas
+ - CoA search
+ - molport search
+ - link to PubChem (store CID as tag)
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:
@@ -105,10 +109,17 @@ misc/unsorted:
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
   - sort batches by addition date
+    add date to select batches (not all of them need dates?)
   - better i18n support
   - caching for search dialog
   - better ui for search dialog (less dialogs)
     (currently four steps search->similar->add->extract)
+  - cross out reagents (old batches)
+  - hide 'fetch properties' when editing reagent
+  - disallow adding images to TextEdit, such as in batch addition
+    for some reason stuff copied from word wants to be pasted as image not as text
+    prioritize text over image in TextEdit if in simple editor mode
+
 */
 
 /**
@@ -187,6 +198,8 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
+        Cache::instance()->writeReagentCache();
+
         NodeHistory::instance()->saveHistory();
 
         PropertyDock::instance()->saveHiddenTags();
@@ -334,26 +347,8 @@ int main( int argc, char *argv[] ) {
     // load search engines
     SearchEngineManager::instance()->loadSearchEngines();
 
-    // test cache
-    /*qDebug() << Cache::instance()->contains( "temp", "value" );
-
-    Cache::instance()->insert( "temp", "value", "testValue" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    qDebug() << Cache::instance()->contains( "temp", "value" );
-
-    Cache::instance()->insert( "temp", "value", "override" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    Cache::instance()->clear( "temp", "value" );
-
-    qDebug() << Cache::instance()->contains( "temp", "value" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-    qDebug() << "validate 1" << ( Cache::validate( "penguin", "key" ));
-    qDebug() << "validate 2" << ( Cache::validate( "penguin", "ke%y" ));
-    */
+    // read reagent cache
+    Cache::instance()->readReagentCache();
 
     return QApplication::exec();
 }

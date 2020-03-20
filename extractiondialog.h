@@ -132,13 +132,4 @@ private:
     QStringList cidList;
     mutable QMutex mutex;
     Status m_status = Idle;
-    constexpr static const char *FormulaContext = "formula";
-    constexpr static const char *DataContext = "data";
-    constexpr static const char *CIDContext = "cid";
-
-    constexpr static const char *IdMapContext = "idMap";
-
-    QMultiMap<QString, int> nameIdMap;
-    QMultiMap<int, QString> idNameMap;
-    constexpr static const int Version = 1;
 };

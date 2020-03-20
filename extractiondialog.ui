@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ExtractionDialog</class>
- 
  <widget class="QDialog" name="ExtractionDialog">
   <property name="geometry">
    <rect>
@@ -35,144 +34,152 @@
     <number>0</number>
    </property>
    <item>
- 
- <widget class="QMainWindow" name="ExtractionDialogContents">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>445</width>
-    <height>308</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-    <item>
-     <widget class="QStackedWidget" name="viewStack">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="SearchFragment" name="searchPage"/>
-      <widget class="StructureFragment" name="structurePage"/>
-      <widget class="PropertyFragment" name="propertyPage"/>
+    <widget class="QMainWindow" name="ExtractionDialogContents">
+     <property name="windowTitle">
+      <string>MainWindow</string>
+     </property>
+     <widget class="QWidget" name="centralWidget">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QStackedWidget" name="fragmentHost">
+         <property name="currentIndex">
+          <number>2</number>
+         </property>
+         <widget class="SearchFragment" name="searchFragment"/>
+         <widget class="StructureFragment" name="structureFragment"/>
+         <widget class="PropertyFragment" name="propertyFragment"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="navigatonLine">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-    </item>
-    <item>
-     <widget class="Line" name="navigatonLine">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+     <widget class="QStatusBar" name="statusbar"/>
+     <widget class="QToolBar" name="navigationBar">
+      <property name="windowTitle">
+       <string>toolBar</string>
       </property>
+      <property name="movable">
+       <bool>false</bool>
+      </property>
+      <property name="allowedAreas">
+       <set>Qt::BottomToolBarArea</set>
+      </property>
+      <property name="toolButtonStyle">
+       <enum>Qt::ToolButtonTextUnderIcon</enum>
+      </property>
+      <property name="floatable">
+       <bool>false</bool>
+      </property>
+      <attribute name="toolBarArea">
+       <enum>BottomToolBarArea</enum>
+      </attribute>
+      <attribute name="toolBarBreak">
+       <bool>false</bool>
+      </attribute>
+      <addaction name="actionSearch"/>
+      <addaction name="actionStructureBrowser"/>
+      <addaction name="actionProperties"/>
+      <addaction name="actionClose"/>
      </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="navigationBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::BottomToolBarArea</set>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextUnderIcon</enum>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>BottomToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionSearch"/>
-   <addaction name="actionStructureBrowser"/>
-   <addaction name="actionProperties"/>
-   <addaction name="actionClose"/>
-  </widget>
-  <action name="actionSearch">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="find">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Search</string>
-   </property>
-   <property name="toolTip">
-    <string>Switch to the Search fragment</string>
-   </property>
-  </action>
-  <action name="actionProperties">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="property">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Properties</string>
-   </property>
-   <property name="toolTip">
-    <string>Switch to the Property fragment</string>
-   </property>
-  </action>
-  <action name="actionClose">
-   <property name="icon">
-    <iconset theme="close">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Close</string>
-   </property>
-   <property name="toolTip">
-    <string>Close dialog</string>
-   </property>
-  </action>
-  <action name="actionStructureBrowser">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="reagent">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Structure browser</string>
-   </property>
-   <property name="toolTip">
-    <string>Switch to the Structure browser fragment</string>
-   </property>
-  </action>
+     <action name="actionSearch">
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="icon">
+       <iconset theme="find">
+        <normaloff>.</normaloff>.</iconset>
+      </property>
+      <property name="text">
+       <string>Search</string>
+      </property>
+      <property name="toolTip">
+       <string>Switch to the Search fragment</string>
+      </property>
+     </action>
+     <action name="actionProperties">
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="icon">
+       <iconset theme="property">
+        <normaloff>.</normaloff>.</iconset>
+      </property>
+      <property name="text">
+       <string>Properties</string>
+      </property>
+      <property name="toolTip">
+       <string>Switch to the Property fragment</string>
+      </property>
+     </action>
+     <action name="actionClose">
+      <property name="icon">
+       <iconset theme="close">
+        <normaloff>.</normaloff>.</iconset>
+      </property>
+      <property name="text">
+       <string>Close</string>
+      </property>
+      <property name="toolTip">
+       <string>Close dialog</string>
+      </property>
+     </action>
+     <action name="actionStructureBrowser">
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="icon">
+       <iconset theme="reagent">
+        <normaloff>.</normaloff>.</iconset>
+      </property>
+      <property name="text">
+       <string>Structure browser</string>
+      </property>
+      <property name="toolTip">
+       <string>Switch to the Structure browser fragment</string>
+      </property>
+     </action>
+    </widget>
+   </item>
+  </layout>
  </widget>
- </item>
- </layout>
- </widget>
- 
- 
+ <customwidgets>
+  <customwidget>
+   <class>SearchFragment</class>
+   <extends>QWidget</extends>
+   <header>searchfragment.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StructureFragment</class>
+   <extends>QWidget</extends>
+   <header>structurefragment.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PropertyFragment</class>
+   <extends>QWidget</extends>
+   <header>propertyfragment.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
 </ui>

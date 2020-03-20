@@ -60,7 +60,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
     this->readCache();
 
     // set reagent name
-    this->ui->searchPage->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+    this->ui->searchFragment->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
 
     // check name
     // NOTE: this also re-enables extract button after unsuccessful query
@@ -126,14 +126,6 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
 
 
 
-
-
-
-
-
-
-
-
    // const QPixmap pixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
     //const QList<QLabel*> tips( QList<QLabel*>() << this->ui->cacheTipIcon << this->ui->searchTipIcon << this->ui->valuesTipIcon << this->ui->propertyTipIcon << this->ui->structureTipIcon );
     //for ( QLabel *tip : tips )
@@ -165,7 +157,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
             }
         }
 
-        this->ui->viewStack->setCurrentIndex( actions.indexOf( action ));
+        this->ui->fragmentHost->setCurrentIndex( actions.indexOf( action ));
         this->adjustSize();
     };
 
@@ -195,7 +187,7 @@ ExtractionDialog::~ExtractionDialog() {
  * @return
  */
 QString ExtractionDialog::name() const {
-    return this->ui->searchPage->identifier();
+    return this->ui->searchFragment->identifier();
 }
 
 /**
@@ -203,46 +195,7 @@ QString ExtractionDialog::name() const {
  * @return
  */
 int ExtractionDialog::id() const {
-    return this->ui->structurePage->cid();// cidEdit->text().toInt();
-}
-
-/**
- * @brief ExtractionDialog::readCache
- */
-void ExtractionDialog::readCache() {
-    // look for id map in cache
-    if ( Cache::instance()->contains( ExtractionDialog::IdMapContext, "data.map" )) {
-        // read serialized map
-        QByteArray byteArray( Cache::instance()->getData( ExtractionDialog::IdMapContext, "data.map", true ));
-        QBuffer buffer( &byteArray );
-        buffer.open( QIODevice::ReadOnly );
-        QDataStream in( &buffer );
-
-        // check version to avoid segfaults
-        // if we fail, new cache information will just be overwritten
-        int version;
-        in >> version;
-        if ( version != ExtractionDialog::Version )
-            return;
-
-        // finally read in the maps
-        in >> this->idNameMap >> this->nameIdMap;
-    }
-}
-
-/**
- * @brief ExtractionDialog::writeCache
- */
-void ExtractionDialog::writeCache() {
-    // serialize maps
-    QByteArray byteArray;
-    QBuffer buffer( &byteArray );
-    buffer.open( QIODevice::WriteOnly );
-    QDataStream out( &buffer );
-    out << ExtractionDialog::Version << this->idNameMap << this->nameIdMap;
-
-    // store maps into disk cache
-    Cache::instance()->insert( ExtractionDialog::IdMapContext, "data.map", byteArray, true );
+    return this->ui->structureFragment->cid();// cidEdit->text().toInt();
 }
 
 /**
@@ -346,7 +299,7 @@ void ExtractionDialog::sendDataRequest(){
 bool ExtractionDialog::parseFormulaRequest( const QByteArray &data ) {
     if ( !data.isEmpty()) {
         qDebug() << "    network->formula" << this->name();
-        Cache::instance()->insert( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id()), data );
+        Cache::instance()->insert( Cache::FormulaContext, QString( "%1.png" ).arg( this->id()), data );
         this->readFormula( data );
         return true;
     }
@@ -362,7 +315,7 @@ bool ExtractionDialog::parseFormulaRequest( const QByteArray &data ) {
 bool ExtractionDialog::parseDataRequest( const QByteArray &data ) {
     if ( !data.isEmpty()) {
         qDebug() << "    network->data" << this->name();
-        Cache::instance()->insert( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()), data, true );
+        Cache::instance()->insert( Cache::DataContext, QString( "%1.dat" ).arg( this->id()), data, true );
         this->readData( data );
         return true;
     }
@@ -438,7 +391,7 @@ bool ExtractionDialog::parseIdList( const QList<int> &idList ) {
  * @return
  */
 bool ExtractionDialog::getDataAndFormula( const int &id ) {
-    this->ui->structurePage->setup( QList<int>() << id );
+    this->ui->structureFragment->setup( QList<int>() << id );
 
     qDebug() << "  getDataAndFormula";
 
@@ -452,9 +405,9 @@ bool ExtractionDialog::getDataAndFormula( const int &id ) {
  * @brief ExtractionDialog::getFormula
  */
 void ExtractionDialog::getFormula() {
-    if ( Cache::instance()->contains( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id()))) {
+    if ( Cache::instance()->contains( Cache::FormulaContext, QString( "%1.png" ).arg( this->id()))) {
         qDebug() << "    cache->formula" << this->name();
-        this->readFormula( Cache::instance()->getData( ExtractionDialog::FormulaContext, QString( "%1.png" ).arg( this->id())));
+        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( this->id())));
         return;
     }
 
@@ -466,9 +419,9 @@ void ExtractionDialog::getFormula() {
  * @brief ExtractionDialog::getData
  */
 void ExtractionDialog::getData() {
-    if ( Cache::instance()->contains( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()))) {
+    if ( Cache::instance()->contains( Cache::DataContext, QString( "%1.dat" ).arg( this->id()))) {
         qDebug() << "    cache->data" << this->name();
-        this->readData( Cache::instance()->getData( ExtractionDialog::DataContext, QString( "%1.dat" ).arg( this->id()), true ));
+        this->readData( Cache::instance()->getData( Cache::DataContext, QString( "%1.dat" ).arg( this->id()), true ));
         return;
     }
 
@@ -857,6 +810,7 @@ void ExtractionDialog::on_actionFetch_triggered() {
     // TODO: completer for cached entries?
 
     // check for id in cache
+#if 0
     if ( this->nameIdMap.contains( this->name())) {
         const QList<int> idList( this->nameIdMap.values( this->name()));
         if ( !idList.isEmpty()) {
@@ -865,7 +819,7 @@ void ExtractionDialog::on_actionFetch_triggered() {
                 return;
         }
     }
-
+#endif
     // send initial search request to get an id
     this->sendInitialRequest();
 }

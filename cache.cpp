@@ -25,6 +25,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpressionValidator>
+#include <QBuffer>
+#include <QDataStream>
 
 /**
  * @brief Cache::Cache
@@ -192,4 +194,43 @@ bool Cache::validate( const QString &text, const QString &key ) {
     const QRegularExpression re( R"([a-zA-z0-9-+,.]+)" );
     const QRegularExpressionValidator validator( re );
     return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
+}
+
+/**
+ * @brief Cache::readReagentCache
+ */
+void Cache::readReagentCache() {
+    // look for id map in cache
+    if ( Cache::instance()->contains( Cache::IdMapContext, "data.map" )) {
+        // read serialized map
+        QByteArray byteArray( Cache::instance()->getData( Cache::IdMapContext, "data.map", true ));
+        QBuffer buffer( &byteArray );
+        buffer.open( QIODevice::ReadOnly );
+        QDataStream in( &buffer );
+
+        // check version to avoid segfaults
+        // if we fail, new cache information will just be overwritten
+        int version;
+        in >> version;
+        if ( version != Cache::Version )
+            return;
+
+        // finally read in the maps
+        in >> this->idNameMap >> this->nameIdMap;
+    }
+}
+
+/**
+ * @brief Cache::writeReagentCache
+ */
+void Cache::writeReagentCache() {
+    // serialize maps
+    QByteArray byteArray;
+    QBuffer buffer( &byteArray );
+    buffer.open( QIODevice::WriteOnly );
+    QDataStream out( &buffer );
+    out << Cache::Version << this->idNameMap << this->nameIdMap;
+
+    // store maps into disk cache
+    Cache::instance()->insert( Cache::IdMapContext, "data.map", byteArray, true );
 }
