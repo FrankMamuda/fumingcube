@@ -11,29 +11,36 @@
    </rect>
   </property>
   <widget class="QWidget" name="structureLayout">
-   <layout class="QGridLayout" name="page1verticalLayout">
+   <layout class="QGridLayout" name="page1verticalLayout" columnstretch="0,0,0,1">
     <item row="5" column="0">
-     <widget class="QLabel" name="cidLabel">
-      <property name="text">
-       <string>PubChem CID</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
      <widget class="QLabel" name="queryLabel">
       <property name="text">
        <string>Query name</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="7" column="1">
+     <widget class="QLineEdit" name="cidEdit">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
      <widget class="QLabel" name="IUPACLabel">
       <property name="text">
        <string>IUPAC name</string>
       </property>
      </widget>
     </item>
-    <item row="9" column="0" colspan="4">
+    <item row="7" column="0">
+     <widget class="QLabel" name="cidLabel">
+      <property name="text">
+       <string>PubChem CID</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0" colspan="4">
      <layout class="QHBoxLayout" name="structureTipLayout">
       <item>
        <widget class="QLabel" name="structureTipIcon">
@@ -61,21 +68,14 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
       </item>
      </layout>
     </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="cidEdit">
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0" colspan="4">
+    <item row="9" column="0" colspan="4">
      <widget class="Line" name="strucureLine">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="2">
+    <item row="3" column="0" colspan="4">
      <widget class="QLabel" name="structurePixmap">
       <property name="text">
        <string/>
@@ -91,40 +91,30 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
       </property>
      </widget>
     </item>
-    <item row="5" column="2">
-     <spacer name="cidSpacer">
+    <item row="1" column="0" colspan="4">
+     <widget class="QLabel" name="structureLabel">
+      <property name="text">
+       <string>Structural formula</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="4">
+     <spacer name="structureSpacer1">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>40</width>
-        <height>20</height>
+        <width>20</width>
+        <height>40</height>
        </size>
       </property>
      </spacer>
     </item>
-    <item row="4" column="1" colspan="2">
-     <widget class="QLineEdit" name="IUPACEdit">
-      <property name="text">
-       <string>titanium tetrachloride</string>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QLineEdit" name="queryEdit">
-      <property name="text">
-       <string>tetrachlorotitanium</string>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0" colspan="3">
+    <item row="4" column="0" colspan="4">
      <spacer name="structureSpacer0">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -137,25 +127,35 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
       </property>
      </spacer>
     </item>
-    <item row="1" column="0" colspan="3">
-     <widget class="QLabel" name="structureLabel">
+    <item row="5" column="1" colspan="3">
+     <widget class="QLineEdit" name="queryEdit">
       <property name="text">
-       <string>Structural formula</string>
+       <string>tetrachlorotitanium</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="3">
-     <spacer name="structureSpacer1">
+    <item row="6" column="1" colspan="3">
+     <widget class="QLineEdit" name="IUPACEdit">
+      <property name="text">
+       <string>titanium tetrachloride</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="2" colspan="2">
+     <spacer name="cidSpacer">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Horizontal</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>20</width>
-        <height>40</height>
+        <width>40</width>
+        <height>20</height>
        </size>
       </property>
      </spacer>

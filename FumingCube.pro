@@ -38,6 +38,7 @@ SOURCES += \
     cache.cpp \
     charactermap.cpp \
     extractiondialog.cpp \
+    fragmentnavigation.cpp \
     ghsbuilder.cpp \
     ghswidget.cpp \
     htmlutils.cpp \
@@ -93,6 +94,8 @@ HEADERS += \
     dockwidget.h \
     extractiondialog.h \
     extractionmodel.h \
+    fragment.h \
+    fragmentnavigation.h \
     ghsbuilder.h \
     ghspictograms.h \
     ghswidget.h \

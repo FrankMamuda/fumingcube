@@ -58,15 +58,12 @@
        <item>
         <widget class="QStackedWidget" name="fragmentHost">
          <property name="currentIndex">
-          <number>2</number>
+          <number>-1</number>
          </property>
-         <widget class="SearchFragment" name="searchFragment"/>
-         <widget class="StructureFragment" name="structureFragment"/>
-         <widget class="PropertyFragment" name="propertyFragment"/>
         </widget>
        </item>
        <item>
-        <widget class="Line" name="navigatonLine">
+        <widget class="Line" name="navigationLine">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -75,7 +72,7 @@
       </layout>
      </widget>
      <widget class="QStatusBar" name="statusbar"/>
-     <widget class="QToolBar" name="navigationBar">
+     <widget class="FragmentNavigation" name="fragmentNavigation">
       <property name="windowTitle">
        <string>toolBar</string>
       </property>
@@ -165,19 +162,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>SearchFragment</class>
-   <extends>QWidget</extends>
-   <header>searchfragment.h</header>
-  </customwidget>
-  <customwidget>
-   <class>StructureFragment</class>
-   <extends>QWidget</extends>
-   <header>structurefragment.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PropertyFragment</class>
-   <extends>QWidget</extends>
-   <header>propertyfragment.h</header>
+   <class>FragmentNavigation</class>
+   <extends>QToolBar</extends>
+   <header>fragmentnavigation.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -21,7 +21,7 @@
 /*
  * includes
  */
-#include <QMainWindow>
+#include "fragment.h"
 #include "networkmanager.h"
 
 /**
@@ -34,7 +34,7 @@ namespace Ui {
 /**
  * @brief The StructureFragment class
  */
-class StructureFragment : public QMainWindow {
+class StructureFragment final : public Fragment {
     Q_OBJECT
     Q_DISABLE_COPY( StructureFragment )
 
@@ -71,9 +71,9 @@ public slots:
     void error( const QString &, NetworkManager::Types type, const QString &errorString );
     void setSearchMode();
     void setup( QList<int> list );
+    void getInfo();
 
 private slots:
-    void getInfo();
     void getFormula( int cid );
     void getName( int cid );
     void readFormula( const QByteArray &data );

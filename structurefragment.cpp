@@ -32,13 +32,15 @@
 #include "variable.h"
 #include <QDir>
 #include <utility>
+#include "extractiondialog.h"
+#include "searchfragment.h"
 
 /**
  * @brief StructureFragment::StructureFragment
  * @param cidList
  * @param parent
  */
-StructureFragment::StructureFragment( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::StructureFragment ) {
+StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui( new Ui::StructureFragment ) {
     this->ui->setupUi( this );  
 }
 
@@ -138,7 +140,7 @@ void StructureFragment::getName( const int cid ) {
     if ( QFileInfo::exists( cache )) {
         QFile file( cache );
         if ( file.open( QIODevice::ReadOnly )) {
-            this->ui->queryEdit->setText( QString( file.readAll()));
+            this->ui->IUPACEdit->setText( QString( file.readAll()));
             file.close();
             this->setStatus( this->status() & ~FetchName );
             this->buttonTest();
@@ -166,6 +168,11 @@ void StructureFragment::readFormula( const QByteArray &data ) {
     const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const bool darkMode = Variable::isEnabled( "darkMode" );
     this->ui->structurePixmap->setPixmap( darkMode ? PixmapUtils::invert( cropped ) : cropped );
+
+    // trigger size adjustment
+    this->ui->structurePixmap->hide();
+    this->ui->structurePixmap->show();
+    this->host()->adjustSize();
 }
 
 /**
@@ -180,6 +187,8 @@ void StructureFragment::setSearchMode() {
  * @param list
  */
 void StructureFragment::setup( QList<int> list ) {
+    this->ui->queryEdit->setText( this->host()->searchFragment()->identifier());
+
     this->cidList = std::move( list );
 
     // make cache dir
@@ -218,8 +227,6 @@ void StructureFragment::setup( QList<int> list ) {
                                SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
                                this,
                                SLOT( error( const QString &, NetworkManager::Types, const QString & )));
-
-    this->getInfo();
 }
 
 /**
@@ -274,11 +281,14 @@ QString StructureFragment::name() const {
  */
 void StructureFragment::getInfo() {
     this->ui->IUPACEdit->setText( StructureFragment::tr( "loading..." ));
+
     this->ui->structurePixmap->setText( StructureFragment::tr( "fetching formula..." ));
 
     this->setStatus( FetchName | FetchFormula );
 
     const int cid = cidList.at( this->index());
+    this->ui->cidEdit->setText( QString::number( cid ));
+
     this->getName( cid );
     this->getFormula( cid );
 }

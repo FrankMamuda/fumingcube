@@ -21,7 +21,7 @@
 /*
  * includes
  */
-#include "fragment.h"
+#include <QMainWindow>
 
 /*
  * classes
@@ -29,37 +29,32 @@
 class ExtractionDialog;
 
 /**
- * @brief The Ui namespace
+ * @brief The Fragment class
  */
-namespace Ui {
-class SearchFragment;
-}
-
-/**
- * @brief The SearchFragment class
- */
-class SearchFragment final : public Fragment {
+class Fragment : public QMainWindow {
     Q_OBJECT
+    Q_DISABLE_COPY( Fragment )
 
 public:
-    explicit SearchFragment( QWidget *parent = nullptr );
-    ~SearchFragment();
-    [[nodiscard]] QString identifier( bool clean = false ) const;
+    explicit Fragment( QWidget *parent = nullptr ) : QMainWindow( parent ) {}
+
+    // disable move
+    Fragment( Fragment&& ) = delete;
+    Fragment& operator=( Fragment&& ) = delete;
+
+    /**
+     * @brief host
+     * @return
+     */
+    [[nodiscard]] ExtractionDialog *host() const { return this->m_host; }
 
 public slots:
-    void setIdentifier( const QString &string );
-
-signals:
-    void status( const QString &message );
- //   void idListReady( )
-
-private slots:
-    void sendInitialRequest();
-    void sendSimilarRequest();
-    bool parseIdList( const QList<int> &idList );
-    bool parseIdListRequest( const QByteArray &data );
-    void toggleControls( bool enabled );
+    /**
+     * @brief setHost
+     * @param host
+     */
+    void setHost( ExtractionDialog *host ) { this->m_host = host; }
 
 private:
-    Ui::SearchFragment *ui;
+    ExtractionDialog *m_host;
 };

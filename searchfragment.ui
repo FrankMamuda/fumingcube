@@ -124,7 +124,7 @@ In the case of multiple matches, you will be able to narrow down your query usin
     <item row="2" column="1">
      <widget class="QLineEdit" name="identifierEdit">
       <property name="text">
-       <string/>
+       <string>dimethylbenzene</string>
       </property>
       <property name="placeholderText">
        <string>name or CAS number</string>
@@ -164,7 +164,8 @@ In the case of multiple matches, you will be able to narrow down your query usin
   </widget>
   <action name="actionFetch">
    <property name="icon">
-    <iconset theme="extract"/>
+    <iconset theme="extract">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Fetch</string>
@@ -175,7 +176,8 @@ In the case of multiple matches, you will be able to narrow down your query usin
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset theme="remove"/>
+    <iconset theme="remove">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Clear cache</string>
@@ -186,7 +188,8 @@ In the case of multiple matches, you will be able to narrow down your query usin
   </action>
   <action name="actionDeleteCache">
    <property name="icon">
-    <iconset theme="remove"/>
+    <iconset theme="remove">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Delete all cache</string>

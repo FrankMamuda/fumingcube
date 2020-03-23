@@ -23,20 +23,15 @@
  * includes
  */
 #include <QDialog>
-#include <QLabel>
-#include <QLayout>
-#include <QMutex>
-#include <qtoolbutton.h>
-#include "networkmanager.h"
+#include <QStackedWidget>
 #include "table.h"
-#include "tag.h"
-#include "ghswidget.h"
-#include "nfpawidget.h"
 
-//
-// classes
-//
-class ExtractionModel;
+/*
+ * classes
+ */
+class SearchFragment;
+class StructureFragment;
+class PropertyFragment;
 
 /**
  * @brief The Ui namespace
@@ -66,70 +61,19 @@ public:
      * @return
      */
     [[nodiscard]] Id reagentId() const { return this->m_reagentId; }
-
-    /**
-     * @brief The StatusOption enum
-     */
-    enum StatusOption {
-        Idle = 0x0,
-        Busy = 0x1,
-        Error = 0x2
-    };
-    Q_DECLARE_FLAGS( Status, StatusOption )
-
-    /**
-     * @brief status
-     * @return
-     */
-    [[nodiscard]] Status status() const { return this->m_status; }
-
-    void readData( const QByteArray &uncompressed ) const;
-
-    [[nodiscard]] QString cachedName() const;
-
-    bool readFromCache();
-
-
-    [[nodiscard]] QString name() const;
-    [[nodiscard]] int id() const;
-
+    [[nodiscard]] SearchFragment *searchFragment() const;
+    [[nodiscard]] StructureFragment *structureFragment() const;
+    [[nodiscard]] PropertyFragment *propertyFragment() const;
+    [[nodiscard]] QStackedWidget *fragmentHost() const;
 
 public slots:
-    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Types, const QString & );
-    void readFormula( const QByteArray &data );
-    /*void getFormula( const QString &cid );
-    void getSimilar( const QList<int> &cidListInt );
-    void buttonTest();*/
-    void sendInitialRequest();
-    void sendSimilarRequest();
-    void sendFormulaRequest();
-    void sendDataRequest();
-    bool parseFormulaRequest( const QByteArray &data );
-    bool parseDataRequest( const QByteArray &data );
-    bool parseIdListRequest( const QByteArray &data );
-    bool parseIdList( const QList<int> &idList );
-    bool getDataAndFormula( const int &id );
-    void getFormula();
-    void getData();
+    void setCurrentFragment( QWidget *widget );
 
-private slots:
-    void readCache();
-    void writeCache();
-    void on_actionFetch_triggered();
-    //void on_clearCacheButton_clicked();
-
-    /**
-     * @brief setStatus
-     * @param status
-     */
-    void setStatus( const ExtractionDialog::Status &status ) { this->m_status = status; }
 private:
     Ui::ExtractionDialog *ui;
-    ExtractionModel *model = nullptr;
     Id m_reagentId = Id::Invalid;
-    QNetworkRequest request;
-    QStringList cidList;
-    mutable QMutex mutex;
-    Status m_status = Idle;
+
+    SearchFragment *m_searchFragment;
+    StructureFragment *m_structureFragment;
+    PropertyFragment *m_propertyFragment;
 };

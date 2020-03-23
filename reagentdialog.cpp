@@ -159,13 +159,13 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
         ReagentDialog::connect( this->ui->referenceEdit, &TextEdit::entered, [ this ]() {
             this->ui->editorToolBar->setEditor( this->ui->referenceEdit );
         } );
+
+        // set completer
+        this->ui->nameEdit->setCompleter( completer );
     }
 
     // focus on the name editor to begin with
     this->ui->nameEdit->setFocus();
-
-    // set completer
-    this->ui->nameEdit->setCompleter( completer );
 
     // setup reference lock button
     auto checkState = [ this ]( bool checked ) {

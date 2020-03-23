@@ -29,6 +29,7 @@
  */
 class Cache : public QObject {
     Q_OBJECT
+    friend class SearchFragment;
 
 public:
     constexpr static const char *FormulaContext = "formula";
