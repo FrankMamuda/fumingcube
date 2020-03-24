@@ -46,15 +46,15 @@ public:
      * @brief host
      * @return
      */
-    [[nodiscard]] ExtractionDialog *host() const { return this->m_host; }
+    [[nodiscard]] QWidget *host() const { return this->m_host; }
 
 public slots:
     /**
      * @brief setHost
      * @param host
      */
-    void setHost( ExtractionDialog *host ) { this->m_host = host; }
+    void setHost( QWidget *host ) { this->m_host = host; }
 
 private:
-    ExtractionDialog *m_host;
+    QWidget *m_host;
 };

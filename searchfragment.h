@@ -22,11 +22,9 @@
  * includes
  */
 #include "fragment.h"
+#include "extractiondialog.h"
 
-/*
- * classes
- */
-class ExtractionDialog;
+#include <QKeyEvent>
 
 /**
  * @brief The Ui namespace
@@ -40,11 +38,18 @@ class SearchFragment;
  */
 class SearchFragment final : public Fragment {
     Q_OBJECT
+    Q_DISABLE_COPY( SearchFragment )
 
 public:
     explicit SearchFragment( QWidget *parent = nullptr );
+
+    // disable move
+    SearchFragment( SearchFragment&& ) = delete;
+    SearchFragment& operator=( SearchFragment&& ) = delete;
+
     ~SearchFragment();
     [[nodiscard]] QString identifier( bool clean = false ) const;
+    [[nodiscard]] ExtractionDialog *host() const { return qobject_cast<ExtractionDialog *>( Fragment::host()); }
 
 public slots:
     void setIdentifier( const QString &string );

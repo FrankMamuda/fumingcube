@@ -23,6 +23,8 @@
  */
 #include <QStackedWidget>
 #include <QToolBar>
+#include "fragment.h"
+#include <QDebug>
 
 /**
  * @brief The FragmentNavigation class
@@ -44,7 +46,38 @@ public:
      * @return
      */
     [[nodiscard]] QStackedWidget *fragmentHost() const { return this->m_fragmentHost; }
-    [[nodiscard]] QAction *addFragment( const QString &name, const QIcon &icon, QWidget *widget );
+
+    /**
+     * @brief addFragmentX
+     * @param name
+     * @param icon
+     * @param parent
+     * @param toolTip
+     * @return
+     */
+    template<class T>
+    [[nodiscard]] T *addFragment( const QString &name, const QIcon &icon, QWidget *parent = nullptr, const QString &toolTip = QString()) {
+        // abort if fragment host or widget is invalid
+        if ( this->fragmentHost() == nullptr )
+            return nullptr;
+
+        // get index and store fragment
+        Fragment *fragment( new T());
+        this->fragmentHost()->addWidget( fragment );
+        fragment->setHost( parent );
+
+        // create an action
+        QAction *action( new QAction( icon, name ));
+        this->insertAction( this->rightSpacer, action );
+        action->setCheckable( true );
+        action->setToolTip( toolTip );
+        this->actionFragmentMap[action] = fragment;
+        this->fragmentActionMap[fragment] = action;
+
+        // connect action
+        QAction::connect( action, &QAction::toggled, this, [ this, action ]() { this->setCurrentFragment( action ); } );
+        return qobject_cast<T*>( fragment );
+    }
 
 public slots:
     /**
@@ -53,8 +86,13 @@ public slots:
      */
     void setFragmentHost( QStackedWidget *fragmentHost ) { this->m_fragmentHost = fragmentHost; }
     void setCurrentFragment( QAction *action );
+    void setCurrentFragment( Fragment *fragment );
+    void installCloseButton( QWidget *parent = nullptr );
+    void setFragmentEnabled( Fragment *fragment, bool enabled );
 
 private:
     QStackedWidget *m_fragmentHost = nullptr;
-    QMap<QAction*, QWidget*> map;
+    QMap<QAction*, Fragment*> actionFragmentMap;
+    QMap<Fragment*, QAction*> fragmentActionMap;
+    QAction *rightSpacer = nullptr;
 };

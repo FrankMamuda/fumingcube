@@ -41,9 +41,9 @@
      </widget>
     </item>
     <item row="11" column="0" colspan="4">
-     <layout class="QHBoxLayout" name="structureTipLayout">
+     <layout class="QHBoxLayout" name="tipLayout">
       <item>
-       <widget class="QLabel" name="structureTipIcon">
+       <widget class="QLabel" name="tipIcon">
         <property name="maximumSize">
          <size>
           <width>16</width>
@@ -56,7 +56,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="structureTipLabel">
+       <widget class="QLabel" name="tipLabel">
         <property name="text">
          <string>This page displays similiar structures (in the case when exact match could not be found.
 Go through the reagent list using 'Next' and 'Previous' buttons and press 'Select' to continue with property extraction in the next page.</string>
@@ -69,7 +69,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
      </layout>
     </item>
     <item row="9" column="0" colspan="4">
-     <widget class="Line" name="strucureLine">
+     <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -102,7 +102,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
      </widget>
     </item>
     <item row="2" column="0" colspan="4">
-     <spacer name="structureSpacer1">
+     <spacer name="spacer1">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -115,7 +115,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
      </spacer>
     </item>
     <item row="4" column="0" colspan="4">
-     <spacer name="structureSpacer0">
+     <spacer name="spacer0">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -162,7 +162,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="structureToolbar">
+  <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar_2</string>
    </property>

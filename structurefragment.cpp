@@ -34,6 +34,9 @@
 #include <utility>
 #include "extractiondialog.h"
 #include "searchfragment.h"
+#include "cache.h"
+#include "propertyfragment.h"
+#include "reagentdialog.h"
 
 /**
  * @brief StructureFragment::StructureFragment
@@ -41,7 +44,26 @@
  * @param parent
  */
 StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui( new Ui::StructureFragment ) {
-    this->ui->setupUi( this );  
+    this->ui->setupUi( this );
+
+    // done action leads to the property fragment
+    QAction::connect( this->ui->actionSelect, &QAction::triggered, this, [ this ]() {
+        this->host()->setCurrentFragment( this->host()->propertyFragment());
+    } );
+
+    // add reagent lambda
+    auto addDialog = [ this ]( const QString &name ) {
+        // TODO: special mode for this
+        ReagentDialog rd( this, name, this->queryName(), ReagentDialog::EditMode );
+        if ( rd.exec() == QDialog::Accepted ) {
+            // TODO: add reagent
+            this->host()->setCurrentFragment( this->host()->propertyFragment());
+        }
+    };
+
+    // add action leads to the ReagentDialog
+    QAction::connect( this->ui->actionAddReagent, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->queryName()); } );// std::bind( addDialog, this->queryName()));
+    QAction::connect( this->ui->actionAddIUPAC, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->IUPACName()); } );//std::bind( addDialog, this->ui->IUPACEdit->text()));
 }
 
 /**
@@ -49,108 +71,85 @@ StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui
  */
 StructureFragment::~StructureFragment() {
     StructureFragment::disconnect( NetworkManager::instance(),
-            SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
-            this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+                                   SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
+                                   this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
     StructureFragment::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
-            this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+                                   this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+    QAction::disconnect( this->ui->actionSelect, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionAddReagent, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionAddIUPAC, &QAction::triggered, this, nullptr );
 
     delete this->ui;
 }
 
 /**
- * @brief StructureFragment::replyReceived
- * @param url
- * @param type
- * @param userData
- * @param data
+ * @brief StructureFragment::keyPressEvent
+ * @param event
  */
-void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &,
-                                      const QByteArray &data ) {
-    const QString cache( this->path() + "/" + QString::number( this->cidList.at( this->index())));
-
-    switch ( type ) {
-        case NetworkManager::NoType:
-        case NetworkManager::CIDRequestInitial:
-        case NetworkManager::DataRequest:
-        case NetworkManager::FormulaRequest:
-            break;
-
-        case NetworkManager::IUPACName: {
-            QFile file( cache );
-            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-                file.write( data.constData(), data.length());
-                file.close();
-            }
-
-            this->ui->IUPACEdit->setText( QString( data ));
-            this->setStatus( this->status() & ~FetchName );
-            this->buttonTest();
-            qDebug() << "status rmn" << this->status();
-        }
-            break;
-
-        case NetworkManager::FormulaRequestBrowser: {
-            QFile file( cache + ".png" );
-            if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
-                file.write( data.constData(), data.length());
-                file.close();
-            }
-
-            this->readFormula( data );
-            this->setStatus( this->status() & ~FetchFormula );
-            this->buttonTest();
-            qDebug() << "status rmf" << this->status();
-        }
-            break;
-
-        case NetworkManager::CIDRequestSimilar:
-        case NetworkManager::FavIcon:
-            break;
+void StructureFragment::keyPressEvent( QKeyEvent *event ) {
+    if (( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) && this->host()->fragmentHost()->currentWidget() == this ) {
+        if ( this->host()->mode() == ExtractionDialog::SearchMode )
+            this->ui->actionSelect->trigger();
+        else if ( this->host()->mode() == ExtractionDialog::ExistingMode )
+            this->ui->actionAddReagent->trigger();
     }
+
+    Fragment::keyReleaseEvent( event );
 }
 
 /**
- * @brief StructureFragment::getFormula
- * @param cid
+ * @brief StructureFragment::sendFormulaRequest
  */
-void StructureFragment::getFormula( const int cid ) {
-    const QString cache( this->path() + "/" + QString::number( cid ) + ".png" );
-    if ( QFileInfo::exists( cache )) {
-        QFile file( cache );
-        if ( file.open( QIODevice::ReadOnly )) {
-            this->readFormula( file.readAll());
-            file.close();
-            this->setStatus( this->status() & ~FetchFormula );
-            this->buttonTest();
-            return;
-        }
-    }
-
-    NetworkManager::instance()->execute(
-            QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( cid ),
-            NetworkManager::FormulaRequestBrowser );
+void StructureFragment::sendFormulaRequest() {
+    qDebug() << "  request formula" << this->queryName();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->cid()), NetworkManager::FormulaRequestBrowser );
 }
 
 /**
- * @brief StructureFragment::getName
- * @param cid
+ * @brief StructureFragment::sendIUPACNameRequest
  */
-void StructureFragment::getName( const int cid ) {
-    const QString cache( this->path() + "/" + QString::number( cid ));
-    if ( QFileInfo::exists( cache )) {
-        QFile file( cache );
-        if ( file.open( QIODevice::ReadOnly )) {
-            this->ui->IUPACEdit->setText( QString( file.readAll()));
-            file.close();
-            this->setStatus( this->status() & ~FetchName );
-            this->buttonTest();
-            return;
-        }
+void StructureFragment::sendIUPACNameRequest() {
+    qDebug() << "  request name" << this->queryName();
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::IUPACName );
+}
+
+/**
+ * @brief StructureFragment::getNameAndFormula
+ */
+void StructureFragment::getNameAndFormula() {
+    // abort if id list is empty
+    if ( this->cidList.isEmpty())
+        return;
+
+    // update status visually
+    this->ui->IUPACEdit->setText( StructureFragment::tr( "loading..." ));
+    this->ui->structurePixmap->setText( StructureFragment::tr( "fetching formula..." ));
+    this->ui->cidEdit->clear();
+
+    // update status
+    this->setStatus( FetchName | FetchFormula );
+
+    // get current id (selected reagent)
+    const int cid = cidList.at( this->index());
+    this->ui->cidEdit->setText( QString::number( cid ));
+
+    // get formula
+    if ( Cache::instance()->contains( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid()))) {
+        qDebug() << "    cache->formula (BROWSER)" << this->queryName();
+        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid())));
+    } else {
+        // formula not in the cache, fetch it
+        this->sendFormulaRequest();
     }
 
-    NetworkManager::instance()->execute(
-            QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( cid ),
-            NetworkManager::IUPACName );
+    // get IUPAC name
+    if ( Cache::instance()->contains( Cache::IUPACContext, QString( "%1" ).arg( this->cid()))) {
+        qDebug() << "    cache->iupac (BROWSER)" << this->queryName();
+        this->readIUPACName( Cache::instance()->getData( Cache::IUPACContext, QString( "%1" ).arg( this->cid())));
+    } else {
+        // IUPAC name not in the cache, fetch it
+        this->sendIUPACNameRequest();
+    }
 }
 
 /**
@@ -173,60 +172,120 @@ void StructureFragment::readFormula( const QByteArray &data ) {
     this->ui->structurePixmap->hide();
     this->ui->structurePixmap->show();
     this->host()->adjustSize();
+
+    this->setStatus( this->status() & ~FetchFormula );
+    this->buttonTest();
 }
 
 /**
- * @brief StructureFragment::setSearchMode
+ * @brief StructureFragment::readIUPACName
+ * @param name
  */
-void StructureFragment::setSearchMode() {
-    //this->ui->buttonBox->setStandardButtons( QDialogButtonBox::Save | QDialogButtonBox::Close );
+void StructureFragment::readIUPACName( const QString &name ) {
+    this->ui->IUPACEdit->setText( name );
+
+    this->setStatus( this->status() & ~FetchName );
+    this->buttonTest();
 }
 
 /**
- * @brief StructureFragment::setup
- * @param list
+ * @brief StructureFragment::parseFormulaRequest
+ * @param data
+ * @return
  */
-void StructureFragment::setup( QList<int> list ) {
-    this->ui->queryEdit->setText( this->host()->searchFragment()->identifier());
-
-    this->cidList = std::move( list );
-
-    // make cache dir
-    this->m_path = QDir( QDir::homePath() + "/" + Main::Path + "/cache/browser/" ).absolutePath();
-    const QDir dir( this->path());
-    if ( !dir.exists()) {
-        dir.mkpath( dir.absolutePath());
-        if ( !dir.exists())
-            return;
+bool StructureFragment::parseFormulaRequest( const QByteArray &data ) {
+    if ( !data.isEmpty()) {
+        qDebug() << "    network->formula (browser)" << this->queryName();
+        Cache::instance()->insert( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid()), data );
+        this->readFormula( data );
+        return true;
     }
 
-    if ( this->cidList.isEmpty())
-        return;
+    return false;
+}
 
-    this->ui->cidEdit->setText( QString::number( this->cidList.first()));
-    this->buttonTest();
+/**
+ * @brief StructureFragment::parseIUPACNameRequest
+ * @param data
+ * @return
+ */
+bool StructureFragment::parseIUPACNameRequest( const QByteArray &data ) {
+    if ( !data.isEmpty()) {
+        const QString name( data );
+        qDebug() << "    network->name (browser)" << this->queryName();
+        Cache::instance()->insert( Cache::IUPACContext, QString( "%1" ).arg( this->cid()), data );
+        this->readIUPACName( name );
+        return true;
+    }
 
-    QAction::connect( this->ui->actionPrevious, &QAction::triggered, [ this ]() {
-        this->m_index--;
-        this->buttonTest();
-        this->getInfo();
-    } );
+    return false;
+}
 
-    QAction::connect( this->ui->actionNext, &QAction::triggered, [ this ]() {
-        this->m_index++;
-        this->buttonTest();
-        this->getInfo();
-    } );
+/**
+ * @brief StructureFragment::cid
+ * @return
+ */
+int StructureFragment::cid() const {
+    return this->cidList.isEmpty() ? -1 : this->cidList.at( this->index());
+}
 
-    StructureFragment::connect( NetworkManager::instance(),
-                               SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
-                               this,
-                               SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+/**
+ * @brief StructureFragment::queryName
+ * @return
+ */
+QString StructureFragment::queryName() const {
+    QString name( this->ui->queryEdit->text().remove( "\n" ).simplified());
 
-    StructureFragment::connect( NetworkManager::instance(),
-                               SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
-                               this,
-                               SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+    if ( !name.isEmpty())
+        name.replace( 0, 1, name.at( 0 ).toUpper());
+
+    return name;
+}
+
+/**
+ * @brief StructureFragment::IUPACName
+ * @return
+ */
+QString StructureFragment::IUPACName() const {
+    return this->ui->IUPACEdit->text().remove( "\n" ).simplified();
+}
+
+/**
+ * @brief StructureFragment::replyReceived
+ * @param url
+ * @param type
+ * @param userData
+ * @param data
+ */
+void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+    switch ( type ) {
+    case NetworkManager::IUPACName:
+        qDebug() << "network->IUPACName" << this->queryName();
+        if ( !this->parseIUPACNameRequest( data )) {
+            qDebug() << "  parseIUPACNameRequest failed";
+
+            // TODO: report error
+            this->setStatus( Error );
+            //emit this->status( "Error" );
+            return;
+        }
+        break;
+
+    case NetworkManager::FormulaRequestBrowser:
+        qDebug() << "network->formula (browser)" << this->queryName();
+        if ( !this->parseFormulaRequest( data )) {
+            qDebug() << "  parseFormulaRequest failed (browser)";
+
+            // TODO: report error
+            this->setStatus( Error );
+            //emit this->status( "Error" );
+            return;
+        }
+        break;
+
+    default:
+        break;
+    }
 }
 
 /**
@@ -247,48 +306,68 @@ void StructureFragment::buttonTest() {
 }
 
 /**
+ * @brief StructureFragment::setup
+ * @param list
+ */
+void StructureFragment::setup( const QList<int> &list ) {
+    // hide/show actions according to the mode
+    if ( this->host()->mode() == ExtractionDialog::SearchMode ) {
+        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionSelect );
+        this->ui->toolBar->removeAction( this->ui->actionAddReagent );
+        this->ui->toolBar->removeAction( this->ui->actionAddIUPAC );
+    } else if ( this->host()->mode() == ExtractionDialog::ExistingMode ) {
+        this->ui->toolBar->removeAction( this->ui->actionSelect );
+        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddReagent );
+        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddIUPAC );
+    }
+
+    // reset status to idle
+    this->setStatus( Idle );
+
+    // copy identifier from search fragment
+    this->ui->queryEdit->setText( this->host()->searchFragment()->identifier());
+
+    // check list of ids provided by the search fragment
+    this->cidList = list;
+    if ( this->cidList.isEmpty())
+        return;
+
+    // select the first id and update previous/next button status
+    this->ui->cidEdit->setText( QString::number( this->cidList.first()));
+    this->buttonTest();
+
+    // connect prev button
+    QAction::connect( this->ui->actionPrevious, &QAction::triggered, [ this ]() {
+        this->m_index--;
+        this->buttonTest();
+        this->getNameAndFormula();
+    } );
+
+    // connect next button
+    QAction::connect( this->ui->actionNext, &QAction::triggered, [ this ]() {
+        this->m_index++;
+        this->buttonTest();
+        this->getNameAndFormula();
+    } );
+
+    // setup finished connection to the NetworkManager
+    StructureFragment::connect( NetworkManager::instance(),
+                                SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
+                                this,
+                                SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
+
+    // setup error connection to the NetworkManager
+    StructureFragment::connect( NetworkManager::instance(),
+                                SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
+                                this,
+                                SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+}
+
+/**
  * @brief StructureFragment::error
  */
 void StructureFragment::error( const QString &, NetworkManager::Types, const QString &errorString ) {
     this->setStatus( Error );
     //this->ui->name->setText( StructureFragment::tr( "Error" ));
     this->ui->structurePixmap->setText( errorString );
-}
-
-/**
- * @brief StructureFragment::cid
- * @return
- */
-int StructureFragment::cid() const {
-    return this->cidList.isEmpty() ? -1 : this->cidList.at( this->index());
-}
-
-/**
- * @brief StructureFragment::name
- * @return
- */
-QString StructureFragment::name() const {
-    QString name( this->ui->queryEdit->text().remove( "\n" ).simplified());
-
-    if ( !name.isEmpty())
-        name.replace( 0, 1, name.at( 0 ).toUpper());
-
-    return name;
-}
-
-/**
- * @brief StructureFragment::getInfo
- */
-void StructureFragment::getInfo() {
-    this->ui->IUPACEdit->setText( StructureFragment::tr( "loading..." ));
-
-    this->ui->structurePixmap->setText( StructureFragment::tr( "fetching formula..." ));
-
-    this->setStatus( FetchName | FetchFormula );
-
-    const int cid = cidList.at( this->index());
-    this->ui->cidEdit->setText( QString::number( cid ));
-
-    this->getName( cid );
-    this->getFormula( cid );
 }

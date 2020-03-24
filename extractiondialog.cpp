@@ -21,37 +21,22 @@
  * includes
  */
 #include "extractiondialog.h"
-#include "extractionmodel.h"
-#include "property.h"
-#include "reagent.h"
-#include "textedit.h"
 #include "ui_extractiondialog.h"
-#include <QBuffer>
-#include <QButtonGroup>
-#include <QDir>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include "tag.h"
-#include "propertywidget.h"
-#include "imageutils.h"
-#include "structurefragment.h"
-#include "pixmaputils.h"
-#include "htmlutils.h"
-#include "listutils.h"
 #include "cache.h"
+#include "fragmentnavigation.h"
+#include "fragment.h"
 #include "searchfragment.h"
+#include "structurefragment.h"
 #include "propertyfragment.h"
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
-ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const int cid ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
+ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &, const Modes &mode ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_mode( mode )/*, m_reagentId( reagentId )*/ {
     // setup ui and get rid of verticalHeader in property view
     this->ui->setupUi( this );
     this->ui->ExtractionDialogContents->setWindowFlags( Qt::Widget );
-
 
 #if 0
     this->buttonTest();
@@ -72,62 +57,20 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
     } 
 #endif
 
-#if 0
-    auto leftSpacer( new QWidget( this ));
-    leftSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
-    auto rightSpacer( new QWidget( this ));
-    rightSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    this->m_mode = ExistingMode;
 
-    QToolBar *toolbar( this->ui->navigationBar );
-    toolbar->insertWidget( this->ui->actionSearch, leftSpacer );
-    toolbar->insertWidget( this->ui->actionClose, rightSpacer );
+    this->fragmentNavigation()->setFragmentHost( this->fragmentHost());
+    this->m_searchFragment = this->fragmentNavigation()->addFragment<SearchFragment>( ExtractionDialog::tr( "Search" ), QIcon::fromTheme( "find" ), this, ExtractionDialog::tr( "Switch to the Search fragment" ));
+    this->m_structureFragment = this->fragmentNavigation()->addFragment<StructureFragment>( ExtractionDialog::tr( "Structure\nbrowser" ), QIcon::fromTheme( "reagent" ), this, ExtractionDialog::tr( "Switch to the Structure browser fragment" ));
+    this->m_propertyFragment = this->fragmentNavigation()->addFragment<PropertyFragment>( ExtractionDialog::tr( "Properties" ), QIcon::fromTheme( "property" ), this, ExtractionDialog::tr( "Switch to the Property extraction fragment" ));
+    this->setCurrentFragment( this->searchFragment());
+    this->fragmentNavigation()->installCloseButton( this );
 
-    const QList<QAction*> actions( QList<QAction*>() << this->ui->actionSearch << this->ui->actionStructureBrowser << this->ui->actionProperties );
-    auto checkState = [ this, actions ]( QAction *action, bool checked ) {
-        if ( !checked ) {
-            action->blockSignals( true );
-            action->setChecked( true );
-            action->blockSignals( false );
-            return;
-        }
+    this->setFragmentEnabled( this->structureFragment(), false );
+    this->setFragmentEnabled( this->propertyFragment(), false );
 
-        for ( QAction *otherAction : actions ) {
-            if ( otherAction != action ) {
-                otherAction->blockSignals( true );
-                otherAction->setChecked( false );
-                otherAction->blockSignals( false );
-            }
-        }
-
-        this->ui->fragmentHost->setCurrentIndex( actions.indexOf( action ));
-        this->adjustSize();
-    };
-
-    for ( QAction *action : actions )
-        QAction::connect( action, &QAction::toggled, this, [ action, checkState ]( bool checked ) { checkState( action, checked ); } );
-
-    this->ui->actionSearch->setChecked( true );
-
-#endif
-
-
-    this->m_searchFragment = new SearchFragment( this );
-    this->m_structureFragment = new StructureFragment( this );
-    this->m_propertyFragment = new PropertyFragment( this );
-
-
-    this->searchFragment()->setHost( this );
-    this->structureFragment()->setHost( this );
-    this->propertyFragment()->setHost( this );
-
-    this->ui->fragmentNavigation->setFragmentHost( this->ui->fragmentHost );
-    QAction *searchAction( this->ui->fragmentNavigation->addFragment( ExtractionDialog::tr( "Search" ), QIcon::fromTheme( "find" ), this->searchFragment()));
-    QAction *structureAction( this->ui->fragmentNavigation->addFragment( ExtractionDialog::tr( "Structure browser" ), QIcon::fromTheme( "reagent" ), this->structureFragment()));
-
-    this->ui->fragmentNavigation->setCurrentFragment( searchAction );
     // set reagent name
     //this->searchFragment()->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
-
 }
 
 /**
@@ -171,35 +114,29 @@ QStackedWidget *ExtractionDialog::fragmentHost() const {
 }
 
 /**
- * @brief ExtractionDialog::setCurrentFragment
- * @param widget
+ * @brief ExtractionDialog::fragmentNavigation
+ * @return
  */
-void ExtractionDialog::setCurrentFragment( QWidget *widget ) {
-    this->ui->fragmentHost->setCurrentWidget( widget );
+FragmentNavigation *ExtractionDialog::fragmentNavigation() const {
+    return this->ui->fragmentNavigation;
 }
 
 /**
  * @brief ExtractionDialog::setCurrentFragment
  * @param fragment
  */
-/*void ExtractionDialog::setCurrentFragment( const ExtractionDialog::Fragments &fragment ) {
-    switch ( fragment ) {
-    case Search:
-        this->ui->fragmentHost->setCurrentWidget( this->searchFragment());
-        break;
+void ExtractionDialog::setCurrentFragment( Fragment *fragment ) {
+    this->fragmentNavigation()->setCurrentFragment( fragment );
+}
 
-    case Structure:
-        this->ui->fragmentHost->setCurrentWidget( this->structureFragment());
-        break;
-
-    case Property:
-        this->ui->fragmentHost->setCurrentWidget( this->propertyFragment());
-        break;
-
-    case NoFragment:
-        ;
-    }
-}*/
+/**
+ * @brief ExtractionDialog::setFragmentEnabled
+ * @param fragment
+ * @param enabled
+ */
+void ExtractionDialog::setFragmentEnabled( Fragment *fragment, bool enabled ) {
+    this->fragmentNavigation()->setFragmentEnabled( fragment, enabled );
+}
 
 #if 0
 

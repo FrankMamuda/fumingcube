@@ -32,6 +32,8 @@
 class SearchFragment;
 class StructureFragment;
 class PropertyFragment;
+class FragmentNavigation;
+class Fragment;
 
 /**
  * @brief The Ui namespace
@@ -48,7 +50,18 @@ class ExtractionDialog : public QDialog {
     Q_DISABLE_COPY( ExtractionDialog )
 
 public:
-    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid, const int cid = 0 );
+
+    /**
+     * @brief The Modes enum
+     */
+    enum Modes {
+        NoMode = -1,
+        SearchMode,
+        ExistingMode
+    };
+    Q_ENUM( Modes )
+
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id & = Id::Invalid, const Modes &mode = SearchMode );
 
     // disable move
     ExtractionDialog( ExtractionDialog&& ) = delete;
@@ -65,13 +78,22 @@ public:
     [[nodiscard]] StructureFragment *structureFragment() const;
     [[nodiscard]] PropertyFragment *propertyFragment() const;
     [[nodiscard]] QStackedWidget *fragmentHost() const;
+    [[nodiscard]] FragmentNavigation *fragmentNavigation() const;
+
+    /**
+     * @brief mode
+     * @return
+     */
+    [[nodiscard]] Modes mode() const { return this->m_mode; }
 
 public slots:
-    void setCurrentFragment( QWidget *widget );
+    void setCurrentFragment( Fragment *fragment );
+    void setFragmentEnabled( Fragment *fragment, bool enabled = true );
 
 private:
     Ui::ExtractionDialog *ui;
     Id m_reagentId = Id::Invalid;
+    Modes m_mode = SearchMode;
 
     SearchFragment *m_searchFragment;
     StructureFragment *m_structureFragment;

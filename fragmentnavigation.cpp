@@ -19,53 +19,30 @@
 /*
  * includes
  */
+#include "fragment.h"
 #include "fragmentnavigation.h"
 #include <QDebug>
 
 /**
  * @brief FragmentNavigation::FragmentNavigation
  */
-FragmentNavigation::FragmentNavigation( QWidget *parent ) : QToolBar( parent ) {}
+FragmentNavigation::FragmentNavigation( QWidget *parent ) : QToolBar( parent ) {
+    auto leftSpacer( new QWidget( this ));
+    leftSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    auto rightSpacer( new QWidget( this ));
+    rightSpacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+
+    this->addWidget( leftSpacer );
+    this->rightSpacer = this->addWidget( rightSpacer );
+}
 
 /**
  * @brief FragmentNavigation::~FragmentNavigation
  */
 FragmentNavigation::~FragmentNavigation() {
-    const QList<QAction*> actions( this->map.keys());
+    const QList<QAction*> actions( this->actionFragmentMap.keys());
     for ( QAction *action : actions )
         QAction::disconnect( action, &QAction::toggled, this, nullptr );
-}
-
-/**
- * @brief FragmentNavigation::addFragment
- * @param name
- * @param icon
- * @param widget
- * @return
- */
-QAction *FragmentNavigation::addFragment( const QString &name, const QIcon &icon, QWidget *widget ) {
-    // abort if fragment host or widget is invalid
-    if ( this->fragmentHost() == nullptr || widget == nullptr )
-        return nullptr;
-
-    qDebug() << "add widget";
-
-    // get index and store fragment
-    this->fragmentHost()->addWidget( widget );
-
-    qDebug() << "add widget done";
-
-    // create an action
-    QAction *action( this->addAction( icon, name ));
-    action->setCheckable( true );
-    this->map[action] = widget;
-
-    // connect action
-    QAction::connect( action, &QAction::toggled, this, [ this, action ]() { this->setCurrentFragment( action ); } );
-
-    qDebug() << "add done";
-
-    return action;
 }
 
 /**
@@ -73,7 +50,7 @@ QAction *FragmentNavigation::addFragment( const QString &name, const QIcon &icon
  * @param action
  */
 void FragmentNavigation::setCurrentFragment( QAction *action ) {
-    if ( !this->map.contains( action ))
+    if ( !this->actionFragmentMap.contains( action ) || this->fragmentHost() == nullptr )
         return;
 
     if ( !action->isChecked()) {
@@ -83,7 +60,11 @@ void FragmentNavigation::setCurrentFragment( QAction *action ) {
         return;
     }
 
-    const QList<QAction*> actions( this->map.keys());
+    // enable action of the active fragment
+    if ( !action->isEnabled())
+        action->setEnabled( true );
+
+    const QList<QAction*> actions( this->actionFragmentMap.keys());
     for ( QAction *otherAction : actions ) {
         if ( otherAction != action ) {
             otherAction->blockSignals( true );
@@ -92,6 +73,40 @@ void FragmentNavigation::setCurrentFragment( QAction *action ) {
         }
     }
 
-    this->fragmentHost()->setCurrentWidget( this->map[action] );
+    this->fragmentHost()->setCurrentWidget( this->actionFragmentMap[action] );
     this->adjustSize();
+}
+
+/**
+ * @brief FragmentNavigation::setCurrentFragment
+ * @param fragment
+ */
+void FragmentNavigation::setCurrentFragment( Fragment *fragment ) {
+    if ( !this->fragmentActionMap.contains( fragment ))
+        return;
+
+    this->fragmentActionMap[fragment]->trigger();
+}
+
+/**
+ * @brief FragmentNavigation::installCloseButton
+ */
+void FragmentNavigation::installCloseButton( QWidget *parent ) {
+    QAction *action( new QAction( QIcon::fromTheme( "close" ), FragmentNavigation::tr( "Close" )));
+    if ( parent != nullptr )
+        QAction::connect( action, &QAction::triggered, parent, &QWidget::close );
+
+    this->addAction( action );
+}
+
+/**
+ * @brief FragmentNavigation::setFragmentEnabled
+ * @param fragment
+ * @param enabled
+ */
+void FragmentNavigation::setFragmentEnabled( Fragment *fragment, bool enabled ) {
+    if ( !this->fragmentActionMap.contains( fragment ))
+        return;
+
+    this->fragmentActionMap[fragment]->setEnabled( enabled );
 }

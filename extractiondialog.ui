@@ -11,10 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Tag editor</string>
+   <string>Search &amp; extract</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="clean">
+   <iconset theme="find">
     <normaloff>.</normaloff>.</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -94,68 +94,7 @@
       <attribute name="toolBarBreak">
        <bool>false</bool>
       </attribute>
-      <addaction name="actionSearch"/>
-      <addaction name="actionStructureBrowser"/>
-      <addaction name="actionProperties"/>
-      <addaction name="actionClose"/>
      </widget>
-     <action name="actionSearch">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="icon">
-       <iconset theme="find">
-        <normaloff>.</normaloff>.</iconset>
-      </property>
-      <property name="text">
-       <string>Search</string>
-      </property>
-      <property name="toolTip">
-       <string>Switch to the Search fragment</string>
-      </property>
-     </action>
-     <action name="actionProperties">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="icon">
-       <iconset theme="property">
-        <normaloff>.</normaloff>.</iconset>
-      </property>
-      <property name="text">
-       <string>Properties</string>
-      </property>
-      <property name="toolTip">
-       <string>Switch to the Property fragment</string>
-      </property>
-     </action>
-     <action name="actionClose">
-      <property name="icon">
-       <iconset theme="close">
-        <normaloff>.</normaloff>.</iconset>
-      </property>
-      <property name="text">
-       <string>Close</string>
-      </property>
-      <property name="toolTip">
-       <string>Close dialog</string>
-      </property>
-     </action>
-     <action name="actionStructureBrowser">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="icon">
-       <iconset theme="reagent">
-        <normaloff>.</normaloff>.</iconset>
-      </property>
-      <property name="text">
-       <string>Structure browser</string>
-      </property>
-      <property name="toolTip">
-       <string>Switch to the Structure browser fragment</string>
-      </property>
-     </action>
     </widget>
    </item>
   </layout>

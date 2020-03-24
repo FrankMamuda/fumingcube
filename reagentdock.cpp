@@ -395,7 +395,7 @@ void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, con
 
             // open extraction dialog if this feature is enabled
             if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
-                ExtractionDialog ed( this, reagentId, cid );
+                ExtractionDialog ed( this, reagentId ); // cid );
                 ed.exec();
                 PropertyDock::instance()->updateView();
             }

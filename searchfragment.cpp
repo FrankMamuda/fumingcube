@@ -99,7 +99,7 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
     QLineEdit::connect( this->ui->identifierEdit, &QLineEdit::returnPressed, this, &SearchFragment::sendInitialRequest );
 
     // debugging
-    this->connect( this, &SearchFragment::status, this, [this]( const QString &status ) {
+    this->connect( this, &SearchFragment::status, this, [ this ]( const QString &status ) {
         qDebug() << "status update" << status;
 
     } );
@@ -160,7 +160,7 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
     if ( idList.count() > 1 ) {
         // if we have multiple ids in the list, open the StructureBrowser and let the user decide
         this->host()->setCurrentFragment( this->host()->structureFragment());
-        this->host()->structureFragment()->getInfo();
+        this->host()->structureFragment()->getNameAndFormula();
         return true;
     }
 
