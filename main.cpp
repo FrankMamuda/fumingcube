@@ -60,8 +60,9 @@ properties:
  - filter in dock
 
 extraction:
- - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
+ - clear cache buttons currently not working
+   probably some other bugs
 
 theming:
  - separate app theme from calculator theme
@@ -115,7 +116,7 @@ misc/unsorted:
   - disallow adding images to TextEdit, such as in batch addition
     for some reason stuff copied from word wants to be pasted as image not as text
     prioritize text over image in TextEdit if in simple editor mode
-  - comma wrong syntax highlighting
+    in short: better mime handling in paste
 */
 
 /**

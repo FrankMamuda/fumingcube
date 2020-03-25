@@ -433,7 +433,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
                     ImageUtils iu( this, qAsConst( pixmap ), 0, true );
-                    iu.setWindowFlags( Qt::Dialog | Qt::Tool );
+                    iu.setWindowFlags( Qt::Dialog );
                     iu.exec();
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));

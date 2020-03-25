@@ -80,8 +80,10 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
-    if ( source->hasImage() && this->isSimpleEditor())
+    if ( this->isSimpleEditor() && source->hasImage()) {
+        qDebug() << "ABRTT" << this->isSimpleEditor() << source->hasImage();
         return false;
+    }
 
     // check if dropped item is an image
     for ( const QUrl &url : source->urls()) {
@@ -208,86 +210,88 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 #ifdef Q_OS_WIN
     // open clipBoard to retrieve metaFiles (formulas from ChemDraw, Accelrys Draw, etc.)
     // QWinMime does not work for some reason, so we read metaFiles directly from win32 clipBoard
-    if ( OpenClipboard( nullptr )) {
-        QPixmap pixmap;
-        int endWidth = 0;
+    if ( !source->hasHtml() && !source->hasText()) {
+        if ( OpenClipboard( nullptr ) && !this->isSimpleEditor()) {
+            QPixmap pixmap;
+            int endWidth = 0;
 
-        // check clipBoard for metaFiles
-        if ( IsClipboardFormatAvailable( CF_ENHMETAFILE )) {
-            // get metaFile from clipBoard
-            const auto metaFile = static_cast<HENHMETAFILE>( GetClipboardData( CF_ENHMETAFILE ));
-            ENHMETAHEADER header;
-            memset( &header, 0, sizeof( ENHMETAHEADER ));
+            // check clipBoard for metaFiles
+            if ( IsClipboardFormatAvailable( CF_ENHMETAFILE )) {
+                // get metaFile from clipBoard
+                const auto metaFile = static_cast<HENHMETAFILE>( GetClipboardData( CF_ENHMETAFILE ));
+                ENHMETAHEADER header;
+                memset( &header, 0, sizeof( ENHMETAHEADER ));
 
-            // lockMemory
-            const HGLOBAL global = GlobalAlloc( GMEM_MOVEABLE, 8 );
-            if ( static_cast<LPBYTE>( GlobalLock( global )) == nullptr ) {
-                CloseClipboard();
+                // lockMemory
+                const HGLOBAL global = GlobalAlloc( GMEM_MOVEABLE, 8 );
+                if ( static_cast<LPBYTE>( GlobalLock( global )) == nullptr ) {
+                    CloseClipboard();
+                    return;
+                }
+
+                // get metaFile header
+                if ( GetEnhMetaFileHeader( metaFile, sizeof( ENHMETAHEADER ), &header ) != 0 ) {
+                    const qreal scaleFactor = 0.125;
+
+                    // get metaFile dimensions
+                    const int width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ) * scaleFactor );
+                    const int height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ) * scaleFactor );
+                    endWidth = static_cast<int>( width * static_cast<qreal>( header.szlMillimeters.cx ) / static_cast<qreal>( header.szlDevice.cx ));
+
+                    // construct rectangle
+                    RECT rect;
+                    memset( &rect, 0, sizeof( RECT ));
+                    rect.right = width;
+                    rect.bottom = height;
+
+                    // proceed with valid sizes
+                    if ( width > 0 && height > 0 ) {
+                        // get device context
+                        const HDC deviceContext = GetDC( nullptr );
+                        const HDC memDC = CreateCompatibleDC( deviceContext );
+
+                        // create bitmap
+                        const HBITMAP bitmap = CreateCompatibleBitmap( memDC, width, height );
+                        SelectObject( memDC, bitmap );
+
+                        // fill white background
+                        const HBRUSH brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
+                        FillRect( memDC, &rect, brush );
+                        DeleteObject( brush );
+
+                        // render metaFile to bitmap
+                        PlayEnhMetaFile( memDC, metaFile, &rect );
+                        BitBlt( deviceContext, 0, 0, width, 0, memDC, 0, 0, static_cast<DWORD>( 0x00CC0020 ));
+
+                        // convert to pixmap
+                        pixmap = QtWin::fromHBITMAP( bitmap );
+
+                        // clean up
+                        DeleteObject( bitmap );
+                        DeleteEnhMetaFile( metaFile );
+                        DeleteDC( memDC );
+                        ReleaseDC( nullptr, deviceContext );
+                    }
+                }
+
+                // unlock memory
+                GlobalUnlock( global );
+            }
+
+            // close clipBoard
+            CloseClipboard();
+
+            if ( !pixmap.isNull()) {
+                this->insertPixmap( pixmap, endWidth );
                 return;
             }
-
-            // get metaFile header
-            if ( GetEnhMetaFileHeader( metaFile, sizeof( ENHMETAHEADER ), &header ) != 0 ) {
-                const qreal scaleFactor = 0.125;
-
-                // get metaFile dimensions
-                const int width = static_cast<int>( qAbs( header.rclFrame.left - header.rclFrame.right ) * scaleFactor );
-                const int height = static_cast<int>( qAbs( header.rclFrame.top - header.rclFrame.bottom ) * scaleFactor );
-                endWidth = static_cast<int>( width * static_cast<qreal>( header.szlMillimeters.cx ) / static_cast<qreal>( header.szlDevice.cx ));
-
-                // construct rectangle
-                RECT rect;
-                memset( &rect, 0, sizeof( RECT ));
-                rect.right = width;
-                rect.bottom = height;
-
-                // proceed with valid sizes
-                if ( width > 0 && height > 0 ) {
-                    // get device context
-                    const HDC deviceContext = GetDC( nullptr );
-                    const HDC memDC = CreateCompatibleDC( deviceContext );
-
-                    // create bitmap
-                    const HBITMAP bitmap = CreateCompatibleBitmap( memDC, width, height );
-                    SelectObject( memDC, bitmap );
-
-                    // fill white background
-                    const HBRUSH brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
-                    FillRect( memDC, &rect, brush );
-                    DeleteObject( brush );
-
-                    // render metaFile to bitmap
-                    PlayEnhMetaFile( memDC, metaFile, &rect );
-                    BitBlt( deviceContext, 0, 0, width, 0, memDC, 0, 0, static_cast<DWORD>( 0x00CC0020 ));
-
-                    // convert to pixmap
-                    pixmap = QtWin::fromHBITMAP( bitmap );
-
-                    // clean up
-                    DeleteObject( bitmap );
-                    DeleteEnhMetaFile( metaFile );
-                    DeleteDC( memDC );
-                    ReleaseDC( nullptr, deviceContext );
-                }
-            }
-
-            // unlock memory
-            GlobalUnlock( global );
-        }
-
-        // close clipBoard
-        CloseClipboard();
-
-        if ( !pixmap.isNull()) {
-            this->insertPixmap( pixmap, endWidth );
-            return;
         }
     }
 #endif
 
     // check dropped items for images
     for ( const QUrl &url : source->urls()) {
-        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" )) {
+        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" ) && !this->isSimpleEditor()) {
             QPixmap pixmap;
 
             pixmap.load( url.toLocalFile());
@@ -305,10 +309,17 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
         if ( this->cleanHTML())
             html = HTMLUtils::simplify( html );
 
+        // TODO: need special handling of subscript, superscript and italic
+        if ( this->isSimpleEditor())
+            html = HTMLUtils::convertToPlainText( html ).simplified();
+
         // insert clean html
         this->insertHtml( html );
         return;
     }
+
+    //if ( source->hasText())
+    //    this->insertPlainText( source->text());
 
     // nothing valid found
     QTextEdit::insertFromMimeData( source );

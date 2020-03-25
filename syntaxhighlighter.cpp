@@ -81,8 +81,8 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
     QList<SyntaxHighlighterOption> options = {
             { "\\w+",                          string },
             { "\\(|\\)",                       parenthesis, },
-            { R"(\d+\.?\d*)",                  number,    true },
-            { R"(\/|\*|\+|\-|\=|\,[^\w])", op },
+            { R"(\d+(\.|\,)?\d*)",             number,    true },
+            { R"(\/|\*|\+|\-|\=|\,[^\w])",     op },
             { "\".+?(?=\")\"",                 reference, true },
             { "\\w+Error.+",                   error,     true, true },
             { R"(\bundefined\b(?!"))",         undefined },

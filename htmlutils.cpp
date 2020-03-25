@@ -54,6 +54,6 @@ QString HTMLUtils::convertToPlainText( const QString &html ) {
  */
 QString HTMLUtils::simplify( const QString &html ) {
     // TODO: don't strip tables as well?
-    const QRegularExpression re( "((?:<\\/?(?:table|a|td|tr|tbody|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
+    const QRegularExpression re( "((?:<\\/?(?:table|a|style|td|tr|tbody|li|ul|img).*?[>])|(?:<!--\\w+-->))" );
     return QString( html ).replace( re, "" );
 }
