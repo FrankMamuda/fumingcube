@@ -94,6 +94,14 @@ future/non-priority:
  - CoA search
  - molport search
  - link to PubChem (store CID as tag)
+ - label sub categories:
+   Project1:
+      solvents
+      inorganics
+   Project2:
+      solvents
+      organics
+      intermediates
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:

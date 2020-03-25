@@ -227,9 +227,10 @@ void SearchFragment::disableFragments() {
 void SearchFragment::sendInitialRequest() {
     // disable fragments
     this->disableFragments();
+    this->host()->clearStatusMessage();
 
     if ( this->identifier().isEmpty())
-#if 0
+#if 1
         return;
 #else
         // TODO: delete this when done with debugging

@@ -124,7 +124,7 @@ In the case of multiple matches, you will be able to narrow down your query usin
     <item row="2" column="1">
      <widget class="QLineEdit" name="identifierEdit">
       <property name="text">
-       <string>dimethylbenzene</string>
+       <string/>
       </property>
       <property name="placeholderText">
        <string>name or CAS number</string>
