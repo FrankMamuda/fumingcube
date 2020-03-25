@@ -88,7 +88,7 @@ private slots:
      * @param status
      */
     void setStatus( const StructureFragment::Status &status ) { this->m_status = status; }
-    void buttonTest();
+    void validate();
 
 protected:
     void keyPressEvent( QKeyEvent *event ) override;

@@ -26,6 +26,8 @@
 #include "ui_searchfragment.h"
 #include "listutils.h"
 #include "cache.h"
+#include "propertyfragment.h"
+#include "fragmentnavigation.h"
 
 /**
  * @brief SearchFragment::SearchFragment
@@ -48,7 +50,6 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
             qDebug() << "network->idList" << this->identifier();
             if ( !this->parseIdListRequest( data )) {
                 qDebug() << "  parseIdListRequest failed";
-                emit this->status( "Error" );
 
                 // try similar structure search if initial request fails
                 this->sendSimilarRequest();
@@ -63,9 +64,12 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
             qDebug() << "network->idList (similar)" << this->identifier();
             if ( !this->parseIdListRequest( data )) {
                 qDebug() << "  parseIdListRequest failed";
+                this->host()->setErrorMessage( SearchFragment::tr( "Could not parse request" ));
 
-                // TODO: report error
-                emit this->status( "Error" );
+                // disable fragments
+                this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->structureFragment(), false );
+                this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->propertyFragment(), false );
+
                 return;
             }
             break;
@@ -84,9 +88,12 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
             break;
 
         case NetworkManager::CIDRequestSimilar:
-            emit this->status( "Error: " + errorMessage );
-            this->toggleControls( true );
+            this->host()->setErrorMessage( errorMessage.contains( "PUGREST.NotFound" ) ? SearchFragment::tr( "Error: could not find requested reagent" ) : SearchFragment::tr( "Error: " ) + errorMessage );
 
+            // disable fragments
+            this->disableFragments();
+
+            this->toggleControls( true );
             break;
 
         default:
@@ -97,12 +104,6 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
     // setup fetch action and line edit
     QAction::connect( this->ui->actionFetch, &QAction::triggered, this, &SearchFragment::sendInitialRequest );
     QLineEdit::connect( this->ui->identifierEdit, &QLineEdit::returnPressed, this, &SearchFragment::sendInitialRequest );
-
-    // debugging
-    this->connect( this, &SearchFragment::status, this, [ this ]( const QString &status ) {
-        qDebug() << "status update" << status;
-
-    } );
 
     // check name
     auto checkName = [ this ]() { this->ui->actionFetch->setEnabled( !this->ui->identifierEdit->text().isEmpty()); };
@@ -144,14 +145,9 @@ void SearchFragment::setIdentifier( const QString &string ) {
  * @return
  */
 bool SearchFragment::parseIdList( const QList<int> &idList ) {
-    //qDebug() << "parseIdList" << idList;
-   // emit this->stat
-
     // abort on empty id lists
-    if ( idList.isEmpty()) {
-        // TODO: update status
+    if ( idList.isEmpty())
         return false;
-    }
 
     // setup structureBrowser
     this->host()->structureFragment()->setup( idList );
@@ -167,19 +163,20 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
     // if the list has only one entry, continue with that
     const int id = idList.first();
 
-    // TODO:
-    //this->host()->structureFragment()->setId
-
     // make sure it is a valid id
     if ( id <= 0 ) {
-        // TODO: update status
+        this->host()->setErrorMessage( SearchFragment::tr( "Could not parse request" ));
+
+        // disable fragments
+        this->disableFragments();
+
         return false;
     }
 
     // all ok, continue with data extraction
-#if 0
-    this->getDataAndFormula( id );
-#endif
+    this->host()->setCurrentFragment( this->host()->propertyFragment());
+    this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->structureFragment(), false );
+    this->host()->propertyFragment()->getDataAndFormula( id );
 
     // return success
     return true;
@@ -217,13 +214,25 @@ void SearchFragment::toggleControls( bool enabled ) {
 }
 
 /**
+ * @brief SearchFragment::disableFragments
+ */
+void SearchFragment::disableFragments() {
+    this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->structureFragment(), false );
+    this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->propertyFragment(), false );
+}
+
+/**
  * @brief SearchFragment::sendInitialRequest
  */
 void SearchFragment::sendInitialRequest() {
+    // disable fragments
+    this->disableFragments();
+
     if ( this->identifier().isEmpty())
 #if 0
         return;
 #else
+        // TODO: delete this when done with debugging
         this->setIdentifier( "dimethylbenzene" );
 #endif
 
@@ -241,9 +250,8 @@ void SearchFragment::sendInitialRequest() {
         }
     }
 
-    // TODO: block ui
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT" ).arg( this->identifier( true )), NetworkManager::CIDRequestInitial );
-    emit this->status( SearchFragment::tr( "Searching for %1 (exact match)" ).arg( this->identifier()));
+    this->host()->setStatusMessage( SearchFragment::tr( "Searching for %1 (exact match)" ).arg( this->identifier()));
     this->toggleControls( false );
 }
 
@@ -251,7 +259,6 @@ void SearchFragment::sendInitialRequest() {
  * @brief SearchFragment::sendSimilarRequest
  */
 void SearchFragment::sendSimilarRequest() {
-    // TODO: block ui
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/%1/cids/TXT?name_type=word" ).arg( this->identifier( true )), NetworkManager::CIDRequestSimilar );
-    emit this->status( SearchFragment::tr( "Searching for %1 (similiar structures)" ).arg( this->identifier()));
+    this->host()->setStatusMessage( SearchFragment::tr( "Searching for %1 (similiar structures)" ).arg( this->identifier()));
 }

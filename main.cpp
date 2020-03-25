@@ -111,15 +111,11 @@ misc/unsorted:
   - sort batches by addition date
     add date to select batches (not all of them need dates?)
   - better i18n support
-  - caching for search dialog
-  - better ui for search dialog (less dialogs)
-    (currently four steps search->similar->add->extract)
   - cross out reagents (old batches)
-  - hide 'fetch properties' when editing reagent
   - disallow adding images to TextEdit, such as in batch addition
     for some reason stuff copied from word wants to be pasted as image not as text
     prioritize text over image in TextEdit if in simple editor mode
-
+  - comma wrong syntax highlighting
 */
 
 /**

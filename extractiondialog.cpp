@@ -28,37 +28,25 @@
 #include "searchfragment.h"
 #include "structurefragment.h"
 #include "propertyfragment.h"
+#include "reagent.h"
+#include "htmlutils.h"
+
+// TODO: disable structure and property fragment on error
 
 /**
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
-ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &, const Modes &mode ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_mode( mode )/*, m_reagentId( reagentId )*/ {
+ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
     // setup ui and get rid of verticalHeader in property view
     this->ui->setupUi( this );
     this->ui->ExtractionDialogContents->setWindowFlags( Qt::Widget );
 
-#if 0
-    this->buttonTest();
+    // if invalid reagentId is passed, default to SearchMode (find and add new reagents and their properties)
+    // otherwise set ExistingMode (get properties for existing reagents)
+    this->m_mode = ( this->reagentId() == Id::Invalid ) ? SearchMode : ExistingMode;
 
-    // forced cid
-    if ( cid > 0 ) {
-        this->ui->nameEdit->setText( "cid_" + QString::number( cid ));
-        this->ui->nameEdit->hide();
-        this->ui->cidEdit->setText( QString::number( cid ));
-        this->ui->cidEdit->setDisabled( true );
-
-        // begin data request immediately
-        this->getFormula( QString::number( cid ));
-
-        // GET DATA
-        if ( !this->readFromCache())
-            NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( cid ), NetworkManager::DataRequest );
-    } 
-#endif
-
-    this->m_mode = ExistingMode;
-
+    // setup fragment navigation and initialize fragments
     this->fragmentNavigation()->setFragmentHost( this->fragmentHost());
     this->m_searchFragment = this->fragmentNavigation()->addFragment<SearchFragment>( ExtractionDialog::tr( "Search" ), QIcon::fromTheme( "find" ), this, ExtractionDialog::tr( "Switch to the Search fragment" ));
     this->m_structureFragment = this->fragmentNavigation()->addFragment<StructureFragment>( ExtractionDialog::tr( "Structure\nbrowser" ), QIcon::fromTheme( "reagent" ), this, ExtractionDialog::tr( "Switch to the Structure browser fragment" ));
@@ -66,11 +54,12 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &, const Modes &mo
     this->setCurrentFragment( this->searchFragment());
     this->fragmentNavigation()->installCloseButton( this );
 
+    if ( this->reagentId() != Id::Invalid )
+        this->searchFragment()->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( this->reagentId())));
+
+    // hide initial fragments for now
     this->setFragmentEnabled( this->structureFragment(), false );
     this->setFragmentEnabled( this->propertyFragment(), false );
-
-    // set reagent name
-    //this->searchFragment()->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
 }
 
 /**
@@ -136,6 +125,32 @@ void ExtractionDialog::setCurrentFragment( Fragment *fragment ) {
  */
 void ExtractionDialog::setFragmentEnabled( Fragment *fragment, bool enabled ) {
     this->fragmentNavigation()->setFragmentEnabled( fragment, enabled );
+}
+
+/**
+ * @brief ExtractionDialog::setStatusMessage
+ * @param message
+ */
+void ExtractionDialog::setStatusMessage( const QString &message ) {
+    this->ui->statusbar->setStyleSheet( "" );
+    this->ui->statusbar->showMessage( message );
+}
+
+/**
+ * @brief ExtractionDialog::setStatusErrorMessage
+ * @param message
+ */
+void ExtractionDialog::setErrorMessage( const QString &message ) {
+    this->ui->statusbar->setStyleSheet( "background-color: red; color: white;" );
+    this->ui->statusbar->showMessage( message );
+}
+
+/**
+ * @brief ExtractionDialog::clearStatusMessage
+ */
+void ExtractionDialog::clearStatusMessage() {
+    this->ui->statusbar->setStyleSheet( "" );
+    this->ui->statusbar->clearMessage();
 }
 
 #if 0

@@ -321,7 +321,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
  * @brief ReagentDock::addReagent
  * @param parentId
  */
-void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, const int cid ) {
+Id ReagentDock::addReagent( const Id &parentId, const QString &reagentName, const int cid ) {
     QString name;
     QString reference;
     bool ok;
@@ -339,17 +339,17 @@ void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, con
 
         if ( ok ) {
             if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
-                return;
+                return Id::Invalid;
         }
     } else {
-        ReagentDialog rd( this, reagentName, reagentName );
+        ReagentDialog rd( this, reagentName, reagentName, ( cid == 0 ? ReagentDialog::AddMode : ReagentDialog::SearchMode ));
         ok = ( rd.exec() == QDialog::Accepted );
         name = rd.name();
         reference = rd.reference();
 
         if ( ok ) {
             if ( !this->checkForDuplicates( qAsConst( name ), qAsConst( reference )))
-                return;
+                return Id::Invalid;
 
             labels = rd.labels;
         }
@@ -367,7 +367,7 @@ void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, con
 
             const Row row = Reagent::instance()->add( qAsConst( name ), qAsConst( reference ), parentId );
             if ( row == Row::Invalid )
-                return;
+                return Id::Invalid;
 
             // get reagentId
             const Id reagentId = Reagent::instance()->id( row );
@@ -394,7 +394,7 @@ void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, con
                         this->view()->filterModel()->mapFromSource( this->view()->indexFromId( reagentId )));
 
             // open extraction dialog if this feature is enabled
-            if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid ) {
+            if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid && cid == 0 ) {
                 ExtractionDialog ed( this, reagentId ); // cid );
                 ed.exec();
                 PropertyDock::instance()->updateView();
@@ -405,13 +405,16 @@ void ReagentDock::addReagent(const Id &parentId, const QString &reagentName, con
                 Reagent::instance()->setFilter( oldFilter );
                 this->view()->updateView();
             }
+
+            return reagentId;
         } else {
             QMessageBox::warning( this, ReagentDock::tr( "Cannot add reagent" ),
                                   ( parentId != Id::Invalid ? ReagentDock::tr( "Batch" ) : ReagentDock::tr( "Reagent" )) +
                                   ReagentDock::tr( " name is empty" ));
-            return;
         }
     }
+
+    return Id::Invalid;
 }
 
 /**

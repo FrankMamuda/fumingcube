@@ -330,7 +330,7 @@ void PropertyDock::on_addPropButton_clicked() {
         if ( qAsConst( allSetTags ).contains( tagId ))
             continue;
 
-        subMenu->addAction( Tag::instance()->name( tagId ), this, [ this, reagentId, tagId ]() {
+        subMenu->addAction(  QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) /*Tag::instance()->name( tagId )*/, this, [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
             this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
         } );

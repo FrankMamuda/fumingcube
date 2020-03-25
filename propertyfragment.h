@@ -45,21 +45,25 @@ public:
     PropertyFragment( PropertyFragment&& ) = delete;
     PropertyFragment& operator=( PropertyFragment&& ) = delete;
 
-    ~PropertyFragment();
+    ~PropertyFragment() override;
+
     [[nodiscard]] ExtractionDialog *host() const { return qobject_cast<ExtractionDialog *>( Fragment::host()); }
 
 public slots:
     bool getDataAndFormula( const int &id );
-    void getFormula();
-    void getData();
 
     void sendFormulaRequest();
     void sendDataRequest();
+
+private slots:
     bool parseFormulaRequest( const QByteArray &data );
     bool parseDataRequest( const QByteArray &data );
 
-    void readData( const QByteArray &uncompressed ) const;
+    void readData( const QByteArray &uncompressed );
     void readFormula( const QByteArray &data );
+
+protected:
+    void keyPressEvent( QKeyEvent *event ) override;
 
 private:
     Ui::PropertyFragment *ui;

@@ -35,8 +35,7 @@ public:
     constexpr static const char *FormulaContext = "formula";
     constexpr static const char *IUPACContext = "iupac";
     constexpr static const char *DataContext = "data";
-    constexpr static const char *CIDContext = "cid";
-    constexpr static const char *IdMapContext = "idMap";
+    constexpr static const char *IdMapContext = "id";
 
     /**
      * @brief The Types enum

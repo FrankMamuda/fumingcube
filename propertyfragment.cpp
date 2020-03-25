@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2019-2020 Armands Aleksejevs
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/.
+ *
+ */
+
+/*
+ * includes
+ */
 #include "propertyfragment.h"
 #include "networkmanager.h"
 #include "extractiondialog.h"
@@ -7,27 +28,41 @@
 #include "cache.h"
 #include "tag.h"
 #include "propertywidget.h"
+#include "pixmaputils.h"
+#include "property.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonDocument>
+#include <QDesktopWidget>
+#include <QWindow>
+#include <QScreen>
 
-PropertyFragment::PropertyFragment(QWidget *parent) :
-    Fragment(parent),
-    ui(new Ui::PropertyFragment)
-{
+/**
+ * @brief PropertyFragment::PropertyFragment
+ * @param parent
+ */
+PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( new Ui::PropertyFragment ) {
+    // setup ui
+    this->ui->setupUi( this );
 
+    // set tip icons
+    const QPixmap pixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
+    const QList<QLabel*> tips( QList<QLabel*>() << this->ui->propertyTipIcon << this->ui->valuesTipIcon );
+    for ( QLabel *tip : tips )
+        tip->setPixmap( pixmap );
 
-    ui->setupUi(this);
+    // setup property table
+    this->ui->propertyView->verticalHeader()->hide();
+    this->ui->propertyView->horizontalHeader()->hide();
+    this->ui->propertyView->horizontalHeader()->setSectionResizeMode( 0, QHeaderView::ResizeToContents );
+    this->ui->propertyView->horizontalHeader()->setSectionResizeMode( 1, QHeaderView::Stretch );
 
-
-    //this->ui->propertyView->verticalHeader()->hide();
-
-    /*
-
-
-
+    // property addition lambda
     auto addProperties = [ this ]( bool all = false ) {
+        if ( this->host()->reagentId() == Id::Invalid )
+            return;
+
         if ( all )
             this->ui->propertyView->selectAll();
 
@@ -35,11 +70,11 @@ PropertyFragment::PropertyFragment(QWidget *parent) :
             auto *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( index.row(), 1 )));
             if ( widget != nullptr ) {
                 if ( widget->tagId() != Id::Invalid ) {
-                    widget->add( this->reagentId());
+                    widget->add( this->host()->reagentId());
                 } else {
                     Row row = Row::Invalid;
                     const QPixmap pixmap( widget->pixmap());
-                    if ( pixmap.isNull() || this->reagentId() == Id::Invalid )
+                    if ( pixmap.isNull() || this->host()->reagentId() == Id::Invalid )
                         return;
 
                     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
@@ -51,29 +86,78 @@ PropertyFragment::PropertyFragment(QWidget *parent) :
                     }
 
                     if ( row != Row::Invalid )
-                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::convertToData( pixmap ), this->reagentId());
+                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::convertToData( pixmap ), this->host()->reagentId());
                 }
             }
         }
 
-        this->accept();
+        this->host()->close();
+        PropertyDock::instance()->updateView();
     };
 
-    QPushButton::connect( this->ui->addAllButton, &QPushButton::pressed, std::bind( addProperties, true ));
-    QPushButton::connect( this->ui->addSelectedButton, &QPushButton::pressed, addProperties );*/
+    // setup finished connection to the NetworkManager
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+        switch ( type ) {
+        case NetworkManager::DataRequest:
+            qDebug() << "network->data" << this->host()->searchFragment()->identifier();
+            if ( !this->parseDataRequest( data )) {
+                qDebug() << "  parseDataRequest failed";
+                this->host()->setErrorMessage( PropertyFragment::tr( "Could not parse data request" ));
+            }
+            // TODO: adjust ui controls
+            //this->toggleControls( true );
+            break;
 
+        case NetworkManager::FormulaRequest:
+            qDebug() << "network->formula (data)" << this->host()->searchFragment()->identifier();
+            if ( !this->parseFormulaRequest( data )) {
+                qDebug() << "  parseFormulaRequest (DATA) failed";
+                this->host()->setErrorMessage( PropertyFragment::tr( "Could not parse formula request" ));
+                return;
+            }
+            // TODO: adjust ui controls
+            break;
+
+        default:
+            ;
+        }
+    } );
+
+    // setup error connection to the NetworkManager
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types, const QString &errorMessage ) {
+        this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
+        this->host()->adjustSize();
+    } );
+
+    // connect addAll, addSelected actions
+    QAction::connect( this->ui->actionAddAll, &QAction::triggered, this, std::bind( addProperties, true ));
+    QAction::connect( this->ui->actionAddSelected, &QAction::triggered, std::bind( addProperties, false ));
+
+    // enable addSelected action only if actions are selected
+    QItemSelectionModel::connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [ this ]( const QItemSelection &, const QItemSelection & ) {
+        const QModelIndexList list( this->ui->propertyView->selectionModel()->selectedRows());
+        this->ui->actionAddSelected->setEnabled( !list.isEmpty());
+    } );
 }
 
-PropertyFragment::~PropertyFragment()
-{
-    delete ui;
+/**
+ * @brief PropertyFragment::~PropertyFragment
+ */
+PropertyFragment::~PropertyFragment() {
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
+    QAction::disconnect( this->ui->actionAddAll, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionAddSelected, &QAction::triggered, this, nullptr );
+    QItemSelectionModel::disconnect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, nullptr );
+
+    delete this->ui;
 }
 
 /**
  * @brief PropertyFragment::sendFormulaRequest
  */
 void PropertyFragment::sendFormulaRequest() {
-    qDebug() << "  request formula" << this->host()->searchFragment()->identifier();
+    qDebug() << "  request formula (DATA)" << this->host()->searchFragment()->identifier();
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->host()->structureFragment()->cid()), NetworkManager::FormulaRequest );
 }
 
@@ -81,7 +165,7 @@ void PropertyFragment::sendFormulaRequest() {
  * @brief PropertyFragment::sendDataRequest
  */
 void PropertyFragment::sendDataRequest(){
-    qDebug() << "  request data" << this->host()->searchFragment()->identifier();
+    qDebug() << "  request data (DATA)" << this->host()->searchFragment()->identifier();
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/%1/JSON" ).arg( this->host()->structureFragment()->cid()), NetworkManager::DataRequest );
 }
 
@@ -92,7 +176,7 @@ void PropertyFragment::sendDataRequest(){
  */
 bool PropertyFragment::parseFormulaRequest( const QByteArray &data ) {
     if ( !data.isEmpty()) {
-        qDebug() << "    network->formula" << this->host()->searchFragment()->identifier();
+        qDebug() << "    network->formula (DATA)" << this->host()->searchFragment()->identifier();
         Cache::instance()->insert( Cache::FormulaContext, QString( "%1.png" ).arg( this->host()->structureFragment()->cid()), data );
         this->readFormula( data );
         return true;
@@ -108,7 +192,7 @@ bool PropertyFragment::parseFormulaRequest( const QByteArray &data ) {
  */
 bool PropertyFragment::parseDataRequest( const QByteArray &data ) {
     if ( !data.isEmpty()) {
-        qDebug() << "    network->data" << this->host()->searchFragment()->identifier();
+        qDebug() << "    network->data (DATA)" << this->host()->searchFragment()->identifier();
         Cache::instance()->insert( Cache::DataContext, QString( "%1.dat" ).arg( this->host()->structureFragment()->cid()), data, true );
         this->readData( data );
         return true;
@@ -123,51 +207,48 @@ bool PropertyFragment::parseDataRequest( const QByteArray &data ) {
  * @return
  */
 bool PropertyFragment::getDataAndFormula( const int &id ) {
-    //this->ui->structureFragment->setup( QList<int>() << id );
-
     qDebug() << "  getDataAndFormula";
 
-    this->getFormula();
-    this->getData();
+    // clear old data
+    this->ui->propertyView->setRowCount( 0 );
+    this->ui->actionAddAll->setDisabled( true );
+    this->ui->actionAddSelected->setDisabled( true );
+
+    // validate id
+    if ( id <= 0 ) {
+        this->host()->setStatusMessage( PropertyFragment::tr( "Error: could not get data for requested reagent" ));
+        return false;
+    }
+
+    // update status
+    this->host()->setStatusMessage( PropertyFragment::tr( "Fetching data (properties and formula)" ));
+
+    // get formula
+    if ( Cache::instance()->contains( Cache::FormulaContext, QString( "%1.png" ).arg( id ))) {
+        qDebug() << "    cache->formula (DATA)" << this->host()->searchFragment()->identifier();
+        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( id )));
+    } else {
+        // formula not in the cache, fetch it
+        this->sendFormulaRequest();
+    }
+
+    // get data
+    if ( Cache::instance()->contains( Cache::DataContext, QString( "%1.dat" ).arg( id ))) {
+        qDebug() << "    cache->data (DATA)" << this->host()->searchFragment()->identifier();
+        this->readData( Cache::instance()->getData( Cache::DataContext, QString( "%1.dat" ).arg( id ), true ));
+    } else {
+        // data not in the cache, fetch it
+        this->sendDataRequest();
+    }
 
     return true;
-}
-
-/**
- * @brief ExtractionDialog::getFormula
- */
-void PropertyFragment::getFormula() {
-    if ( Cache::instance()->contains( Cache::FormulaContext, QString( "%1.png" ).arg( this->host()->structureFragment()->cid()))) {
-        qDebug() << "    cache->formula" << this->host()->searchFragment()->identifier();
-        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( this->host()->structureFragment()->cid())));
-        return;
-    }
-
-    // formula not in the cache, fetch it
-    this->sendFormulaRequest();
-}
-
-/**
- * @brief PropertyFragment::getData
- */
-void PropertyFragment::getData() {
-    if ( Cache::instance()->contains( Cache::DataContext, QString( "%1.dat" ).arg( this->host()->structureFragment()->cid()))) {
-        qDebug() << "    cache->data" << this->host()->searchFragment()->identifier();
-        this->readData( Cache::instance()->getData( Cache::DataContext, QString( "%1.dat" ).arg( this->host()->structureFragment()->cid()), true ));
-        return;
-    }
-
-    // data not in the cache, fetch it
-    this->sendDataRequest();
 }
 
 /**
  * @brief PropertyFragment::readData
  * @param uncompressed
  */
-void PropertyFragment::readData( const QByteArray &uncompressed ) const {
-    //QMutexLocker lock( &this->mutex );
-
+void PropertyFragment::readData( const QByteArray &uncompressed ) {
     /**
      * @brief findTag finds a TOCHeading in json document
      */
@@ -358,7 +439,6 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) const {
     };
 
     QMap<QString, PropertyWidget*>propList;
-
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const auto row = static_cast<Row>( y );
 
@@ -379,35 +459,43 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) const {
                 continue;
 
             PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
-            propList[Tag::instance()->name( row )] = group;
+            //propList[Tag::instance()->name( row )] = group;
+            propList[QApplication::translate( "Tag", Tag::instance()->name( row ).toUtf8().constData())] = group;
         }
     }
-#if 0
 
     int row = this->ui->propertyView->rowCount();
-    QStringList propListKeys( propList.keys());
+    const QStringList propListKeys( propList.keys());
     this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + propListKeys.count());
+
+    // add properties and their names
     for ( const QString &name : propListKeys ) {
         this->ui->propertyView->setItem( row, 0, new QTableWidgetItem( name ));
         this->ui->propertyView->setCellWidget( row, 1, propList[name] );
         row++;
     }
 
+    // resize content
     this->ui->propertyView->resizeRowsToContents();
     this->ui->propertyView->resizeColumnsToContents();
-#endif
+
+    // resize to 40% of screen height
+    QScreen *screen( this->window()->windowHandle()->screen());
+    this->ui->propertyView->setFixedHeight( static_cast<int>( screen->geometry().height() * 0.4 ));
+    this->host()->adjustSize();
+
+    // enable action
+    this->ui->actionAddAll->setEnabled( propListKeys.count() > 0 );
+
+    // clear message (success!)
+    this->host()->clearStatusMessage();
 }
 
 /**
  * @brief PropertyFragment::readFormula
  * @param data
  */
-void PropertyFragment::readFormula(const QByteArray &data) {
-#if 0
-    QMutexLocker lock( &this->mutex );
-
-    const int rows = this->ui->propertyView->rowCount();
-    this->ui->propertyView->setRowCount( rows + 1 );
+void PropertyFragment::readFormula( const QByteArray &data ) {
     QPixmap pixmap;
     if ( !pixmap.loadFromData( data ))
         return;
@@ -416,8 +504,23 @@ void PropertyFragment::readFormula(const QByteArray &data) {
         return;
 
     const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    const QPixmap scaled( cropped.scaledToWidth( cropped.width() / 2, Qt::SmoothTransformation ));
+    const bool darkMode = Variable::isEnabled( "darkMode" );
+
+    const int rows = this->ui->propertyView->rowCount();
+    this->ui->propertyView->setRowCount( rows + 1 );
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
-    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
+    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, darkMode ? PixmapUtils::invert( scaled ) : scaled ));
     this->ui->propertyView->resizeRowToContents( rows );
-#endif
+}
+
+/**
+ * @brief PropertyFragment::keyPressEvent
+ * @param event
+ */
+void PropertyFragment::keyPressEvent( QKeyEvent *event ) {
+    if (( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) && this->host()->fragmentHost()->currentWidget() == this )
+        this->ui->actionAddAll->trigger();
+
+    Fragment::keyReleaseEvent( event );
 }

@@ -17,12 +17,6 @@
  */
 
 /*
-    er zijn enkele caching problemen, maar het ExtractionDialog
-    werkt
-    moeten een uniforme caching oplossing maken
-*/
-
-/*
  * includes
  */
 #include "imageutils.h"
@@ -37,6 +31,10 @@
 #include "cache.h"
 #include "propertyfragment.h"
 #include "reagentdialog.h"
+#include "fragmentnavigation.h"
+#include "reagentdock.h"
+
+// TODO: disable property fragment on error
 
 /**
  * @brief StructureFragment::StructureFragment
@@ -44,20 +42,29 @@
  * @param parent
  */
 StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui( new Ui::StructureFragment ) {
+    // setup ui
     this->ui->setupUi( this );
+
+    // set tip icons
+    const QPixmap pixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
+    const QList<QLabel*> tips( QList<QLabel*>() << this->ui->tipIcon );
+    for ( QLabel *tip : tips )
+        tip->setPixmap( pixmap );
 
     // done action leads to the property fragment
     QAction::connect( this->ui->actionSelect, &QAction::triggered, this, [ this ]() {
         this->host()->setCurrentFragment( this->host()->propertyFragment());
+        this->host()->propertyFragment()->getDataAndFormula( this->cid());
     } );
 
     // add reagent lambda
     auto addDialog = [ this ]( const QString &name ) {
         // TODO: special mode for this
-        ReagentDialog rd( this, name, this->queryName(), ReagentDialog::EditMode );
-        if ( rd.exec() == QDialog::Accepted ) {
-            // TODO: add reagent
+        const Id reagentId = ReagentDock::instance()->addReagent( Id::Invalid, name, this->cid());
+        if ( reagentId != Id::Invalid ) {
+            this->host()->setReagentId( reagentId );
             this->host()->setCurrentFragment( this->host()->propertyFragment());
+            this->host()->propertyFragment()->getDataAndFormula( this->cid());
         }
     };
 
@@ -88,9 +95,9 @@ StructureFragment::~StructureFragment() {
  */
 void StructureFragment::keyPressEvent( QKeyEvent *event ) {
     if (( event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter ) && this->host()->fragmentHost()->currentWidget() == this ) {
-        if ( this->host()->mode() == ExtractionDialog::SearchMode )
+        if ( this->host()->mode() == ExtractionDialog::ExistingMode )
             this->ui->actionSelect->trigger();
-        else if ( this->host()->mode() == ExtractionDialog::ExistingMode )
+        else if ( this->host()->mode() == ExtractionDialog::SearchMode )
             this->ui->actionAddReagent->trigger();
     }
 
@@ -101,7 +108,7 @@ void StructureFragment::keyPressEvent( QKeyEvent *event ) {
  * @brief StructureFragment::sendFormulaRequest
  */
 void StructureFragment::sendFormulaRequest() {
-    qDebug() << "  request formula" << this->queryName();
+    qDebug() << "  request formula (BROWSER)" << this->queryName();
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->cid()), NetworkManager::FormulaRequestBrowser );
 }
 
@@ -109,7 +116,7 @@ void StructureFragment::sendFormulaRequest() {
  * @brief StructureFragment::sendIUPACNameRequest
  */
 void StructureFragment::sendIUPACNameRequest() {
-    qDebug() << "  request name" << this->queryName();
+    qDebug() << "  request name  (BROWSER)" << this->queryName();
     NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::IUPACName );
 }
 
@@ -128,6 +135,7 @@ void StructureFragment::getNameAndFormula() {
 
     // update status
     this->setStatus( FetchName | FetchFormula );
+    this->host()->setStatusMessage( StructureFragment::tr( "Working" ));
 
     // get current id (selected reagent)
     const int cid = cidList.at( this->index());
@@ -174,7 +182,7 @@ void StructureFragment::readFormula( const QByteArray &data ) {
     this->host()->adjustSize();
 
     this->setStatus( this->status() & ~FetchFormula );
-    this->buttonTest();
+    this->validate();
 }
 
 /**
@@ -185,7 +193,7 @@ void StructureFragment::readIUPACName( const QString &name ) {
     this->ui->IUPACEdit->setText( name );
 
     this->setStatus( this->status() & ~FetchName );
-    this->buttonTest();
+    this->validate();
 }
 
 /**
@@ -263,10 +271,7 @@ void StructureFragment::replyReceived( const QString &, NetworkManager::Types ty
         qDebug() << "network->IUPACName" << this->queryName();
         if ( !this->parseIUPACNameRequest( data )) {
             qDebug() << "  parseIUPACNameRequest failed";
-
-            // TODO: report error
             this->setStatus( Error );
-            //emit this->status( "Error" );
             return;
         }
         break;
@@ -275,10 +280,7 @@ void StructureFragment::replyReceived( const QString &, NetworkManager::Types ty
         qDebug() << "network->formula (browser)" << this->queryName();
         if ( !this->parseFormulaRequest( data )) {
             qDebug() << "  parseFormulaRequest failed (browser)";
-
-            // TODO: report error
             this->setStatus( Error );
-            //emit this->status( "Error" );
             return;
         }
         break;
@@ -289,20 +291,19 @@ void StructureFragment::replyReceived( const QString &, NetworkManager::Types ty
 }
 
 /**
- * @brief StructureFragment::buttonTest
+ * @brief StructureFragment::validate
  */
-void StructureFragment::buttonTest() {
-    if ( this->cidList.count() <= 1 )
-        return;
+void StructureFragment::validate() {
+    this->ui->actionPrevious->setEnabled( !this->cidList.isEmpty() && this->index() > 0 );
+    this->ui->actionNext->setEnabled( !this->cidList.isEmpty() && this->index() < this->cidList.count() - 1 );
+    this->ui->actionSelect->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
+    this->ui->actionAddReagent->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
+    this->ui->actionAddIUPAC->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
 
-    this->ui->actionPrevious->setDisabled( true );
-    this->ui->actionNext->setDisabled( true );
-
-    if ( this->status() == Idle ) {
-        this->ui->actionPrevious->setEnabled( this->index() > 0 );
-        this->ui->actionNext->setEnabled( this->index() < this->cidList.count() - 1 );
-        return;
-    }
+    if ( this->status() == Idle )
+        this->host()->clearStatusMessage();
+    else
+        this->host()->fragmentNavigation()->setFragmentEnabled( this->host()->propertyFragment(), false );
 }
 
 /**
@@ -311,11 +312,11 @@ void StructureFragment::buttonTest() {
  */
 void StructureFragment::setup( const QList<int> &list ) {
     // hide/show actions according to the mode
-    if ( this->host()->mode() == ExtractionDialog::SearchMode ) {
+    if ( this->host()->mode() == ExtractionDialog::ExistingMode ) {
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionSelect );
         this->ui->toolBar->removeAction( this->ui->actionAddReagent );
         this->ui->toolBar->removeAction( this->ui->actionAddIUPAC );
-    } else if ( this->host()->mode() == ExtractionDialog::ExistingMode ) {
+    } else if ( this->host()->mode() == ExtractionDialog::SearchMode ) {
         this->ui->toolBar->removeAction( this->ui->actionSelect );
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddReagent );
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddIUPAC );
@@ -334,19 +335,19 @@ void StructureFragment::setup( const QList<int> &list ) {
 
     // select the first id and update previous/next button status
     this->ui->cidEdit->setText( QString::number( this->cidList.first()));
-    this->buttonTest();
+    this->validate();
 
     // connect prev button
     QAction::connect( this->ui->actionPrevious, &QAction::triggered, [ this ]() {
         this->m_index--;
-        this->buttonTest();
+        this->validate();
         this->getNameAndFormula();
     } );
 
     // connect next button
     QAction::connect( this->ui->actionNext, &QAction::triggered, [ this ]() {
         this->m_index++;
-        this->buttonTest();
+        this->validate();
         this->getNameAndFormula();
     } );
 
@@ -366,8 +367,9 @@ void StructureFragment::setup( const QList<int> &list ) {
 /**
  * @brief StructureFragment::error
  */
-void StructureFragment::error( const QString &, NetworkManager::Types, const QString &errorString ) {
+void StructureFragment::error( const QString &, NetworkManager::Types, const QString &errorMessage ) {
     this->setStatus( Error );
-    //this->ui->name->setText( StructureFragment::tr( "Error" ));
-    this->ui->structurePixmap->setText( errorString );
+    this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
+    this->ui->structurePixmap->setText( StructureFragment::tr( "Could not load structure" ));
+    this->host()->adjustSize();
 }

@@ -54,16 +54,13 @@ public:
 public slots:
     void setIdentifier( const QString &string );
 
-signals:
-    void status( const QString &message );
- //   void idListReady( )
-
 private slots:
     void sendInitialRequest();
     void sendSimilarRequest();
     bool parseIdList( const QList<int> &idList );
     bool parseIdListRequest( const QByteArray &data );
     void toggleControls( bool enabled );
+    void disableFragments();
 
 private:
     Ui::SearchFragment *ui;

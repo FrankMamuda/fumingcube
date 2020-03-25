@@ -32,6 +32,9 @@ namespace Ui {
     class ReagentDialog;
 }
 
+/**
+ * @brief The ReagentTools namespace
+ */
 namespace ReagentTools {
     /**
      * @brief DigitsToScript
@@ -70,6 +73,7 @@ public:
      */
     enum Modes {
         AddMode,
+        SearchMode,
         EditMode,
         BatchMode,
         BatchEditMode

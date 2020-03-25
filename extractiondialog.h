@@ -61,7 +61,11 @@ public:
     };
     Q_ENUM( Modes )
 
-    explicit ExtractionDialog( QWidget *parent = nullptr, const Id & = Id::Invalid, const Modes &mode = SearchMode );
+    // ExistingMode constructor
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+
+    // SearchMode constructor
+    //ExtractionDialog( QWidget *parent = nullptr, const int id = 0 );
 
     // disable move
     ExtractionDialog( ExtractionDialog&& ) = delete;
@@ -89,6 +93,10 @@ public:
 public slots:
     void setCurrentFragment( Fragment *fragment );
     void setFragmentEnabled( Fragment *fragment, bool enabled = true );
+    void setStatusMessage( const QString &message = QString());
+    void setErrorMessage( const QString &message = QString());
+    void clearStatusMessage();
+    void setReagentId( const Id &reagentId ) { this->m_reagentId = reagentId; }
 
 private:
     Ui::ExtractionDialog *ui;

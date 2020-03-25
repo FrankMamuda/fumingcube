@@ -144,7 +144,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
-    if ( this->mode() == AddMode || this->mode() == EditMode ) {
+    if ( this->mode() == AddMode || this->mode() == EditMode || this->mode() == SearchMode ) {
         // setup editor toolbar
         this->ui->editorToolBar->installFeature( EditorToolbar::Font );
         this->ui->editorToolBar->installFeature( EditorToolbar::VerticalAlignment );
@@ -178,9 +178,15 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
         checkState( false );
         break;
 
+    case SearchMode:
+        checkState( false );
+        this->ui->propertyCheck->hide();
+        break;
+
     case EditMode:
         this->setWindowTitle( ReagentDialog::tr( "Edit reagent" ));
         this->ui->lockButton->setChecked( this->mode() == EditMode );
+        this->ui->propertyCheck->hide();
         break;
 
     case BatchMode:
@@ -281,7 +287,7 @@ bool ReagentDialog::eventFilter( QObject *object, QEvent *event ) {
         const QKeyEvent *keyEvent( dynamic_cast<QKeyEvent *>( event ));
         if ( keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter ) {
             if ( object == this->ui->nameEdit ) {
-                if ( this->mode() == AddMode || this->mode() == EditMode )
+                if ( this->mode() == AddMode || this->mode() == EditMode || this->mode() == SearchMode )
                     this->ui->referenceEdit->setFocus();
                 else
                     this->ui->buttonBox->button( QDialogButtonBox::Ok )->animateClick();
