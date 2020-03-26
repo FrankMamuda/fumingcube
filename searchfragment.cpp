@@ -136,13 +136,13 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
         if ( QMessageBox::question( this, SearchFragment::tr( "Confirm deletion" ), SearchFragment::tr( "Delete all cache?" )) != QMessageBox::Yes )
             return;
 
-            const QList<int> values( Cache::instance()->nameIdMap.values());
-            for ( const int id : values ) {
-                Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
-                Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
-                Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
-            }
-            Cache::instance()->clear( Cache::IdMapContext, "data.map" );
+        const QList<int> values( Cache::instance()->nameIdMap.values());
+        for ( const int id : values ) {
+            Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
+            Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
+            Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
+        }
+        Cache::instance()->clear( Cache::IdMapContext, "data.map" );
     } );
 }
 

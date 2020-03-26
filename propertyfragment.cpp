@@ -528,13 +528,10 @@ void PropertyFragment::readFormula( const QByteArray &data ) {
         return;
 
     const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
-    //const QPixmap scaled( cropped.scaledToWidth( static_cast<int>( cropped.width() * 0.75 ), Qt::SmoothTransformation ));
-    const bool darkMode = Variable::isEnabled( "darkMode" );
-
     const int rows = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( rows + 1 );
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
-    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, darkMode ? PixmapUtils::invert( cropped ) : cropped ));
+    this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );
 }
 

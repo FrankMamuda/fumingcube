@@ -124,6 +124,12 @@ misc/unsorted:
     for some reason stuff copied from word wants to be pasted as image not as text
     prioritize text over image in TextEdit if in simple editor mode
     in short: better mime handling in paste
+  - better not found error handling in search
+  - allow search without addition
+  - some caching issues (structures dont match cids)
+    could be that while request is being sent and user changes index
+    the wrong cid is set to the fetched data and image
+  - show image not inverted in dark mode
 */
 
 /**
