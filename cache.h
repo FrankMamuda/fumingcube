@@ -29,8 +29,14 @@
  */
 class Cache : public QObject {
     Q_OBJECT
+    friend class SearchFragment;
 
 public:
+    constexpr static const char *FormulaContext = "formula";
+    constexpr static const char *IUPACContext = "iupac";
+    constexpr static const char *DataContext = "data";
+    constexpr static const char *IdMapContext = "id";
+
     /**
      * @brief The Types enum
      */
@@ -63,7 +69,17 @@ public:
     [[nodiscard]] QString contextPath( const QString &context, const QString &key = QString()) const;
     [[nodiscard]] static bool validate( const QString &context, const QString &key );
 
+public slots:
+    void readReagentCache();
+    void writeReagentCache();
+
+
 private:
     explicit Cache();
     QString m_path;
+
+    QMultiMap<QString, int> nameIdMap;
+    QMultiMap<int, QString> idNameMap;
+
+    constexpr static const int Version = 1;
 };

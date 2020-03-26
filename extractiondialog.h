@@ -23,20 +23,17 @@
  * includes
  */
 #include <QDialog>
-#include <QLabel>
-#include <QLayout>
-#include <QMutex>
-#include <qtoolbutton.h>
-#include "networkmanager.h"
+#include <QStackedWidget>
 #include "table.h"
-#include "tag.h"
-#include "ghswidget.h"
-#include "nfpawidget.h"
 
-//
-// classes
-//
-class ExtractionModel;
+/*
+ * classes
+ */
+class SearchFragment;
+class StructureFragment;
+class PropertyFragment;
+class FragmentNavigation;
+class Fragment;
 
 /**
  * @brief The Ui namespace
@@ -53,7 +50,22 @@ class ExtractionDialog : public QDialog {
     Q_DISABLE_COPY( ExtractionDialog )
 
 public:
-    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid, const int cid = 0 );
+
+    /**
+     * @brief The Modes enum
+     */
+    enum Modes {
+        NoMode = -1,
+        SearchMode,
+        ExistingMode
+    };
+    Q_ENUM( Modes )
+
+    // ExistingMode constructor
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+
+    // SearchMode constructor
+    //ExtractionDialog( QWidget *parent = nullptr, const int id = 0 );
 
     // disable move
     ExtractionDialog( ExtractionDialog&& ) = delete;
@@ -66,80 +78,32 @@ public:
      * @return
      */
     [[nodiscard]] Id reagentId() const { return this->m_reagentId; }
+    [[nodiscard]] SearchFragment *searchFragment() const;
+    [[nodiscard]] StructureFragment *structureFragment() const;
+    [[nodiscard]] PropertyFragment *propertyFragment() const;
+    [[nodiscard]] QStackedWidget *fragmentHost() const;
+    [[nodiscard]] FragmentNavigation *fragmentNavigation() const;
 
     /**
-     * @brief The StatusOption enum
-     */
-    enum StatusOption {
-        Idle = 0x0,
-        Busy = 0x1,
-        Error = 0x2
-    };
-    Q_DECLARE_FLAGS( Status, StatusOption )
-
-    /**
-     * @brief status
+     * @brief mode
      * @return
      */
-    [[nodiscard]] Status status() const { return this->m_status; }
-
-    void readData( const QByteArray &uncompressed ) const;
-
-    [[nodiscard]] QString cachedName() const;
-
-    bool readFromCache();
-
-
-    [[nodiscard]] QString name() const;
-    [[nodiscard]] int id() const;
-
+    [[nodiscard]] Modes mode() const { return this->m_mode; }
 
 public slots:
-    void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Types, const QString & );
-    void readFormula( const QByteArray &data );
-    /*void getFormula( const QString &cid );
-    void getSimilar( const QList<int> &cidListInt );
-    void buttonTest();*/
-    void sendInitialRequest();
-    void sendSimilarRequest();
-    void sendFormulaRequest();
-    void sendDataRequest();
-    bool parseFormulaRequest( const QByteArray &data );
-    bool parseDataRequest( const QByteArray &data );
-    bool parseIdListRequest( const QByteArray &data );
-    bool parseIdList( const QList<int> &idList );
-    bool getDataAndFormula( const int &id );
-    void getFormula();
-    void getData();
-
-private slots:
-    void readCache();
-    void writeCache();
-    void on_extractButton_clicked();
-    //void on_clearCacheButton_clicked();
-
-    /**
-     * @brief setStatus
-     * @param status
-     */
-    void setStatus( const ExtractionDialog::Status &status ) { this->m_status = status; }
+    void setCurrentFragment( Fragment *fragment );
+    void setFragmentEnabled( Fragment *fragment, bool enabled = true );
+    void setStatusMessage( const QString &message = QString());
+    void setErrorMessage( const QString &message = QString());
+    void clearStatusMessage();
+    void setReagentId( const Id &reagentId ) { this->m_reagentId = reagentId; }
 
 private:
     Ui::ExtractionDialog *ui;
-    ExtractionModel *model = nullptr;
     Id m_reagentId = Id::Invalid;
-    QNetworkRequest request;
-    QStringList cidList;
-    mutable QMutex mutex;
-    Status m_status = Idle;
-    constexpr static const char *FormulaContext = "formula";
-    constexpr static const char *DataContext = "data";
-    constexpr static const char *CIDContext = "cid";
+    Modes m_mode = SearchMode;
 
-    constexpr static const char *IdMapContext = "idMap";
-
-    QMultiMap<QString, int> nameIdMap;
-    QMultiMap<int, QString> idNameMap;
-    constexpr static const int Version = 1;
+    SearchFragment *m_searchFragment;
+    StructureFragment *m_structureFragment;
+    PropertyFragment *m_propertyFragment;
 };

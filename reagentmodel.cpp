@@ -109,6 +109,7 @@ void ReagentModel::setupModelData() {
         const QString generatedName( ReagentModel::generateName( QApplication::translate( "Reagent",
                                          Reagent::instance()->name( row ).toUtf8().constData()),
                                          Reagent::instance()->reference( row )));
+
         auto *reagent( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
 
         reagent->setData( static_cast<int>( reagentId ), ID );
@@ -209,14 +210,15 @@ void ReagentModel::add( const Id &id ) {
  * @param parentItem
  */
 void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *parentItem ) {
-    const QString generatedName( parentId == Id::Invalid ? ReagentModel::generateName( Reagent::instance()->name( id ),
-                                                                                       Reagent::instance()->reference(
-                                                                                               id ))
-                                                         : Reagent::instance()->name( id ));
+    const QString generatedName( parentId == Id::Invalid ?
+                                     ReagentModel::generateName( Reagent::instance()->name( id ),
+                                                                 Reagent::instance()->reference( id ))
+                                   :
+                                     Reagent::instance()->name( id ));
     auto *item( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
-    item->setData( generatedName, HTML );
+    item->setData( NodeHistory::instance()->isDeperecated( id ) ? QString( "<s>%1</s>" ).arg( generatedName ) : generatedName, HTML );
     parentItem->appendRow( item );
 }
 

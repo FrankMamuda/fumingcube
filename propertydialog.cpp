@@ -137,9 +137,10 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
             return;
     }
 
+    const QString tagName( QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()));
     this->setWindowTitle(( defaultValue.isEmpty() ? PropertyDialog::tr( "Add" ) : PropertyDialog::tr( "Edit" )) +
-                         QString( " '%1'" ).arg( Tag::instance()->name( tagId )));
-    this->ui->nameLabel->setText( Tag::instance()->name( tagId ));
+                         QString( " '%1'" ).arg( /*Tag::instance()->name( tagId )*/ tagName ));
+    this->ui->nameLabel->setText( tagName/*Tag::instance()->name( tagId )*/);
     this->ui->unitsLabel->setText( Tag::instance()->units( tagId ));
     this->ui->unitsLabel->setTextFormat( Qt::RichText );
 

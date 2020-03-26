@@ -53,6 +53,9 @@ database:
  - fix crash on argument count mismatch
  - expand built-in database with more reagents
 
+reagent:
+ - upon reagent deletion, remove from hidden node list
+
 i18n:
  - language selector in settings
 
@@ -60,7 +63,6 @@ properties:
  - filter in dock
 
 extraction:
- - unified caching solution (cidLists, images, etc.) (in progress)
  - tag selection for extraction (user might not need all tags)
 
 theming:
@@ -85,6 +87,22 @@ future/non-priority:
  - scripted property extractor with multiple data sources
  - store variables (for example F = molarMass( "NaOH" )
    (not sure how to get a list of vars from globalObject, though)
+ - property modifiers:
+   boiling point: 43C @1 atm
+                  11C @20 mbar
+ - aliases (display names for reagents)
+ - add some padding to formulas
+ - CoA search
+ - molport search
+ - link to PubChem (store CID as tag)
+ - label sub categories:
+   Project1:
+      solvents
+      inorganics
+   Project2:
+      solvents
+      organics
+      intermediates
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:
@@ -101,10 +119,12 @@ misc/unsorted:
   - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
   - sort batches by addition date
+    add date to select batches (not all of them need dates?)
   - better i18n support
-  - caching for search dialog
-  - better ui for search dialog (less dialogs)
-    (currently four steps search->similar->add->extract)
+  - disallow adding images to TextEdit, such as in batch addition
+    for some reason stuff copied from word wants to be pasted as image not as text
+    prioritize text over image in TextEdit if in simple editor mode
+    in short: better mime handling in paste
 */
 
 /**
@@ -170,6 +190,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "reagentDock/selection", -1, Var::Flag::Hidden );
     Variable::add( "reagentDock/openNodes", "", Var::Flag::Hidden );
     Variable::add( "reagentDock/hiddenNodes", "", Var::Flag::Hidden );
+    Variable::add( "reagentDock/deprecatedNodes", "", Var::Flag::Hidden );
     Variable::add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
     Variable::add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
@@ -183,6 +204,8 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit, []() {
+        Cache::instance()->writeReagentCache();
+
         NodeHistory::instance()->saveHistory();
 
         PropertyDock::instance()->saveHiddenTags();
@@ -330,26 +353,8 @@ int main( int argc, char *argv[] ) {
     // load search engines
     SearchEngineManager::instance()->loadSearchEngines();
 
-    // test cache
-    /*qDebug() << Cache::instance()->contains( "temp", "value" );
-
-    Cache::instance()->insert( "temp", "value", "testValue" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    qDebug() << Cache::instance()->contains( "temp", "value" );
-
-    Cache::instance()->insert( "temp", "value", "override" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    Cache::instance()->clear( "temp", "value" );
-
-    qDebug() << Cache::instance()->contains( "temp", "value" );
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-
-    qDebug() << Cache::instance()->getData( "temp", "value" );
-    qDebug() << "validate 1" << ( Cache::validate( "penguin", "key" ));
-    qDebug() << "validate 2" << ( Cache::validate( "penguin", "ke%y" ));
-    */
+    // read reagent cache
+    Cache::instance()->readReagentCache();
 
     return QApplication::exec();
 }

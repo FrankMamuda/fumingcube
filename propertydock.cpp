@@ -330,7 +330,7 @@ void PropertyDock::on_addPropButton_clicked() {
         if ( qAsConst( allSetTags ).contains( tagId ))
             continue;
 
-        subMenu->addAction( Tag::instance()->name( tagId ), this, [ this, reagentId, tagId ]() {
+        subMenu->addAction(  QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) /*Tag::instance()->name( tagId )*/, this, [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
             this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
         } );
@@ -433,7 +433,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
                     ImageUtils iu( this, qAsConst( pixmap ), 0, true );
-                    iu.setWindowFlags( Qt::Dialog | Qt::Tool );
+                    iu.setWindowFlags( Qt::Dialog );
                     iu.exec();
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));
@@ -769,4 +769,24 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         const QString completed( QString( "%1( %2 ) " ).arg( functionName, qAsConst( parents )));
         MainWindow::instance()->insertCommand( completed );
     }
+}
+
+/**
+ * @brief PropertyDock::on_extractButton_clicked
+ */
+void PropertyDock::on_extractButton_clicked() {
+    // get reagent id
+    const Id reagentId = ReagentDock::instance()->view()->idFromIndex(
+            ReagentDock::instance()->view()->filterModel()->mapToSource(
+            ReagentDock::instance()->view()->currentIndex()));
+
+    if ( reagentId == Id::Invalid )
+        return;
+
+    const Id parentId = Reagent::instance()->parentId( reagentId );
+
+    // FIXME DUP CODE
+    ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
+    ed.exec();
+    this->updateView();
 }

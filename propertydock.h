@@ -75,6 +75,8 @@ private slots:
     void addProperty( const QString &name, const QVariant &value, const Id &reagentId, const Id &tagId = Id::Invalid );
     void on_propertyView_doubleClicked( const QModelIndex &index );
 
+    void on_extractButton_clicked();
+
 private:
     explicit PropertyDock( QWidget *parent = nullptr );
     Ui::PropertyDock *ui;

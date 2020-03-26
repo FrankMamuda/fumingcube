@@ -60,11 +60,10 @@ public:
     [[nodiscard]] ReagentView *view() const;
     QMenu *buildMenu( bool context = true );
 
+    Id addReagent( const Id &parentId, const QString &reagentName = QString(), const int cid = 0 );
+
 signals:
     void currentIndexChanged( const QModelIndex &index );
-
-public slots:
-    void addReagent( const Id &parentId, const QString &reagentName = QString(), const int cid = 0 );
 
 private slots:
     void on_reagentView_customContextMenuRequested( const QPoint &pos );

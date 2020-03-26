@@ -21,31 +21,33 @@
 /*
  * includes
  */
-#include <QDialog>
+#include "fragment.h"
 #include "networkmanager.h"
+#include "extractiondialog.h"
 
 /**
  * @brief The Ui namespace
  */
 namespace Ui {
-    class StructureBrowser;
+    class StructureFragment;
 }
 
 /**
- * @brief The StructureBrowser class
+ * @brief The StructureFragment class
  */
-class StructureBrowser : public QDialog {
+class StructureFragment final : public Fragment {
     Q_OBJECT
-    Q_DISABLE_COPY( StructureBrowser )
+    Q_DISABLE_COPY( StructureFragment )
 
 public:
-    explicit StructureBrowser( QList<int> cidList, QWidget *parent = nullptr );
+    explicit StructureFragment( QWidget *parent = nullptr );
 
     // disable move
-    StructureBrowser( StructureBrowser&& ) = delete;
-    StructureBrowser& operator=( StructureBrowser&& ) = delete;
+    StructureFragment( StructureFragment&& ) = delete;
+    StructureFragment& operator=( StructureFragment&& ) = delete;
 
-    ~StructureBrowser() override;
+    ~StructureFragment() override;
+    [[nodiscard]] ExtractionDialog *host() const { return qobject_cast<ExtractionDialog *>( Fragment::host()); }
 
     /**
      * @brief The StatusOption enum
@@ -64,25 +66,32 @@ public:
      */
     [[nodiscard]] Status status() const { return this->m_status; }
     [[nodiscard]] int cid() const;
-    [[nodiscard]] QString name() const;
+    [[nodiscard]] QString queryName() const;
+    [[nodiscard]] QString IUPACName() const;
 
 public slots:
     void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
     void error( const QString &, NetworkManager::Types type, const QString &errorString );
-    void setSearchMode();
+    void setup( const QList<int> &list );
+    void getNameAndFormula();
 
 private slots:
-    void getInfo();
-    void getFormula( int cid );
-    void getName( int cid );
+    void sendFormulaRequest();
+    void sendIUPACNameRequest();
     void readFormula( const QByteArray &data );
+    void readIUPACName( const QString &queryName );
+    bool parseFormulaRequest( const QByteArray &data );
+    bool parseIUPACNameRequest( const QByteArray &data );
 
     /**
      * @brief setStatus
      * @param status
      */
-    void setStatus( const StructureBrowser::Status &status ) { this->m_status = status; }
-    void buttonTest();
+    void setStatus( const StructureFragment::Status &status ) { this->m_status = status; }
+    void validate();
+
+protected:
+    void keyPressEvent( QKeyEvent *event ) override;
 
 private:
     /**
@@ -91,17 +100,10 @@ private:
      */
     [[nodiscard]] int index() const { return this->m_index; }
 
-    /**
-     * @brief path
-     * @return
-     */
-    [[nodiscard]] QString path() const { return this->m_path; }
-
-    Ui::StructureBrowser *ui;
+    Ui::StructureFragment *ui;
     QList<int> cidList;
     int m_index = 0;
-    QString m_path;
     Status m_status = Idle;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS( StructureBrowser::Status )
+Q_DECLARE_OPERATORS_FOR_FLAGS( StructureFragment::Status )

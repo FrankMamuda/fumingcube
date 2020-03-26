@@ -74,6 +74,14 @@ protected:
         return QSizeF( vScale * 2, vScale * 2 ).toSize();
     }
 
+    /**
+     * @brief sizeHint
+     * @return
+     */
+    [[nodiscard]] QSize minimumSizeHint() const override {
+        return this->sizeHint();
+    }
+
 private:
     int m_scale = 0;
     qreal m_vscale = 0.0;
