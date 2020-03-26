@@ -153,8 +153,9 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
     this->host()->structureFragment()->setup( idList );
 
     // select an id
-    if ( idList.count() > 1 ) {
+    if ( idList.count() > 1 || this->host()->mode() == ExtractionDialog::SearchMode ) {
         // if we have multiple ids in the list, open the StructureBrowser and let the user decide
+        // NOTE: this is also the default behaviour in SearchMode, because we do need to add a new reagent
         this->host()->setCurrentFragment( this->host()->structureFragment());
         this->host()->structureFragment()->getNameAndFormula();
         return true;
