@@ -49,6 +49,7 @@
 #include <QSqlQuery>
 #include <QMimeData>
 #include <QSqlError>
+#include <QDesktopServices>
 
 /**
  * @brief PropertyDock::PropertyDock
@@ -189,6 +190,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
         switch ( type ) {
             case Tag::CAS:
             case Tag::Text:
+            case Tag::PubChemId:
             case Tag::Integer:
             case Tag::Real:
             case Tag::State: {
@@ -401,7 +403,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         const Id tagId = Property::instance()->tagId( row );
         const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
-        if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::CAS ||
+        if ( type == Tag::Text || type == Tag::Integer || type == Tag::PubChemId || type == Tag::Real || type == Tag::CAS ||
              type == Tag::Formula || tagId == Id::Invalid ) {
             menu.addAction( PropertyDock::tr( "Copy" ), this, [ row, type, tagId ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
@@ -768,6 +770,15 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
         // paste
         const QString completed( QString( "%1( %2 ) " ).arg( functionName, qAsConst( parents )));
         MainWindow::instance()->insertCommand( completed );
+    }
+
+    if ( type == Tag::PubChemId ) {
+        const int cid = Property::instance()->propertyData( row ).toInt();
+        if ( cid <= 0 )
+            return;
+
+        // TODO add link icon in property (via delegate)
+        QDesktopServices::openUrl( QString( "https://pubchem.ncbi.nlm.nih.gov/compound/%1" ).arg( cid ));
     }
 }
 

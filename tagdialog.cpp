@@ -76,6 +76,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         case Tag::State:
             return;
 
+        case Tag::PubChemId:
         case Tag::Integer:
         case Tag::Real:
             this->ui->nameEdit->setEnabled( true );

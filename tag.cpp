@@ -137,5 +137,5 @@ void Tag::populate() {
                QStringList() << "MeSH Entry Terms" << "MeSH Entry Terms" );
     this->add( Tag::tr( "IUPAC Name" ), Text, "", 0, 0, 0, 0, "", 0,
                QStringList() << "IUPAC Name" << "IUPAC Name" );
-   // this->add( Tag::tr( "PubChem id" ), PubChemId );
+    this->add( Tag::tr( "PubChem id" ), PubChemId );
 }

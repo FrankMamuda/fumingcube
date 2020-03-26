@@ -472,6 +472,14 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
             PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
             //propList[Tag::instance()->name( row )] = group;
             propList[QApplication::translate( "Tag", Tag::instance()->name( row ).toUtf8().constData())] = group;
+            continue;
+        }
+
+        if ( Tag::instance()->type( row ) == Tag::PubChemId ) {
+            const QString cid( QString::number( this->host()->structureFragment()->cid()));
+            const QList<QStringList> list = QList<QStringList>() << ( QStringList() << cid << cid );
+            PropertyWidget *group( new PropertyWidget( nullptr, list, Tag::instance()->id( row )));
+            propList[QApplication::translate( "Tag", Tag::instance()->name( row ).toUtf8().constData())] = group;
         }
     }
 
@@ -485,6 +493,11 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
         this->ui->propertyView->setCellWidget( row, 1, propList[name] );
         row++;
     }
+
+    // add PubChemId
+   // this->ui->propertyView->setRowCount( this->ui->propertyView->rowCount() + 1 );
+   // this->ui->propertyView->setItem( row, 0, new QTableWidgetItem( name ));
+   // //this->ui->propertyView->setCellWidget( row, 1, propList[name] );
 
     // resize content
     this->ui->propertyView->resizeRowsToContents();

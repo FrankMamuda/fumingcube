@@ -94,7 +94,6 @@ future/non-priority:
  - add some padding to formulas
  - CoA search
  - molport search
- - link to PubChem (store CID as tag)
  - label sub categories:
    Project1:
       solvents

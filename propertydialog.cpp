@@ -43,6 +43,7 @@ PropertyDialog::PropertyDialog( QWidget *parent, const Id &tagId, const QString 
     const bool darkMode = Variable::isEnabled( "darkMode" );
 
     switch ( type ) {
+        case Tag::PubChemId:
         case Tag::Integer:
         case Tag::Real: {
 
@@ -188,6 +189,7 @@ QVariant PropertyDialog::value() const {
         case Tag::Real:
             return this->ui->textEdit->text().replace( ",", "." ).toDouble();
 
+        case Tag::PubChemId:
         case Tag::Integer:
             return this->ui->textEdit->text().toInt();
 

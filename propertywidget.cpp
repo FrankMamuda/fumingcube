@@ -58,6 +58,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
         return;
 
     switch ( type ) {
+        case Tag::PubChemId:
         case Tag::Text:
         case Tag::Integer:
         case Tag::Real:
@@ -107,6 +108,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
                 this->m_position = this->displayValues.count() - 1;
 
             switch ( type ) {
+                case Tag::PubChemId:
                 case Tag::Text:
                 case Tag::Integer:
                 case Tag::Real:
@@ -138,6 +140,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
                 this->m_position = 0;
 
             switch ( type ) {
+                case Tag::PubChemId:
                 case Tag::Text:
                 case Tag::Integer:
                 case Tag::Real:
@@ -206,6 +209,7 @@ void PropertyWidget::add( const Id &id ) {
         return;
 
     switch ( Tag::instance()->type( this->tagId())) {
+        case Tag::PubChemId:
         case Tag::Text:
         case Tag::Integer:
         case Tag::Real:

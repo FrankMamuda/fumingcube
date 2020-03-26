@@ -70,7 +70,8 @@ public:
         NFPA,
         CAS,
         State,
-        Formula
+        Formula,
+        PubChemId
     };
     Q_ENUM( Types )
 
