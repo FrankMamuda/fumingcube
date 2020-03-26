@@ -166,8 +166,10 @@ void Cache::clear( const QString &context, const QString &key ) {
     if ( !Cache::validate( context, key ))
         return;
 
-    if ( this->contains( context, key ))
+    if ( this->contains( context, key )) {
+        //.qDebug() << "DEL" << context << key << this->contextPath( context, key ) << QFile::exists( this->contextPath( context, key ));
         QFile::remove( this->contextPath( context, key ));
+    }
 }
 
 /**

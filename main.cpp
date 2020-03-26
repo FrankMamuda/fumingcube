@@ -53,6 +53,9 @@ database:
  - fix crash on argument count mismatch
  - expand built-in database with more reagents
 
+reagent:
+ - upon reagent deletion, remove from hidden node list
+
 i18n:
  - language selector in settings
 
@@ -61,8 +64,6 @@ properties:
 
 extraction:
  - tag selection for extraction (user might not need all tags)
- - clear cache buttons currently not working
-   probably some other bugs
 
 theming:
  - separate app theme from calculator theme
@@ -120,7 +121,6 @@ misc/unsorted:
   - sort batches by addition date
     add date to select batches (not all of them need dates?)
   - better i18n support
-  - cross out reagents (old batches)
   - disallow adding images to TextEdit, such as in batch addition
     for some reason stuff copied from word wants to be pasted as image not as text
     prioritize text over image in TextEdit if in simple editor mode
@@ -190,6 +190,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "reagentDock/selection", -1, Var::Flag::Hidden );
     Variable::add( "reagentDock/openNodes", "", Var::Flag::Hidden );
     Variable::add( "reagentDock/hiddenNodes", "", Var::Flag::Hidden );
+    Variable::add( "reagentDock/deprecatedNodes", "", Var::Flag::Hidden );
     Variable::add( "propertyDock/hiddenTags", "", Var::Flag::Hidden );
     Variable::add( "darkMode", false, Var::Flag::ReadOnly | Var::Flag::Hidden | Var::Flag::NoSave );
     Variable::add( "overrideTheme", false, Var::Flag::ReadOnly | Var::Flag::Hidden );

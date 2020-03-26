@@ -28,6 +28,7 @@
 #include "cache.h"
 #include "propertyfragment.h"
 #include "fragmentnavigation.h"
+#include <QMessageBox>
 
 /**
  * @brief SearchFragment::SearchFragment
@@ -109,6 +110,40 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
     auto checkName = [ this ]() { this->ui->actionFetch->setEnabled( !this->ui->identifierEdit->text().isEmpty()); };
     QLineEdit::connect( this->ui->identifierEdit, &QLineEdit::textChanged, checkName );
     checkName();
+
+    // setup cache deletion actions
+    QAction::connect( this->ui->actionClear, &QAction::triggered, this, [ this ]() {
+        if ( this->identifier().isEmpty())
+            return;
+
+        // check for id in cache
+        if ( Cache::instance()->nameIdMap.contains( this->identifier())) {
+            // get a list of ids for the identifier
+            // make sure to reverse the list, since the most relavant entries are at the end
+            const QList<int> idList( Cache::instance()->nameIdMap.values( this->identifier()));
+
+            for ( const int id : idList ) {
+                Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
+                Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
+                Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
+            }
+        }
+    } );
+
+
+    // setup cache deletion actions
+    QAction::connect( this->ui->actionDeleteCache, &QAction::triggered, this, [ this ]() {
+        if ( QMessageBox::question( this, SearchFragment::tr( "Confirm deletion" ), SearchFragment::tr( "Delete all cache?" )) != QMessageBox::Yes )
+            return;
+
+            const QList<int> values( Cache::instance()->nameIdMap.values());
+            for ( const int id : values ) {
+                Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
+                Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
+                Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
+            }
+            Cache::instance()->clear( Cache::IdMapContext, "data.map" );
+    } );
 }
 
 /**
@@ -119,6 +154,8 @@ SearchFragment::~SearchFragment() {
     NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
     QAction::disconnect( this->ui->actionFetch, &QAction::triggered, this, &SearchFragment::sendInitialRequest );
     QLineEdit::disconnect( this->ui->identifierEdit, &QLineEdit::returnPressed, this, &SearchFragment::sendInitialRequest );
+    QAction::disconnect( this->ui->actionDeleteCache, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionClear, &QAction::triggered, this, nullptr );
 
     delete this->ui;
 }

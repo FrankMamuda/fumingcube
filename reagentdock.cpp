@@ -245,6 +245,22 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                                         static_cast<Id>( item->data( ReagentModel::ID ).toInt())
                                       : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
 
+        // deprecation
+        if  ( parentId != Id::Invalid ) {
+            const Id id = item->data( ReagentModel::ID ).value<Id>();
+            if ( !NodeHistory::instance()->isDeperecated( id )) {
+                menu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id ]() {
+                    NodeHistory::instance()->deprecate( id );
+                    this->view()->updateView();
+                } )->setIcon( QIcon::fromTheme( "remove" ));
+            } else {
+                menu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id ]() {
+                    NodeHistory::instance()->restore( id );
+                    this->view()->updateView();
+                } )->setIcon( QIcon::fromTheme( "show" ));
+            }
+        }
+
         if ( context ) {
             menu->addAction( ReagentDock::tr( "Copy name" ), this,
                              [ item ]() { QGuiApplication::clipboard()->setText( item->text()); } )->setIcon(

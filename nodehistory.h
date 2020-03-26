@@ -58,6 +58,14 @@ public:
     [[nodiscard]] bool isHidden( const Id& id ) const { return this->hiddenNodes.contains( id ); }
 
     /**
+     * @brief isDeperecated
+     * @param id
+     * @return
+     */
+    [[nodiscard]] bool isDeperecated( const Id& id ) const { return this->deprecatedNodes.contains( id ); }
+
+
+    /**
      * @brief hiddenCount
      * @return
      */
@@ -91,9 +99,21 @@ public slots:
     void hide( const Id& id ) { if ( !this->hiddenNodes.contains( id )) this->hiddenNodes << id; }
 
     /**
+     * @brief deprecate
+     * @param id
+     */
+    void deprecate( const Id& id ) { if ( !this->deprecatedNodes.contains( id )) this->deprecatedNodes << id; }
+
+    /**
+     * @brief restore
+     * @param id
+     */
+    void restore( const Id& id ) { if ( this->deprecatedNodes.contains( id )) this->deprecatedNodes.removeAll( id ); }
+
+    /**
      * @brief clearHiddenNodes
      */
-    void clearHiddenNodes() { this->hiddenNodes.clear(); }
+    void clearHiddenNodes() { this->hiddenNodes.clear(); }    
 
 private:
     explicit NodeHistory();
@@ -102,4 +122,5 @@ private:
     bool m_enabled = true;
     QList<Id> openNodes;
     QList<Id> hiddenNodes;
+    QList<Id> deprecatedNodes;
 };

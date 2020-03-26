@@ -81,6 +81,7 @@ void NodeHistory::restoreNodeState() {
 void NodeHistory::saveHistory() {
     Variable::setValue( "reagentDock/openNodes", ListUtils::toStringList<Id>( qAsConst( this->openNodes )));
     Variable::setValue( "reagentDock/hiddenNodes", ListUtils::toStringList<Id>( qAsConst( this->hiddenNodes )));
+    Variable::setValue( "reagentDock/deprecatedNodes", ListUtils::toStringList<Id>( qAsConst( this->deprecatedNodes )));
 }
 
 /**
@@ -89,6 +90,7 @@ void NodeHistory::saveHistory() {
 void NodeHistory::loadHistory() {
     this->openNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/openNodes" ));
     this->hiddenNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/hiddenNodes" ));
+    this->deprecatedNodes = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "reagentDock/deprecatedNodes" ));
 }
 
 /**

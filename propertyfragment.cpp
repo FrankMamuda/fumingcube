@@ -138,6 +138,16 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
         const QModelIndexList list( this->ui->propertyView->selectionModel()->selectedRows());
         this->ui->actionAddSelected->setEnabled( !list.isEmpty());
     } );
+
+    // setup clear action
+    QAction::connect( this->ui->actionClear, &QAction::triggered, this, [ this ]() {
+        this->ui->propertyView->setRowCount( 0 );
+        this->ui->actionAddAll->setDisabled( true );
+        this->ui->actionAddSelected->setDisabled( true );
+        this->host()->setCurrentFragment( this->host()->searchFragment());
+        this->host()->setFragmentEnabled( this, false );
+        this->host()->setFragmentEnabled( this->host()->structureFragment(), false );
+    } );
 }
 
 /**
@@ -149,6 +159,7 @@ PropertyFragment::~PropertyFragment() {
     QAction::disconnect( this->ui->actionAddAll, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionAddSelected, &QAction::triggered, this, nullptr );
     QItemSelectionModel::disconnect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, nullptr );
+    QAction::disconnect( this->ui->actionClear, &QAction::triggered, this, nullptr );
 
     delete this->ui;
 }

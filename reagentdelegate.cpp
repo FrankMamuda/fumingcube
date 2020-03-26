@@ -74,8 +74,7 @@ QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QMode
         return QStyledItemDelegate::sizeHint( option, index );
 
     const QFont font( option.font );
-    const QString html(
-            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
+    const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
     auto *document( new QTextDocument());
     document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" )
                        .arg( QString::number( font.pointSize()),
