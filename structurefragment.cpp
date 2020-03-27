@@ -109,7 +109,7 @@ void StructureFragment::keyPressEvent( QKeyEvent *event ) {
  */
 void StructureFragment::sendFormulaRequest() {
     qDebug() << "  request formula (BROWSER)" << this->queryName();
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->cid()), NetworkManager::FormulaRequestBrowser );
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/PNG" ).arg( this->cid()), NetworkManager::FormulaRequestBrowser, this->cid());
 }
 
 /**
@@ -117,7 +117,7 @@ void StructureFragment::sendFormulaRequest() {
  */
 void StructureFragment::sendIUPACNameRequest() {
     qDebug() << "  request name  (BROWSER)" << this->queryName();
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::IUPACName );
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::IUPACName, this->cid());
 }
 
 /**
@@ -144,7 +144,7 @@ void StructureFragment::getNameAndFormula() {
     // get formula
     if ( Cache::instance()->contains( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid()))) {
         qDebug() << "    cache->formula (BROWSER)" << this->queryName();
-        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid())));
+        this->readFormula( Cache::instance()->getData( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid())), this->cid());
     } else {
         // formula not in the cache, fetch it
         this->sendFormulaRequest();
@@ -153,7 +153,7 @@ void StructureFragment::getNameAndFormula() {
     // get IUPAC name
     if ( Cache::instance()->contains( Cache::IUPACContext, QString( "%1" ).arg( this->cid()))) {
         qDebug() << "    cache->iupac (BROWSER)" << this->queryName();
-        this->readIUPACName( Cache::instance()->getData( Cache::IUPACContext, QString( "%1" ).arg( this->cid())));
+        this->readIUPACName( Cache::instance()->getData( Cache::IUPACContext, QString( "%1" ).arg( this->cid())), this->cid());
     } else {
         // IUPAC name not in the cache, fetch it
         this->sendIUPACNameRequest();
@@ -164,7 +164,10 @@ void StructureFragment::getNameAndFormula() {
  * @brief StructureFragment::readFormula
  * @param data
  */
-void StructureFragment::readFormula( const QByteArray &data ) {
+void StructureFragment::readFormula(const QByteArray &data , const int id) {
+    if ( this->cid() != id || id <= 0 )
+        return;
+
     QPixmap pixmap;
     if ( !pixmap.loadFromData( data ))
         return;
@@ -189,7 +192,10 @@ void StructureFragment::readFormula( const QByteArray &data ) {
  * @brief StructureFragment::readIUPACName
  * @param name
  */
-void StructureFragment::readIUPACName( const QString &name ) {
+void StructureFragment::readIUPACName( const QString &name, const int id ) {
+    if ( this->cid() != id || id <= 0 )
+        return;
+
     this->ui->IUPACEdit->setText( name );
 
     this->setStatus( this->status() & ~FetchName );
@@ -201,11 +207,11 @@ void StructureFragment::readIUPACName( const QString &name ) {
  * @param data
  * @return
  */
-bool StructureFragment::parseFormulaRequest( const QByteArray &data ) {
+bool StructureFragment::parseFormulaRequest( const QByteArray &data, const int id ) {
     if ( !data.isEmpty()) {
         qDebug() << "    network->formula (browser)" << this->queryName();
-        Cache::instance()->insert( Cache::FormulaContext, QString( "%1.png" ).arg( this->cid()), data );
-        this->readFormula( data );
+        Cache::instance()->insert( Cache::FormulaContext, QString( "%1.png" ).arg( id ), data );
+        this->readFormula( data, id );
         return true;
     }
 
@@ -217,12 +223,12 @@ bool StructureFragment::parseFormulaRequest( const QByteArray &data ) {
  * @param data
  * @return
  */
-bool StructureFragment::parseIUPACNameRequest( const QByteArray &data ) {
+bool StructureFragment::parseIUPACNameRequest( const QByteArray &data , const int id ) {
     if ( !data.isEmpty()) {
         const QString name( data );
         qDebug() << "    network->name (browser)" << this->queryName();
-        Cache::instance()->insert( Cache::IUPACContext, QString( "%1" ).arg( this->cid()), data );
-        this->readIUPACName( name );
+        Cache::instance()->insert( Cache::IUPACContext, QString( "%1" ).arg( id ), data );
+        this->readIUPACName( name, id );
         return true;
     }
 
@@ -265,11 +271,11 @@ QString StructureFragment::IUPACName() const {
  * @param userData
  * @param data
  */
-void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
     switch ( type ) {
     case NetworkManager::IUPACName:
         qDebug() << "network->IUPACName" << this->queryName();
-        if ( !this->parseIUPACNameRequest( data )) {
+        if ( !this->parseIUPACNameRequest( data, userData.toInt())) {
             qDebug() << "  parseIUPACNameRequest failed";
             this->setStatus( Error );
             return;
@@ -278,7 +284,7 @@ void StructureFragment::replyReceived( const QString &, NetworkManager::Types ty
 
     case NetworkManager::FormulaRequestBrowser:
         qDebug() << "network->formula (browser)" << this->queryName();
-        if ( !this->parseFormulaRequest( data )) {
+        if ( !this->parseFormulaRequest( data, userData.toInt())) {
             qDebug() << "  parseFormulaRequest failed (browser)";
             this->setStatus( Error );
             return;

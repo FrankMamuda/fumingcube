@@ -74,6 +74,8 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
 
     this->ui->addPropButton->setEnabled( false );
     this->ui->removePropButton->setEnabled( false );
+    this->ui->extractButton->setEnabled( false );
+
     QItemSelectionModel::connect( this->ui->propertyView->selectionModel(),
                                                        &QItemSelectionModel::currentChanged,
                                                        [ this, buttonTest ]( const QModelIndex &current,
@@ -87,6 +89,7 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
     ReagentDock::connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged,
                                       [ this ]( const QModelIndex &current ) {
                                           this->ui->addPropButton->setEnabled( current.isValid());
+                                          this->ui->extractButton->setEnabled( current.isValid());
                                       } );
 
     // move up/down lambda

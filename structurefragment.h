@@ -78,10 +78,10 @@ public slots:
 private slots:
     void sendFormulaRequest();
     void sendIUPACNameRequest();
-    void readFormula( const QByteArray &data );
-    void readIUPACName( const QString &queryName );
-    bool parseFormulaRequest( const QByteArray &data );
-    bool parseIUPACNameRequest( const QByteArray &data );
+    void readFormula( const QByteArray &data, const int id );
+    void readIUPACName( const QString &queryName, const int id );
+    bool parseFormulaRequest( const QByteArray &data, const int id );
+    bool parseIUPACNameRequest( const QByteArray &data, const int id );
 
     /**
      * @brief setStatus
