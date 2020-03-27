@@ -102,6 +102,7 @@ future/non-priority:
       solvents
       organics
       intermediates
+ - better ImageUitls dialof (save as, replace, zoom, etc.)
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:
@@ -115,21 +116,22 @@ scripting/non-priority:
 misc/unsorted:
   - cut properties from reagents
   - allow to display treeView in multiple columns
-  - remove extra <br> at the end of some properties
   - double check all add/edit/delete buttons for when they should be enabled or not
+    FIXME: upon reagent hiding, index defaults to invalid, but buttons remain active
   - sort batches by addition date
     add date to select batches (not all of them need dates?)
   - better i18n support
-  - disallow adding images to TextEdit, such as in batch addition
-    for some reason stuff copied from word wants to be pasted as image not as text
-    prioritize text over image in TextEdit if in simple editor mode
-    in short: better mime handling in paste
+  - better mime handling in paste
   - better not found error handling in search
   - allow search without addition
-  - some caching issues (structures dont match cids)
-    could be that while request is being sent and user changes index
-    the wrong cid is set to the fetched data and image
   - show image not inverted in dark mode
+  - reagent word wrap
+  - search history
+  - ReagentDialog TextEdit size adjustment (long names look ugly)
+  - 'collapse all' button
+  - explicit selection of lableless reagents
+  - add IUPAC->name query->reference
+  - sort tags instead of properties?
 */
 
 /**

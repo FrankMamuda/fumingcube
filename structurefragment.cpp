@@ -85,6 +85,8 @@ StructureFragment::~StructureFragment() {
     QAction::disconnect( this->ui->actionSelect, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionAddReagent, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionAddIUPAC, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionPrevious, &QAction::triggered,  this, nullptr );
+    QAction::disconnect( this->ui->actionNext, &QAction::triggered,  this, nullptr );
 
     delete this->ui;
 }
@@ -301,7 +303,7 @@ void StructureFragment::replyReceived( const QString &, NetworkManager::Types ty
  */
 void StructureFragment::validate() {
     this->ui->actionPrevious->setEnabled( !this->cidList.isEmpty() && this->index() > 0 );
-    this->ui->actionNext->setEnabled( !this->cidList.isEmpty() && this->index() < this->cidList.count() - 1 );
+    this->ui->actionNext->setEnabled( !this->cidList.isEmpty() && this->index() >= 0 && this->index() < this->cidList.count() - 1 );
     this->ui->actionSelect->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
     this->ui->actionAddReagent->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
     this->ui->actionAddIUPAC->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
@@ -344,14 +346,17 @@ void StructureFragment::setup( const QList<int> &list ) {
     this->validate();
 
     // connect prev button
-    QAction::connect( this->ui->actionPrevious, &QAction::triggered, [ this ]() {
+    QAction::connect( this->ui->actionPrevious, &QAction::triggered, this, [ this ]() {
+        if ( this->m_index <= 0 )
+            return;
+
         this->m_index--;
         this->validate();
         this->getNameAndFormula();
     } );
 
     // connect next button
-    QAction::connect( this->ui->actionNext, &QAction::triggered, [ this ]() {
+    QAction::connect( this->ui->actionNext, &QAction::triggered, this, [ this ]() {
         this->m_index++;
         this->validate();
         this->getNameAndFormula();

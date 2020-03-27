@@ -354,6 +354,7 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
         }
         this->ui->referenceEdit->setText( !match.isEmpty() ? reagentReferences[match] : QString( html ).remove( ' ' ));
     } );
+
+    //this->ui->nameEdit->setMaximumHeight( 128 );
+    //this->ui->referenceEdit->setMaximumHeight( 128 );
 }
-
-

@@ -203,7 +203,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
         } else {
             // properties with built-in tags don't use property names, but rather tag names
-            const QString units( Tag::instance()->units( tagId ));
+            const QString units( Tag::instance()->units( tagId ).remove( QRegularExpression( R"(<\s*br\s*\/>)" )));
 
             QString stringData( data.toString());
             if ( tagId != Id::Invalid ) {

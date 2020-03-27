@@ -238,6 +238,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
+        const QString batchName( TextUtils::elidedString( item->text()));
 
         menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
                          [ this, parentId, item ]() { this->addReagent(
@@ -249,12 +250,12 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         if  ( parentId != Id::Invalid ) {
             const Id id = item->data( ReagentModel::ID ).value<Id>();
             if ( !NodeHistory::instance()->isDeperecated( id )) {
-                menu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id ]() {
+                menu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->deprecate( id );
                     this->view()->updateView();
                 } )->setIcon( QIcon::fromTheme( "remove" ));
             } else {
-                menu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id ]() {
+                menu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->restore( id );
                     this->view()->updateView();
                 } )->setIcon( QIcon::fromTheme( "show" ));
@@ -285,7 +286,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
                     QAction *action(
                             labels->addAction( QIcon( Label::instance()->pixmap( Label::instance()->colour( row ))),
-                                               Label::instance()->name( row ),
+                                               QApplication::translate( "Label", Label::instance()->name( row ).toUtf8().constData(), nullptr ),
                                                [ item, menuLabelId, reagentId, hasLabel ]() {
                                                    if ( hasLabel ) {
                                                        LabelSet::instance()->remove( menuLabelId, reagentId );

@@ -138,4 +138,6 @@ void Tag::populate() {
     this->add( Tag::tr( "IUPAC Name" ), Text, "", 0, 0, 0, 0, "", 0,
                QStringList() << "IUPAC Name" << "IUPAC Name" );
     this->add( Tag::tr( "PubChem id" ), PubChemId );
+    this->add( Tag::tr( "Molecular formula" ), Text, "", 0, 0, 0, 0, "", 0,
+               QStringList() << "Molecular Formula" << "Molecular Formula" );
 }
