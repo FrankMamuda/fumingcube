@@ -308,14 +308,14 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     QDialog::showEvent( event );
 
     // steal height from a line edit widget
-    this->ui->nameEdit->setMaximumHeight( this->ui->lineEdit->height());
+    //this->ui->nameEdit->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->nameEdit->document()->setDocumentMargin( 2 );
     this->ui->nameEdit->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->nameEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->nameEdit->setCleanHTML( true );
     this->ui->nameEdit->setSimpleEditor( true );
 
-    this->ui->referenceEdit->setMaximumHeight( this->ui->lineEdit->height());
+    //this->ui->referenceEdit->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->referenceEdit->document()->setDocumentMargin( 2 );
     this->ui->referenceEdit->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->referenceEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -323,12 +323,13 @@ void ReagentDialog::showEvent( QShowEvent *event ) {
     this->ui->referenceEdit->setSimpleEditor( true );
 
     // dummy line edit widget is not needed anymore
+    // TODO: remove this completely
     this->ui->lineEdit->hide();
 
     // force widget to resize to minimum
     QApplication::processEvents();
     QTimer::singleShot( 0, this, [ this ]() {
-        this->resize( this->minimumSizeHint());
+        this->resize( this->width(), this->minimumSizeHint().height());
     } );
 
     // copy reference from name by default

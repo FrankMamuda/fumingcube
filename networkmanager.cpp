@@ -47,7 +47,7 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
 
         // abort on errors
         if ( reply->error()) {
-            emit this->error( reply->url().toString(), type, reply->errorString());
+            emit this->error( reply->url().toString(), type, userData, reply->errorString());
             reply->deleteLater();
             return;
         }

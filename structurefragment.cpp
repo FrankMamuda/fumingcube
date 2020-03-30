@@ -33,6 +33,9 @@
 #include "reagentdialog.h"
 #include "fragmentnavigation.h"
 #include "reagentdock.h"
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 // TODO: disable property fragment on error
 
@@ -69,8 +72,8 @@ StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui
     };
 
     // add action leads to the ReagentDialog
-    QAction::connect( this->ui->actionAddReagent, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->queryName()); } );// std::bind( addDialog, this->queryName()));
-    QAction::connect( this->ui->actionAddIUPAC, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->IUPACName()); } );//std::bind( addDialog, this->ui->IUPACEdit->text()));
+    QAction::connect( this->ui->actionAddReagent, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->queryName()); } );
+    QAction::connect( this->ui->actionAdd, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->name()); } );
 }
 
 /**
@@ -80,11 +83,11 @@ StructureFragment::~StructureFragment() {
     StructureFragment::disconnect( NetworkManager::instance(),
                                    SIGNAL( finished( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )),
                                    this, SLOT( replyReceived( const QString &, NetworkManager::Types, const QVariant &, const QByteArray & )));
-    StructureFragment::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
-                                   this, SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+    StructureFragment::disconnect( NetworkManager::instance(), SIGNAL( error( const QString &, NetworkManager::Types, const QVariant &, const QString & )),
+                                   this, SLOT( error( const QString &, NetworkManager::Types, const QVariant &, const QString & )));
     QAction::disconnect( this->ui->actionSelect, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionAddReagent, &QAction::triggered, this, nullptr );
-    QAction::disconnect( this->ui->actionAddIUPAC, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionAdd, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionPrevious, &QAction::triggered,  this, nullptr );
     QAction::disconnect( this->ui->actionNext, &QAction::triggered,  this, nullptr );
 
@@ -115,11 +118,12 @@ void StructureFragment::sendFormulaRequest() {
 }
 
 /**
- * @brief StructureFragment::sendIUPACNameRequest
+ * @brief StructureFragment::sendNameRequest
  */
-void StructureFragment::sendIUPACNameRequest() {
+void StructureFragment::sendNameRequest() {
     qDebug() << "  request name  (BROWSER)" << this->queryName();
-    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::IUPACName, this->cid());
+    NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/description/JSON" ).arg( this->cid()), NetworkManager::NameRequest, this->cid());
+    //NetworkManager::instance()->execute( QString( "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/%1/property/IUPACName/TXT" ).arg( this->cid()), NetworkManager::Name, this->cid());
 }
 
 /**
@@ -131,7 +135,7 @@ void StructureFragment::getNameAndFormula() {
         return;
 
     // update status visually
-    this->ui->IUPACEdit->setText( StructureFragment::tr( "loading..." ));
+    this->ui->nameEdit->setText( StructureFragment::tr( "loading..." ));
     this->ui->structurePixmap->setText( StructureFragment::tr( "fetching formula..." ));
     this->ui->cidEdit->clear();
 
@@ -152,13 +156,13 @@ void StructureFragment::getNameAndFormula() {
         this->sendFormulaRequest();
     }
 
-    // get IUPAC name
-    if ( Cache::instance()->contains( Cache::IUPACContext, QString( "%1" ).arg( this->cid()))) {
-        qDebug() << "    cache->iupac (BROWSER)" << this->queryName();
-        this->readIUPACName( Cache::instance()->getData( Cache::IUPACContext, QString( "%1" ).arg( this->cid())), this->cid());
+    // get name
+    if ( Cache::instance()->contains( Cache::NameContext, QString( "%1" ).arg( this->cid()))) {
+        qDebug() << "    cache->name (BROWSER)" << this->queryName();
+        this->readName( Cache::instance()->getData( Cache::NameContext, QString( "%1" ).arg( this->cid())), this->cid());
     } else {
-        // IUPAC name not in the cache, fetch it
-        this->sendIUPACNameRequest();
+        // name not in the cache, fetch it
+        this->sendNameRequest();
     }
 }
 
@@ -166,7 +170,7 @@ void StructureFragment::getNameAndFormula() {
  * @brief StructureFragment::readFormula
  * @param data
  */
-void StructureFragment::readFormula(const QByteArray &data , const int id) {
+void StructureFragment::readFormula( const QByteArray &data, const int id ) {
     if ( this->cid() != id || id <= 0 )
         return;
 
@@ -191,14 +195,14 @@ void StructureFragment::readFormula(const QByteArray &data , const int id) {
 }
 
 /**
- * @brief StructureFragment::readIUPACName
+ * @brief StructureFragment::readName
  * @param name
  */
-void StructureFragment::readIUPACName( const QString &name, const int id ) {
+void StructureFragment::readName( const QString &name, const int id ) {
     if ( this->cid() != id || id <= 0 )
         return;
 
-    this->ui->IUPACEdit->setText( name );
+    this->ui->nameEdit->setText( name );
 
     this->setStatus( this->status() & ~FetchName );
     this->validate();
@@ -221,17 +225,55 @@ bool StructureFragment::parseFormulaRequest( const QByteArray &data, const int i
 }
 
 /**
- * @brief StructureFragment::parseIUPACNameRequest
+ * @brief StructureFragment::parseNameRequest
  * @param data
  * @return
  */
-bool StructureFragment::parseIUPACNameRequest( const QByteArray &data , const int id ) {
+bool StructureFragment::parseNameRequest( const QByteArray &data, const int id ) {
     if ( !data.isEmpty()) {
-        const QString name( data );
+        //const QString name( data );
         qDebug() << "    network->name (browser)" << this->queryName();
-        Cache::instance()->insert( Cache::IUPACContext, QString( "%1" ).arg( id ), data );
-        this->readIUPACName( name, id );
-        return true;
+
+
+        const QJsonDocument document( QJsonDocument::fromJson( data ));
+        const QJsonValue value( document.isArray() ? QJsonValue( document.array()) : document.object());
+        if ( value.isObject()) {
+            const QJsonObject valueObject( value.toObject());
+
+            if ( valueObject.contains( "InformationList" )) {
+                const QJsonValue infoListValue( valueObject["InformationList"] );
+
+                if ( infoListValue.isObject()) {
+                    const QJsonObject infoListObject( infoListValue.toObject());
+
+                    if ( infoListObject.contains( "Information" )) {
+                        const QJsonValue infoValue( infoListObject["Information"] );
+
+                        if ( infoValue.isArray()) {
+                            const QJsonArray infoArray( infoValue.toArray());
+
+                            for ( const QJsonValue &val : infoArray ) {
+                                if ( !val.isObject())
+                                    continue;
+
+                                const QJsonObject obj( val.toObject());
+                                if ( !obj.contains( "Title" ))
+                                    continue;
+
+                                const QString name( obj["Title"].toString());
+                                if ( name.isEmpty())
+                                    continue;
+
+
+                                Cache::instance()->insert( Cache::NameContext, QString( "%1" ).arg( id ), QString( name ).replace( ";", " " ).toUtf8().constData());
+                                this->readName( name, id );
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return false;
@@ -259,11 +301,11 @@ QString StructureFragment::queryName() const {
 }
 
 /**
- * @brief StructureFragment::IUPACName
+ * @brief StructureFragment::nameEdit
  * @return
  */
-QString StructureFragment::IUPACName() const {
-    return this->ui->IUPACEdit->text().remove( "\n" ).simplified();
+QString StructureFragment::name() const {
+    return this->ui->nameEdit->text().remove( "\n" ).simplified();
 }
 
 /**
@@ -275,10 +317,10 @@ QString StructureFragment::IUPACName() const {
  */
 void StructureFragment::replyReceived( const QString &, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
     switch ( type ) {
-    case NetworkManager::IUPACName:
-        qDebug() << "network->IUPACName" << this->queryName();
-        if ( !this->parseIUPACNameRequest( data, userData.toInt())) {
-            qDebug() << "  parseIUPACNameRequest failed";
+    case NetworkManager::NameRequest:
+        qDebug() << "network->name" << this->queryName();
+        if ( !this->parseNameRequest( data, userData.toInt())) {
+            qDebug() << "  parseNameRequest failed";
             this->setStatus( Error );
             return;
         }
@@ -306,7 +348,7 @@ void StructureFragment::validate() {
     this->ui->actionNext->setEnabled( !this->cidList.isEmpty() && this->index() >= 0 && this->index() < this->cidList.count() - 1 );
     this->ui->actionSelect->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
     this->ui->actionAddReagent->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
-    this->ui->actionAddIUPAC->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
+    this->ui->actionAdd->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
 
     if ( this->status() == Idle )
         this->host()->clearStatusMessage();
@@ -323,11 +365,11 @@ void StructureFragment::setup( const QList<int> &list ) {
     if ( this->host()->mode() == ExtractionDialog::ExistingMode ) {
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionSelect );
         this->ui->toolBar->removeAction( this->ui->actionAddReagent );
-        this->ui->toolBar->removeAction( this->ui->actionAddIUPAC );
+        this->ui->toolBar->removeAction( this->ui->actionAdd );
     } else if ( this->host()->mode() == ExtractionDialog::SearchMode ) {
         this->ui->toolBar->removeAction( this->ui->actionSelect );
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddReagent );
-        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddIUPAC );
+        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAdd );
     }
 
     // reset status to idle
@@ -370,17 +412,22 @@ void StructureFragment::setup( const QList<int> &list ) {
 
     // setup error connection to the NetworkManager
     StructureFragment::connect( NetworkManager::instance(),
-                                SIGNAL( error( const QString &, NetworkManager::Types, const QString & )),
+                                SIGNAL( error( const QString &, NetworkManager::Types, const QVariant &, const QString & )),
                                 this,
-                                SLOT( error( const QString &, NetworkManager::Types, const QString & )));
+                                SLOT( error( const QString &, NetworkManager::Types, const QVariant &, const QString & )));
 }
 
 /**
  * @brief StructureFragment::error
  */
-void StructureFragment::error( const QString &, NetworkManager::Types, const QString &errorMessage ) {
-    this->setStatus( Error );
-    this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
-    this->ui->structurePixmap->setText( StructureFragment::tr( "Could not load structure" ));
-    this->host()->adjustSize();
+void StructureFragment::error( const QString &, NetworkManager::Types type, const QVariant &userData, const QString &errorMessage ) {
+    if ( this->cid() != userData.toInt())
+        return;
+
+    if ( type == NetworkManager::FormulaRequestBrowser || type == NetworkManager::NameRequest ) {
+        this->setStatus( Error );
+        this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
+        this->ui->structurePixmap->setText( StructureFragment::tr( "Could not load structure" ));
+        this->host()->adjustSize();
+    }
 }

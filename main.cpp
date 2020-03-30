@@ -102,7 +102,7 @@ future/non-priority:
       solvents
       organics
       intermediates
- - better ImageUitls dialof (save as, replace, zoom, etc.)
+ - better ImageUitls dialog (save as, replace, zoom, etc.)
 
 scripting/non-priority:
  - add additional functions such as mol( mass, reagent ) which returns:
@@ -122,7 +122,7 @@ misc/unsorted:
     add date to select batches (not all of them need dates?)
   - better i18n support
   - better mime handling in paste
-  - better not found error handling in search
+  - better 'not found' and 'server busy' error handling in search
   - allow search without addition
   - show image not inverted in dark mode
   - reagent word wrap
@@ -130,7 +130,6 @@ misc/unsorted:
   - ReagentDialog TextEdit size adjustment (long names look ugly)
   - 'collapse all' button
   - explicit selection of lableless reagents
-  - add IUPAC->name query->reference
   - sort tags instead of properties?
 */
 

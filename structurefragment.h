@@ -67,21 +67,21 @@ public:
     [[nodiscard]] Status status() const { return this->m_status; }
     [[nodiscard]] int cid() const;
     [[nodiscard]] QString queryName() const;
-    [[nodiscard]] QString IUPACName() const;
+    [[nodiscard]] QString name() const;
 
 public slots:
     void replyReceived( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &, NetworkManager::Types type, const QString &errorString );
+    void error( const QString &, NetworkManager::Types type, const QVariant &, const QString &errorString );
     void setup( const QList<int> &list );
     void getNameAndFormula();
 
 private slots:
     void sendFormulaRequest();
-    void sendIUPACNameRequest();
+    void sendNameRequest();
     void readFormula( const QByteArray &data, const int id );
-    void readIUPACName( const QString &queryName, const int id );
+    void readName( const QString &queryName, const int id );
     bool parseFormulaRequest( const QByteArray &data, const int id );
-    bool parseIUPACNameRequest( const QByteArray &data, const int id );
+    bool parseNameRequest( const QByteArray &data, const int id );
 
     /**
      * @brief setStatus

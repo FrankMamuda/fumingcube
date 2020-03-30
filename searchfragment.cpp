@@ -81,7 +81,7 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
     } );
 
     // setup error connection to the NetworkManager
-    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types type, const QString &errorMessage ) {
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QString &errorMessage ) {
         switch ( type ) {
         case NetworkManager::CIDRequestInitial:
             // try similar structure search if initial request fails
@@ -124,7 +124,7 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
 
             for ( const int id : idList ) {
                 Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
-                Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
+                Cache::instance()->clear( Cache::NameContext, QString( "%1" ).arg( id ));
                 Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
             }
         }
@@ -139,7 +139,7 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
         const QList<int> values( Cache::instance()->nameIdMap.values());
         for ( const int id : values ) {
             Cache::instance()->clear( Cache::FormulaContext, QString( "%1.png" ).arg( id ));
-            Cache::instance()->clear( Cache::IUPACContext, QString( "%1" ).arg( id ));
+            Cache::instance()->clear( Cache::NameContext, QString( "%1" ).arg( id ));
             Cache::instance()->clear( Cache::DataContext, QString( "%1.dat" ).arg( id ));
         }
         Cache::instance()->clear( Cache::IdMapContext, "data.map" );
@@ -186,11 +186,15 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
     if ( idList.isEmpty())
         return false;
 
+    // remove null ids
+    QList cleanList( idList );
+    cleanList.removeAll( 0 );
+
     // setup structureBrowser
-    this->host()->structureFragment()->setup( idList );
+    this->host()->structureFragment()->setup( qAsConst( cleanList ));
 
     // select an id
-    if ( idList.count() > 1 || this->host()->mode() == ExtractionDialog::SearchMode ) {
+    if ( qAsConst( cleanList ).count() > 1 || this->host()->mode() == ExtractionDialog::SearchMode ) {
         // if we have multiple ids in the list, open the StructureBrowser and let the user decide
         // NOTE: this is also the default behaviour in SearchMode, because we do need to add a new reagent
         this->host()->setCurrentFragment( this->host()->structureFragment());
@@ -199,7 +203,7 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
     }
 
     // if the list has only one entry, continue with that
-    const int id = idList.first();
+    const int id = qAsConst( cleanList ).first();
 
     // make sure it is a valid id
     if ( id <= 0 ) {

@@ -124,9 +124,11 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
     } );
 
     // setup error connection to the NetworkManager
-    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types, const QString &errorMessage ) {
-        this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
-        this->host()->adjustSize();
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QString &errorMessage ) {
+        if ( type == NetworkManager::DataRequest || type == NetworkManager::FormulaRequest ) {
+            this->host()->setErrorMessage( StructureFragment::tr( "Error: " ) + errorMessage );
+            this->host()->adjustSize();
+        }
     } );
 
     // connect addAll, addSelected actions

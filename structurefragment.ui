@@ -13,9 +13,9 @@
   <widget class="QWidget" name="structureLayout">
    <layout class="QGridLayout" name="page1verticalLayout" columnstretch="0,0,0,0">
     <item row="6" column="0">
-     <widget class="QLabel" name="IUPACLabel">
+     <widget class="QLabel" name="nameLabel">
       <property name="text">
-       <string>IUPAC name</string>
+       <string>PubChem name</string>
       </property>
      </widget>
     </item>
@@ -120,7 +120,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
      </widget>
     </item>
     <item row="6" column="1" colspan="3">
-     <widget class="QLineEdit" name="IUPACEdit">
+     <widget class="QLineEdit" name="nameEdit">
       <property name="text">
        <string>titanium tetrachloride</string>
       </property>
@@ -178,7 +178,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddReagent"/>
-   <addaction name="actionAddIUPAC"/>
+   <addaction name="actionAdd"/>
    <addaction name="actionSelect"/>
    <addaction name="actionPrevious"/>
    <addaction name="actionNext"/>
@@ -231,16 +231,16 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
     <string>Add reagent</string>
    </property>
   </action>
-  <action name="actionAddIUPAC">
+  <action name="actionAdd">
    <property name="icon">
     <iconset theme="add">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Add (IUPAC)</string>
+    <string>Add (PubChem name)</string>
    </property>
    <property name="toolTip">
-    <string>Add reagent using IUPAC name</string>
+    <string>Add reagent using PubChem name</string>
    </property>
   </action>
  </widget>

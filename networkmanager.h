@@ -46,7 +46,7 @@ public:
         DataRequest,
         FormulaRequest,
         FormulaRequestBrowser,
-        IUPACName,
+        NameRequest,
         FavIcon
     };
     Q_ENUM( Types )
@@ -71,7 +71,7 @@ signals:
      * @param data
      */
     void finished( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data );
-    void error( const QString &url, NetworkManager::Types type, const QString &errorString );
+    void error( const QString &url, NetworkManager::Types type, const QVariant &userData, const QString &errorString );
 
 public slots:
     void execute( const QString &url, NetworkManager::Types type, const QVariant &userData = QVariant());

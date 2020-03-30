@@ -121,7 +121,7 @@ void SearchEngineManager::replyReceived( const QString &, NetworkManager::Types 
     case NetworkManager::CIDRequestSimilar:
     case NetworkManager::DataRequest:
     case NetworkManager::FormulaRequest:
-    case NetworkManager::IUPACName:
+    case NetworkManager::NameRequest:
     case NetworkManager::NoType:
     case NetworkManager::FormulaRequestBrowser:
         break;
