@@ -91,7 +91,6 @@ future/non-priority:
    boiling point: 43C @1 atm
                   11C @20 mbar
  - aliases (display names for reagents)
- - add some padding to formulas
  - CoA search
  - molport search
  - label sub categories:
@@ -123,11 +122,7 @@ misc/unsorted:
   - better i18n support
   - better mime handling in paste
   - better 'not found' and 'server busy' error handling in search
-  - allow search without addition
-  - show image not inverted in dark mode
   - reagent word wrap
-  - search history
-  - ReagentDialog TextEdit size adjustment (long names look ugly)
   - 'collapse all' button
   - explicit selection of lableless reagents
   - sort tags instead of properties?
@@ -204,6 +199,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "fetchPropertiesOnAddition", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "decimalSeparator", QString( QLocale::system().decimalPoint()), Var::Flag::Hidden );
+    Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
 
     // read configuration
     XMLTools::read();

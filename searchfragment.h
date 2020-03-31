@@ -24,6 +24,7 @@
 #include "fragment.h"
 #include "extractiondialog.h"
 
+#include <QCompleter>
 #include <QKeyEvent>
 
 /**
@@ -47,7 +48,7 @@ public:
     SearchFragment( SearchFragment&& ) = delete;
     SearchFragment& operator=( SearchFragment&& ) = delete;
 
-    ~SearchFragment();
+    ~SearchFragment() override;
     [[nodiscard]] QString identifier( bool clean = false ) const;
     [[nodiscard]] ExtractionDialog *host() const { return qobject_cast<ExtractionDialog *>( Fragment::host()); }
 
@@ -64,4 +65,6 @@ private slots:
 
 private:
     Ui::SearchFragment *ui;
+    QCompleter *completer = nullptr;
+    QStringList history;
 };

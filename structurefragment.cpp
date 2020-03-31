@@ -62,7 +62,6 @@ StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui
 
     // add reagent lambda
     auto addDialog = [ this ]( const QString &name ) {
-        // TODO: special mode for this
         const Id reagentId = ReagentDock::instance()->addReagent( Id::Invalid, name, this->cid());
         if ( reagentId != Id::Invalid ) {
             this->host()->setReagentId( reagentId );
@@ -74,6 +73,11 @@ StructureFragment::StructureFragment( QWidget *parent ) : Fragment( parent ), ui
     // add action leads to the ReagentDialog
     QAction::connect( this->ui->actionAddReagent, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->queryName()); } );
     QAction::connect( this->ui->actionAdd, &QAction::triggered, this, [ this, addDialog ]() { addDialog( this->name()); } );
+    QAction::connect( this->ui->actionFetch, &QAction::triggered, this, [ this ]() {
+        this->host()->setReagentId( Id::Invalid );
+        this->host()->setCurrentFragment( this->host()->propertyFragment());
+        this->host()->propertyFragment()->getDataAndFormula( this->cid());
+    } );
 }
 
 /**
@@ -90,6 +94,7 @@ StructureFragment::~StructureFragment() {
     QAction::disconnect( this->ui->actionAdd, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionPrevious, &QAction::triggered,  this, nullptr );
     QAction::disconnect( this->ui->actionNext, &QAction::triggered,  this, nullptr );
+    QAction::disconnect( this->ui->actionFetch, &QAction::triggered,  this, nullptr );
 
     delete this->ui;
 }
@@ -349,6 +354,7 @@ void StructureFragment::validate() {
     this->ui->actionSelect->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
     this->ui->actionAddReagent->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
     this->ui->actionAdd->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
+    this->ui->actionFetch->setEnabled( !this->cidList.isEmpty() && this->status() == Idle );
 
     if ( this->status() == Idle )
         this->host()->clearStatusMessage();
@@ -361,6 +367,8 @@ void StructureFragment::validate() {
  * @param list
  */
 void StructureFragment::setup( const QList<int> &list ) {
+    this->ui->toolBar->removeAction( this->ui->actionFetch );
+
     // hide/show actions according to the mode
     if ( this->host()->mode() == ExtractionDialog::ExistingMode ) {
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionSelect );
@@ -370,6 +378,7 @@ void StructureFragment::setup( const QList<int> &list ) {
         this->ui->toolBar->removeAction( this->ui->actionSelect );
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAddReagent );
         this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionAdd );
+        this->ui->toolBar->insertAction( this->ui->actionPrevious, this->ui->actionFetch );
     }
 
     // reset status to idle

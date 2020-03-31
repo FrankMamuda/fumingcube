@@ -28,7 +28,10 @@
 #include "cache.h"
 #include "propertyfragment.h"
 #include "fragmentnavigation.h"
+#include "variable.h"
+#include <QCompleter>
 #include <QMessageBox>
+#include <QStringListModel>
 
 /**
  * @brief SearchFragment::SearchFragment
@@ -43,6 +46,12 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
     const QList<QLabel*> tips( QList<QLabel*>() << this->ui->cacheTipIcon << this->ui->searchTipIcon );
     for ( QLabel *tip : tips )
         tip->setPixmap( pixmap );
+
+    this->history = Variable::compressedString( "searchFragment/history" ).split( ";" );
+    this->completer = new QCompleter( this->history, this );
+    this->completer->setCaseSensitivity( Qt::CaseInsensitive );
+    this->completer->setCompletionMode( QCompleter::InlineCompletion );
+    this->ui->identifierEdit->setCompleter( this->completer );
 
     // setup finished connection to the NetworkManager
     NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
@@ -157,6 +166,9 @@ SearchFragment::~SearchFragment() {
     QAction::disconnect( this->ui->actionDeleteCache, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionClear, &QAction::triggered, this, nullptr );
 
+    Variable::setCompressedString( "searchFragment/history", this->history.join( ";" ));
+
+    delete this->completer;
     delete this->ui;
 }
 
@@ -192,6 +204,16 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
 
     // setup structureBrowser
     this->host()->structureFragment()->setup( qAsConst( cleanList ));
+
+    // save history on success
+    if ( !this->history.contains( this->identifier()))
+        this->history << this->identifier();
+
+    if ( this->history.count() >= 32 )
+        this->history.removeFirst();
+
+    delete this->completer->model();
+    this->completer->setModel( new QStringListModel( this->history ));
 
     // select an id
     if ( qAsConst( cleanList ).count() > 1 || this->host()->mode() == ExtractionDialog::SearchMode ) {

@@ -187,6 +187,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
         this->setWindowTitle( ReagentDialog::tr( "Edit reagent" ));
         this->ui->lockButton->setChecked( this->mode() == EditMode );
         this->ui->propertyCheck->hide();
+        this->ui->labelButton->hide();
         break;
 
     case BatchMode:
@@ -225,7 +226,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     auto validate = []( const QString &text ) {
         QString string( text );
         int pos;
-        const QRegularExpression re( R"([\p{L}0-9-+,.\)\(\[\]\{\}\@\s\p{No}\/\\]+)" );
+        const QRegularExpression re( R"([\p{L}0-9-+,.\)\(\[\]\{\}\@\s\p{No}\/\\:]+)" );
         const QRegularExpressionValidator validator( re );
         return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
     };
@@ -307,24 +308,17 @@ bool ReagentDialog::eventFilter( QObject *object, QEvent *event ) {
 void ReagentDialog::showEvent( QShowEvent *event ) {
     QDialog::showEvent( event );
 
-    // steal height from a line edit widget
-    //this->ui->nameEdit->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->nameEdit->document()->setDocumentMargin( 2 );
     this->ui->nameEdit->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->nameEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->nameEdit->setCleanHTML( true );
     this->ui->nameEdit->setSimpleEditor( true );
 
-    //this->ui->referenceEdit->setMaximumHeight( this->ui->lineEdit->height());
     this->ui->referenceEdit->document()->setDocumentMargin( 2 );
     this->ui->referenceEdit->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->referenceEdit->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     this->ui->referenceEdit->setCleanHTML( true );
     this->ui->referenceEdit->setSimpleEditor( true );
-
-    // dummy line edit widget is not needed anymore
-    // TODO: remove this completely
-    this->ui->lineEdit->hide();
 
     // force widget to resize to minimum
     QApplication::processEvents();

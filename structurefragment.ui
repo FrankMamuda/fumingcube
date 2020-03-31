@@ -179,6 +179,7 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
    </attribute>
    <addaction name="actionAddReagent"/>
    <addaction name="actionAdd"/>
+   <addaction name="actionFetch"/>
    <addaction name="actionSelect"/>
    <addaction name="actionPrevious"/>
    <addaction name="actionNext"/>
@@ -241,6 +242,14 @@ Go through the reagent list using 'Next' and 'Previous' buttons and press 'Selec
    </property>
    <property name="toolTip">
     <string>Add reagent using PubChem name</string>
+   </property>
+  </action>
+  <action name="actionFetch">
+   <property name="icon">
+    <iconset theme="extract"/>
+   </property>
+   <property name="text">
+    <string>Fetch (no addition)</string>
    </property>
   </action>
  </widget>

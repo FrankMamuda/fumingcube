@@ -138,7 +138,7 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
     // enable addSelected action only if actions are selected
     QItemSelectionModel::connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [ this ]( const QItemSelection &, const QItemSelection & ) {
         const QModelIndexList list( this->ui->propertyView->selectionModel()->selectedRows());
-        this->ui->actionAddSelected->setEnabled( !list.isEmpty());
+        this->ui->actionAddSelected->setEnabled( !list.isEmpty() && this->host()->reagentId() != Id::Invalid );
     } );
 
     // setup clear action
@@ -511,7 +511,8 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
     this->host()->adjustSize();
 
     // enable action
-    this->ui->actionAddAll->setEnabled( propListKeys.count() > 0 );
+    if ( this->host()->reagentId() != Id::Invalid )
+        this->ui->actionAddAll->setEnabled( propListKeys.count() > 0 );
 
     // clear message (success!)
     this->host()->clearStatusMessage();

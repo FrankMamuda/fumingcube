@@ -316,7 +316,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             SearchEngineManager::instance()->populateMenu( menu->addMenu( ReagentDock::tr( "Search online" )), reagentName );
 
             // hide reagent
-            menu->addAction( ReagentDock::tr( R"(Hide "%1")" ).arg( TextUtils::elidedString( HTMLUtils::convertToPlainText( Reagent::instance()->name( id )))), [ this, id ]() {
+            menu->addAction( ReagentDock::tr( R"(Hide "%1")" ).arg( TextUtils::elidedString( item->text())), [ this, id ]() {
                 NodeHistory::instance()->hide( id );
                 this->view()->updateView();
             } )->setIcon( QIcon::fromTheme( "hide" ));

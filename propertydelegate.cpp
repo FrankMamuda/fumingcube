@@ -131,7 +131,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 }
 
                 // calculate the preferred with (to fit property value column)
-                const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth : originalSize.width();
+                const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth - 16 : originalSize.width();
                 const auto scaledHeight = static_cast<int>(
                         ( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) *
                         static_cast<qreal>( originalSize.height()));
@@ -189,10 +189,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 return !pixmapData.isEmpty();
             };
 
-
             // embed pixmap in html
             if ( setupPixmap())
-                document->setHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg(
+                document->setHtml( QString( R"(<table cellpadding="4"><tr><td><img width="%1" height="%2" src="data:image/png;base64,%3"></td></tr></table>)" ).arg(
                         scaledSize.width()).arg( scaledSize.height()).arg( pixmapData.toBase64().constData()));
         }
     } else {

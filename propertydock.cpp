@@ -433,10 +433,13 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         }
 
         if ( type == Tag::Formula || tagId == PixmapTag ) {
-            menu.addAction( PropertyDock::tr( "View" ), this, [ this, row ]() {
+            menu.addAction( PropertyDock::tr( "View" ), this, [ this, type, row ]() {
                 QPixmap pixmap;
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
+                    if ( Variable::isEnabled( "darkMode" ) && type == Tag::Formula )
+                        pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( pixmap ));
+
                     ImageUtils iu( this, qAsConst( pixmap ), 0, true );
                     iu.setWindowFlags( Qt::Dialog );
                     iu.exec();
