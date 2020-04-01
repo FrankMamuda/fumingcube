@@ -61,39 +61,16 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
     // load hidden tags
     this->loadHiddenTags();
 
-    // buttonTest lambda
-    auto buttonTest = [ this ]( const QModelIndex &index ) {
-        if ( Property::instance()->count() < 2 ) {
-            this->ui->upButton->setDisabled( true );
-            this->ui->downButton->setDisabled( true );
-        }
-
-        this->ui->upButton->setEnabled( index.isValid() && index.row() != 0 );
-        this->ui->downButton->setEnabled( index.isValid() && index.row() != Property::instance()->count() - 1 );
-    };
-
     this->ui->addPropButton->setEnabled( false );
     this->ui->removePropButton->setEnabled( false );
     this->ui->extractButton->setEnabled( false );
 
-    QItemSelectionModel::connect( this->ui->propertyView->selectionModel(),
-                                                       &QItemSelectionModel::currentChanged,
-                                                       [ this, buttonTest ]( const QModelIndex &current,
-                                                                             const QModelIndex & ) {
-                                                           this->ui->removePropButton->setEnabled( current.isValid());
-                                                           this->ui->editPropButton->setEnabled( current.isValid());
-
-                                                           buttonTest( current );
-                                                       } );
-
-    ReagentDock::connect( ReagentDock::instance(), &ReagentDock::currentIndexChanged,
-                                      [ this ]( const QModelIndex &current ) {
-                                          this->ui->addPropButton->setEnabled( current.isValid());
-                                          this->ui->extractButton->setEnabled( current.isValid());
-                                      } );
+    // check buttons on selection change
+    QItemSelectionModel::connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentChanged, this, &PropertyDock::buttonTest );
+    this->buttonTest();
 
     // move up/down lambda
-    auto move = [ this, buttonTest ]( bool up ) {
+    auto move = [ this ]( bool up ) {
         // test integrity
         QSet<int> orderSet;
         bool reindex = false;
@@ -157,9 +134,8 @@ PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui
         container->setCurrentIndex( current );
 
         container->setFocus();
-        buttonTest( current );
+        this->buttonTest();
     };
-    buttonTest( this->ui->propertyView->currentIndex());
 
     // move
     QToolButton::connect( this->ui->upButton, &QToolButton::clicked, std::bind( move, true ));
@@ -208,6 +184,9 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
                 if ( result == PropertyDialog::Rejected )
                     return values;
+
+                if ( result == PropertyDialog::Advanced )
+                    value = pd.value().toString();
 
                 break;
             }
@@ -262,6 +241,8 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
  * @brief PropertyDock::~PropertyDock
  */
 PropertyDock::~PropertyDock() {
+    QItemSelectionModel::disconnect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::currentChanged, this, &PropertyDock::buttonTest );
+
     delete this->ui;
 }
 
@@ -278,6 +259,7 @@ int PropertyDock::sectionSize( int column ) const {
  * @brief PropertyDock::updateView
  */
 void PropertyDock::updateView() {
+    this->buttonTest();
     this->setSpecialWidgets();
     this->ui->propertyView->resizeToContents();
 }
@@ -806,4 +788,24 @@ void PropertyDock::on_extractButton_clicked() {
     ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
     ed.exec();
     this->updateView();
+}
+
+/**
+ * @brief PropertyDock::buttonTest
+ */
+void PropertyDock::buttonTest() {
+    if ( Property::instance()->count() < 2 ) {
+        this->ui->upButton->setDisabled( true );
+        this->ui->downButton->setDisabled( true );
+    }
+
+    const QModelIndex propertyIndex( this->ui->propertyView->currentIndex());
+    const bool validProperty = propertyIndex.isValid();
+    const bool validReagent = ReagentDock::instance()->view()->currentIndex().isValid();
+    this->ui->upButton->setEnabled( validProperty && propertyIndex.row() != 0 && validReagent );
+    this->ui->downButton->setEnabled( validProperty && propertyIndex.row() != Property::instance()->count() - 1 && validReagent );
+    this->ui->editPropButton->setEnabled( validProperty && validReagent );
+    this->ui->removePropButton->setEnabled( validProperty && validReagent );
+    this->ui->extractButton->setEnabled( validReagent );
+    this->ui->addPropButton->setEnabled( validReagent );
 }

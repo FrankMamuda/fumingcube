@@ -58,7 +58,6 @@ ReagentDock::ReagentDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::
                                                  this->ui->editButton->setEnabled( current.isValid());
                                                  emit this->currentIndexChanged( current );
                                              } );
-
     // hide searchBox
     this->ui->searchEdit->hide();
 
@@ -230,8 +229,19 @@ ReagentView *ReagentDock::view() const {
 QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
-    menu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
+    auto *addMenu( menu->addMenu( ReagentDock::tr( "Add" )));
+    addMenu->setIcon( QIcon::fromTheme( "add" ));
+    addMenu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
             QIcon::fromTheme( "reagent" ));
+
+    menu->addAction( ReagentDock::tr( "Edit" ), this, [ this ]() { this->on_editButton_clicked(); } )->setIcon(
+            QIcon::fromTheme( "edit" ));
+
+    menu->addAction( ReagentDock::tr( "Remove" ), this, [ this ]() { this->on_removeButton_clicked(); } )->setIcon(
+            QIcon::fromTheme( "remove" ));
+
+    auto *visMenu( menu->addMenu( ReagentDock::tr( "Visibility" )));
+    visMenu->setIcon( QIcon::fromTheme( "show" ));
 
     const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
     if ( index.isValid()) {
@@ -240,7 +250,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
         const QString batchName( TextUtils::elidedString( item->text()));
 
-        menu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
+        addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
                          [ this, parentId, item ]() { this->addReagent(
                                     ( parentId == Id::Invalid ) ?
                                         static_cast<Id>( item->data( ReagentModel::ID ).toInt())
@@ -250,12 +260,12 @@ QMenu *ReagentDock::buildMenu( bool context ) {
         if  ( parentId != Id::Invalid ) {
             const Id id = item->data( ReagentModel::ID ).value<Id>();
             if ( !NodeHistory::instance()->isDeperecated( id )) {
-                menu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( batchName ), this, [ this, id ]() {
+                visMenu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->deprecate( id );
                     this->view()->updateView();
                 } )->setIcon( QIcon::fromTheme( "remove" ));
             } else {
-                menu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( batchName ), this, [ this, id ]() {
+                visMenu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->restore( id );
                     this->view()->updateView();
                 } )->setIcon( QIcon::fromTheme( "show" ));
@@ -316,7 +326,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             SearchEngineManager::instance()->populateMenu( menu->addMenu( ReagentDock::tr( "Search online" )), reagentName );
 
             // hide reagent
-            menu->addAction( ReagentDock::tr( R"(Hide "%1")" ).arg( TextUtils::elidedString( item->text())), [ this, id ]() {
+            visMenu->addAction( ReagentDock::tr( R"(Hide "%1")" ).arg( TextUtils::elidedString( item->text())), [ this, id ]() {
                 NodeHistory::instance()->hide( id );
                 this->view()->updateView();
             } )->setIcon( QIcon::fromTheme( "hide" ));
@@ -324,10 +334,16 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     }
 
     if ( NodeHistory::instance()->hiddenCount() > 0 && context ) {
-        menu->addAction( PropertyDock::tr( "Show all reagents" ), this, []() {
+        visMenu->addAction( PropertyDock::tr( "Show all reagents" ), this, []() {
             NodeHistory::instance()->clearHiddenNodes();
             ReagentDock::instance()->view()->updateView();
         } )->setIcon( QIcon::fromTheme( "show" ));
+    }
+
+    if ( context ) {
+        visMenu->addAction( ReagentDock::tr( "Collapse all" ), []() {
+            ReagentDock::instance()->view()->collapseAll();
+        } );
     }
 
     menu->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -467,12 +483,20 @@ void ReagentDock::on_removeButton_clicked() {
         // remove batches
         if ( Reagent::instance()->parentId( reagentRow ) == Id::Invalid ) {
             const QList<Row> children( Reagent::instance()->children( reagentRow ));
-            for ( const Row &batchRow : children )
+            for ( const Row &batchRow : children ) {
                 Reagent::instance()->remove( batchRow );
+
+                // remove from depcrecated nodes
+                NodeHistory::instance()->deprecatedNodes.removeOne( Reagent::instance()->id( batchRow ));
+            }
         }
 
         // remove reagent
         Reagent::instance()->remove( reagentRow );
+
+        // remove from open and closed nodes (we don't need dangling reagents)
+        NodeHistory::instance()->openNodes.removeOne( reagentId );
+        NodeHistory::instance()->hiddenNodes.removeOne( reagentId );
 
         // remove orphans just in case
         Reagent::instance()->removeOrphanedEntries();

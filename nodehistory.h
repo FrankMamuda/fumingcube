@@ -30,6 +30,7 @@
 class NodeHistory : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY( NodeHistory )
+    friend class ReagentDock;
 
 public:
     // disable move

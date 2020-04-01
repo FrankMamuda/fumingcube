@@ -54,13 +54,9 @@ database:
  - expand built-in database with more reagents
 
 reagent:
- - upon reagent deletion, remove from hidden node list
-
-i18n:
- - language selector in settings
-
-properties:
- - filter in dock
+ - sort batches by addition date
+   OR add date to select batches (not all of them need dates?)
+ - ReagentDock word wrap
 
 theming:
  - separate app theme from calculator theme
@@ -68,7 +64,30 @@ theming:
     app window background)
  - option to change syntax highlighter (and font size) (partially supported)
 
-future/non-priority:
+extraction:
+  - new icons
+    refresh/update
+    structure browser, etc.
+    find online
+    deprecate
+    collapse
+    clear/dismiss
+    delete cache
+    property
+    delete all
+    select tag
+    add all
+  - better 'not found' and 'server busy' error handling in search
+
+misc/unsorted:
+  - explicit selection of labelless reagents
+  - update cmakelists
+*/
+
+/*
+ NON-PRIORITY TODO:
+
+future:
  - icons in "add property" menu
  - multiple references
  - use bind in queries
@@ -99,8 +118,21 @@ future/non-priority:
       organics
       intermediates
  - better ImageUitls dialog (save as, replace, zoom, etc.)
+ - allow to display treeView in multiple columns
+ - cut properties from reagents
+ - better mime handling in paste
+ - sort tags instead of properties?
 
-scripting/non-priority:
+properties:
+ - filter in dock
+
+i18n:
+ - better i18n support
+   input dialogs can have an i18n button, to localize names
+   add reagent-> sodium hydroxide [flag button]
+ - language selector in settings
+
+scripting:
  - add additional functions such as mol( mass, reagent ) which returns:
    mol = mass * assay( reagent ) / molarMass( reagent )
  - add 'any' as batch name (a wildcard that chooses any batch with the
@@ -108,24 +140,6 @@ scripting/non-priority:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
-
-misc/unsorted:
-  - cut properties from reagents
-  - allow to display treeView in multiple columns
-  - double check all add/edit/delete buttons for when they should be enabled or not
-    FIXME: upon reagent hiding, index defaults to invalid, but buttons remain active
-  - sort batches by addition date
-    add date to select batches (not all of them need dates?)
-  - better i18n support
-  - better mime handling in paste
-  - better 'not found' and 'server busy' error handling in search
-  - reagent word wrap
-  - 'collapse all' button
-  - explicit selection of lableless reagents
-  - sort tags instead of properties?
-  - better icons for ExtractionDialog
-    refresh, structure browser, etc.
-  - update cmakelists
 */
 
 /**

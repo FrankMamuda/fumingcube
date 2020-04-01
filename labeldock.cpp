@@ -26,6 +26,7 @@
 #include "reagentdock.h"
 #include "ui_labeldock.h"
 #include "labeldialog.h"
+#include "propertydock.h"
 #include <QDebug>
 #include <QMenu>
 #include <QSqlQuery>
@@ -125,6 +126,7 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
     }
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();
+    PropertyDock::instance()->updateView();
 }
 
 /**
