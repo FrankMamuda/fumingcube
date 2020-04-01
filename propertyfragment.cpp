@@ -30,6 +30,7 @@
 #include "propertywidget.h"
 #include "pixmaputils.h"
 #include "property.h"
+#include "tagselectiondialog.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -37,6 +38,7 @@
 #include <QDesktopWidget>
 #include <QWindow>
 #include <QScreen>
+#include "listutils.h"
 
 /**
  * @brief PropertyFragment::PropertyFragment
@@ -134,6 +136,11 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
     // connect addAll, addSelected actions
     QAction::connect( this->ui->actionAddAll, &QAction::triggered, this, std::bind( addProperties, true ));
     QAction::connect( this->ui->actionAddSelected, &QAction::triggered, std::bind( addProperties, false ));
+    QAction::connect( this->ui->actionRefresh, &QAction::triggered, this, [ this ]() { this->getDataAndFormula( this->host()->structureFragment()->cid()); } );
+    QAction::connect( this->ui->actionSelectTags, &QAction::triggered, this, [ this ]() {
+        TagSelectionDialog td( this );
+        td.exec();
+    } );
 
     // enable addSelected action only if actions are selected
     QItemSelectionModel::connect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [ this ]( const QItemSelection &, const QItemSelection & ) {
@@ -162,6 +169,7 @@ PropertyFragment::~PropertyFragment() {
     QAction::disconnect( this->ui->actionAddSelected, &QAction::triggered, this, nullptr );
     QItemSelectionModel::disconnect( this->ui->propertyView->selectionModel(), &QItemSelectionModel::selectionChanged, this, nullptr );
     QAction::disconnect( this->ui->actionClear, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionRefresh, &QAction::triggered, this, nullptr );
 
     delete this->ui;
 }
@@ -451,9 +459,22 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
         return values;
     };
 
+    // get selected tags
+    const QList<Id> selectedTags = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "propertyFragment/selectedTags" ));
+
+    // get properties and fill table widget
     QMap<QString, PropertyWidget*>propList;
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const auto row = static_cast<Row>( y );
+
+        // check for selected tags for extraction
+        if ( !selectedTags.isEmpty()) {
+            const Id id( Tag::instance()->id( row ));
+
+            // not in the list? - continue
+            if ( !selectedTags.contains( id ))
+                continue;
+        }
 
         const QString script( Tag::instance()->script( row ).toString());
         if ( !script.isEmpty()) {
@@ -523,6 +544,25 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
  * @param data
  */
 void PropertyFragment::readFormula( const QByteArray &data ) {
+    // get selected tags
+    const QList<Id> selectedTags = ListUtils::toNumericList<Id>( Variable::value<QStringList>( "propertyFragment/selectedTags" ));
+    for ( int y = 0; y < Tag::instance()->count(); y++ ) {
+        const auto row = static_cast<Row>( y );
+
+        // ignore tags that are not of Formula type
+        if ( Tag::instance()->type( row ) != Tag::Formula )
+            continue;
+
+        // check if formula tag is enabled
+        if ( !selectedTags.isEmpty()) {
+            const Id id( Tag::instance()->id( row ));
+
+            // not in the list? - continue
+            if ( !selectedTags.contains( id ))
+                return;
+        }
+    }
+
     QPixmap pixmap;
     if ( !pixmap.loadFromData( data ))
         return;
@@ -533,7 +573,7 @@ void PropertyFragment::readFormula( const QByteArray &data ) {
     const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const int rows = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( rows + 1 );
-    this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( "Formula" ));
+    this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( ExtractionDialog::tr( "Structural formula" )));
     this->ui->propertyView->setCellWidget( rows, 1, new PropertyWidget( nullptr, cropped ));
     this->ui->propertyView->resizeRowToContents( rows );
 }

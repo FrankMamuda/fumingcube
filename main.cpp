@@ -62,9 +62,6 @@ i18n:
 properties:
  - filter in dock
 
-extraction:
- - tag selection for extraction (user might not need all tags)
-
 theming:
  - separate app theme from calculator theme
    (calculator window background styling to be defined independantly from
@@ -126,6 +123,9 @@ misc/unsorted:
   - 'collapse all' button
   - explicit selection of lableless reagents
   - sort tags instead of properties?
+  - better icons for ExtractionDialog
+    refresh, structure browser, etc.
+  - update cmakelists
 */
 
 /**
@@ -200,6 +200,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "alwaysOnTop", false, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "decimalSeparator", QString( QLocale::system().decimalPoint()), Var::Flag::Hidden );
     Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
+    Variable::add( "propertyFragment/selectedTags", "", Var::Flag::Hidden );
 
     // read configuration
     XMLTools::read();

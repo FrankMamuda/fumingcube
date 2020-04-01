@@ -76,6 +76,7 @@ SOURCES += \
     table.cpp \
     tag.cpp \
     tagdialog.cpp \
+    tagselectiondialog.cpp \
     textedit.cpp \
     theme.cpp \
     variable.cpp \
@@ -137,6 +138,7 @@ HEADERS += \
     table.h \
     tag.h \
     tagdialog.h \
+    tagselectiondialog.h \
     textedit.h \
     textutils.h \
     theme.h \
@@ -169,7 +171,8 @@ FORMS += \
         searchfragment.ui \
         settingsdialog.ui \
         structurefragment.ui \
-        tagdialog.ui
+        tagdialog.ui \
+        tagselectiondialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -126,7 +126,7 @@ SearchFragment::SearchFragment( QWidget *parent ) : Fragment( parent ), ui( new 
             return;
 
         // check for id in cache
-        if ( Cache::instance()->nameIdMap.contains( this->identifier())) {
+        if ( Cache::instance()->nameIdMap.contains( this->identifier().toLower())) {
             // get a list of ids for the identifier
             // make sure to reverse the list, since the most relavant entries are at the end
             const QList<int> idList( Cache::instance()->nameIdMap.values( this->identifier()));
@@ -260,7 +260,7 @@ bool SearchFragment::parseIdListRequest( const QByteArray &data ) {
 
     // store ids into cache
     for ( const int &id : idList )
-        Cache::instance()->nameIdMap.insert( this->identifier(), id );
+        Cache::instance()->nameIdMap.insert( this->identifier().toLower(), id );
 
     // continue on
     return this->parseIdList( idList );
@@ -302,10 +302,10 @@ void SearchFragment::sendInitialRequest() {
 #endif
 
     // check for id in cache
-    if ( Cache::instance()->nameIdMap.contains( this->identifier())) {
+    if ( Cache::instance()->nameIdMap.contains( this->identifier().toLower())) {
         // get a list of ids for the identifier
         // make sure to reverse the list, since the most relavant entries are at the end
-        QList<int> idList( Cache::instance()->nameIdMap.values( this->identifier()));
+        QList<int> idList( Cache::instance()->nameIdMap.values( this->identifier().toLower()));
         std::reverse( idList.begin(), idList.end());
 
         if ( !idList.isEmpty()) {

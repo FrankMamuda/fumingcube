@@ -124,6 +124,8 @@
    </attribute>
    <addaction name="actionAddAll"/>
    <addaction name="actionAddSelected"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionSelectTags"/>
    <addaction name="actionClear"/>
   </widget>
   <action name="actionAddAll">
@@ -160,6 +162,22 @@
    </property>
    <property name="toolTip">
     <string>Clear properties and return to the Search fragment</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset theme="find"/>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionSelectTags">
+   <property name="icon">
+    <iconset theme="clean"/>
+   </property>
+   <property name="text">
+    <string>Select tags</string>
    </property>
   </action>
  </widget>
