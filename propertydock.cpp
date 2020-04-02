@@ -50,6 +50,7 @@
 #include <QMimeData>
 #include <QSqlError>
 #include <QDesktopServices>
+#include <QPainter>
 
 /**
  * @brief PropertyDock::PropertyDock
@@ -185,6 +186,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 if ( result == PropertyDialog::Rejected )
                     return values;
 
+                // copy current value to the PropertyEditor
                 if ( result == PropertyDialog::Advanced )
                     value = pd.value().toString();
 
@@ -282,13 +284,12 @@ void PropertyDock::on_addPropButton_clicked() {
     // get reagent id
     const Id reagentId = ReagentDock::instance()->view()->idFromIndex(
             ReagentDock::instance()->view()->filterModel()->mapToSource(
-                    ReagentDock::instance()->view()->currentIndex()));
+            ReagentDock::instance()->view()->currentIndex()));
     if ( reagentId == Id::Invalid )
         return;
 
     // get reagent name
-    const QString reagentName(
-            HTMLUtils::convertToPlainText( Reagent::instance()->name( Reagent::instance()->row( reagentId ))));
+    const QString reagentName( HTMLUtils::convertToPlainText( Reagent::instance()->name( Reagent::instance()->row( reagentId ))));
 
     // get UNFILTERED tags that have been set
     QSqlQuery query;
@@ -388,28 +389,69 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
         const Id tagId = Property::instance()->tagId( row );
         const Tag::Types type = ( tagId != Id::Invalid ) ? Tag::instance()->type( tagId ) : Tag::NoType;
 
-        if ( type == Tag::Text || type == Tag::Integer || type == Tag::PubChemId || type == Tag::Real || type == Tag::CAS ||
-             type == Tag::Formula || tagId == Id::Invalid ) {
-            menu.addAction( PropertyDock::tr( "Copy" ), this, [ row, type, tagId ]() {
+        if ( type == Tag::Text ||
+             type == Tag::Integer ||
+             type == Tag::PubChemId ||
+             type == Tag::Real ||
+             type == Tag::CAS ||
+             type == Tag::GHS ||
+             type == Tag::NFPA ||
+             type == Tag::Formula ||
+             tagId == Id::Invalid ) {
+            menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
+                QMimeData *propertyData( new QMimeData());
 
-                if ( type == Tag::Formula )
-                    QGuiApplication::clipboard()->setImage( QImage::fromData( data.toByteArray()));
-                else if ( type == Tag::Real )
+                if ( type == Tag::Formula ) {
+                    // add proper transparent image to clipboard
+                    propertyData->setData( "PNG", data.toByteArray());
+                    propertyData->setData( "image/png", data.toByteArray());
+                } else if ( type == Tag::Real ) {
+                    // add pre-processed text to clipboard
                     QGuiApplication::clipboard()->setText(
                             data.toString().replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
-                                                     QString( "\\1%1\\2" ).arg(
-                                                             Variable::string( "decimalSeparator" ))));
-                else
+                                    QString( "\\1%1\\2" ).arg(
+                                    Variable::string( "decimalSeparator" ))));
+                } else if ( type == Tag::GHS || type == Tag::NFPA ) {
+                    PropertyViewWidget *widget( qobject_cast<PropertyViewWidget*>( this->ui->propertyView->indexWidget( index )));
+                    if ( widget != nullptr ) {
+                        // upscale widget for a sharp image
+                        const qreal factor = 4.0;
+                        const QSizeF size( widget->sizeHint().width() * factor, widget->sizeHint().height() * factor );
+
+                        // make an empty pixmap
+                        QPixmap pixmap( size.toSize());
+                        pixmap.fill( Qt::transparent );
+                        pixmap.setDevicePixelRatio( factor );
+
+                        // draw widget contents
+                        QPainter painter( &pixmap );
+                        if ( type == Tag::GHS )
+                            qobject_cast<GHSWidget *>( widget )->paint( &painter, factor );
+                        else
+                            widget->render( &painter, QPoint(), QRegion(), QWidget::DrawChildren );
+
+                        painter.end();
+
+                        // add proper transparent image to clipboard
+                        const QByteArray pixmapData( PixmapUtils::convertToData( pixmap ));
+                        propertyData->setData( "PNG", pixmapData );
+                        propertyData->setData( "image/png", pixmapData );
+                    }
+                } else {
                     QGuiApplication::clipboard()->setText( HTMLUtils::convertToPlainText( data.toString()));
+                }
 
-
-                QMimeData *propertyData( new QMimeData());
+                // set fumingcube-specific mime information (for copy/paste of whole properties)
                 propertyData->setData( mimeTag, QString::number( static_cast<int>( tagId )).toLatin1().constData());
                 propertyData->setData( mimeName, Property::instance()->name( row ).toLatin1().constData());
                 propertyData->setData( mimeData, data.toByteArray());
-                propertyData->setText( QGuiApplication::clipboard()->text());
 
+                // copy clipboard text to mime text if any
+                if ( !QGuiApplication::clipboard()->text().isEmpty())
+                    propertyData->setText( QGuiApplication::clipboard()->text());
+
+                // set mime data to clipboard
                 QGuiApplication::clipboard()->setMimeData( propertyData );
             } )->setIcon( QIcon::fromTheme( "copy" ));
         }

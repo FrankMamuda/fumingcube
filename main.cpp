@@ -122,6 +122,8 @@ future:
  - cut properties from reagents
  - better mime handling in paste
  - sort tags instead of properties?
+ - interactive label maker (label as in something you can
+   print out and glue on a bottle)
 
 properties:
  - filter in dock

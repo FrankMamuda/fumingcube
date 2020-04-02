@@ -83,12 +83,15 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionSearch"/>
+   <addaction name="separator"/>
    <addaction name="actionReagents"/>
    <addaction name="actionProperties"/>
    <addaction name="actionLabels"/>
+   <addaction name="separator"/>
    <addaction name="actionTags"/>
    <addaction name="actionClear"/>
    <addaction name="actionSettings"/>
+   <addaction name="separator"/>
    <addaction name="actionAbout"/>
   </widget>
   <action name="actionReagents">
@@ -117,7 +120,7 @@
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset theme="remove">
+    <iconset theme="clear">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
@@ -165,7 +168,8 @@
   </action>
   <action name="actionSearch">
    <property name="icon">
-    <iconset theme="find"/>
+    <iconset theme="find">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Search</string>

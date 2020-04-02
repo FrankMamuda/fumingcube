@@ -55,6 +55,7 @@ public slots:
      * @brief setLinear
      */
     void setLinear() { this->m_linear = true; }
+    void paint( QPainter *painter, const qreal devicePixelRatio = 1.0 ) const;
 
 protected:
     void paintEvent( QPaintEvent * ) override;

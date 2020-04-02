@@ -46,25 +46,35 @@ GHSWidget::GHSWidget( QWidget *parent, const QStringList &parms ) : PropertyView
 }
 
 /**
- * @brief GHSWidget::paintEvent
+ * @brief GHSWidget::paint
+ * @param devicePixelRatio
  */
-void GHSWidget::paintEvent( QPaintEvent * ) {
-    QPainter painter( this );
+void GHSWidget::paint(QPainter *painter, const qreal devicePixelRatio ) const {
     int xOffset = 0;
     int yOffset = 0;
     int index = 0;
 
     for ( const QString &key : this->parameters()) {
-        const QPixmap pixmap( GHSPictograms::pixmap( key, GHSWidget::scale ));
+        QPixmap pixmap( GHSPictograms::pixmap( key, static_cast<int>( GHSWidget::scale * devicePixelRatio )));
+        pixmap.setDevicePixelRatio( devicePixelRatio );
+
         if ( xOffset >= this->iconsPerRow() * GHSWidget::scale ) {
             xOffset = 0;
             yOffset += GHSWidget::scale;
         }
 
-        painter.drawPixmap( qAsConst( xOffset ), qAsConst( yOffset ), GHSWidget::scale, GHSWidget::scale, pixmap );
+        painter->drawPixmap( qAsConst( xOffset ), qAsConst( yOffset ), GHSWidget::scale, GHSWidget::scale, qAsConst( pixmap ));
         xOffset += GHSWidget::scale;
         index++;
     }
+}
+
+/**
+ * @brief GHSWidget::paintEvent
+ */
+void GHSWidget::paintEvent( QPaintEvent * ) {
+    QPainter painter( this );
+    this->paint( &painter, 1.0 );
 }
 
 /**
