@@ -27,6 +27,7 @@
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <QTextDocument>
+#include <QTreeView>
 
 /**
  * @brief The ReagentDelegate class
@@ -47,6 +48,13 @@ public:
      */
     [[nodiscard]] ReagentModel *sourceModel() const { return qobject_cast<ReagentModel *>( this->m_model->sourceModel()); }
 
+    /**
+     * @brief parentView
+     * @return
+     */
+    [[nodiscard]] QTreeView *parentView() const { return this->m_view; }
+
+
 public slots:
     /**
      * @brief setModel
@@ -59,6 +67,12 @@ public slots:
      */
     void clearCache() { this->cache.clear(); }
 
+    /**
+     * @brief setParentView
+     * @param view
+     */
+    void setParentView( QTreeView *view ) { this->m_view = view; }
+
 protected:
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
@@ -66,4 +80,5 @@ protected:
 private:
     QSortFilterProxyModel *m_model = nullptr;
     mutable QMap<QString, QTextDocument *> cache;
+    QTreeView *m_view = nullptr;
 };

@@ -46,6 +46,7 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
 
     // set html delegate
     this->delegate->setModel( this->filterModel());
+    this->delegate->setParentView( this );
     this->setItemDelegate( this->delegate );
 
     // restore state

@@ -56,7 +56,6 @@ database:
 reagent:
  - sort batches by addition date
    OR add date to select batches (not all of them need dates?)
- - ReagentDock word wrap
 
 theming:
  - separate app theme from calculator theme
@@ -112,6 +111,7 @@ future:
  - sort tags instead of properties?
  - interactive label maker (label as in something you can
    print out and glue on a bottle)
+ - reagentDock word wrap resize fix
 
 properties:
  - filter in dock

@@ -20,6 +20,7 @@
  * includes
  */
 #include "reagentdelegate.h"
+#include "reagentdock.h"
 #include <QPainter>
 #include <QApplication>
 #include <QDebug>
@@ -50,8 +51,7 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
     QTextDocument *document( this->cache[html] );
     painter->save();
 
-    const auto pixmap(
-            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
+    const auto pixmap( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
     if ( !pixmap.isNull())
         painter->drawPixmap(
                 QRect( option.rect.left(), option.rect.top() + option.rect.height() / 2 - pixmap.height() / 2,
@@ -70,20 +70,24 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
  * @return
  */
 QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    if ( this->model() == nullptr || !index.isValid())
+    if ( this->model() == nullptr || !index.isValid() || this->parentView() == nullptr )
         return QStyledItemDelegate::sizeHint( option, index );
 
     const QFont font( option.font );
     const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
     auto *document( new QTextDocument());
+
+    const auto pixmap( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
+    QTextOption textOption( document->defaultTextOption());
+    textOption.setWrapMode( QTextOption::WordWrap );
+    document->setDefaultTextOption( textOption );
+    document->setTextWidth( this->parentView()->columnWidth( 0 ) - this->parentView()->indentation() - ( pixmap.isNull() ? 0 : pixmap.width()));
+
     document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" )
                        .arg( QString::number( font.pointSize()),
                              font.family(),
                              html ));
     this->cache[html] = document;
-
-    const auto pixmap(
-            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
     return QSizeF( document->idealWidth() + ( pixmap.isNull() ? 0 : pixmap.width()),
                    document->size().height()).toSize();
 }
