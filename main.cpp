@@ -65,18 +65,6 @@ theming:
  - option to change syntax highlighter (and font size) (partially supported)
 
 extraction:
-  - new icons
-    refresh/update
-    structure browser, etc.
-    find online
-    deprecate
-    collapse
-    clear/dismiss
-    delete cache
-    property
-    delete all
-    select tag
-    add all
   - better 'not found' and 'server busy' error handling in search
 
 misc/unsorted:

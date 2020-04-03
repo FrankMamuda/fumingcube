@@ -84,7 +84,7 @@ SearchEngineManager::~SearchEngineManager() {
  * @param searchMenu
  */
 void SearchEngineManager::populateMenu( QMenu *searchMenu, const QString &query ) const {
-    searchMenu->setIcon( QIcon::fromTheme( "find" ));
+    searchMenu->setIcon( QIcon::fromTheme( "structure" ));
 
     const QList<SearchEngine *> engines( this->searchEngines.values());
     for ( SearchEngine *engine : engines ) {

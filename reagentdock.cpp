@@ -263,7 +263,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 visMenu->addAction( ReagentDock::tr( "Deprecate \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->deprecate( id );
                     this->view()->updateView();
-                } )->setIcon( QIcon::fromTheme( "remove" ));
+                } )->setIcon( QIcon::fromTheme( "deprecate" ));
             } else {
                 visMenu->addAction( ReagentDock::tr( "Restore \"%1\"" ).arg( batchName ), this, [ this, id ]() {
                     NodeHistory::instance()->restore( id );
@@ -343,7 +343,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     if ( context ) {
         visMenu->addAction( ReagentDock::tr( "Collapse all" ), []() {
             ReagentDock::instance()->view()->collapseAll();
-        } );
+        } )->setIcon( QIcon::fromTheme( "collapse" ));
     }
 
     menu->setAttribute( Qt::WA_DeleteOnClose, true );

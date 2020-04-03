@@ -49,7 +49,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDi
     // setup fragment navigation and initialize fragments
     this->fragmentNavigation()->setFragmentHost( this->fragmentHost());
     this->m_searchFragment = this->fragmentNavigation()->addFragment<SearchFragment>( ExtractionDialog::tr( "Search" ), QIcon::fromTheme( "find" ), this, ExtractionDialog::tr( "Switch to the Search fragment" ));
-    this->m_structureFragment = this->fragmentNavigation()->addFragment<StructureFragment>( ExtractionDialog::tr( "Structure\nbrowser" ), QIcon::fromTheme( "reagent" ), this, ExtractionDialog::tr( "Switch to the Structure browser fragment" ));
+    this->m_structureFragment = this->fragmentNavigation()->addFragment<StructureFragment>( ExtractionDialog::tr( "Structure\nbrowser" ), QIcon::fromTheme( "structure" ), this, ExtractionDialog::tr( "Switch to the Structure browser fragment" ));
     this->m_propertyFragment = this->fragmentNavigation()->addFragment<PropertyFragment>( ExtractionDialog::tr( "Properties" ), QIcon::fromTheme( "property" ), this, ExtractionDialog::tr( "Switch to the Property extraction fragment" ));
     this->setCurrentFragment( this->searchFragment());
     this->fragmentNavigation()->installCloseButton( this );

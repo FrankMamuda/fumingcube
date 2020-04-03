@@ -130,7 +130,7 @@
   </widget>
   <action name="actionAddAll">
    <property name="icon">
-    <iconset theme="accept">
+    <iconset theme="add_all_properties">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
@@ -142,7 +142,7 @@
   </action>
   <action name="actionAddSelected">
    <property name="icon">
-    <iconset theme="accept">
+    <iconset theme="add_property">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
@@ -166,7 +166,8 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset theme="find"/>
+    <iconset theme="update">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Refresh</string>
@@ -174,7 +175,8 @@
   </action>
   <action name="actionSelectTags">
    <property name="icon">
-    <iconset theme="clean"/>
+    <iconset theme="select_tag">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Select tags</string>

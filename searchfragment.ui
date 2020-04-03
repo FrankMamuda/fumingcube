@@ -176,7 +176,7 @@ In the case of multiple matches, you will be able to narrow down your query usin
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset theme="remove">
+    <iconset theme="delete_cache">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
