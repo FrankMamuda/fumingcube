@@ -59,7 +59,7 @@ reagent:
 
 theming:
  - separate app theme from calculator theme
-   (calculator window background styling to be defined independantly from
+   (calculator window background styling to be defined independently from
     app window background)
  - option to change syntax highlighter (and font size) (partially supported)
 
@@ -68,7 +68,6 @@ extraction:
 
 misc/unsorted:
   - explicit selection of labelless reagents
-  - update cmakelists
 */
 
 /*
@@ -104,7 +103,7 @@ future:
       solvents
       organics
       intermediates
- - better ImageUitls dialog (save as, replace, zoom, etc.)
+ - better ImageUtils dialog (save as, replace, zoom, etc.)
  - allow to display treeView in multiple columns
  - cut properties from reagents
  - better mime handling in paste

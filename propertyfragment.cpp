@@ -492,7 +492,7 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
             if ( values.isEmpty())
                 continue;
 
-            PropertyWidget *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
+            auto *group( new PropertyWidget( nullptr, values, Tag::instance()->id( row )));
             //propList[Tag::instance()->name( row )] = group;
             propList[QApplication::translate( "Tag", Tag::instance()->name( row ).toUtf8().constData())] = group;
             continue;
@@ -501,7 +501,7 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
         if ( Tag::instance()->type( row ) == Tag::PubChemId ) {
             const QString cid( QString::number( this->host()->structureFragment()->cid()));
             const QList<QStringList> list = QList<QStringList>() << ( QStringList() << cid << cid );
-            PropertyWidget *group( new PropertyWidget( nullptr, list, Tag::instance()->id( row )));
+            auto *group( new PropertyWidget( nullptr, list, Tag::instance()->id( row )));
             propList[QApplication::translate( "Tag", Tag::instance()->name( row ).toUtf8().constData())] = group;
         }
     }

@@ -24,7 +24,6 @@
 #include "structurefragment.h"
 #include "ui_structurefragment.h"
 #include "variable.h"
-#include <QDir>
 #include <utility>
 #include "extractiondialog.h"
 #include "searchfragment.h"
