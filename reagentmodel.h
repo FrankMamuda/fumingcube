@@ -42,7 +42,8 @@ public:
         ID,
         ParentId,
         HTML,
-        Pixmap
+        Pixmap,
+        DateTime
     };
 
     /**

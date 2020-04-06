@@ -24,6 +24,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QDebug>
+#include <QDate>
 
 /**
  * @brief ReagentDelegate::paint
@@ -35,8 +36,8 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
     if ( this->model() == nullptr || !index.isValid())
         return QStyledItemDelegate::paint( painter, option, index );
 
-    const QString html(
-            this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
+    // NOTE: not the most elegant way to map data, but it works
+    const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString() + QString::number( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::DateTime ).toDate().toJulianDay()));
     if ( !this->cache.contains( html ))
         return QStyledItemDelegate::paint( painter, option, index );
 
@@ -74,7 +75,10 @@ QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QMode
         return QStyledItemDelegate::sizeHint( option, index );
 
     const QFont font( option.font );
+    QDate date( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::DateTime ).toDate());
+    const QString dateString( date.isValid() ? QString( " (%1)" ).arg( date.toString( Qt::SystemLocaleShortDate )) : "" );
     const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
+
     auto *document( new QTextDocument());
 
     const auto pixmap( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::Pixmap ).value<QPixmap>());
@@ -82,12 +86,13 @@ QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QMode
     textOption.setWrapMode( QTextOption::WordWrap );
     document->setDefaultTextOption( textOption );
     document->setTextWidth( this->parentView()->columnWidth( 0 ) - this->parentView()->indentation() - ( pixmap.isNull() ? 0 : pixmap.width()));
-
     document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" )
                        .arg( QString::number( font.pointSize()),
                              font.family(),
-                             html ));
-    this->cache[html] = document;
+                             html + dateString ));
+
+    // NOTE: not the most elegant way to map data, but it works
+    this->cache[html + QString::number( date.toJulianDay())] = document;
     return QSizeF( document->idealWidth() + ( pixmap.isNull() ? 0 : pixmap.width()),
                    document->size().height()).toSize();
 }

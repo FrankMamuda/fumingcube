@@ -22,6 +22,7 @@
  * includes
  */
 #include "table.h"
+#include <QDate>
 
 /**
  * @brief The Reagent class
@@ -44,6 +45,7 @@ public:
         Name,
         Reference,
         ParentId,
+        DateTime,
 
         // count (DO NOT REMOVE)
                 Count
@@ -59,7 +61,7 @@ public:
         return reagent;
     }
     ~Reagent() override = default;
-    Row add( const QString &name, const QString &reference, const Id &parentId = Id::Invalid );
+    Row add(const QString &name, const QString &reference, const Id &parentId = Id::Invalid, const QDateTime &dateTime = QDateTime());
     [[nodiscard]] QList<Row> children( const Row &row ) const;
     [[nodiscard]] QList<Id> labelIds( const Row &row ) const;
 
@@ -69,8 +71,39 @@ public:
     INITIALIZE_FIELD( QString, Reference, reference )
     INITIALIZE_FIELD( Id, ParentId, parentId )
 
+    /**
+     * @brief dateTime
+     * @param row
+     * @return
+     */
+    [[nodiscard]] QDateTime dateTime( const Row &row ) {
+        return QDateTime::fromSecsSinceEpoch( this->value( row, DateTime ).toInt());
+    }
+
+    /**
+     * @brief dateTime
+     * @param id
+     * @return
+     */
+    [[nodiscard]] QDateTime dateTime( const Id &id ) {
+        const int dateTime = this->value( id, DateTime ).toInt();
+        if ( dateTime <= 0 )
+            return QDateTime();
+
+        return QDateTime::fromSecsSinceEpoch( this->value( id, DateTime ).toInt());
+    }
+
 public slots:
     void removeOrphanedEntries() override;
+
+    /**
+     * @brief setDateTime
+     * @param row
+     * @param dateTime
+     */
+    void setDateTime( const Row &row, const QDateTime &dateTime ) {
+        this->setValue( row, DateTime, dateTime.toSecsSinceEpoch());
+    }
 
 private:
     explicit Reagent();

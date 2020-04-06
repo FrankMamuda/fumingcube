@@ -218,6 +218,7 @@ void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *par
     auto *item( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
+    item->setData( Reagent::instance()->dateTime( id ), DateTime );
     item->setData( NodeHistory::instance()->isDeperecated( id ) ? QString( "<s>%1</s>" ).arg( generatedName ) : generatedName, HTML );
     parentItem->appendRow( item );
 }

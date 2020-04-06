@@ -53,9 +53,8 @@ database:
  - fix crash on argument count mismatch
  - expand built-in database with more reagents
 
-reagent:
- - sort batches by addition date
-   OR add date to select batches (not all of them need dates?)
+property:
+ - date type (expiration date, manufacturing date, etc.)
 
 theming:
  - separate app theme from calculator theme

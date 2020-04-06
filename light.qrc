@@ -75,5 +75,7 @@
         <file alias="scalable/add_all_properties.svg">icons/light/scalable/add_all_properties.svg</file>
         <file alias="scalable/collapse.svg">icons/light/scalable/collapse.svg</file>
         <file alias="scalable/select_tag.svg">icons/light/scalable/select_tag.svg</file>
+        <file alias="scalable/calendar.svg">icons/light/scalable/calendar.svg</file>
+        <file alias="16x16/calendar.png">icons/light/16x16/calendar.png</file>
     </qresource>
 </RCC>

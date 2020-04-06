@@ -32,7 +32,7 @@
  */
 ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
     // set a model to treeView
-    this->setModel( new QSortFilterProxyModel());
+    this->setModel( new SortFilterProxyModel( this ));
 
     // setup node history
     NodeHistory::instance()->setTreeParent( this );
@@ -160,4 +160,26 @@ void ReagentView::mouseReleaseEvent( QMouseEvent *event ) {
     }
 
     QTreeView::mouseReleaseEvent( event );
+}
+
+/**
+ * @brief SortFilterProxyModel::lessThan
+ * @param left
+ * @param right
+ * @return
+ */
+bool SortFilterProxyModel::lessThan( const QModelIndex &left, const QModelIndex &right ) const {
+    const QStandardItem *leftItem( qobject_cast<ReagentModel *>( this->sourceModel())->itemFromIndex( left ));
+    const QStandardItem *rightItem( qobject_cast<ReagentModel *>( this->sourceModel())->itemFromIndex( right ));
+
+    if ( leftItem->data( ReagentModel::ParentId ).value<Id>() == Id::Invalid && rightItem->data( ReagentModel::ParentId ).value<Id>() == Id::Invalid )
+        return QSortFilterProxyModel::lessThan( left, right );
+
+    const QDateTime leftDate( leftItem->data( ReagentModel::DateTime ).toDateTime());
+    const QDateTime rightDate( rightItem->data( ReagentModel::DateTime ).toDateTime());
+
+    if ( leftDate == rightDate )
+        return QSortFilterProxyModel::lessThan( left, right );
+
+    return leftDate < rightDate;
 }

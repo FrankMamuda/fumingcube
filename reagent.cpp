@@ -32,16 +32,20 @@ Reagent::Reagent() : Table( "reagent" ) {
     this->addField( PRIMARY_FIELD( ID ) );
     this->addField( FIELD( Name, String ) );
     this->addField( FIELD( Reference, String ) );
-    this->addField( FIELD( ParentId, Int ) );
+    this->addField( FIELD( ParentId, Int ));
+    this->addField( FIELD( DateTime, Int ));
 }
 
 /**
  * @brief Reagent::add
  * @param name
+ * @param reference
+ * @param parentId
+ * @param dateTime
  * @return
  */
-Row Reagent::add( const QString &name, const QString &reference, const Id &parentId ) {
-    return Table::add( QVariantList() << Database_::null << name << reference << static_cast<int>( parentId ));
+Row Reagent::add( const QString &name, const QString &reference, const Id &parentId, const QDateTime &dateTime ) {
+    return Table::add( QVariantList() << Database_::null << name << reference << static_cast<int>( parentId ) << static_cast<int>( dateTime.toSecsSinceEpoch()));
 }
 
 /**

@@ -30,6 +30,7 @@
 #include <QTextEdit>
 #include <QPainter>
 #include <QDesktopServices>
+#include <QCalendarWidget>
 #include "reagent.h"
 #include "property.h"
 #include "variable.h"
@@ -41,6 +42,7 @@
 #include "htmlutils.h"
 #include "textutils.h"
 #include "searchengine.h"
+#include "datepicker.h"
 
 /**
  * @brief ReagentDock::ReagentDock
@@ -240,6 +242,9 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     menu->addAction( ReagentDock::tr( "Remove" ), this, [ this ]() { this->on_removeButton_clicked(); } )->setIcon(
             QIcon::fromTheme( "remove" ));
 
+    auto *dateMenu( menu->addMenu( ReagentDock::tr( "Date" )));
+    dateMenu->setIcon( QIcon::fromTheme( "calendar" ));
+
     auto *visMenu( menu->addMenu( ReagentDock::tr( "Visibility" )));
     visMenu->setIcon( QIcon::fromTheme( "show" ));
 
@@ -255,6 +260,33 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                                     ( parentId == Id::Invalid ) ?
                                         static_cast<Id>( item->data( ReagentModel::ID ).toInt())
                                       : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
+
+
+
+        if ( parentId != Id::Invalid ) {
+            const Id id = item->data( ReagentModel::ID ).value<Id>();
+            const QDateTime current( Reagent::instance()->dateTime( id ));
+
+            // add date
+            dateMenu->addAction( current.isValid() ? ReagentDock::tr( "Edit date" ) : ReagentDock::tr( "Add date to batch \"%1\"" ).arg( batchName ), this, [ this, item, current, id ]() {
+                DatePicker datePicker( this );
+                datePicker.setDate( current.isValid() ? current.date() : QDate::currentDate());
+                if ( datePicker.exec() == QDialog::Accepted ) {
+                    // rename without resetting the model
+                    Reagent::instance()->setDateTime( Reagent::instance()->row( id ), QDateTime( datePicker.date()));
+                    const_cast<QStandardItem *>( item )->setData( QDateTime( datePicker.date()), ReagentModel::DateTime );
+                }
+            } )->setIcon( QIcon::fromTheme( current.isValid() ? "edit" : "add" ));
+
+            if ( current.isValid()) {
+                // remove date
+                dateMenu->addAction( ReagentDock::tr( "Remove date" ), this, [ item, id ]() {
+                    // rename without resetting the model
+                    Reagent::instance()->setDateTime( Reagent::instance()->row( id ), QDateTime());
+                    const_cast<QStandardItem *>( item )->setData( QDateTime(), ReagentModel::DateTime );
+                } )->setIcon( QIcon::fromTheme( "remove" ));
+            }
+        }
 
         // deprecation
         if  ( parentId != Id::Invalid ) {

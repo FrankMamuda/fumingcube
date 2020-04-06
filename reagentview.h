@@ -28,6 +28,17 @@
 #include <QTreeView>
 
 /**
+ * @brief The SortFilterProxyModel class
+ */
+class SortFilterProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
+public:
+    explicit SortFilterProxyModel( QObject *parent = nullptr ) : QSortFilterProxyModel( parent ) {}
+    bool lessThan( const QModelIndex &left, const QModelIndex &right ) const;
+};
+
+/**
  * @brief The ReagentView class
  */
 class ReagentView : public QTreeView {
@@ -59,7 +70,7 @@ public:
      * @brief filterModel
      * @return
      */
-    [[nodiscard]] QSortFilterProxyModel *filterModel() const { return qobject_cast<QSortFilterProxyModel *>( QTreeView::model()); }
+    [[nodiscard]] SortFilterProxyModel *filterModel() const { return qobject_cast<SortFilterProxyModel *>( QTreeView::model()); }
 
     /**
      * @brief idFromIndex
