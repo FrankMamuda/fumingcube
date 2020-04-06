@@ -398,7 +398,12 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
              type == Tag::NFPA ||
              type == Tag::Formula ||
              tagId == Id::Invalid ) {
-            menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId ]() {
+
+            menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId
+#ifdef Q_CC_MSVC
+            , mimeTag, mimeData, mimeName
+#endif
+            ]() {
                 const QVariant data( Property::instance()->propertyData( row ));
                 QMimeData *propertyData( new QMimeData());
 
