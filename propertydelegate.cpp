@@ -207,10 +207,10 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             QString stringData( data.toString());
             if ( tagId != Id::Invalid ) {
                 const Tag::Types type = Tag::instance()->type( tagId );
-                if ( type == Tag::Real )
+                if ( type == Tag::Real ) {
                     stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
                                         QString( "\\1%1\\2" ).arg( Variable::string( "decimalSeparator" )));
-                else if ( type == Tag::State ) {
+                } else if ( type == Tag::State ) {
                     bool ok;
                     int stateIndex = stringData.toInt( &ok );
 
@@ -233,6 +233,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                         default:
                             stringData = PropertyDelegate::tr( "Unknown" );
                     }
+                } else if ( type == Tag::Date ) {
+                    const QDate date( stringData.isEmpty() ? QDate() : QDate::fromJulianDay( stringData.toInt()));
+                    stringData = date.isValid() ? date.toString( Qt::DateFormat::SystemLocaleDate ) : "";
                 }
             }
 

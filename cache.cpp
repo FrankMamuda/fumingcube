@@ -46,20 +46,6 @@ Cache::Cache() {
 }
 
 /**
- * @brief Cache::data
- * @param type
- * @param key
- * @return
- */
-QVariant Cache::data( const Cache::Types &type, const QString &key ) const {
-    Q_UNUSED( type )
-    Q_UNUSED( key )
-
-    // STUB
-    return QVariant();
-}
-
-/**
  * @brief Cache::checksum
  * @param data
  * @param len
@@ -139,7 +125,6 @@ bool Cache::insert( const QString &context, const QString &key, const QByteArray
 
     // write cache file
     QFile file( this->contextPath( context, key ));
-    qDebug() << this->contextPath( context, key );
     if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate )) {
         QByteArray out( compress ? qCompress( data ) : data );
         file.write( out.constData(), out.length());
@@ -166,10 +151,8 @@ void Cache::clear( const QString &context, const QString &key ) {
     if ( !Cache::validate( context, key ))
         return;
 
-    if ( this->contains( context, key )) {
-        //.qDebug() << "DEL" << context << key << this->contextPath( context, key ) << QFile::exists( this->contextPath( context, key ));
+    if ( this->contains( context, key ))
         QFile::remove( this->contextPath( context, key ));
-    }
 }
 
 /**

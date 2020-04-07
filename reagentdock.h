@@ -59,6 +59,7 @@ public:
     [[nodiscard]] bool checkBatchForDuplicates( const QString &name, Id parentId ) const;
     [[nodiscard]] ReagentView *view() const;
     QMenu *buildMenu( bool context = true );
+    QMenu *buildAddMenu( bool context = true );
 
     Id addReagent( const Id &parentId, const QString &reagentName = QString(), const int cid = 0 );
 

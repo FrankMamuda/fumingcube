@@ -24,6 +24,8 @@
 #include "tag.h"
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QDate>
+#include "datepicker.h"
 #include "htmlutils.h"
 #include "property.h"
 
@@ -88,6 +90,10 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
             this->ui->unitsEdit->setEnabled( true );
             break;
 
+        case Tag::Date:
+            this->ui->valueEdit->setEnabled( false );
+            break;
+
         case Tag::GHS:
         case Tag::NFPA:
         case Tag::Text:
@@ -95,10 +101,13 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
             break;
         }
 
+        // toggle date button
+        this->ui->dateButton->setVisible( index == Tag::Date );
+
         if ( index == Tag::Real )
             this->ui->precisionSpin->setEnabled( true );
     };
-    QComboBox::connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), widgetTest );
+    QComboBox::connect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, widgetTest );
     widgetTest( this->ui->typeCombo->currentIndex());
 
     // make sure edit button is visible only when one item is selected
@@ -114,7 +123,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
     this->ui->actionRemove->setDisabled( true );
 
     // handle save button when edit dock is open
-    QDialogButtonBox::connect( this->ui->buttonBox, &QDialogButtonBox::clicked, [ this ]( QAbstractButton *button ) {
+    QDialogButtonBox::connect( this->ui->buttonBox, &QDialogButtonBox::clicked, this, [ this ]( QAbstractButton *button ) {
         const QDialogButtonBox::ButtonRole role = this->ui->buttonBox->buttonRole( button );
 
         if ( role == QDialogButtonBox::AcceptRole ) {
@@ -126,13 +135,20 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
             if ( row == Row::Invalid )
                 return;
 
+            const bool isDate = this->ui->typeCombo->currentIndex() == Tag::Date;
+
             if ( this->mode() == Edit ) {
                 Tag::instance()->setType( row, static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()));
                 Tag::instance()->setName( row, this->ui->nameEdit->text());
                 Tag::instance()->setUnits( row, HTMLUtils::captureBody( this->ui->unitsEdit->toHtml()));
                 Tag::instance()->setMinValue( row, this->ui->minEdit->text());
                 Tag::instance()->setMaxValue( row, this->ui->maxEdit->text());
-                Tag::instance()->setDefaultValue( row, this->ui->valueEdit->text());
+
+                if ( isDate )
+                    Tag::instance()->setDefaultValue( row, QString::number( this->date.isValid() ? this->date.toJulianDay() : 0 ));
+                else
+                    Tag::instance()->setDefaultValue( row, this->ui->valueEdit->text());
+
                 Tag::instance()->setPrecision( row, this->ui->precisionSpin->value());
                 Tag::instance()->setFunction( row, this->ui->functionEdit->text());
                 Tag::instance()->setScale( row, this->ui->scaleSpin->value());
@@ -145,7 +161,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
                             HTMLUtils::captureBody( this->ui->unitsEdit->toHtml()),
                             this->ui->minEdit->text(),
                             this->ui->maxEdit->text(),
-                            this->ui->valueEdit->text(),
+                            isDate ? QString::number( this->date.isValid() ? this->date.toJulianDay() : 0 ) : this->ui->valueEdit->text(),
                             this->ui->precisionSpin->value(),
                             this->ui->functionEdit->text(),
                             this->ui->scaleSpin->value(),
@@ -157,12 +173,27 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         this->ui->dockWidget->close();
         this->clear();
     } );
+
+    // connect date button
+    QToolButton::connect( this->ui->dateButton, &QToolButton::pressed, this, [ this ]() {
+        DatePicker dp( this );
+        dp.setDate( QDate::currentDate());
+        if ( dp.exec() == QDialog::Accepted ) {
+            this->date = dp.date();
+            this->ui->valueEdit->setText( this->date.toString( Qt::DateFormat::LocalDate ));
+        }
+    } );
+
 }
 
 /**
  * @brief TagDialog::~TagDialog
  */
 TagDialog::~TagDialog() {
+    QToolButton::disconnect( this->ui->dateButton, &QToolButton::pressed, this, nullptr );
+    QComboBox::disconnect( this->ui->typeCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, nullptr );
+    QItemSelectionModel::disconnect( this->ui->tagView->selectionModel(), &QItemSelectionModel::selectionChanged, this, nullptr );
+    QDialogButtonBox::disconnect( this->ui->buttonBox, &QDialogButtonBox::clicked, this, nullptr );
     delete this->ui;
 }
 
@@ -239,7 +270,16 @@ void TagDialog::on_actionEdit_triggered() {
     this->ui->unitsEdit->setHtml( HTMLUtils::captureBody( Tag::instance()->units( row )).replace( " ","&nbsp;" ));
     this->ui->minEdit->setText( Tag::instance()->minValue( row ).toString());
     this->ui->maxEdit->setText( Tag::instance()->maxValue( row ).toString());
-    this->ui->valueEdit->setText( Tag::instance()->defaultValue( row ).toString());
+
+    const bool isDate = this->ui->typeCombo->currentIndex() == Tag::Date;
+    if ( isDate ) {
+        const int julianDay = Tag::instance()->defaultValue( row ).toInt();
+        const QDate date( julianDay == 0 ? QDate() : QDate::fromJulianDay( julianDay ));
+        this->ui->valueEdit->setText( date.toString( Qt::DateFormat::LocalDate ));
+    } else {
+        this->ui->valueEdit->setText( Tag::instance()->defaultValue( row ).toString());
+    }
+
     this->ui->precisionSpin->setValue( Tag::instance()->precision( row ));
     this->ui->functionEdit->setText( Tag::instance()->function( row ));
     this->ui->scaleSpin->setValue( Tag::instance()->scale( row ));
@@ -260,6 +300,7 @@ void TagDialog::clear() {
     this->ui->scaleSpin->setValue( 1.0 );
     this->ui->typeCombo->setCurrentIndex( 0 );
     this->ui->patternEdit->clear();
+    this->date = QDate();
 
     this->setMode();
 }

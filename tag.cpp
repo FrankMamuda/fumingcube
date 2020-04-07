@@ -140,4 +140,6 @@ void Tag::populate() {
     this->add( Tag::tr( "PubChem id" ), PubChemId );
     this->add( Tag::tr( "Molecular formula" ), Text, "", 0, 0, 0, 0, "", 0,
                QStringList() << "Molecular Formula" << "Molecular Formula" );
+    this->add( Tag::tr( "Expiration date" ), Date );
+    this->add( Tag::tr( "Production date" ), Date );
 }

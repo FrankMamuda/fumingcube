@@ -231,43 +231,36 @@ ReagentView *ReagentDock::view() const {
 QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
-    auto *addMenu( menu->addMenu( ReagentDock::tr( "Add" )));
-    addMenu->setIcon( QIcon::fromTheme( "add" ));
-    addMenu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
-            QIcon::fromTheme( "reagent" ));
+    // add 'Add' menu
+    menu->addMenu( buildAddMenu( context ));
 
-    menu->addAction( ReagentDock::tr( "Edit" ), this, [ this ]() { this->on_editButton_clicked(); } )->setIcon(
-            QIcon::fromTheme( "edit" ));
+    // add 'Edit' menu
+    menu->addAction( ReagentDock::tr( "Edit" ), this, [ this ]() { this->on_editButton_clicked(); } )->setIcon( QIcon::fromTheme( "edit" ));
 
-    menu->addAction( ReagentDock::tr( "Remove" ), this, [ this ]() { this->on_removeButton_clicked(); } )->setIcon(
-            QIcon::fromTheme( "remove" ));
+    // add 'Remove' menu
+    menu->addAction( ReagentDock::tr( "Remove" ), this, [ this ]() { this->on_removeButton_clicked(); } )->setIcon( QIcon::fromTheme( "remove" ));
 
+    // add 'Date' menu
     auto *dateMenu( menu->addMenu( ReagentDock::tr( "Date" )));
     dateMenu->setIcon( QIcon::fromTheme( "calendar" ));
 
+    // add 'Visibility' menu
     auto *visMenu( menu->addMenu( ReagentDock::tr( "Visibility" )));
     visMenu->setIcon( QIcon::fromTheme( "show" ));
 
+    // validate index
     const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
     if ( index.isValid()) {
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
-        const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
         const QString batchName( TextUtils::elidedString( item->text()));
 
-        addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
-                         [ this, parentId, item ]() { this->addReagent(
-                                    ( parentId == Id::Invalid ) ?
-                                        static_cast<Id>( item->data( ReagentModel::ID ).toInt())
-                                      : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
-
-
-
+        // add/edit/remove date to/from batch
         if ( parentId != Id::Invalid ) {
             const Id id = item->data( ReagentModel::ID ).value<Id>();
             const QDateTime current( Reagent::instance()->dateTime( id ));
 
-            // add date
+            // add/edit date menu
             dateMenu->addAction( current.isValid() ? ReagentDock::tr( "Edit date" ) : ReagentDock::tr( "Add date to batch \"%1\"" ).arg( batchName ), this, [ this, item, current, id ]() {
                 DatePicker datePicker( this );
                 datePicker.setDate( current.isValid() ? current.date() : QDate::currentDate());
@@ -278,6 +271,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 }
             } )->setIcon( QIcon::fromTheme( current.isValid() ? "edit" : "add" ));
 
+            // remove date
             if ( current.isValid()) {
                 // remove date
                 dateMenu->addAction( ReagentDock::tr( "Remove date" ), this, [ item, id ]() {
@@ -380,6 +374,32 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
     menu->setAttribute( Qt::WA_DeleteOnClose, true );
     return menu;
+}
+
+/**
+ * @brief ReagentDock::buildAddMenu
+ * @return
+ */
+QMenu *ReagentDock::buildAddMenu( bool context ) {
+    auto *addMenu( new QMenu( ReagentDock::tr( "Add" )));
+    addMenu->setIcon( QIcon::fromTheme( "add" ));
+    addMenu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
+            QIcon::fromTheme( "reagent" ));
+
+    const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
+    if ( index.isValid()) {
+        const QStandardItem *item( this->view()->itemFromIndex( index ));
+        const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
+        const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
+
+        addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
+                         [ this, parentId, item ]() { this->addReagent(
+                                    ( parentId == Id::Invalid ) ?
+                                        static_cast<Id>( item->data( ReagentModel::ID ).toInt())
+                                      : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
+    }
+
+    return addMenu;
 }
 
 /**
@@ -487,7 +507,7 @@ Id ReagentDock::addReagent( const Id &parentId, const QString &reagentName, cons
  * @param pos
  */
 void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos ) {
-    QMenu *menu( this->buildMenu( true ));
+    QMenu *menu( this->buildAddMenu( true ));
     menu->exec( this->mapToGlobal( pos ));
 }
 

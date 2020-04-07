@@ -53,9 +53,6 @@ database:
  - fix crash on argument count mismatch
  - expand built-in database with more reagents
 
-property:
- - date type (expiration date, manufacturing date, etc.)
-
 theming:
  - separate app theme from calculator theme
    (calculator window background styling to be defined independently from
@@ -67,6 +64,8 @@ extraction:
 
 misc/unsorted:
   - explicit selection of labelless reagents
+  - sometimes clipboard gets locked up
+  - restore previously selected label on start
 */
 
 /*
@@ -110,6 +109,7 @@ future:
  - interactive label maker (label as in something you can
    print out and glue on a bottle)
  - reagentDock word wrap resize fix
+ - tag sub categories
 
 properties:
  - filter in dock
@@ -269,6 +269,9 @@ int main( int argc, char *argv[] ) {
 
         if ( !Label::instance()->count())
             Label::instance()->populate();
+
+        Tag::instance()->sort( Tag::Name, Qt::AscendingOrder );
+        //Tag::instance()->select();
 
         return success;
     };

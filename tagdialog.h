@@ -21,6 +21,9 @@
 /*
  * includes
  */
+#include "datepicker.h"
+
+#include <QDate>
 #include <QDialog>
 #include <QTextCharFormat>
 
@@ -81,5 +84,5 @@ protected:
 private:
     Ui::TagDialog *ui;
     Modes m_mode = NoMode;
+    QDate date;
 };
-

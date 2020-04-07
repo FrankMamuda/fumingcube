@@ -39,6 +39,7 @@
 #include "pixmaputils.h"
 #include "htmlutils.h"
 #include "textutils.h"
+#include "datepicker.h"
 #include <QBuffer>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -195,15 +196,24 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
             case Tag::NFPA: {
                 NFPABuilder nfpa( PropertyDock::instance(), value.split( " " ));
-                return ( nfpa.exec() == QDialog::Accepted ) ? QPair<QString, QVariant>( QString(),
-                                                                                        nfpa.parameters().join( " " ))
-                                                            : values;
+                return ( nfpa.exec() == QDialog::Accepted ) ?
+                         QPair<QString, QVariant>( QString(), nfpa.parameters().join( " " )) :
+                         values;
             }
 
             case Tag::GHS: {
                 GHSBuilder ghs( PropertyDock::instance(), value.split( " " ));
                 return ( ghs.exec() == QDialog::Accepted ) ?
                          QPair<QString, QVariant>( QString(), ghs.parameters().join( " " )) :
+                         values;
+            }
+
+            case Tag::Date: {
+                const QDate date( value.isEmpty() ? QDate::currentDate() : QDate::fromJulianDay( value.toInt()));
+                DatePicker dp( PropertyDock::instance());
+                dp.setDate( date.isValid() ? date : QDate::currentDate());
+                return ( dp.exec() == QDialog::Accepted ) ?
+                         QPair<QString, QVariant>( QString(), QString::number( dp.date().toJulianDay())) :
                          values;
             }
 
@@ -314,11 +324,17 @@ void PropertyDock::on_addPropButton_clicked() {
     while ( query.next())
         allTags << query.value( 0 ).value<Id>();
 
+    std::sort( allTags.begin(), allTags.end(), []( const Id &l, const Id &r ) {
+        return QString::localeAwareCompare(
+                    QApplication::translate( "Tag", Tag::instance()->name( l ).toUtf8().constData()),
+                    QApplication::translate( "Tag", Tag::instance()->name( r ).toUtf8().constData())) < 0;
+    } );
+
     for ( const Id tagId : qAsConst( allTags )) {
         if ( qAsConst( allSetTags ).contains( tagId ))
             continue;
 
-        subMenu->addAction(  QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) /*Tag::instance()->name( tagId )*/, this, [ this, reagentId, tagId ]() {
+        subMenu->addAction( QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) /*Tag::instance()->name( tagId )*/, this, [ this, reagentId, tagId ]() {
             const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
             this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
         } );

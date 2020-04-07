@@ -25,6 +25,8 @@
 #include <QCompleter>
 #include <QTextEdit>
 
+
+
 /**
  * @brief The TextEdit class
  */

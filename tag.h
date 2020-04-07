@@ -71,7 +71,8 @@ public:
         CAS,
         State,
         Formula,
-        PubChemId
+        PubChemId,
+        Date
     };
     Q_ENUM( Types )
 
