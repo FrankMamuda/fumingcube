@@ -67,8 +67,8 @@ extraction:
 
 misc/unsorted:
   - explicit selection of labelless reagents
-  - sometimes clipboard gets locked up
   - restore previously selected label on start
+  - reagentDock word wrap resize fix
 */
 
 /*
@@ -111,7 +111,6 @@ future:
  - sort tags instead of properties?
  - interactive label maker (label as in something you can
    print out and glue on a bottle)
- - reagentDock word wrap resize fix
  - tag sub categories
 
 properties:
@@ -131,6 +130,13 @@ scripting:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
+
+ImageUtils:
+    - invert option -
+    - add background option
+    - alpha-by-colour
+    - save/open (at least in view mode)
+    - proper sizing (at least for dragged/pasted images)
 */
 
 /**

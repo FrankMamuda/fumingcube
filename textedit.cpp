@@ -28,8 +28,7 @@
 #include <QDropEvent>
 #include <QRegularExpression>
 #ifdef Q_OS_WIN
-#include <windows.h>
-#include <QtWin>
+#include "emfmime.h"
 #endif
 #include "htmlutils.h"
 #include "property.h"
@@ -48,8 +47,9 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
    this->m_id = QRandomGenerator::global()->generate();
 
     // setup finished connection to the NetworkManager
-#if 0
     NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
+        qDebug() << this->id();
+
         switch ( type ) {
         case NetworkManager::TextEditImage:
         {
@@ -57,6 +57,7 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
             if ( idn != this->id())
                 return;
 
+            // TODO: svg not implemented yet
             if ( url.endsWith( ".svg" )) {
                 qDebug() << "network->image; svg not implemented yet" << idn << this->id();
                 return;
@@ -65,10 +66,8 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
             qDebug() << "network->image" << idn << this->id();
             QPixmap pixmap;
             pixmap.loadFromData( data );
-            if ( pixmap.isNull()) {
-                qDebug() << "bad image" << data.size() << data.left( 32 );
+            if ( pixmap.isNull())
                 return;
-            }
 
             const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
             this->insertPixmap( pixmap, qMin( sectionSize, pixmap.width()));
@@ -79,14 +78,13 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
             ;
         }
     } );
-#endif
 }
 
 /**
  * @brief TextEdit::~TextEdit
  */
 TextEdit::~TextEdit() {
-    //NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
 }
 
 /**
@@ -123,10 +121,8 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
  * @return
  */
 bool TextEdit::canInsertFromMimeData( const QMimeData *source ) const {
-    if ( this->isSimpleEditor() && source->hasImage()) {
-        qDebug() << "ABRTT" << this->isSimpleEditor() << source->hasImage();
+    if ( this->isSimpleEditor() && source->hasImage())
         return false;
-    }
 
     // check if dropped item is an image
     for ( const QUrl &url : source->urls()) {
@@ -219,39 +215,47 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( this->isSimpleEditor() && source->hasImage())
         return;
 
-    //qDebug() << source->formats() << "\n\n" << source->html() << "\n\n" << source->urls();
-
-    // probably images dropped from the internet
-    if ( source->hasImage() && source->hasHtml()) {
-       // qDebug() << source->formats() << "\n" << source->html();
-
-
-
-    }
-
-#if 0
+    if (( source->hasImage() && source->hasHtml())
 #ifdef Q_OS_WIN
-    if ( source->formats().contains( R"(application/x-qt-windows-mime;value="DragImageBits")" ) && !source->urls().isEmpty()) {
-        const QUrl url( source->urls().first());
-        if ( url.isValid()) {
-            qDebug() << "request" << source->urls().first();
+            || ( source->formats().contains( R"(application/x-qt-windows-mime;value="DragImageBits")" ) && source->hasHtml())
+#endif
+            ) {
+        {
+            // handle base64 images
+            const QRegularExpression re( "<img[^>]*src=\"data:image\\/\\w+;base64([^\"]+?(?=\"))\"" );
+            QRegularExpressionMatch match( re.match( source->html()));
+            if ( match.hasMatch()) {
+                const QString imgSource( match.captured( 1 ));
+                QPixmap pixmap;
+                pixmap.loadFromData( QByteArray::fromBase64( imgSource.toLatin1().constData()));
+                if ( !pixmap.isNull()) {
+                    this->insertPixmap( qAsConst( pixmap ), pixmap.width());
+                    return;
+                }
+            }
+        }
 
-            NetworkManager::instance()->execute( url.toString(), NetworkManager::TextEditImage, this->id());
-            return;
+        {
+            // handle img urls
+            QRegularExpression re( "<img[^>]*src=\"([^\"]+?(?=\"))\"" );
+            QRegularExpressionMatch match( re.match( source->html()));
+            if ( match.hasMatch()) {
+                const QString imgSource( match.captured( 1 ));
+                NetworkManager::instance()->execute( imgSource, NetworkManager::TextEditImage, this->id());
+                return;
+            }
         }
     }
-#endif
-#endif
 
     // check clipboard for image
     if ( source->hasImage()) {
-        const QImage image( qvariant_cast<QImage>( source->imageData()));
-        if ( image.isNull())
-            return;
+        qDebug() << source->formats();
 
-        const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
-        this->insertPixmap( QPixmap::fromImage( qAsConst( image )), qMin( sectionSize, image.width()));
-        return;
+        const QImage image( qvariant_cast<QImage>( source->imageData()));
+        if ( !image.isNull()) {
+            this->insertPixmap( QPixmap::fromImage( qAsConst( image )), image.width());
+            return;
+        }
     }
 
     // check dropped items for images

@@ -117,16 +117,8 @@ void SearchEngineManager::loadSearchEngines() {
  */
 void SearchEngineManager::replyReceived( const QString &, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
     switch ( type ) {
-    case NetworkManager::CIDRequestInitial:
-    case NetworkManager::CIDRequestSimilar:
-    case NetworkManager::DataRequest:
-    case NetworkManager::FormulaRequest:
-    case NetworkManager::NameRequest:
-    case NetworkManager::NoType:
-    case NetworkManager::FormulaRequestBrowser:
-        break;
-
     case NetworkManager::FavIcon:
+    {
         // make sure we use a valid name
         const QString name( userData.toString());
         if ( name.isEmpty() || !this->searchEngines.contains( name ))
@@ -146,8 +138,11 @@ void SearchEngineManager::replyReceived( const QString &, NetworkManager::Types 
         // save icon to cache and add it to the search engine
         pixmap.save( this->iconPath( name ));
         engine->setIcon( QIcon( pixmap ));
-
+    }
         break;
+
+    default:
+        ;
     }
 }
 

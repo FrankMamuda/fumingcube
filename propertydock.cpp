@@ -231,9 +231,9 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
         }
     }
 
-    auto *pe( new PropertyEditor( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value )));
-    if ( pe->exec() == QDialog::Accepted ) {
-        const QString strippedName( HTMLUtils::convertToPlainText( pe->name()));
+    PropertyEditor pe( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value ));
+    if ( pe.exec() == QDialog::Accepted ) {
+        const QString strippedName( HTMLUtils::convertToPlainText( pe.name()));
 
         QTextEdit ed;
         ed.setText( strippedName );
@@ -243,7 +243,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
             return values;
         }
 
-        return { strippedName, pe->value() };
+        return { strippedName, pe.value() };
     }
 
     return values;

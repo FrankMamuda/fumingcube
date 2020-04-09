@@ -26,14 +26,20 @@
 
 /**
  * @brief EMFMime::canConvertToMime
- * @param mime_type
- * @param data_obj
+ * @param mime
+ * @param dataObject
  * @return
  */
 bool EMFMime::canConvertToMime( const QString &mime, IDataObject *dataObject ) const {
     if ( !QString::compare( mime, "application/x-qt-image" )) {
-        FORMATETC formatetc { CF_ENHMETAFILE, nullptr, DVASPECT_CONTENT, -1, TYMED_ENHMF };
-        return dataObject->QueryGetData( &formatetc ) == S_OK;
+        //  NOTE: prioritize CF_DIB
+        FORMATETC formatetcEmf { CF_ENHMETAFILE, nullptr, DVASPECT_CONTENT, -1, TYMED_ENHMF };
+        FORMATETC formatetcBmp { CF_DIB, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+
+        const bool canGetEmf = dataObject->QueryGetData( &formatetcEmf ) == S_OK;
+        const bool canGetBmp = dataObject->QueryGetData( &formatetcBmp ) == S_OK;
+
+        return canGetEmf && !canGetBmp;
     }
 
     return false;
@@ -41,9 +47,8 @@ bool EMFMime::canConvertToMime( const QString &mime, IDataObject *dataObject ) c
 
 /**
  * @brief EMFMime::convertToMime
- * @param mime_type
- * @param data_obj
- * @param preferred_type
+ * @param mime
+ * @param dataObject
  * @return
  */
 QVariant EMFMime::convertToMime( const QString &mime, IDataObject *dataObject, QVariant::Type ) const {
@@ -83,6 +88,8 @@ QVariant EMFMime::convertToMime( const QString &mime, IDataObject *dataObject, Q
                     const HBRUSH brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
                     FillRect( memDC, &rect, brush );
                     DeleteObject( brush );
+
+                    // TODO: add transparency
 
                     // render metaFile to bitmap
                     PlayEnhMetaFile( memDC, s.hEnhMetaFile, &rect );

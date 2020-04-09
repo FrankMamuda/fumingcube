@@ -83,6 +83,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
 
         case Tag::Formula:
         case Tag::State:
+        case Tag::Date:
         case Tag::NoType:
             return;
     }
@@ -126,6 +127,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
 
                 case Tag::Formula:
                 case Tag::State:
+                case Tag::Date:
                 case Tag::NoType:
                     return;
             }
@@ -158,6 +160,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
 
                 case Tag::Formula:
                 case Tag::State:
+                case Tag::Date:
                 case Tag::NoType:
                     return;
             }
