@@ -23,6 +23,7 @@
  * includes
  */
 #include <QCompleter>
+#include <QRandomGenerator>
 #include <QTextEdit>
 
 
@@ -36,7 +37,9 @@ class TextEdit : public QTextEdit {
 
 public:
     explicit TextEdit( QWidget *parent = nullptr );
+    ~TextEdit() override;
     void insertPixmap( const QPixmap &pixmap, int preferredWidth = -1 );
+    quint32 id() const { return this->m_id; }
 
     /**
      * @brief cleanHTML
@@ -85,4 +88,5 @@ private:
     bool m_cleanHTML = true;
     bool m_simpleEditor = false;
     QCompleter *m_completer = nullptr;
+    quint32 m_id = 0;
 };

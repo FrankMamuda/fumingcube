@@ -36,6 +36,7 @@
 #include "propertydock.h"
 #include <QAbstractItemView>
 #include "pixmaputils.h"
+#include "networkmanager.h"
 
 /**
  * @brief TextEdit::TextEdit
@@ -44,6 +45,48 @@
 TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
    this->setTabChangesFocus( true );
    this->installEventFilter( this );
+   this->m_id = QRandomGenerator::global()->generate();
+
+    // setup finished connection to the NetworkManager
+#if 0
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
+        switch ( type ) {
+        case NetworkManager::TextEditImage:
+        {
+            const quint32 idn = userData.value<quint32>();
+            if ( idn != this->id())
+                return;
+
+            if ( url.endsWith( ".svg" )) {
+                qDebug() << "network->image; svg not implemented yet" << idn << this->id();
+                return;
+            }
+
+            qDebug() << "network->image" << idn << this->id();
+            QPixmap pixmap;
+            pixmap.loadFromData( data );
+            if ( pixmap.isNull()) {
+                qDebug() << "bad image" << data.size() << data.left( 32 );
+                return;
+            }
+
+            const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
+            this->insertPixmap( pixmap, qMin( sectionSize, pixmap.width()));
+            return;
+        }
+
+        default:
+            ;
+        }
+    } );
+#endif
+}
+
+/**
+ * @brief TextEdit::~TextEdit
+ */
+TextEdit::~TextEdit() {
+    //NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
 }
 
 /**
@@ -176,11 +219,32 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( this->isSimpleEditor() && source->hasImage())
         return;
 
+    //qDebug() << source->formats() << "\n\n" << source->html() << "\n\n" << source->urls();
+
+    // probably images dropped from the internet
+    if ( source->hasImage() && source->hasHtml()) {
+       // qDebug() << source->formats() << "\n" << source->html();
+
+
+
+    }
+
+#if 0
+#ifdef Q_OS_WIN
+    if ( source->formats().contains( R"(application/x-qt-windows-mime;value="DragImageBits")" ) && !source->urls().isEmpty()) {
+        const QUrl url( source->urls().first());
+        if ( url.isValid()) {
+            qDebug() << "request" << source->urls().first();
+
+            NetworkManager::instance()->execute( url.toString(), NetworkManager::TextEditImage, this->id());
+            return;
+        }
+    }
+#endif
+#endif
+
     // check clipboard for image
     if ( source->hasImage()) {
-        qDebug() << source->formats();
-        qDebug() << source->html() << source->urls();
-
         const QImage image( qvariant_cast<QImage>( source->imageData()));
         if ( image.isNull())
             return;

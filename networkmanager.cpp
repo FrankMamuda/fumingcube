@@ -40,7 +40,7 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
     QNetworkReply *reply( this->manager.get( qAsConst( request )));
 
     // handle replies
-    QNetworkReply::connect( reply, &QNetworkReply::finished, [ this, reply ]() mutable {
+    QNetworkReply::connect( reply, &QNetworkReply::finished, this, [ this, reply ]() mutable {
         const Types type = static_cast<Types>( reply->request().attribute( QNetworkRequest::User ).toInt());
         const QVariant userData(
                 reply->request().attribute( static_cast<QNetworkRequest::Attribute>( QNetworkRequest::User + 1 )));
@@ -63,7 +63,7 @@ void NetworkManager::execute( const QString &url, NetworkManager::Types type, co
         emit this->finished( reply->url().toString(), type, userData, data );
 
         // clean up
-        reply->disconnect( reply, SIGNAL( finished()));
+        reply->disconnect( reply, &QNetworkReply::finished, this, nullptr );
         reply->deleteLater();
     } );
 }
