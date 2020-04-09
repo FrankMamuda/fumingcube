@@ -45,6 +45,9 @@
 #include <QSharedMemory>
 #include <QSettings>
 #include <QTranslator>
+#ifdef Q_OS_WIN
+#include "emfmime.h"
+#endif
 
 /*
  TODO:
@@ -207,8 +210,16 @@ int main( int argc, char *argv[] ) {
     // read configuration
     XMLTools::read();
 
+#ifdef Q_OS_WIN
+    EMFMime *emf( new EMFMime());
+#endif
+
     // clean up on exit
-    QApplication::connect( &a, &QApplication::aboutToQuit, []() {
+    QApplication::connect( &a, &QApplication::aboutToQuit, [ emf ]() {
+#ifdef Q_OS_WIN
+        delete emf;
+#endif
+
         Cache::instance()->writeReagentCache();
 
         NodeHistory::instance()->saveHistory();
