@@ -23,6 +23,7 @@
 #ifdef Q_OS_WIN
 #include <QPixmap>
 #include <QtWin>
+#include <QBitmap>
 
 /**
  * @brief EMFMime::canConvertToMime
@@ -36,8 +37,8 @@ bool EMFMime::canConvertToMime( const QString &mime, IDataObject *dataObject ) c
         FORMATETC formatetcEmf { CF_ENHMETAFILE, nullptr, DVASPECT_CONTENT, -1, TYMED_ENHMF };
         FORMATETC formatetcBmp { CF_DIB, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 
-        const bool canGetEmf = dataObject->QueryGetData( &formatetcEmf ) == S_OK;
-        const bool canGetBmp = dataObject->QueryGetData( &formatetcBmp ) == S_OK;
+        const bool canGetEmf = dataObject->QueryGetData( &formatetcEmf ) == static_cast<HRESULT>( 0x00000000 );
+        const bool canGetBmp = dataObject->QueryGetData( &formatetcBmp ) == static_cast<HRESULT>( 0x00000000 );
 
         return canGetEmf && !canGetBmp;
     }
@@ -58,7 +59,7 @@ QVariant EMFMime::convertToMime( const QString &mime, IDataObject *dataObject, Q
         FORMATETC formatetc { CF_ENHMETAFILE, nullptr, DVASPECT_CONTENT, -1, TYMED_ENHMF };
         STGMEDIUM s;
 
-        if ( dataObject->GetData( &formatetc, &s ) != S_OK )
+        if ( dataObject->GetData( &formatetc, &s ) != static_cast<HRESULT>( 0x00000000 ))
             return QVariant();
 
         if ( s.tymed != TYMED_ENHMF ) {
@@ -80,23 +81,23 @@ QVariant EMFMime::convertToMime( const QString &mime, IDataObject *dataObject, Q
                     const HDC deviceContext = GetDC( nullptr );
                     const HDC memDC = CreateCompatibleDC( deviceContext );
 
-                    // create bitmap
-                    const HBITMAP bitmap = CreateCompatibleBitmap( memDC, rect.right, rect.bottom );
+                    // create and select bitmap
+                    const BITMAPINFO bi { { sizeof( BITMAPINFOHEADER ), rect.right, rect.bottom, 1, 24, 0, 0, 0, 0, 0, 0 }, { { 0, 0, 0, 0 } } };
+                    const HBITMAP bitmap = CreateDIBSection( deviceContext, &bi, DIB_RGB_COLORS, 0,0,0 );
                     SelectObject( memDC, bitmap );
 
-                    // fill white background
-                    const HBRUSH brush = CreateSolidBrush( static_cast<COLORREF>( 0x00FFFFFF ));
+                    // fill magenta background
+                    const HBRUSH brush = CreateSolidBrush( RGB( 255, 0, 255 ));
                     FillRect( memDC, &rect, brush );
                     DeleteObject( brush );
 
-                    // TODO: add transparency
-
                     // render metaFile to bitmap
                     PlayEnhMetaFile( memDC, s.hEnhMetaFile, &rect );
-                    BitBlt( deviceContext, 0, 0, rect.right, 0, memDC, 0, 0, static_cast<DWORD>( 0x00CC0020 ));
 
-                    // convert to image
-                    const QImage image( QtWin::fromHBITMAP( bitmap ).toImage());
+                    // apply mask and convert to image
+                    QPixmap pixmap( QtWin::fromHBITMAP( bitmap ));
+                    pixmap.setMask( pixmap.createMaskFromColor( { Qt::magenta } ));
+                    const QImage image( pixmap.toImage());
 
                     // clean up
                     DeleteObject( bitmap );

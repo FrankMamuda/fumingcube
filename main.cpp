@@ -69,6 +69,7 @@ misc/unsorted:
   - explicit selection of labelless reagents
   - restore previously selected label on start
   - reagentDock word wrap resize fix
+  - view custom properties in a separate dialog
 */
 
 /*
