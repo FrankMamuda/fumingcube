@@ -51,6 +51,9 @@ public:
 protected:
     void resizeEvent( QResizeEvent *event ) override;
 
+private slots:
+    void setWidgetsEnabled( bool enabled = true );
+
 public slots:
     void resizeToContents();
 

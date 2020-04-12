@@ -49,7 +49,7 @@ GHSWidget::GHSWidget( QWidget *parent, const QStringList &parms ) : PropertyView
  * @brief GHSWidget::paint
  * @param devicePixelRatio
  */
-void GHSWidget::paint(QPainter *painter, const qreal devicePixelRatio ) const {
+void GHSWidget::paint( QPainter *painter, const qreal devicePixelRatio ) const {
     int xOffset = 0;
     int yOffset = 0;
     int index = 0;

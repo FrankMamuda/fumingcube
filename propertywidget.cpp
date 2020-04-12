@@ -158,10 +158,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QList<QStringList> &value
                     this->ghs->update( PropertyWidget::parseGHS( this->propertyValues[this->position()] ));
                     break;
 
-                case Tag::Formula:
-                case Tag::State:
-                case Tag::Date:
-                case Tag::NoType:
+                default:
                     return;
             }
         } );
@@ -231,9 +228,7 @@ void PropertyWidget::add( const Id &id ) {
                                        id );
             break;
 
-        case Tag::Formula:
-        case Tag::State:
-        case Tag::NoType:
+        default:
             return;
     }
 }

@@ -283,8 +283,10 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
  * @param option
  * @param index
  */
-void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-    const QTableView *view( qobject_cast<QTableView *>( this->parent()));
+void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {    
+    const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
+    if ( view->isResizeInProgress())
+        return;
 
     // draw custom selection highlight
     if ( option.state & QStyle::State_Selected ) {
@@ -321,6 +323,10 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
+    const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
+    if ( view->isResizeInProgress())
+        return QSize();
+
     // prevents caching before the model initializes
     const Row row = Property::instance()->row( index );
     if ( row == Row::Invalid )

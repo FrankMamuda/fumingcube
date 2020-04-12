@@ -58,31 +58,8 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
     this->resizeTimer.setSingleShot( true );
     QTimer::connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
         this->m_resizeInProgress = false;
-
-        // what this does is:
-        //   0) runs when column resize has been finished (200 msec)
-        //   1) finds all formulas or other pixmaps
-        //   2) removes them from document cache
-        //   3) forces propertyView to resize, thus recreating missing documents
-        //      a) here pixmaps are rescaled if required and stored into pixmap cache
-        //      b) loaded from pixmap cache and displayed
-        // all this is done to resolve performance issues in handling large pixmaps
-        for ( int y = 0; y < Property::instance()->count(); y++ ) {
-            const Row row = Property::instance()->row( y );
-            const Id tagId = Property::instance()->tagId( row );
-            const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula ||
-                                                                tagId == PixmapTag ) : false;
-
-            if ( !pixmapTag )
-                continue;
-
-            const QModelIndex index( Property::instance()->index( y, Property::PropertyData ));
-            if ( this->delegate->documentMap.contains( index ))
-                this->delegate->documentMap.remove( index );
-
-            this->update( index );
-        }
-        this->resizeRowsToContents();
+        this->setWidgetsEnabled( true );
+        this->resizeToContents();
     } );
 }
 
@@ -91,14 +68,33 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
  * @param event
  */
 void PropertyView::resizeEvent( QResizeEvent *event ) {
+    this->setWidgetsEnabled( false );
     QTableView::resizeEvent( event );
-    this->resizeToContents();
+}
+
+/**
+ * @brief PropertyView::setWidgetsEnabled
+ * @param enabled
+ */
+void PropertyView::setWidgetsEnabled( bool enabled ) {
+    for ( int y = 0; y < Property::instance()->count(); y++ ) {
+        QWidget *widget( this->indexWidget( Property::instance()->index( y, Property::PropertyData )));
+        if ( widget != nullptr )
+            widget->setUpdatesEnabled( enabled );
+    }
 }
 
 /**
  * @brief PropertyView::resizeToContents
  */
 void PropertyView::resizeToContents() {
-    PropertyDock::instance()->clearDocumentCache();
+    //qDebug() << "resizeToContents called";
+
+    this->clearDocumentCache();
+    for ( int y = 0; y < Property::instance()->count(); y++ ) {
+        this->update( Property::instance()->index( y, Property::Name ));
+        this->update( Property::instance()->index( y, Property::PropertyData ));
+    }
+
     this->resizeRowsToContents();
 }
