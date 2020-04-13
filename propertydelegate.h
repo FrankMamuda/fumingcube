@@ -27,6 +27,13 @@
 #include <QTextDocument>
 #include <QMap>
 
+//
+// THIS IS A MESS
+//
+// DON'T STORE PIXMAP IN CACHE IF SIZE MATCHES THE ORIGINAL DATA
+//
+//
+
 /**
  * @brief The PropertyDelegate class
  */
@@ -52,6 +59,6 @@ private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
 
 private:
-    mutable QMap<QString, QMap<int, QByteArray>> cache;
+  //mutable QMap<QString, QMap<int, QByteArray>> cache;
     mutable QMap<QString, QSize> sizeCache;
 };

@@ -22,6 +22,7 @@
 #include "pixmaputils.h"
 #include <QBuffer>
 #include <QFileDialog>
+#include <QImageReader>
 
 /**
  * @brief PixmapUtils::autoCrop
@@ -204,5 +205,5 @@ QPixmap PixmapUtils::getOpenPixmap( QWidget *context ) {
     if ( fileName.isEmpty())
         return QPixmap();
 
-    return QPixmap( fileName );
+    return QPixmap::fromImage( QImageReader( fileName ).read());
 }

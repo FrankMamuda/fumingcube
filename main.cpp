@@ -68,8 +68,13 @@ extraction:
 misc/unsorted:
   - explicit selection of labelless reagents
   - restore previously selected label on start
-  - reagentDock word wrap resize fix
   - view custom properties in a separate dialog
+ - adding structure property should open ImageUtils by default
+   where user can either paste an image or load from file
+ - PropertyEditor insert image should go through ImageUtils
+ - save PropertyDelegate pixmaps in disk cache?
+ - upon property deletion, there must be a PropertyDock
+   refresh (currently PropertyViewWidget just does not repaint)
 */
 
 /*
@@ -105,7 +110,6 @@ future:
       solvents
       organics
       intermediates
- - better ImageUtils dialog (save as, replace, zoom, etc.)
  - allow to display treeView in multiple columns
  - cut properties from reagents
  - better mime handling in paste
@@ -133,6 +137,7 @@ scripting:
    in that order; useful when assay is not defined)
 
 ImageUtils:
+    - replace/zoom
     - invert option -
     - add background option
     - alpha-by-colour

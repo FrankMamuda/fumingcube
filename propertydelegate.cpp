@@ -138,7 +138,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
                 scaledSize = QSize( scaledWidth, scaledHeight );
 
                 // generateMipMap lambda - downscales, inverts and crops pixmap
-                auto generateMipMap = [ this, checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
+                auto generateMipMap = [ checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
                     if ( pixmap.isNull()) {
                         if ( !pixmap.loadFromData( qAsConst( storedData )))
                             return false;
@@ -161,23 +161,19 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
 
                     // convert it back to buffer
                     pixmapData = PixmapUtils::convertToData( pixmap );
+                    if ( pixmapData.isEmpty())
+                        return false;
 
                     // insert data into the cache
-                    this->cache[checksum][scaledSize.width()] = pixmapData;
+                    Cache::instance()->insert( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png", pixmapData );
                     // qDebug() << "TO CACHE";
 
                     return true;
                 };
 
                 // check for pre-cached pixmaps with this scaledWidth, if none are available - make them
-                if ( this->cache.contains( checksum )) {
-                    if ( this->cache[checksum].contains( scaledSize.width())) {
-                        pixmapData = this->cache[checksum][scaledSize.width()];
-                        //qDebug() << "CACHE PASS" << checksum;
-                    } else {
-                        if ( !generateMipMap())
-                            return false;
-                    }
+                if ( Cache::instance()->contains( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png" )) {
+                    pixmapData = Cache::instance()->getData( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png" );
                 } else {
                     if ( !generateMipMap())
                         return false;

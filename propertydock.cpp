@@ -754,7 +754,7 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     this->ui->propertyView->setUpdatesEnabled( false );
 
     bool pixmap = false;
-    if ( tagId != Id::Invalid ) {
+    if ( tagId != Id::Invalid && tagId != PixmapTag ) {
         pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
 
         // warn if already exists

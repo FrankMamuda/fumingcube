@@ -41,22 +41,19 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
     this->setItemDelegateForColumn( Property::Name, this->delegate );
 
     PropertyView::connect( this->horizontalHeader(), &QHeaderView::sectionResized,
-                           [ this ]( const int column, const int oldWidth, const int newWidth ) {
+                           [ this ]( const int, const int oldWidth, const int newWidth ) {
                                if ( oldWidth == newWidth )
                                    return;
 
-                               this->resizeTimer.start( 200 );
+                               this->resizeTimer.start( 128 );
                                this->m_resizeInProgress = true;
-                               if ( column == Property::Name )
-                                   this->resizeToContents();
                            } );
 
     this->horizontalHeader()->show();
-    //this->resizeRowsToContents();
 
     // setup timer
     this->resizeTimer.setSingleShot( true );
-    QTimer::connect( &this->resizeTimer, &QTimer::timeout, [ this ]() {
+    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this ]() {
         this->m_resizeInProgress = false;
         this->setWidgetsEnabled( true );
         this->resizeToContents();
@@ -64,10 +61,21 @@ PropertyView::PropertyView( QWidget *parent ) : QTableView( parent ) {
 }
 
 /**
+ * @brief PropertyView::~PropertyView
+ */
+PropertyView::~PropertyView() {
+    QTimer::disconnect( &this->resizeTimer, &QTimer::timeout, this, nullptr );
+
+    delete this->delegate;
+}
+
+/**
  * @brief PropertyView::resizeEvent
  * @param event
  */
 void PropertyView::resizeEvent( QResizeEvent *event ) {
+    this->resizeTimer.start( 200 );
+    this->m_resizeInProgress = true;
     this->setWidgetsEnabled( false );
     QTableView::resizeEvent( event );
 }
@@ -88,8 +96,6 @@ void PropertyView::setWidgetsEnabled( bool enabled ) {
  * @brief PropertyView::resizeToContents
  */
 void PropertyView::resizeToContents() {
-    //qDebug() << "resizeToContents called";
-
     this->clearDocumentCache();
     for ( int y = 0; y < Property::instance()->count(); y++ ) {
         this->update( Property::instance()->index( y, Property::Name ));

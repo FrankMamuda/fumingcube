@@ -25,6 +25,7 @@
 #include "reagentdelegate.h"
 #include "reagentmodel.h"
 #include <QSortFilterProxyModel>
+#include <QTimer>
 #include <QTreeView>
 
 /**
@@ -51,14 +52,7 @@ public:
     // disable move
     ReagentView( ReagentView&& ) = delete;
     ReagentView& operator=( ReagentView&& ) = delete;
-
-    /**
-     * @brief ~ReagentView::~ReagentView
-     */
-    ~ReagentView() override {
-        delete this->delegate;
-        delete this->reagentModel;
-    }
+    ~ReagentView() override;
 
     /**
      * @brief model
@@ -93,6 +87,12 @@ public:
      */
     [[nodiscard]] QStandardItem *itemFromIndex( const QModelIndex &index ) const { return this->sourceModel()->itemFromIndex( index ); }
 
+    /**
+     * @brief isResizeInProgress
+     * @return
+     */
+    [[nodiscard]] bool isResizeInProgress() const { return this->m_resizeInProgress; }
+
 public slots:
     void updateView();
     void selectReagent( const QModelIndex &filterIndex = QModelIndex());
@@ -101,8 +101,11 @@ public slots:
 protected:
     void keyReleaseEvent( QKeyEvent *event ) override;
     void mouseReleaseEvent( QMouseEvent *event ) override;
+    void resizeEvent( QResizeEvent *event ) override;
 
 private:
     ReagentModel *reagentModel = new ReagentModel();
     ReagentDelegate *delegate = new ReagentDelegate();
+    QTimer resizeTimer;
+    bool m_resizeInProgress = false;
 };
