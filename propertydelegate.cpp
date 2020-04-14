@@ -48,25 +48,233 @@
  * @brief PropertyDelegate::setupDocument
  * @param index
  */
-void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &font ) const {
+void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &defaultFont ) const {
+    QFont font( defaultFont );
+
     // reuse document from cache if any
     if ( this->documentMap.contains( index ) || !index.isValid())
         return;
 
-    // get property row, data and tagId
-    const Row row = Property::instance()->row( index );
-    const QVariant data( Property::instance()->propertyData( row ));
-    const Id tagId = Property::instance()->tagId( row );
-    const bool pixmapTag = ( tagId != Id::Invalid ) ? ( Tag::instance()->type( tagId ) == Tag::Formula ||
-                                                        tagId == PixmapTag ) : false;
+    // get data and tag/property info
+    const Row propertyRow = Property::instance()->row( index );
+    const QVariant data( Property::instance()->propertyData( propertyRow ));
+    const Id tagId = Property::instance()->tagId( propertyRow );
+    const Tag::Types tagType = Tag::instance()->type( tagId );
+
+    // create a new document
+    auto *document( new QTextDocument());
+
+    // set special modifiers
+    if ( index.column() == Property::Name )
+       this->setSpecialModifiers( font, tagId, propertyRow );
+
+    // special handling of pixmaps and formulas
+    if ( tagType == Tag::Formula || tagId == PixmapTag ) {
+        // name column
+        if ( index.column() == Property::Name ) {
+            this->setupTextDocument( index, document, tagType == Tag::Formula ?
+                                         QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
+                                         Property::instance()->name( propertyRow ),
+                                     font );
+        } else if ( index.column() == Property::PropertyData ) {
+            this->setupPixmapDocument( index, document, data.toByteArray(), Tag::instance()->type( tagId ) == Tag::Formula );
+        }
+
+        return;
+    }
+
+    // handle custom properties
+    if ( tagId == Id::Invalid ) {
+        // custom properties however do display their names
+        this->setupTextDocument( index, document, ( index.column() == Property::Name ) ? Property::instance()->name( propertyRow ) : data.toString(), qAsConst( font ));
+        return;
+    }
+
+    // properties with built-in tags don't use property names, but rather tag names
+    const QString units( Tag::instance()->units( tagId ).remove( QRegularExpression( R"(<\s*br\s*\/>)" )));
+    QString stringData( data.toString());
+    if ( tagId != Id::Invalid ) {
+        const Tag::Types type = Tag::instance()->type( tagId );
+        if ( type == Tag::Real ) {
+            stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
+                                QString( "\\1%1\\2" ).arg( Variable::string( "decimalSeparator" )));
+        } else if ( type == Tag::State ) {
+            bool ok;
+            int stateIndex = stringData.toInt( &ok );
+
+            if ( !ok )
+                stateIndex = -1;
+
+            switch ( stateIndex ) {
+            case 0:
+                stringData = PropertyDelegate::tr( "Solid" );
+                break;
+
+            case 1:
+                stringData = PropertyDelegate::tr( "Liquid" );
+                break;
+
+            case 2:
+                stringData = PropertyDelegate::tr( "Gaseous" );
+                break;
+
+            default:
+                stringData = PropertyDelegate::tr( "Unknown" );
+            }
+        } else if ( type == Tag::Date ) {
+            const QDate date( stringData.isEmpty() ? QDate() : QDate::fromJulianDay( stringData.toInt()));
+            stringData = date.isValid() ? date.toString( Qt::DateFormat::SystemLocaleDate ) : "";
+        }
+    }
+
+    // setup document
+    this->setupTextDocument( index,
+                             document,
+                             ( index.column() == Property::Name ?
+                             QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
+                             ( HTMLUtils::simplify( qAsConst( stringData ) + units ))),
+                             font );
+}
+
+/**
+ * @brief PropertyDelegate::setupPixmapDocument
+ * @param document
+ */
+void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocument *document, const QByteArray &data, bool isFormula ) const {
+    // failsafes
+    if ( document == nullptr || data.isEmpty())
+        return;
+
+    // read pixmap header
+    PixmapInfo info;
+    if ( !PixmapUtils::readHeader( data, &info ))
+        return;
+
+    // get section width
+    const int sectionWidth = PropertyDock::instance()->sectionSize( Property::PropertyData );
+
+    // determine required mipmap size
+    const int needsScaling = info.width > sectionWidth - 16;
+    const int width = needsScaling ? sectionWidth - 16 : info.width;
+    const int height = needsScaling ? static_cast<int>(( static_cast<qreal>( width ) / static_cast<qreal>( info.width )) * static_cast<qreal>( info.height )) : info.height;
+    const bool isDarkMode = Variable::isEnabled( "darkMode" );
+    QString key( QString( "%1/%2%3.png" ).arg( info.crc ).arg( width ).arg( isDarkMode && isFormula ? "d" : "" ));
+
+    // check if mipmap already exists in cache
+    bool isCached = Cache::instance()->contains( "property", key );
+    QByteArray pixmapData( isCached ? Cache::instance()->getData( "property", key ) : data );
+
+    // make mipmap if it is necessary
+    if ( !isCached && ( needsScaling || ( isDarkMode && isFormula ))) {
+        QPixmap pixmap;
+        if ( !pixmap.loadFromData( qAsConst( pixmapData )))
+            return;
+
+        // special handling of formulas
+        if ( isFormula ) {
+            pixmap = PixmapUtils::autoCrop( qAsConst( pixmap ));
+            if ( isDarkMode )
+                pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( qAsConst( pixmap )));
+        }
+
+        // FAST downscale pixmap
+        // NOTE: use pixmap.width(), since autocrop could have made it smaller
+        if ( width * 2 < pixmap.width())
+            pixmap = pixmap.scaled( width * 2, height, Qt::IgnoreAspectRatio, Qt::FastTransformation );
+
+        // SLOW downscale pixmap
+        pixmap = pixmap.scaled( width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
+
+        // convert it back to buffer
+        pixmapData = PixmapUtils::toData( pixmap );
+        if ( pixmapData.isEmpty())
+            return;
+
+        // insert into cache
+        Cache::instance()->insert( "property", key, pixmapData );
+    }
+
+    // embed pixmap in html
+    document->setHtml( QString( R"(<table cellpadding="4"><tr><td><img width="%1" height="%2" src="data:image/png;base64,%3"></td></tr></table>)" )
+                       .arg( width )
+                       .arg( height )
+                       .arg( pixmapData.toBase64().constData()));
+
+    // just add to cache
+    this->documentMap[index] = document;
+}
+
+/**
+ * @brief PropertyDelegate::setupTextDocument
+ * @param document
+ * @param text
+ * @param font
+ */
+void PropertyDelegate::setupTextDocument( const QModelIndex &index, QTextDocument *document, const QString &text, const QFont &font ) const {
+    // failsafes
+    if ( document == nullptr || text.isEmpty())
+        return;
+
+    // apply font and generate initial html
+    QString html( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" ).arg( QString::number( font.pointSize()), font.family(), qAsConst( text )));
+
+    // italic modifier
+    if ( font.italic()) {
+        html.prepend( "<i>" );
+        html.append( "</i>" );
+    }
+
+    // strikeout
+    if ( font.strikeOut()) {
+        html.prepend( "<s>" );
+        html.append( "</s>" );
+    }
+
+    // add star
+    if ( index.column() == Property::Name && font.italic() && !font.strikeOut()) {
+        //   PixmapDa ( !Cache::instance()->getData( "pixmap", "star_12" ))
+        //
+        //
+        //   html.prepend( QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" )
+        //                 .arg( PixmapUtils::toData( QIcon::fromTheme( "star" ).pixmap( 12, 12 ), "star_12" ).toBase64().constData()));
+    }
+
+    // set html to the document
+    document->setHtml( qAsConst( html ));
+
+    // finialize and add to cache
+    this->finializeDocument( index, document );
+}
+
+/**
+ * @brief PropertyDelegate::finializeDocument
+ * @param document
+ */
+void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocument *document ) const {
     const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
 
-    // check for overrides
-    const Id reagentId = Property::instance()->reagentId( row );
+    // setup margins and word wrap
+    document->setDocumentMargin( 2 );
+    document->setTextWidth( view != nullptr ? static_cast<int>( view->columnWidth( index.column())) : 128 );
+    document->setTextWidth( document->idealWidth());
+
+    // add to cache
+    this->documentMap[index] = document;
+}
+
+/**
+ * @brief PropertyDelegate::setSpecialModifiers
+ * @param document
+ */
+void PropertyDelegate::setSpecialModifiers( QFont &font, const Id &tagId, const Row &propertyRow ) const {
+    // get reagent info
+    const Id reagentId = Property::instance()->reagentId( propertyRow );
     const Id reagentParentId = Reagent::instance()->parentId( reagentId );
 
     // check if property belongs to the batch
     const bool isBatchProperty = Reagent::instance()->parentId( reagentId ) != Id::Invalid;
+
+    // check for overrides
     bool isOverridden = false;
     if ( isBatchProperty ) {
         QSqlQuery query;
@@ -80,11 +288,12 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
             isOverridden = true;
     }
 
+    // check for duplicates
     bool isDuplicate = false;
     if ( tagId != Id::Invalid ) {
         if ( !Tag::instance()->function( tagId ).isEmpty()) {
             // check backwards all scriptable tags for duplicates
-            const int startIndex = static_cast<int>( row ) - 1;
+            const int startIndex = static_cast<int>( propertyRow ) - 1;
             if ( startIndex > 0 ) {
                 for ( int y = startIndex; y >= 0; y-- ) {
                     const Row propRow = static_cast<Row>( y );
@@ -98,179 +307,13 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &fon
         }
     }
 
-    // create a new document
-    auto *document( new QTextDocument());
+    // NOTE: batch properties are displayed in italic (at least for now)
+    if ( isBatchProperty && !isDuplicate )
+        font.setItalic( true );
 
-    // special handling of pixmaps
-    if ( pixmapTag && index.column() == Property::PropertyData ) {
-        if ( !view->isResizeInProgress()) {
-            QSize scaledSize;
-            QByteArray pixmapData;
-
-            auto setupPixmap = [ this, data, tagId, &scaledSize, &pixmapData ]() {
-                // get pixmap data and calculate a quick checksum for cache access
-                const QByteArray storedData( data.toByteArray());
-                const QString checksum( Cache::checksum( storedData ));
-
-                // get sectionWidth (property value column width)
-                const int sectionWidth = PropertyDock::instance()->sectionSize( Property::PropertyData );
-
-                // get original pixmap width either by loading from widthCache or by loading pixmap
-                QSize originalSize;
-                QPixmap pixmap;
-                if ( this->sizeCache.contains( checksum )) {
-                    // get width from cache
-                    originalSize = this->sizeCache[checksum];
-                } else {
-                    if ( !pixmap.loadFromData( qAsConst( storedData )))
-                        return false;
-
-                    // get width from pixmap and store into cache
-                    originalSize = pixmap.size();
-                    this->sizeCache[checksum] = originalSize;
-                }
-
-                // calculate the preferred with (to fit property value column)
-                const int scaledWidth = ( originalSize.width() >= sectionWidth ) ? sectionWidth - 16 : originalSize.width();
-                const auto scaledHeight = static_cast<int>(
-                        ( static_cast<qreal>( scaledWidth ) / static_cast<qreal>( originalSize.width())) *
-                        static_cast<qreal>( originalSize.height()));
-                scaledSize = QSize( scaledWidth, scaledHeight );
-
-                // generateMipMap lambda - downscales, inverts and crops pixmap
-                auto generateMipMap = [ checksum, storedData, &pixmap, &pixmapData, tagId, originalSize, &scaledSize ]() {
-                    if ( pixmap.isNull()) {
-                        if ( !pixmap.loadFromData( qAsConst( storedData )))
-                            return false;
-                    }
-
-                    // invert and autoCrop it if necessary
-                    if ( Tag::instance()->type( tagId ) == Tag::Formula ) {
-                        pixmap = PixmapUtils::autoCrop( qAsConst( pixmap ));
-                        if ( Variable::isEnabled( "darkMode" ))
-                            pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( qAsConst( pixmap )));
-                    }
-
-                    // FAST downscale pixmap
-                    if ( scaledSize.width() * 2 < originalSize.width())
-                        pixmap = pixmap.scaled( QSize( scaledSize.width() * 2, scaledSize.height() * 2 ),
-                                                Qt::IgnoreAspectRatio, Qt::FastTransformation );
-
-                    // downscale pixmap
-                    pixmap = pixmap.scaled( qAsConst( scaledSize ), Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
-
-                    // convert it back to buffer
-                    pixmapData = PixmapUtils::convertToData( pixmap );
-                    if ( pixmapData.isEmpty())
-                        return false;
-
-                    // insert data into the cache
-                    Cache::instance()->insert( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png", pixmapData );
-                    // qDebug() << "TO CACHE";
-
-                    return true;
-                };
-
-                // check for pre-cached pixmaps with this scaledWidth, if none are available - make them
-                if ( Cache::instance()->contains( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png" )) {
-                    pixmapData = Cache::instance()->getData( "pixmap", checksum + "/" + QString::number( scaledSize.width()) + ".png" );
-                } else {
-                    if ( !generateMipMap())
-                        return false;
-                }
-
-                if ( scaledSize.isEmpty())
-                    return false;
-
-                return !pixmapData.isEmpty();
-            };
-
-            // embed pixmap in html
-            if ( setupPixmap())
-                document->setHtml( QString( R"(<table cellpadding="4"><tr><td><img width="%1" height="%2" src="data:image/png;base64,%3"></td></tr></table>)" ).arg(
-                        scaledSize.width()).arg( scaledSize.height()).arg( pixmapData.toBase64().constData()));
-        }
-    } else {
-        QString html;
-
-        if ( tagId == Id::Invalid || tagId == PixmapTag ) {
-            // custom properties however do display their names
-            html = ( index.column() == Property::Name ) ? Property::instance()->name( row ) : data.toString();
-        } else {
-            // properties with built-in tags don't use property names, but rather tag names
-            const QString units( Tag::instance()->units( tagId ).remove( QRegularExpression( R"(<\s*br\s*\/>)" )));
-
-            QString stringData( data.toString());
-            if ( tagId != Id::Invalid ) {
-                const Tag::Types type = Tag::instance()->type( tagId );
-                if ( type == Tag::Real ) {
-                    stringData.replace( QRegularExpression( "(\\d+)[,.](\\d+)" ),
-                                        QString( "\\1%1\\2" ).arg( Variable::string( "decimalSeparator" )));
-                } else if ( type == Tag::State ) {
-                    bool ok;
-                    int stateIndex = stringData.toInt( &ok );
-
-                    if ( !ok )
-                        stateIndex = -1;
-
-                    switch ( stateIndex ) {
-                        case 0:
-                            stringData = PropertyDelegate::tr( "Solid" );
-                            break;
-
-                        case 1:
-                            stringData = PropertyDelegate::tr( "Liquid" );
-                            break;
-
-                        case 2:
-                            stringData = PropertyDelegate::tr( "Gaseous" );
-                            break;
-
-                        default:
-                            stringData = PropertyDelegate::tr( "Unknown" );
-                    }
-                } else if ( type == Tag::Date ) {
-                    const QDate date( stringData.isEmpty() ? QDate() : QDate::fromJulianDay( stringData.toInt()));
-                    stringData = date.isValid() ? date.toString( Qt::DateFormat::SystemLocaleDate ) : "";
-                }
-            }
-
-            // NOTE: for now use this i18n method, in future replace with something better
-            html = ( index.column() == Property::Name ?
-                         /*Tag::instance()->name( tagId )*/ QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
-                         ( HTMLUtils::simplify( qAsConst( stringData ) + units )));
-
-            if ( index.column() == Property::Name ) {
-                // NOTE: batch properties are displayed in italic (at least for now)
-                if ( isBatchProperty && !isDuplicate ) {
-                    html.prepend( "<i>" );
-                    html.append( "</i>" );
-                }
-
-                if ( isDuplicate ) {
-                    // TODO: add tooltip?
-                    html.prepend( "<s>" );
-                    html.append( "</s>" );
-                }
-
-                // NOTE: overridden properties display a star icon (at least for now)
-                if ( isOverridden && !isDuplicate ) {
-                    html.prepend( QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" )
-                                  .arg( PixmapUtils::convertToData( QIcon::fromTheme( "star" ).pixmap( 12, 12 ), "star_12" ).toBase64().constData()));
-                }
-            }
-        }
-
-        document->setHtml( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" )
-                           .arg( QString::number( font.pointSize()),
-                                 font.family(),
-                                 qAsConst( html )));
-    }
-
-    document->setDocumentMargin( 2 );
-    document->setTextWidth( view != nullptr ? static_cast<int>( view->columnWidth( index.column())) : 128 );
-    document->setTextWidth( document->idealWidth());
-    this->documentMap[index] = document;
+    // TODO: add tooltip?
+    if ( isDuplicate )
+        font.setStrikeOut( true );
 }
 
 /**

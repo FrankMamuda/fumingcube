@@ -47,11 +47,10 @@ Cache::Cache() {
 
 /**
  * @brief Cache::checksum
- * @param data
- * @param len
+ * @param array
  * @return
  */
-QString Cache::checksum( const QByteArray &array ) {
+QByteArray Cache::checksum( const QByteArray &array ) {
     QByteArray data( array );
 
     // if array is larger than 1K, take samples from start, mid and end
@@ -62,7 +61,7 @@ QString Cache::checksum( const QByteArray &array ) {
         data.append( array.mid( array.length() - 32 - 1, 32 ));
     }
 
-    return QString( QCryptographicHash::hash( data, QCryptographicHash::Md5 ).toHex());
+    return QCryptographicHash::hash( data, QCryptographicHash::Md5 );
 }
 
 /**

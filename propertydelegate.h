@@ -26,6 +26,7 @@
 #include <QStyledItemDelegate>
 #include <QTextDocument>
 #include <QMap>
+#include "table.h"
 
 //
 // THIS IS A MESS
@@ -57,8 +58,11 @@ public slots:
 
 private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
+    void setupPixmapDocument( const QModelIndex &index, QTextDocument *document, const QByteArray &data, bool isFormula = false ) const;
+    void setupTextDocument( const QModelIndex &index, QTextDocument *document, const QString &text, const QFont &font ) const;
+    void finializeDocument( const QModelIndex &index, QTextDocument *document ) const;
+    void setSpecialModifiers( QFont &font, const Id &tagId, const Row &propertyRow ) const;
 
 private:
-  //mutable QMap<QString, QMap<int, QByteArray>> cache;
     mutable QMap<QString, QSize> sizeCache;
 };

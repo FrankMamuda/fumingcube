@@ -45,6 +45,7 @@
 #include <QSharedMemory>
 #include <QSettings>
 #include <QTranslator>
+#include "pixmaputils.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
 #endif
@@ -75,6 +76,7 @@ misc/unsorted:
  - save PropertyDelegate pixmaps in disk cache?
  - upon property deletion, there must be a PropertyDock
    refresh (currently PropertyViewWidget just does not repaint)
+ - pixmap properties arent given names
 */
 
 /*
@@ -352,6 +354,10 @@ int main( int argc, char *argv[] ) {
         MainWindow::instance()->setTheme( theme );
     }
 
+    // initialize star pixmap
+    if ( !Cache::instance()->contains( "pixmap", "star_12" ))
+        Cache::instance()->insert( "pixmap", "star_12", PixmapUtils::toData( QIcon::fromTheme( "star" ).pixmap( 12, 12 )));
+
     // show main window
     MainWindow::instance()->setWindowFlag( Qt::WindowStaysOnTopHint, Variable::isEnabled( "alwaysOnTop" ));
     MainWindow::instance()->show();
@@ -386,6 +392,8 @@ int main( int argc, char *argv[] ) {
 
     // read reagent cache
     Cache::instance()->readReagentCache();
+
+    qDebug() << PixmapUtils::readHeader(  PixmapUtils::toData( QIcon::fromTheme( "star" ).pixmap( 12, 12 )));
 
     return QApplication::exec();
 }

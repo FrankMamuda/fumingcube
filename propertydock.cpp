@@ -221,7 +221,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 // load image
                 const QPixmap pixmap( PixmapUtils::getOpenPixmap( PropertyDock::instance()));
                 if ( !pixmap.isNull())
-                    return QPair<QString, QVariant>( QString(), PixmapUtils::convertToData( pixmap ));
+                    return QPair<QString, QVariant>( QString(), PixmapUtils::toData( pixmap ));
 
                 break;
             }
@@ -358,7 +358,7 @@ void PropertyDock::on_addPropButton_clicked() {
                     QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",
                                            &ok ));
             if ( ok && !title.isEmpty())
-                this->addProperty( title, PixmapUtils::convertToData( pixmap ), reagentId, PixmapTag );
+                this->addProperty( title, PixmapUtils::toData( pixmap ), reagentId, PixmapTag );
         }
     } )->setIcon( QIcon::fromTheme( "image" ));
 
@@ -455,7 +455,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                         painter.end();
 
                         // add proper transparent image to clipboard
-                        const QByteArray pixmapData( PixmapUtils::convertToData( pixmap ));
+                        const QByteArray pixmapData( PixmapUtils::toData( pixmap ));
                         propertyData->setData( "PNG", pixmapData );
                         propertyData->setData( "image/png", pixmapData );
                     }
@@ -675,7 +675,7 @@ void PropertyDock::replacePixmap( const Row &row ) {
     // load image
     const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
     if ( !pixmap.isNull()) {
-        Property::instance()->setPropertyData( row, PixmapUtils::convertToData( pixmap ));
+        Property::instance()->setPropertyData( row, PixmapUtils::toData( pixmap ));
         this->updateView();
     }
 }

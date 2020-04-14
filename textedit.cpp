@@ -111,7 +111,7 @@ void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
 
         // insert in textEdit
         this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" )
-                                       .arg( out.width()).arg( out.height()).arg( PixmapUtils::convertToData( out ).toBase64().constData()));
+                                       .arg( out.width()).arg( out.height()).arg( PixmapUtils::toData( out ).toBase64().constData()));
     }
 }
 
