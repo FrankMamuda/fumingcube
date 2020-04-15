@@ -75,12 +75,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Cache</name>
     <message>
-        <location filename="../cache.cpp" line="135"/>
+        <location filename="../cache.cpp" line="120"/>
         <source>could not create context - &quot;%1&quot;</source>
         <translation>nebija iespējams izveidot kešatmiņas kontekstu - &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../cache.cpp" line="155"/>
+        <location filename="../cache.cpp" line="139"/>
         <source>could not write cache - &quot;%1/%2&quot;</source>
         <translation>nebija iespējams rakstīt kešatmiņu - &quot;%1/%2&quot;</translation>
     </message>
@@ -497,17 +497,22 @@ pārlūks</translation>
         <translation>Rādīt visus reaģentus</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="141"/>
+        <location filename="../labeldock.ui" line="34"/>
+        <source>Display reagents without labels</source>
+        <translation>Rādīt reaģentus bez birkām</translation>
+    </message>
+    <message>
+        <location filename="../labeldock.cpp" line="137"/>
         <source>Add new label</source>
         <translation>Pievienot jaunu birku</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="148"/>
+        <location filename="../labeldock.cpp" line="144"/>
         <source>Remove label</source>
         <translation>Noņemt birku</translation>
     </message>
     <message>
-        <location filename="../labeldock.cpp" line="159"/>
+        <location filename="../labeldock.cpp" line="155"/>
         <source>Edit label</source>
         <translation>Rediģēt birku</translation>
     </message>
@@ -664,22 +669,22 @@ pārlūks</translation>
 <context>
     <name>PropertyDelegate</name>
     <message>
-        <location filename="../propertydelegate.cpp" line="222"/>
+        <location filename="../propertydelegate.cpp" line="112"/>
         <source>Solid</source>
         <translation>Cietveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="226"/>
+        <location filename="../propertydelegate.cpp" line="116"/>
         <source>Liquid</source>
         <translation>Šķidra</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="230"/>
+        <location filename="../propertydelegate.cpp" line="120"/>
         <source>Gaseous</source>
         <translation>Gāzveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="234"/>
+        <location filename="../propertydelegate.cpp" line="124"/>
         <source>Unknown</source>
         <translation>Nezināms</translation>
     </message>
@@ -763,12 +768,12 @@ pārlūks</translation>
         <translation>Pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="340"/>
+        <location filename="../propertydock.cpp" line="346"/>
         <source>Add custom property to &apos;%1&apos;</source>
         <translation>Pievienot nestandarta īpašību &apos;%1&apos;  reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="346"/>
+        <location filename="../propertydock.cpp" line="352"/>
         <source>Add image to &apos;%1&apos;</source>
         <translation>Pievienot attēlu &apos;%1&apos; reaģentam</translation>
     </message>
@@ -781,93 +786,100 @@ pārlūks</translation>
         <translation type="vanished">Attēli (*.png *.jpg)</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="352"/>
+        <location filename="../propertydock.cpp" line="357"/>
+        <location filename="../propertydock.cpp" line="499"/>
         <source>Set title</source>
         <translation>Pievienot nosaukumu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="352"/>
+        <location filename="../propertydock.cpp" line="357"/>
+        <location filename="../propertydock.cpp" line="499"/>
         <source>Title:</source>
         <translation>Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="360"/>
+        <location filename="../propertydock.cpp" line="365"/>
         <source>Get properties from the internet</source>
         <translation>Izgūt īpašības no interneta</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="412"/>
+        <location filename="../propertydock.cpp" line="417"/>
         <source>Copy</source>
         <translation>Kopēt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="475"/>
+        <location filename="../propertydock.cpp" line="480"/>
         <source>View</source>
         <translation>Parādīt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="488"/>
+        <location filename="../propertydock.cpp" line="493"/>
         <source>Replace</source>
         <translation>Aizstāt ar citu attēlu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="494"/>
+        <location filename="../propertydock.cpp" line="497"/>
+        <source>Rename</source>
+        <translation>Pārsaukt</translation>
+    </message>
+    <message>
+        <location filename="../propertydock.cpp" line="508"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="508"/>
+        <location filename="../propertydock.cpp" line="522"/>
         <source>Paste to calculator</source>
         <translation>Ielīmēt kalkulatorā</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="510"/>
+        <location filename="../propertydock.cpp" line="524"/>
         <source>Reference</source>
         <translation>Atsauci</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="513"/>
+        <location filename="../propertydock.cpp" line="527"/>
         <source>Value</source>
         <translation>Vērtību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="516"/>
+        <location filename="../propertydock.cpp" line="530"/>
         <source>Hide property &quot;%1&quot;</source>
         <translation>Slēpt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="525"/>
+        <location filename="../propertydock.cpp" line="539"/>
         <source>Show all properties</source>
         <translation>Rādīt visas īpašības</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="552"/>
+        <location filename="../propertydock.cpp" line="566"/>
         <source>Paste property &quot;%1&quot;</source>
         <translation>Ielīmēt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="597"/>
-        <location filename="../propertydock.cpp" line="601"/>
+        <location filename="../propertydock.cpp" line="611"/>
+        <location filename="../propertydock.cpp" line="615"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="597"/>
+        <location filename="../propertydock.cpp" line="611"/>
         <source>Remove selected property?</source>
         <translation>Dzēst izvēlēto īpašību?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="602"/>
+        <location filename="../propertydock.cpp" line="616"/>
         <source>Remove %1 properties?</source>
         <translation>Dzēst %1 īpašību(-as)?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="763"/>
+        <location filename="../propertydock.cpp" line="774"/>
         <source>Duplicate property</source>
         <translation>Īpašība jau eksistē</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="764"/>
+        <location filename="../propertydock.cpp" line="775"/>
         <source>Reagent already has this property, add regardless?</source>
         <translation>Reaģentam šobrīd jau ir šī īpašība, pievienot vēlreiz?</translation>
     </message>
@@ -1061,12 +1073,12 @@ izvēlētās</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="281"/>
+        <location filename="../main.cpp" line="307"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="282"/>
+        <location filename="../main.cpp" line="308"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -1076,12 +1088,12 @@ Please restart the application</source>
 <context>
     <name>QWidget</name>
     <message>
-        <location filename="../pixmaputils.cpp" line="203"/>
+        <location filename="../pixmaputils.cpp" line="270"/>
         <source>Open Image</source>
         <translation>Atvērt attēlu</translation>
     </message>
     <message>
-        <location filename="../pixmaputils.cpp" line="203"/>
+        <location filename="../pixmaputils.cpp" line="270"/>
         <source>Images (*.png *.jpg)</source>
         <translation>Attēli (*.png *.jpg)</translation>
     </message>

@@ -65,8 +65,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     auto *document( new QTextDocument());
 
     // set special modifiers
+    TextFlags flags;
     if ( index.column() == Property::Name )
-       this->setSpecialModifiers( font, tagId, propertyRow );
+       this->setTextFlags( flags, tagId, propertyRow );
 
     // special handling of pixmaps and formulas
     if ( tagType == Tag::Formula || tagId == PixmapTag ) {
@@ -75,6 +76,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
             this->setupTextDocument( index, document, tagType == Tag::Formula ?
                                          QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
                                          Property::instance()->name( propertyRow ),
+                                     qAsConst( flags ),
                                      font );
         } else if ( index.column() == Property::PropertyData ) {
             this->setupPixmapDocument( index, document, data.toByteArray(), Tag::instance()->type( tagId ) == Tag::Formula );
@@ -86,7 +88,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     // handle custom properties
     if ( tagId == Id::Invalid ) {
         // custom properties however do display their names
-        this->setupTextDocument( index, document, ( index.column() == Property::Name ) ? Property::instance()->name( propertyRow ) : data.toString(), qAsConst( font ));
+        this->setupTextDocument( index, document, ( index.column() == Property::Name ) ? Property::instance()->name( propertyRow ) : data.toString(), qAsConst( flags ), qAsConst( font ));
         return;
     }
 
@@ -133,6 +135,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
                              ( index.column() == Property::Name ?
                              QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
                              ( HTMLUtils::simplify( qAsConst( stringData ) + units ))),
+                             qAsConst( flags ),
                              font );
 }
 
@@ -210,33 +213,36 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
  * @param text
  * @param font
  */
-void PropertyDelegate::setupTextDocument( const QModelIndex &index, QTextDocument *document, const QString &text, const QFont &font ) const {
+void PropertyDelegate::setupTextDocument( const QModelIndex &index, QTextDocument *document, const QString &text, const TextFlags &flags, const QFont &font ) const {
     // failsafes
     if ( document == nullptr || text.isEmpty())
         return;
 
     // apply font and generate initial html
-    QString html( QString( R"(<p style="font-size: %1pt; font-family: '%2'">%3</p>)" ).arg( QString::number( font.pointSize()), font.family(), qAsConst( text )));
+    QString html( QString( R"(<p style="font-size: %1pt; font-family: '%2'"><!--STAR-->%3</p>)" ).arg( QString::number( font.pointSize()), font.family(), qAsConst( text )));
 
     // italic modifier
-    if ( font.italic()) {
+    if ( flags.testFlag( Batch )) {
         html.prepend( "<i>" );
         html.append( "</i>" );
     }
 
     // strikeout
-    if ( font.strikeOut()) {
+    if ( flags.testFlag( Duplicate )) {
         html.prepend( "<s>" );
         html.append( "</s>" );
     }
 
     // add star
-    if ( index.column() == Property::Name && font.italic() && !font.strikeOut()) {
-        //   PixmapDa ( !Cache::instance()->getData( "pixmap", "star_12" ))
-        //
-        //
-        //   html.prepend( QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" )
-        //                 .arg( PixmapUtils::toData( QIcon::fromTheme( "star" ).pixmap( 12, 12 ), "star_12" ).toBase64().constData()));
+    if ( index.column() == Property::Name && flags.testFlag( Override ) && !flags.testFlag( Duplicate )) {
+        const QString starKey( "star.png" );
+
+        // initialize star pixmap
+        if ( !Cache::instance()->contains( "property", starKey ))
+            Cache::instance()->insert( "property", starKey, PixmapUtils::toData( QIcon::fromTheme( "star" ).pixmap( 12, 12 )));
+
+        const QByteArray data( Cache::instance()->getData( "property", starKey ));
+        html.replace( "<!--STAR-->", QString( R"(<img width="12" height="12" src="data:image/png;base64,%1">)" ).arg( data.toBase64().constData()));
     }
 
     // set html to the document
@@ -263,10 +269,10 @@ void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocumen
 }
 
 /**
- * @brief PropertyDelegate::setSpecialModifiers
+ * @brief PropertyDelegate::setTextFlags
  * @param document
  */
-void PropertyDelegate::setSpecialModifiers( QFont &font, const Id &tagId, const Row &propertyRow ) const {
+void PropertyDelegate::setTextFlags( TextFlags &flags, const Id &tagId, const Row &propertyRow ) const {
     // get reagent info
     const Id reagentId = Property::instance()->reagentId( propertyRow );
     const Id reagentParentId = Reagent::instance()->parentId( reagentId );
@@ -275,17 +281,16 @@ void PropertyDelegate::setSpecialModifiers( QFont &font, const Id &tagId, const 
     const bool isBatchProperty = Reagent::instance()->parentId( reagentId ) != Id::Invalid;
 
     // check for overrides
-    bool isOverridden = false;
     if ( isBatchProperty ) {
         QSqlQuery query;
-        query.exec( QString( "select * from %1 where %2=%3 and %4=%5" )
+        query.exec( QString( "select * from %1 where %2=%3 and %4=%5 and %4!=-2" )
                     .arg( Property::instance()->tableName(),
                           Property::instance()->fieldName( Property::ReagentId ),
                           QString::number( static_cast<int>( reagentParentId )),
                           Property::instance()->fieldName( Property::TagId ),
                           QString::number( static_cast<int>( tagId ))));
         if ( query.next())
-            isOverridden = true;
+            flags.setFlag( Override );
     }
 
     // check for duplicates
@@ -309,11 +314,11 @@ void PropertyDelegate::setSpecialModifiers( QFont &font, const Id &tagId, const 
 
     // NOTE: batch properties are displayed in italic (at least for now)
     if ( isBatchProperty && !isDuplicate )
-        font.setItalic( true );
+        flags.setFlag( TextFlag::Batch );
 
     // TODO: add tooltip?
     if ( isDuplicate )
-        font.setStrikeOut( true );
+        flags.setFlag( TextFlag::Duplicate );
 }
 
 /**

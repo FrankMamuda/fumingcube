@@ -354,9 +354,8 @@ void PropertyDock::on_addPropButton_clicked() {
         const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
         if ( !pixmap.isNull()) {
             bool ok;
-            const QString title(
-                    QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",
-                                           &ok ));
+            const QString title( QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",  &ok ));
+
             if ( ok && !title.isEmpty())
                 this->addProperty( title, PixmapUtils::toData( pixmap ), reagentId, PixmapTag );
         }
@@ -494,6 +493,15 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             menu.addAction( PropertyDock::tr( "Replace" ), this, [ this, row ]() {
                 this->replacePixmap( row );
             } )->setIcon( QIcon::fromTheme( "replace" ));
+
+            menu.addAction( PropertyDock::tr( "Rename" ), this, [ this, row ]() {
+                bool ok;
+                const QString title( QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",  &ok ));
+
+                if ( ok && !title.isEmpty())
+                    Property::instance()->setName( row, title );
+
+            } )->setIcon( QIcon::fromTheme( "edit" ));
         }
 
         if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
@@ -753,11 +761,8 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
     // less flickering with updates disabled
     this->ui->propertyView->setUpdatesEnabled( false );
 
-    bool pixmap = false;
+    // warn if property already exists (skip custom and pixmap properties)
     if ( tagId != Id::Invalid && tagId != PixmapTag ) {
-        pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
-
-        // warn if already exists
         QSqlQuery query;
         query.exec( QString( "select * from %1 where %2=%3 and %4=%5" )
                     .arg( Property::instance()->tableName(),
@@ -774,8 +779,8 @@ void PropertyDock::addProperty( const QString &name, const QVariant &value, cons
         }
     }
 
-
     // add property
+    const bool pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
     Property::instance()->add(( tagId == Id::Invalid || pixmap ) ? name : QString(), tagId, value, reagentId );
 
     // clear document cache and resize view
@@ -813,7 +818,6 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
             parents = QString( R"("%1", "%2")" ).arg(
                     HTMLUtils::convertToPlainText( Reagent::instance()->reference( parentId )),
                     HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
-            //qDebug() << "has parent";
         } else {
             parents = QString( "\"%1\"" ).arg( HTMLUtils::convertToPlainText( Reagent::instance()->reference( reagentId )));
         }

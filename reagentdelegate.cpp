@@ -75,14 +75,10 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
  * @return
  */
 QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-  //  qDebug() << "MAKE STUFF" << (this->model() == nullptr) << !index.isValid() << (this->parentView() == nullptr);
-
-
     if ( this->model() == nullptr || !index.isValid() || this->parentView() == nullptr )
         return QStyledItemDelegate::sizeHint( option, index );
 
     const ReagentView *view( qobject_cast<ReagentView *>( this->parentView()));
- //.. ,, qDebug() << "RESIZE" << view->isResizeInProgress();
     if ( view->isResizeInProgress())
         return QSize();
 

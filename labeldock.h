@@ -65,6 +65,8 @@ public:
 private slots:
     void on_labelView_customContextMenuRequested( const QPoint &pos );
 
+    void on_noButton_clicked();
+
 private:
     explicit LabelDock( QWidget *parent = nullptr );
     Ui::LabelDock *ui;

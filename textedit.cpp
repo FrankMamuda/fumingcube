@@ -48,8 +48,6 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
 
     // setup finished connection to the NetworkManager
     NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
-        qDebug() << this->id();
-
         switch ( type ) {
         case NetworkManager::TextEditImage:
         {
@@ -249,8 +247,6 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // check clipboard for image
     if ( source->hasImage()) {
-        qDebug() << source->formats();
-
         const QImage image( qvariant_cast<QImage>( source->imageData()));
         if ( !image.isNull()) {
             this->insertPixmap( QPixmap::fromImage( qAsConst( image )), image.width());
