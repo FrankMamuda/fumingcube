@@ -22,10 +22,20 @@
  * includes
  */
 #include "main.h"
-
 #include <QPixmap>
 #include <QByteArray>
 #include <QMap>
+
+/**
+ * @brief The PixmapInfo class
+ */
+class PixmapInfo {
+public:
+    int width = 0;
+    int height = 0;
+    quint32 crc = 0;
+    bool isValid() { return this->width > 0 && this->height > 0 && this->crc != 0; }
+};
 
 /**
  * @brief The PixmapUtils class
@@ -53,8 +63,9 @@ public:
     [[nodiscard]] static QPixmap autoCrop( const QPixmap &pixmap, const QColor &key = Qt::white );
     [[maybe_unused]][[nodiscard]] static QPixmap brighten( const QPixmap &pixmap, int factor = 150 );
     [[nodiscard]] static QPixmap invert( const QPixmap &pixmap );
-    [[nodiscard]] static QByteArray convertToData( const QPixmap &pixmap, const QString &key = QString());
+    [[nodiscard]] static QByteArray toData( const QPixmap &pixmap );
     [[nodiscard]] static QPixmap getOpenPixmap( QWidget *context );
+    [[nodiscard]] static bool readHeader( const QByteArray &array, PixmapInfo *info = nullptr );
 
 private:
     explicit PixmapUtils() {

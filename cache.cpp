@@ -47,11 +47,10 @@ Cache::Cache() {
 
 /**
  * @brief Cache::checksum
- * @param data
- * @param len
+ * @param array
  * @return
  */
-QString Cache::checksum( const QByteArray &array ) {
+QByteArray Cache::checksum( const QByteArray &array ) {
     QByteArray data( array );
 
     // if array is larger than 1K, take samples from start, mid and end
@@ -62,7 +61,7 @@ QString Cache::checksum( const QByteArray &array ) {
         data.append( array.mid( array.length() - 32 - 1, 32 ));
     }
 
-    return QString( QCryptographicHash::hash( data, QCryptographicHash::Md5 ).toHex());
+    return QCryptographicHash::hash( data, QCryptographicHash::Md5 );
 }
 
 /**
@@ -114,7 +113,7 @@ bool Cache::insert( const QString &context, const QString &key, const QByteArray
         return false;
 
     // make context path if non-existant
-    const QDir dir( this->contextPath( context ));
+    const QDir dir( QFileInfo( this->contextPath( context, key )).absolutePath());
     if ( !dir.exists()) {
         dir.mkpath( dir.absolutePath());
         if ( !dir.exists()) {
@@ -137,7 +136,7 @@ bool Cache::insert( const QString &context, const QString &key, const QByteArray
         return true;
     }
 
-    qCritical() << Cache::tr( R"(could not write cache - "%1/%2")" ).arg( key, context );
+    qCritical() << Cache::tr( R"(could not write cache - "%1/%2")" ).arg( context, key );
     return false;
 }
 
@@ -176,7 +175,7 @@ bool Cache::validate( const QString &text, const QString &key ) {
 
     QString string( text + key );
     int pos;
-    const QRegularExpression re( R"([a-zA-z0-9-+,.]+)" );
+    const QRegularExpression re( R"([a-zA-z0-9-+,./]+)" );
     const QRegularExpressionValidator validator( re );
     return validator.validate( string, pos ) != QRegularExpressionValidator::Invalid;
 }

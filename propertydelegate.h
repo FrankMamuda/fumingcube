@@ -26,6 +26,14 @@
 #include <QStyledItemDelegate>
 #include <QTextDocument>
 #include <QMap>
+#include "table.h"
+
+//
+// THIS IS A MESS
+//
+// DON'T STORE PIXMAP IN CACHE IF SIZE MATCHES THE ORIGINAL DATA
+//
+//
 
 /**
  * @brief The PropertyDelegate class
@@ -34,6 +42,19 @@ class PropertyDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
 public:
+    /**
+     * @brief The TextFlag enum
+     */
+    enum TextFlag {
+        NoFlags      = 0x0,
+        Batch        = 0x01,
+        Duplicate    = 0x02,
+        Override     = 0x04
+    };
+
+    Q_DECLARE_FLAGS( TextFlags, TextFlag )
+    Q_FLAG( TextFlags )
+
     explicit PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const override;
@@ -50,8 +71,11 @@ public slots:
 
 private slots:
     void setupDocument( const QModelIndex &index, const QFont &font ) const;
+    void setupPixmapDocument( const QModelIndex &index, QTextDocument *document, const QByteArray &data, bool isFormula = false ) const;
+    void setupTextDocument( const QModelIndex &index, QTextDocument *document, const QString &text, const TextFlags &flags, const QFont &font ) const;
+    void finializeDocument( const QModelIndex &index, QTextDocument *document ) const;
+    void setTextFlags( TextFlags &flags, const Id &tagId, const Row &propertyRow ) const;
 
 private:
-    mutable QMap<QString, QMap<int, QByteArray>> cache;
     mutable QMap<QString, QSize> sizeCache;
 };

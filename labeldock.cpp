@@ -40,13 +40,17 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
     this->ui->labelView->setModel( Label::instance());
     this->ui->labelView->setModelColumn( Label::Name );
 
-    QPushButton::connect( this->ui->allButton, &QPushButton::clicked,
-                          [ this ]() { this->ui->labelView->setCurrentIndex( QModelIndex()); } );
+    QPushButton::connect( this->ui->allButton, &QPushButton::clicked, [ this ]() {
+        this->ui->labelView->selectionModel()->blockSignals( true );
+        this->ui->labelView->reset();
+        this->ui->labelView->selectionModel()->blockSignals( false );
+
+        LabelDock::setFilter( QModelIndexList());
+    } );
     QItemSelectionModel::connect( this->ui->labelView->selectionModel(),
                                   &QItemSelectionModel::selectionChanged,
                                   [ this ]( const QItemSelection &, const QItemSelection & ) {
-                                      LabelDock::setFilter(
-                                              this->ui->labelView->selectionModel()->selectedRows());
+                                      LabelDock::setFilter( this->ui->labelView->selectionModel()->selectedRows());
                                   } );
 }
 
@@ -77,8 +81,11 @@ Id LabelDock::currentLabel() const {
 void LabelDock::setFilter( const QModelIndexList &list ) {
     // apply sql filter
     if ( list.isEmpty()) {
+        // don't set filter twice
+        if ( Reagent::instance()->filter().isEmpty())
+            return;
+
         Reagent::instance()->setFilter( "" );
-        qDebug() << "select none";
     } else {
         QList<Id> labelIds;
         for ( const QModelIndex &index : list )
@@ -93,21 +100,6 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
                                    .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ),
                                          QString::number( static_cast<int>( labelIds.at( y )))));
 
-        /*QList<Id> reagentList;
-        QSqlQuery query;
-        query.exec( QString( "select distinct %1 from %2 where "
-                             "%1 in ( %3 ) "
-                             "or "
-                             "%4 in ( %3 ) " )
-                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
-                    .arg( Reagent::instance()->tableName())
-                    .arg( whereStatement )
-                    .arg( Reagent::instance()->fieldName( Reagent::ParentId )));
-        while ( query.next()) {
-            const Id id = query.value( 0 ).value<Id>();
-            reagentList << id;
-        }*/
-
         QString reagentStatement( QString( "select distinct %1 from %2 where "
                                            "%1 in ( %3 ) "
                                            "or "
@@ -117,12 +109,16 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
                                                 whereStatement,
                                                 Reagent::instance()->fieldName( Reagent::ParentId )));
 
-        // qDebug() << "REAGENTS" << reagentList;
+        const QString filter( QString( "%1.%2 in ( %3 )" )
+                              .arg( Reagent::instance()->tableName(),
+                                    Reagent::instance()->fieldName( Reagent::ID ),
+                                    reagentStatement ));
 
-        Reagent::instance()->setFilter( QString( "%1.%2 in ( %3 )" )
-                                        .arg( Reagent::instance()->tableName(),
-                                              Reagent::instance()->fieldName( Reagent::ID ),
-                                              reagentStatement ));
+        // don't set filter twice
+        if ( !QString::compare( Reagent::instance()->filter(), filter ))
+            return;
+
+        Reagent::instance()->setFilter( filter );
     }
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();
@@ -175,4 +171,23 @@ void LabelDock::on_labelView_customContextMenuRequested( const QPoint &pos ) {
     } );
 
     menu.exec( this->mapToGlobal( pos ));
+}
+
+/**
+ * @brief LabelDock::on_noButton_clicked
+ */
+void LabelDock::on_noButton_clicked() {
+    Reagent::instance()->setFilter( QString( "%1 not in ( select %2 from %3 )" )
+                                    .arg( Reagent::instance()->fieldName( Reagent::ID ))
+                                    .arg( LabelSet::instance()->fieldName( LabelSet::ReagentId ))
+                                    .arg( LabelSet::instance()->tableName())
+                                    );
+
+    this->ui->labelView->selectionModel()->blockSignals( true );
+    this->ui->labelView->reset();
+    this->ui->labelView->selectionModel()->blockSignals( false );
+
+    Reagent::instance()->select();
+    ReagentDock::instance()->view()->updateView();
+    PropertyDock::instance()->updateView();
 }

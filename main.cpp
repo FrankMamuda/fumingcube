@@ -45,6 +45,7 @@
 #include <QSharedMemory>
 #include <QSettings>
 #include <QTranslator>
+#include "pixmaputils.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
 #endif
@@ -66,10 +67,11 @@ extraction:
   - better 'not found' and 'server busy' error handling in search
 
 misc/unsorted:
-  - explicit selection of labelless reagents
-  - restore previously selected label on start
-  - reagentDock word wrap resize fix
-  - view custom properties in a separate dialog
+ - restore previously selected label on start
+ - view custom properties in a separate dialog
+ - adding structure property should open ImageUtils by default
+   where user can either paste an image or load from file
+ - PropertyEditor insert image should go through ImageUtils
 */
 
 /*
@@ -105,10 +107,8 @@ future:
       solvents
       organics
       intermediates
- - better ImageUtils dialog (save as, replace, zoom, etc.)
  - allow to display treeView in multiple columns
  - cut properties from reagents
- - better mime handling in paste
  - sort tags instead of properties?
  - interactive label maker (label as in something you can
    print out and glue on a bottle)
@@ -133,11 +133,12 @@ scripting:
    in that order; useful when assay is not defined)
 
 ImageUtils:
-    - invert option -
-    - add background option
-    - alpha-by-colour
-    - save/open (at least in view mode)
-    - proper sizing (at least for dragged/pasted images)
+ - replace/zoom
+ - invert option
+ - add background option
+ - alpha-by-colour
+ - save/open (at least in view mode)
+ - proper sizing (at least for dragged/pasted images)
 */
 
 /**
@@ -214,6 +215,9 @@ int main( int argc, char *argv[] ) {
     Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
     Variable::add( "propertyFragment/selectedTags", "", Var::Flag::Hidden );
 
+    // TODO:
+    Variable::add( "properyDock/selection", "", Var::Flag::Hidden );
+
     // read configuration
     XMLTools::read();
 
@@ -222,7 +226,11 @@ int main( int argc, char *argv[] ) {
 #endif
 
     // clean up on exit
-    QApplication::connect( &a, &QApplication::aboutToQuit, [ emf ]() {
+    QApplication::connect( &a, &QApplication::aboutToQuit, [
+                       #ifdef Q_OS_WIN
+                           emf
+                       #endif
+                           ]() {
 #ifdef Q_OS_WIN
         delete emf;
 #endif

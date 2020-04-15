@@ -40,7 +40,7 @@ public:
     PropertyView( PropertyView&& ) = delete;
     PropertyView& operator=( PropertyView&& ) = delete;
 
-    ~PropertyView() override { delete this->delegate; }
+    ~PropertyView() override;
 
     /**
      * @brief isResizeInProgress

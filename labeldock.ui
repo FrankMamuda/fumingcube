@@ -29,6 +29,13 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="noButton">
+      <property name="text">
+       <string>Display reagents without labels</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QListView" name="labelView">
       <property name="contextMenuPolicy">
        <enum>Qt::CustomContextMenu</enum>

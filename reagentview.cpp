@@ -54,13 +54,33 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
 
     // make sure to change reagent on click
     ReagentView::connect( this, SIGNAL( clicked( const QModelIndex & )), this, SLOT( selectReagent( const QModelIndex & )));
+
+    // setup timer
+    this->resizeTimer.setSingleShot( true );
+    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this ]() {
+        this->m_resizeInProgress = false;
+        this->delegate->clearCache();
+
+        // force update (triggered by sort)
+        this->filterModel()->sort( 0, Qt::DescendingOrder );
+        this->filterModel()->sort( 0, Qt::AscendingOrder );
+    } );
+}
+
+/**
+ * @brief ReagentView::~ReagentView
+ */
+ReagentView::~ReagentView() {
+    QTimer::disconnect( &this->resizeTimer, &QTimer::timeout, this, nullptr );
+    delete this->delegate;
+    delete this->reagentModel;
 }
 
 /**
  * @brief ReagentView::updateView
  */
 void ReagentView::updateView() {
-    qobject_cast<ReagentDelegate *>( this->itemDelegate())->clearCache();
+    this->delegate->clearCache();
     NodeHistory::instance()->setEnabled( false );
     this->sourceModel()->setupModelData();
 
@@ -94,9 +114,8 @@ void ReagentView::selectReagent( const QModelIndex &filterIndex ) {
     Variable::setInteger( "reagentDock/selection", reagentId );
 
     // apply sql filter
-    //qDebug() << PropertyDock::instance()->hiddenTags.join( ", " ).append( " ) " ).prepend( "not in ( ");
     Property::instance()->setFilter( QString(
-            "( %1=%2 and %1>-1 and %4 %6 ) or ( %1=%3 and %1>-1 and %4 %6 and %4 not in ( select %4 from %5 where ( %1=%2 )))" )
+            "( %1=%2 and %1>-1 and %4 %6 ) or ( %1=%3 and %1>-1 and %4 %6 and %4 not in ( select %4 from %5 where ( %1=%2 and %4>-2 )))" )
                                              .arg( Property::instance()->fieldName( Property::ReagentId ),   // 1
                                                    QString::number( reagentId ),                             // 2
                                                    item->data( ReagentModel::ParentId ).toString(),          // 3
@@ -160,6 +179,18 @@ void ReagentView::mouseReleaseEvent( QMouseEvent *event ) {
     }
 
     QTreeView::mouseReleaseEvent( event );
+}
+
+/**
+ * @brief ReagentView::resizeEvent
+ * @param event
+ */
+void ReagentView::resizeEvent( QResizeEvent *event ) {
+
+    this->m_resizeInProgress = true;
+    this->resizeTimer.start( 128 );
+
+    QTreeView::resizeEvent( event );
 }
 
 /**

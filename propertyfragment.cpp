@@ -88,7 +88,7 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
                     }
 
                     if ( row != Row::Invalid )
-                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::convertToData( pixmap ), this->host()->reagentId());
+                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::toData( pixmap ), this->host()->reagentId());
                 }
             }
         }

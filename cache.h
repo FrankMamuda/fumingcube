@@ -60,7 +60,7 @@ public:
      * @return
      */
     [[nodiscard]] QString path() const { return this->m_path; }
-    [[nodiscard]] static QString checksum( const QByteArray &array );
+    [[nodiscard]] static QByteArray checksum( const QByteArray &array );
     [[nodiscard]] bool contains( const QString &context, const QString &key ) const;
     [[nodiscard]] QByteArray getData( const QString &context, const QString &key, bool compressed = false ) const;
     bool insert( const QString &context, const QString &key, const QByteArray &data, bool compress = false );

@@ -36,6 +36,10 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
     if ( this->model() == nullptr || !index.isValid())
         return QStyledItemDelegate::paint( painter, option, index );
 
+    const ReagentView *view( qobject_cast<ReagentView *>( this->parentView()));
+    if ( view->isResizeInProgress())
+        return;
+
     // NOTE: not the most elegant way to map data, but it works
     const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString() + QString::number( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::DateTime ).toDate().toJulianDay()));
     if ( !this->cache.contains( html ))
@@ -73,6 +77,10 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
 QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const {
     if ( this->model() == nullptr || !index.isValid() || this->parentView() == nullptr )
         return QStyledItemDelegate::sizeHint( option, index );
+
+    const ReagentView *view( qobject_cast<ReagentView *>( this->parentView()));
+    if ( view->isResizeInProgress())
+        return QSize();
 
     const QFont font( option.font );
     QDate date( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::DateTime ).toDate());
