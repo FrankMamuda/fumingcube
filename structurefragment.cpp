@@ -185,7 +185,7 @@ void StructureFragment::readFormula( const QByteArray &data, const int id ) {
     if ( pixmap.isNull())
         return;
 
-    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    const QPixmap cropped( PixmapUtils::cropAndRemoveAlpha( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const bool darkMode = Variable::isEnabled( "darkMode" );
     this->ui->structurePixmap->setPixmap( darkMode ? PixmapUtils::invert( cropped ) : cropped );
 

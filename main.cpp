@@ -72,6 +72,15 @@ misc/unsorted:
  - adding structure property should open ImageUtils by default
    where user can either paste an image or load from file
  - PropertyEditor insert image should go through ImageUtils
+
+imageutils:
+ - fix crappy crop (menu solution is rather ugly)
+ - if crop handles arent in view, zoom out until they are)
+ - add image/formula should go through ImageUtils
+ - fit screen is broken (if height>width)
+ - does replace work?
+ - edit image should open ImageUtils
+
 */
 
 /*

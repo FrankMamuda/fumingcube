@@ -38,7 +38,7 @@ class TextEdit : public QTextEdit {
 public:
     explicit TextEdit( QWidget *parent = nullptr );
     ~TextEdit() override;
-    void insertPixmap( const QPixmap &pixmap, int preferredWidth = -1 );
+    void insertPixmap( const QPixmap &pixmap );
     quint32 id() const { return this->m_id; }
 
     /**

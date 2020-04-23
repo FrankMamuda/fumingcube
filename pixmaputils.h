@@ -60,7 +60,7 @@ public:
         return pu;
     }
 
-    [[nodiscard]] static QPixmap autoCrop( const QPixmap &pixmap, const QColor &key = Qt::white );
+    [[nodiscard]] static QPixmap cropAndRemoveAlpha( const QPixmap &pixmap, const QColor &key = Qt::white );
     [[maybe_unused]][[nodiscard]] static QPixmap brighten( const QPixmap &pixmap, int factor = 150 );
     [[nodiscard]] static QPixmap invert( const QPixmap &pixmap );
     [[nodiscard]] static QByteArray toData( const QPixmap &pixmap );

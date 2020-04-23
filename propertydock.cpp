@@ -219,9 +219,16 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
             case Tag::Formula: {
                 // load image
+                // FIXME: dup code
                 const QPixmap pixmap( PixmapUtils::getOpenPixmap( PropertyDock::instance()));
-                if ( !pixmap.isNull())
-                    return QPair<QString, QVariant>( QString(), PixmapUtils::toData( pixmap ));
+                if ( !pixmap.isNull()) {
+                    ImageUtils iu( PropertyDock::instance());
+                    iu.setImage( pixmap.toImage(), true );
+
+                    // TODO: check if title is not empty
+                    if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
+                        return QPair<QString, QVariant>( QString(), PixmapUtils::toData( QPixmap::fromImage( iu.image())));
+                }
 
                 break;
             }
@@ -351,13 +358,16 @@ void PropertyDock::on_addPropButton_clicked() {
     // add an option to embed images
     menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( TextUtils::elidedString( reagentName )), this, [ this, reagentId ]() {
         // load image
+        // FIXME: dup code
         const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
         if ( !pixmap.isNull()) {
-            bool ok;
-            const QString title( QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",  &ok ));
+            ImageUtils iu( this );
+            iu.setImage( pixmap.toImage(), true );
+            iu.setAddMode();
 
-            if ( ok && !title.isEmpty())
-                this->addProperty( title, PixmapUtils::toData( pixmap ), reagentId, PixmapTag );
+            // TODO: check if title is not empty
+            if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
+                this->addProperty( iu.title(), PixmapUtils::toData( QPixmap::fromImage( iu.image())), reagentId, PixmapTag );
         }
     } )->setIcon( QIcon::fromTheme( "image" ));
 
@@ -482,9 +492,10 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
                     if ( Variable::isEnabled( "darkMode" ) && type == Tag::Formula )
-                        pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( pixmap ));
+                        pixmap = PixmapUtils::invert( PixmapUtils::cropAndRemoveAlpha( pixmap ));
 
-                    ImageUtils iu( this, qAsConst( pixmap ), 0, true );
+                    ImageUtils iu( this );
+                    iu.setImage( pixmap.toImage(), true );
                     iu.setWindowFlags( Qt::Dialog );
                     iu.exec();
                 }
@@ -681,10 +692,18 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
  */
 void PropertyDock::replacePixmap( const Row &row ) {
     // load image
-    const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
+    // FIXME: dup code
+    // TODO: edit name directly from here?
+    QPixmap pixmap;
+    pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray());
     if ( !pixmap.isNull()) {
-        Property::instance()->setPropertyData( row, PixmapUtils::toData( pixmap ));
-        this->updateView();
+        ImageUtils iu( PropertyDock::instance());
+        iu.setImage( pixmap.toImage(), true );
+
+        if ( iu.exec() == QDialog::Accepted && !iu.image().isNull()) {
+            Property::instance()->setPropertyData( row, PixmapUtils::toData( QPixmap::fromImage( iu.image())));
+            this->updateView();
+        }
     }
 }
 
@@ -850,8 +869,6 @@ void PropertyDock::on_extractButton_clicked() {
         return;
 
     const Id parentId = Reagent::instance()->parentId( reagentId );
-
-    // FIXME DUP CODE
     ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
     ed.exec();
     this->updateView();
