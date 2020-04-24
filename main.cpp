@@ -75,7 +75,6 @@ misc/unsorted:
 
 imageutils:
  - icons in ImageUtils
- - fit doesn't work well in ImageUtils
  - drop in ImageUtils
 */
 

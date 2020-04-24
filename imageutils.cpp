@@ -107,11 +107,9 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
 
     // FIT SCREEN lambda
     QAction::connect( this->ui->actionFit, &QAction::triggered, this, [ this, adjustCropWidget ] () {
-        // TODO: add margin
-        if ( this->image().width() < this->image().height())
-            this->imageWidget()->setZoomScale( qMin( 1.0, this->ui->scrollArea->height() / static_cast<qreal>( this->image().height())));
-        else
-            this->imageWidget()->setZoomScale( qMin( 1.0, this->ui->scrollArea->width() / static_cast<qreal>( this->image().width())));
+        const qreal widthIndex = this->ui->scrollArea->width() / static_cast<qreal>( this->image().width());
+        const qreal heightIndex = this->ui->scrollArea->height() / static_cast<qreal>( this->image().height());
+        this->imageWidget()->setZoomScale( qMin( 1.0, heightIndex < widthIndex ? heightIndex : widthIndex ));
 
         adjustCropWidget();
     } );
@@ -189,7 +187,11 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     // PASTE lambda
     QAction::connect( this->ui->actionPaste, &QAction::triggered, this, [ this, hideCropWidget ] () {
         if ( !QApplication::clipboard()->image().isNull()) {
-            if ( QMessageBox::question( this, ImageUtils::tr( "Confirm replacement" ), ImageUtils::tr( "Replace current image?" )) == QMessageBox::Yes ) {
+            bool replace = !this->imageWidget()->image().isNull();
+            if ( replace )
+                replace = QMessageBox::question( this, ImageUtils::tr( "Confirm replacement" ), ImageUtils::tr( "Replace current image?" )) == QMessageBox::Yes;
+
+            if ( replace ) {
                 hideCropWidget();
                 this->setImage( QApplication::clipboard()->image(), true );
                 this->ui->actionFit->trigger();
@@ -214,6 +216,7 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
 
         hideCropWidget();
         this->loadImage( fileName );
+        this->ui->actionFit->trigger();
     } );
 
     // SAVE lambda
