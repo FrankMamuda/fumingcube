@@ -34,6 +34,7 @@
 #include "property.h"
 #include "propertydock.h"
 #include <QAbstractItemView>
+#include <QImageReader>
 #include "pixmaputils.h"
 #include "networkmanager.h"
 
@@ -63,11 +64,11 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
 
             qDebug() << "network->image" << idn << this->id();
             QPixmap pixmap;
-            pixmap.loadFromData( data );
-            if ( pixmap.isNull())
+            if ( pixmap.loadFromData( data )) {
+                this->insertImage( pixmap.toImage());
                 return;
+            }
 
-            this->insertPixmap( pixmap );
             return;
         }
 
@@ -85,22 +86,29 @@ TextEdit::~TextEdit() {
 }
 
 /**
- * @brief TextEdit::insertPixmap
- * @param pixmap
+ * @brief TextEdit::insertImage
+ * @param image
  */
-void TextEdit::insertPixmap( const QPixmap &pixmap ) {
-    ImageUtils iu( this );
-    iu.setImage( pixmap.toImage());
-
-    if ( iu.exec() == QDialog::Accepted ) {
-        // abort on invalid pixmap
-        if ( iu.image().isNull())
-            return;
-
-        // insert in textEdit
-        this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" )
-                                       .arg( iu.image().width()).arg( iu.image().height()).arg( PixmapUtils::toData( QPixmap::fromImage( iu.image())).toBase64().constData()));
+void TextEdit::insertImage( const QImage &image ) {
+    ImageUtils iu( this, ImageUtils::EditMode, image );
+    if ( iu.exec() == QDialog::Accepted && !iu.image().isNull()) {
+        const QImage processed( iu.image());
+        this->insertImageData( processed.width(), processed.height(), PixmapUtils::toData( QPixmap::fromImage( processed )).toBase64().constData());
     }
+}
+
+/**
+ * @brief TextEdit::insertImageData
+ * @param width
+ * @param height
+ * @param base64
+ */
+void TextEdit::insertImageData( const int width, const int height, const QString &base64 ) {
+    if ( base64.isEmpty())
+        return;
+
+    // insert in textEdit
+    this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( width ).arg( height ).arg( base64.constData()));
 }
 
 /**
@@ -214,10 +222,10 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             QRegularExpressionMatch match( re.match( source->html()));
             if ( match.hasMatch()) {
                 const QString imgSource( match.captured( 1 ));
+
                 QPixmap pixmap;
-                pixmap.loadFromData( QByteArray::fromBase64( imgSource.toLatin1().constData()));
-                if ( !pixmap.isNull()) {
-                    this->insertPixmap( qAsConst( pixmap ));
+                if ( pixmap.loadFromData( QByteArray::fromBase64( imgSource.toLatin1().constData()))) {
+                    this->insertImage( pixmap.toImage() );
                     return;
                 }
             }
@@ -239,7 +247,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( source->hasImage()) {
         const QImage image( qvariant_cast<QImage>( source->imageData()));
         if ( !image.isNull()) {
-            this->insertPixmap( QPixmap::fromImage( qAsConst( image )));
+            this->insertImage( image );
             return;
         }
     }
@@ -252,12 +260,9 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             continue;
 
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" ) && !this->isSimpleEditor()) {
-            QPixmap pixmap;
-
-            pixmap.load( url.toLocalFile());
-
-            if ( !pixmap.isNull()) {
-                this->insertPixmap( pixmap );
+            const QImage image( QImageReader( url.toLocalFile()).read());
+            if ( !image.isNull()) {
+                this->insertImage( image );
                 return;
             }
         }

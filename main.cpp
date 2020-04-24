@@ -74,13 +74,9 @@ misc/unsorted:
  - PropertyEditor insert image should go through ImageUtils
 
 imageutils:
- - fix crappy crop (menu solution is rather ugly)
- - if crop handles arent in view, zoom out until they are)
- - add image/formula should go through ImageUtils
- - fit screen is broken (if height>width)
- - does replace work?
- - edit image should open ImageUtils
-
+ - icons in ImageUtils
+ - fit doesn't work well in ImageUtils
+ - drop in ImageUtils
 */
 
 /*
@@ -94,7 +90,6 @@ future:
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
  - theme browser
- - menu option to add image from clipboard
  - all fileOpen dialogs must remember last location
  - warning when added property tag is hidden
  - first open dialog?
@@ -140,14 +135,6 @@ scripting:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
-
-ImageUtils:
- - replace/zoom
- - invert option
- - add background option
- - alpha-by-colour
- - save/open (at least in view mode)
- - proper sizing (at least for dragged/pasted images)
 */
 
 /**

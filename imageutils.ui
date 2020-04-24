@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>497</width>
-    <height>300</height>
+    <width>552</width>
+    <height>367</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,31 +40,28 @@
      </property>
      <widget class="QWidget" name="centralwidget">
       <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="0">
-        <widget class="QLabel" name="iconLabel">
-         <property name="minimumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-        </widget>
+       <item row="0" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="titleLabel">
+           <property name="text">
+            <string>Title</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="titleEdit"/>
+         </item>
+        </layout>
        </item>
-       <item row="3" column="0" colspan="3">
-        <widget class="QDialogButtonBox" name="buttonBox">
-         <property name="standardButtons">
-          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="3">
+       <item row="1" column="0" colspan="2">
         <widget class="QScrollArea" name="scrollArea">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -73,8 +70,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>477</width>
-            <height>170</height>
+            <width>532</width>
+            <height>204</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -100,27 +97,94 @@
          </widget>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="infoLabel">
-         <property name="text">
-          <string>Formulas and image properties will be automatically scaled to fit property window width
-No scaling however will be applied for images in custom properties as they will appear in full size</string>
+       <item row="2" column="0">
+        <widget class="QStackedWidget" name="stackedWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="1">
+            <widget class="QLabel" name="infoLabel">
+             <property name="text">
+              <string>Formulas and image properties will be automatically scaled to fit property window width.
+No scaling however will be applied for images in custom properties as they will appear in full size.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="iconLabel">
+             <property name="minimumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QDialogButtonBox" name="buttonBox">
+             <property name="standardButtons">
+              <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="1" column="0">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="doneButton">
+             <property name="text">
+              <string>Done</string>
+             </property>
+             <property name="icon">
+              <iconset theme="accept">
+               <normaloff>.</normaloff>.</iconset>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
-       </item>
-       <item row="0" column="0" colspan="3">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QLabel" name="titleLabel">
-           <property name="text">
-            <string>Title</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="titleEdit"/>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
@@ -129,7 +193,7 @@ No scaling however will be applied for images in custom properties as they will 
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>497</width>
+        <width>552</width>
         <height>21</height>
        </rect>
       </property>
@@ -168,9 +232,11 @@ No scaling however will be applied for images in custom properties as they will 
        <property name="title">
         <string>Image</string>
        </property>
-       <addaction name="actionSave"/>
        <addaction name="actionReplace"/>
+       <addaction name="actionSave"/>
        <addaction name="actionRestoreOriginal"/>
+       <addaction name="actionPaste"/>
+       <addaction name="actionClear"/>
       </widget>
       <addaction name="menuImage"/>
       <addaction name="menuTransform"/>
@@ -208,7 +274,7 @@ No scaling however will be applied for images in custom properties as they will 
         <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
-       <string>Save</string>
+       <string>Save as...</string>
       </property>
      </action>
      <action name="actionReplace">
@@ -217,7 +283,7 @@ No scaling however will be applied for images in custom properties as they will 
         <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
-       <string>Replace</string>
+       <string>Open</string>
       </property>
      </action>
      <action name="actionMakeTransparent">
@@ -254,9 +320,6 @@ No scaling however will be applied for images in custom properties as they will 
       </property>
      </action>
      <action name="actionCrop">
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
       <property name="text">
        <string>Manual crop</string>
       </property>
@@ -273,6 +336,16 @@ No scaling however will be applied for images in custom properties as they will 
     </widget>
    </item>
   </layout>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste from clipboard</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

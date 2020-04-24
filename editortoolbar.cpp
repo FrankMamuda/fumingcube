@@ -22,6 +22,7 @@
 #include "charactermap.h"
 #include "editortoolbar.h"
 #include "ghspictograms.h"
+#include "imageutils.h"
 #include "pixmaputils.h"
 #include <QBitmap>
 #include <QColorDialog>
@@ -162,10 +163,11 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
             this->actionImage = this->addAction( "" );
             this->actionImage->setIcon( QIcon::fromTheme( "image" ));
             QAction::connect( this->actionImage, &QAction::triggered, [ this ]() {
-                // load image
-                const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
-                if ( !pixmap.isNull())
-                    this->editor()->insertPixmap( pixmap );
+                ImageUtils iu( this, ImageUtils::OpenMode );
+                if ( iu.exec() == QDialog::Accepted && !iu.image().isNull()) {
+                    const QImage processed( iu.image());
+                    this->editor()->insertImageData( processed.width(), processed.height(), PixmapUtils::toData( QPixmap::fromImage( processed )).toBase64().constData());
+                }
             } );
             break;
 
@@ -182,7 +184,7 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
                     menu->addAction( icon, GHSHazards::Hazards[key], [ this, key ]() {
                         const QPixmap pixmap( GHSPictograms::pixmap( key, 48 ));
                         if ( !pixmap.isNull())
-                            this->editor()->insertPixmap( pixmap );
+                            this->editor()->insertImageData( pixmap.width(), pixmap.height(), PixmapUtils::toData( pixmap ).toBase64().constData());
                     } );
                 }
 

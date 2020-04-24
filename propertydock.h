@@ -63,7 +63,7 @@ public slots:
     void clearDocumentCache();
     void setSpecialWidgets();
     void setCurrentIndex( const QModelIndex &index );
-    void replacePixmap( const Row &row );
+    void replacePixmap( const Row &row, bool isFormula = false );
     void saveHiddenTags();
     void loadHiddenTags();
 

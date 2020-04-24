@@ -42,21 +42,26 @@ class ImageUtils : public QDialog {
     Q_OBJECT
 
 public:
+    /**
+     * @brief The Modes enum
+     */
+    enum Modes {
+        EditMode = 0,
+        ViewMode,
+        OpenMode,
+        PropertyMode
+    };
+    Q_ENUM( Modes )
+
     // disable move
     ImageUtils( ImageUtils&& ) = delete;
     ImageUtils& operator=( ImageUtils&& ) = delete;
 
     // constructor/destructor
-    ImageUtils( QWidget *parent = nullptr );
+    explicit ImageUtils( QWidget *parent = nullptr, const Modes &mode = EditMode, const QImage &image = QImage());
     ~ImageUtils() override;
 
     bool loadImage( const QString &fileName );
-
-    /**
-     * @brief scale
-     * @return
-     */
-    [[nodiscard]] qreal scale() const { return this->m_scale; }
 
     /**
      * @brief cropWidget
@@ -74,14 +79,15 @@ public slots:
     void scaleImage( qreal scale );
     void setViewMode();
     void setAddMode();
+    void setTitle( const QString &title );
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;
     void showEvent( QShowEvent *event ) override;
+    void mouseReleaseEvent( QMouseEvent *event ) override;
 
 private:
     Ui::ImageUtils *ui;
-    qreal m_scale = 1.0;
     CropWidget *m_cropWidget = nullptr;
     QRect lastImageGeometry;
     QImage originalImage;

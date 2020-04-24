@@ -25,7 +25,6 @@
 #include "textedit.h"
 #include "tag.h"
 #include "variable.h"
-#include "imageutils.h"
 #include "cache.h"
 #include "reagent.h"
 #include "reagentmodel.h"

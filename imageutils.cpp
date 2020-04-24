@@ -30,12 +30,15 @@
 #include <QDebug>
 #include <QPainter>
 #include <QResizeEvent>
+#include <QClipboard>
+#include <QMessageBox>
+#include <QFileDialog>
 
 /**
  * @brief ImageUtils::ImageUtils
  * @param parent
  */
-ImageUtils::ImageUtils( QWidget *parent ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
+ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image ) : QDialog( parent ), ui( new Ui::ImageUtils ) {
     this->ui->setupUi( this );
     this->ui->contents->setWindowFlags( Qt::Widget );
 
@@ -44,61 +47,84 @@ ImageUtils::ImageUtils( QWidget *parent ) : QDialog( parent ), ui( new Ui::Image
     this->resize( QApplication::primaryScreen()->availableSize() * 3 / 5 );
     this->m_cropWidget = new CropWidget( this->imageWidget());
 
-    // this->loadImage( "C:/Home/Downloads/CN103819475AD00061.png" );
-    this->loadImage( "C:/Home/Downloads/131411.png" );
+    // adjustCropWidget lambda
+    auto adjustCropWidget = [ this ]() {
+        // move crop rectangle along with the image
+        if ( this->cropWidget()->isVisible()) {
+            const QPoint delta( this->imageWidget()->imageGeometry().topLeft() + QPoint( this->cropWidget()->geometry().topLeft() - this->lastImageGeometry.topLeft()));
+            this->cropWidget()->move( delta );
+            this->cropWidget()->resize( this->cropWidget()->size() * ( this->imageWidget()->imageGeometry().size().width() / static_cast<qreal>( this->lastImageGeometry.size().width())));
+        }
+
+        // store last geometry for crop widget
+        this->lastImageGeometry = this->imageWidget()->imageGeometry();
+    };
+
+    // hideCropWidget lambda
+    auto hideCropWidget = [ this ]() {
+        this->cropWidget()->hide();
+        this->ui->actionFit->trigger();
+        this->ui->stackedWidget->setCurrentIndex( 0 );
+    };
 
     // SCALE lambda
-    QAction::connect( this->ui->actionScale, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionScale, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        hideCropWidget();
+
         bool ok;
-        const qreal scale = QInputDialog::getInt( this, ImageUtils::tr( "Scale image" ), ImageUtils::tr( "Input scale factor (%)" ), static_cast<int>( this->scale() * 100 ), 5, 200, 1, &ok ) / 100.0;
+        const qreal scale = QInputDialog::getInt( this, ImageUtils::tr( "Scale image" ), ImageUtils::tr( "Input scale factor (%)" ), 100, 5, 200, 1, &ok ) / 100.0;
         if ( ok )
             this->scaleImage( scale );
     } );
 
+
     // ZOOM IN lambda
-    QAction::connect( this->ui->actionZoomIn, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionZoomIn, &QAction::triggered, this, [ this, adjustCropWidget ] () {
         this->imageWidget()->setZoomScale( qMin( this->imageWidget()->zoomScale() + 0.25, 4.0 ));
-        this->scaleImage( this->scale());
+        adjustCropWidget();
     } );
 
     // ZOOM OUT lambda
-    QAction::connect( this->ui->actionZoomOut, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionZoomOut, &QAction::triggered, this, [ this, adjustCropWidget ] () {
         this->imageWidget()->setZoomScale( qMax( this->imageWidget()->zoomScale() - 0.25, 0.05 ));
-        this->scaleImage( this->scale());
+        adjustCropWidget();
     } );
 
     // NORMAL SIZE lambda
-    QAction::connect( this->ui->actionNormalSize, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionNormalSize, &QAction::triggered, this, [ this, adjustCropWidget ] () {
         this->imageWidget()->setZoomScale( 1.0 );
-        this->scaleImage( this->scale());
+        adjustCropWidget();
     } );
 
     // MAKE TRANSPARENT lambda
     QAction::connect( this->ui->actionMakeTransparent, &QAction::triggered, this, [ this ] () {
         QColorDialog cd( this );
-        cd.move( this->imageWidget()->mapToGlobal( this->imageWidget()->imageGeometry().topRight()));
+        cd.move( this->ui->scrollArea->mapToGlobal( this->ui->scrollArea->geometry().center()));
         cd.setWindowTitle( ImageUtils::tr( "Pick current background colour (colour key)" ));
         if ( cd.exec() == QDialog::Accepted && cd.currentColor().isValid())
             this->setImage( ImageUtils::colourToAlpha( this->image(), cd.currentColor()));
     } );
 
     // FIT SCREEN lambda
-    QAction::connect( this->ui->actionFit, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionFit, &QAction::triggered, this, [ this, adjustCropWidget ] () {
+        // TODO: add margin
         if ( this->image().width() < this->image().height())
-            this->imageWidget()->setZoomScale(( this->ui->scrollArea->size().width()) / ( this->image().width() * this->scale()));
+            this->imageWidget()->setZoomScale( qMin( 1.0, this->ui->scrollArea->height() / static_cast<qreal>( this->image().height())));
         else
-            this->imageWidget()->setZoomScale(( this->ui->scrollArea->size().height()) / ( this->image().height() * this->scale()));
+            this->imageWidget()->setZoomScale( qMin( 1.0, this->ui->scrollArea->width() / static_cast<qreal>( this->image().width())));
 
-        this->scaleImage( this->scale());
+        adjustCropWidget();
     } );
 
     // AUTOCROP lambda
-    QAction::connect( this->ui->actionAutocrop, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionAutocrop, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        hideCropWidget();
         this->setImage( ImageUtils::autoCrop( this->image()));
     } );
 
     // ROTATE lambda
-    QAction::connect( this->ui->actionRotate, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionRotate, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        hideCropWidget();
         this->setImage( this->image().transformed( QTransform().rotate( 90 )));
     } );
 
@@ -125,31 +151,115 @@ ImageUtils::ImageUtils( QWidget *parent ) : QDialog( parent ), ui( new Ui::Image
     } );
 
     // RESTORE lambda
-    QAction::connect( this->ui->actionRestoreOriginal, &QAction::triggered, this, [ this ] () {
+    QAction::connect( this->ui->actionRestoreOriginal, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        hideCropWidget();
         this->setImage( this->originalImage );
     } );
 
     // MANUAL CROP lambda
-    QAction::connect( this->ui->actionCrop, &QAction::toggled, this, [ this ] ( bool checked ) {
-        if ( checked ) {
+    QAction::connect( this->ui->actionCrop, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        if ( !this->cropWidget()->isVisible()) {
+            if ( !this->ui->scrollArea->geometry().contains( this->imageWidget()->imageGeometry()))
+                this->ui->actionFit->trigger();
+
             this->cropWidget()->setGeometry( this->imageWidget()->imageGeometry());
             this->cropWidget()->show();
+            this->ui->stackedWidget->setCurrentIndex( 1 );
         } else {
-            if ( this->cropWidget()->isVisible()) {
-                const QPointF delta( QPointF( this->cropWidget()->geometry().topLeft() - this->imageWidget()->imageGeometry().topLeft()) / this->imageWidget()->zoomScale());
-                const QSizeF scale( this->cropWidget()->size() / this->imageWidget()->zoomScale());
+            hideCropWidget();
+        }
+    } );
 
-                const QImage image( this->image().convertToFormat( QImage::Format_ARGB32 ).copy( QRect( delta.toPoint(), scale.toSize())));
-                this->setImage( image );
-                this->cropWidget()->hide();
-                this->imageWidget()->setZoomScale( 1.0 );
-            }
+    // DONE button lambda
+    QPushButton::connect( this->ui->doneButton, &QPushButton::clicked, this, [ this, hideCropWidget ] () {
+        if ( this->cropWidget()->isVisible()) {
+            const QPointF delta( QPointF( this->cropWidget()->geometry().topLeft() - this->imageWidget()->imageGeometry().topLeft()) / this->imageWidget()->zoomScale());
+            const QSizeF scale( this->cropWidget()->size() / this->imageWidget()->zoomScale());
+
+            const QImage image( this->image().convertToFormat( QImage::Format_ARGB32 ).copy( QRect( delta.toPoint(), scale.toSize())));
+            this->setImage( image );
+            hideCropWidget();
         }
     } );
 
     this->ui->iconLabel->setPixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
     this->ui->titleEdit->hide();
     this->ui->titleLabel->hide();
+
+    // PASTE lambda
+    QAction::connect( this->ui->actionPaste, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        if ( !QApplication::clipboard()->image().isNull()) {
+            if ( QMessageBox::question( this, ImageUtils::tr( "Confirm replacement" ), ImageUtils::tr( "Replace current image?" )) == QMessageBox::Yes ) {
+                hideCropWidget();
+                this->setImage( QApplication::clipboard()->image(), true );
+                this->ui->actionFit->trigger();
+            }
+        } else {
+            QMessageBox::information( this, ImageUtils::tr( "Paste error" ), ImageUtils::tr( "Clipboard contains no valid images" ));
+        }
+    } );
+
+    // CLEAR lambda
+    QAction::connect( this->ui->actionClear, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        hideCropWidget();
+        this->originalImage = QImage();
+        this->imageWidget()->setImage( QImage());
+    } );
+
+    // OPEN/REPLACE lambda
+    QAction::connect( this->ui->actionReplace, &QAction::triggered, this, [ this, hideCropWidget ] () {
+        const QString fileName( QFileDialog::getOpenFileName( this, QWidget::tr( "Open Image" ), "", QWidget::tr( "Images (*.png *.jpg)" )));
+        if ( fileName.isEmpty())
+            return;
+
+        hideCropWidget();
+        this->loadImage( fileName );
+    } );
+
+    // SAVE lambda
+    QAction::connect( this->ui->actionSave, &QAction::triggered, this, [ this ] () {
+        const QString fileName( QFileDialog::getSaveFileName( this, QWidget::tr( "Save Image" ), "", QWidget::tr( "Image (*.png)" )));
+        if ( fileName.isEmpty())
+            return;
+
+        this->imageWidget()->image().save( fileName );
+    } );
+
+    this->ui->actionSave->setShortcut( QKeySequence::Save );
+    this->ui->actionPaste->setShortcut( QKeySequence::Paste );
+    this->ui->actionZoomIn->setShortcut( QKeySequence::ZoomIn );
+    this->ui->actionZoomOut->setShortcut( QKeySequence::ZoomOut );
+    this->ui->actionReplace->setShortcut( QKeySequence::Open );
+    this->ui->actionFit->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_F ));
+    this->ui->actionNormalSize->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_N ));
+    this->ui->actionAutocrop->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_C ));
+    this->ui->actionCrop->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_C ));
+    this->ui->actionMakeTransparent->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_T ));
+    this->ui->actionSetBackground->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_B ));
+    this->ui->actionInvert->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_I ));
+    this->ui->actionRotate->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_R ));
+    this->ui->actionRestoreOriginal->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_O ));
+
+    // set image if any
+    if ( !image.isNull() && mode != OpenMode )
+        this->setImage( image, true );
+
+    switch ( mode ) {
+    case OpenMode:
+        this->ui->actionReplace->trigger();
+        break;
+
+    case ViewMode:
+        this->setViewMode();
+        break;
+
+    case PropertyMode:
+        this->setAddMode();
+        break;
+
+    case EditMode:
+        break;
+    }
 }
 
 /**
@@ -168,9 +278,15 @@ ImageUtils::~ImageUtils() {
     QAction::disconnect( this->ui->actionInvert, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionSetBackground, &QAction::triggered, this, nullptr );
     QAction::disconnect( this->ui->actionRestoreOriginal, &QAction::triggered, this, nullptr );
-    QAction::disconnect( this->ui->actionCrop, &QAction::toggled, this, nullptr );
+    QAction::disconnect( this->ui->actionCrop, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionPaste, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionClear, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionReplace, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionSave, &QAction::triggered, this, nullptr );
+    QPushButton::disconnect( this->ui->doneButton, &QPushButton::clicked, this, nullptr );
 
     // delete ui
+    delete this->m_cropWidget;
     delete this->ui;
 }
 
@@ -238,6 +354,14 @@ void ImageUtils::setAddMode() {
 }
 
 /**
+ * @brief ImageUtils::setTitle
+ * @param title
+ */
+void ImageUtils::setTitle( const QString &title ) {
+    this->ui->titleEdit->setText( title );
+}
+
+/**
  * @brief ImageUtils::resizeEvent
  * @param event
  */
@@ -260,7 +384,19 @@ void ImageUtils::resizeEvent( QResizeEvent *event ) {
  */
 void ImageUtils::showEvent( QShowEvent *event ) {
     QDialog::showEvent( event );
+    this->ui->actionFit->trigger();
     this->lastImageGeometry = this->imageWidget()->imageGeometry();
+}
+
+/**
+ * @brief ImageUtils::mouseReleaseEvent
+ * @param event
+ */
+void ImageUtils::mouseReleaseEvent( QMouseEvent *event ) {
+    QDialog::mouseReleaseEvent( event );
+
+    if ( this->ui->imageWidget->image().isNull())
+        this->ui->actionReplace->trigger();
 }
 
 /**
@@ -274,8 +410,7 @@ void ImageUtils::scaleImage( double scale ) {
     if ( this->imageWidget()->image().isNull() || scale < 0.05 || scale > 2.0 )
         return;
 
-    this->m_scale = scale;
-    this->setImage( this->image().scaledToWidth( static_cast<int>( this->image().width() * this->scale()), Qt::SmoothTransformation ));
+    this->setImage( this->image().scaledToWidth( static_cast<int>( this->image().width() * scale ), Qt::SmoothTransformation ));
 }
 
 /**

@@ -23,6 +23,7 @@
 #include <QPainter>
 #include <QFontMetrics>
 #include <QApplication>
+#include <QPaintEvent>
 
 /**
  * @brief ImageWidget::imageGeometry
@@ -41,7 +42,7 @@ QRect ImageWidget::imageGeometry() const {
 /**
  * @brief ImageWidget::paintEvent
  */
-void ImageWidget::paintEvent( QPaintEvent * ) {
+void ImageWidget::paintEvent( QPaintEvent *event ) {
     if ( this->imageUtilsParent() == nullptr )
         return;
 
@@ -49,12 +50,17 @@ void ImageWidget::paintEvent( QPaintEvent * ) {
     painter.setRenderHint( QPainter::SmoothPixmapTransform, true );
 
     const QRect imageGeometry( this->imageGeometry());
-    painter.drawImage( imageGeometry, this->image());
 
-    painter.save();
-    painter.setPen( QApplication::palette().color( QPalette::Text ));
-    painter.drawRect( imageGeometry.adjusted( -1, -1, 0, 0 ));
-    painter.restore();
+    if ( !this->image().isNull()) {
+        painter.drawImage( imageGeometry, this->image());
+        painter.save();
+        painter.setPen( QApplication::palette().color( QPalette::Text ));
+        painter.drawRect( imageGeometry.adjusted( -1, -1, 0, 0 ));
+        painter.restore();
+    } else {
+        painter.drawText( event->rect(), ImageWidget::tr( "No image has been set.\nOpen from file or paste from clipboard.\n\nClick anywhere on this window to open an image." ), QTextOption(  Qt::AlignCenter ));
+        return;
+    }
 
     if ( this->imageUtilsParent()->cropWidget()->isVisible()) {
         painter.save();
