@@ -34,6 +34,7 @@
 #include "property.h"
 #include "propertydock.h"
 #include <QAbstractItemView>
+#include <QImageReader>
 #include "pixmaputils.h"
 #include "networkmanager.h"
 
@@ -63,12 +64,11 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
 
             qDebug() << "network->image" << idn << this->id();
             QPixmap pixmap;
-            pixmap.loadFromData( data );
-            if ( pixmap.isNull())
+            if ( pixmap.loadFromData( data )) {
+                this->insertImage( pixmap.toImage());
                 return;
+            }
 
-            const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
-            this->insertPixmap( pixmap, qMin( sectionSize, pixmap.width()));
             return;
         }
 
@@ -86,31 +86,29 @@ TextEdit::~TextEdit() {
 }
 
 /**
- * @brief TextEdit::insertPixmap
- * @param pixmap
- * @param preferredWidth
+ * @brief TextEdit::insertImage
+ * @param image
  */
-void TextEdit::insertPixmap( const QPixmap &pixmap, const int preferredWidth ) {
-    bool accepted = true;
-    QPixmap out( pixmap );
-
-    if ( preferredWidth > 0 ) {
-        ImageUtils iu( this, pixmap, preferredWidth );
-        accepted = iu.exec();
-
-        if ( accepted )
-            out = iu.pixmap;
+void TextEdit::insertImage( const QImage &image ) {
+    ImageUtils iu( this, ImageUtils::EditMode, image );
+    if ( iu.exec() == QDialog::Accepted && !iu.image().isNull()) {
+        const QImage processed( iu.image());
+        this->insertImageData( processed.width(), processed.height(), PixmapUtils::toData( QPixmap::fromImage( processed )).toBase64().constData());
     }
+}
 
-    if ( accepted ) {
-        // abort on invalid pixmap
-        if ( out.isNull())
-            return;
+/**
+ * @brief TextEdit::insertImageData
+ * @param width
+ * @param height
+ * @param base64
+ */
+void TextEdit::insertImageData( const int width, const int height, const QString &base64 ) {
+    if ( base64.isEmpty())
+        return;
 
-        // insert in textEdit
-        this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" )
-                                       .arg( out.width()).arg( out.height()).arg( PixmapUtils::toData( out ).toBase64().constData()));
-    }
+    // insert in textEdit
+    this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( width ).arg( height ).arg( base64.constData()));
 }
 
 /**
@@ -224,10 +222,10 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             QRegularExpressionMatch match( re.match( source->html()));
             if ( match.hasMatch()) {
                 const QString imgSource( match.captured( 1 ));
+
                 QPixmap pixmap;
-                pixmap.loadFromData( QByteArray::fromBase64( imgSource.toLatin1().constData()));
-                if ( !pixmap.isNull()) {
-                    this->insertPixmap( qAsConst( pixmap ), pixmap.width());
+                if ( pixmap.loadFromData( QByteArray::fromBase64( imgSource.toLatin1().constData()))) {
+                    this->insertImage( pixmap.toImage() );
                     return;
                 }
             }
@@ -249,7 +247,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
     if ( source->hasImage()) {
         const QImage image( qvariant_cast<QImage>( source->imageData()));
         if ( !image.isNull()) {
-            this->insertPixmap( QPixmap::fromImage( qAsConst( image )), image.width());
+            this->insertImage( image );
             return;
         }
     }
@@ -262,13 +260,9 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             continue;
 
         if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" ) && !this->isSimpleEditor()) {
-            QPixmap pixmap;
-
-            pixmap.load( url.toLocalFile());
-
-            if ( !pixmap.isNull()) {
-                const int sectionSize = PropertyDock::instance()->sectionSize( Property::PropertyData );
-                this->insertPixmap( pixmap, qMin( sectionSize, pixmap.width()));
+            const QImage image( QImageReader( url.toLocalFile()).read());
+            if ( !image.isNull()) {
+                this->insertImage( image );
                 return;
             }
         }

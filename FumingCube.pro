@@ -40,6 +40,7 @@ SOURCES += \
     about.cpp \
     cache.cpp \
     charactermap.cpp \
+    cropwidget.cpp \
     datepicker.cpp \
     extractiondialog.cpp \
     fragmentnavigation.cpp \
@@ -47,6 +48,7 @@ SOURCES += \
     ghswidget.cpp \
     htmlutils.cpp \
     imageutils.cpp \
+    imagewidget.cpp \
     label.cpp \
     labeldialog.cpp \
     labeldock.cpp \
@@ -96,6 +98,7 @@ HEADERS += \
     buttonbox.h \
     cache.h \
     charactermap.h \
+    cropwidget.h \
     datepicker.h \
     dockwidget.h \
     extractiondialog.h \
@@ -107,6 +110,7 @@ HEADERS += \
     ghswidget.h \
     htmlutils.h \
     imageutils.h \
+    imagewidget.h \
     label.h \
     labeldialog.h \
     labeldock.h \

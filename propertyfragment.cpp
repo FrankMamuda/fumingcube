@@ -570,7 +570,7 @@ void PropertyFragment::readFormula( const QByteArray &data ) {
     if ( pixmap.isNull())
         return;
 
-    const QPixmap cropped( PixmapUtils::autoCrop( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
+    const QPixmap cropped( PixmapUtils::cropAndRemoveAlpha( qAsConst( pixmap ), QColor::fromRgb( 245, 245, 245, 255 )));
     const int rows = this->ui->propertyView->rowCount();
     this->ui->propertyView->setRowCount( rows + 1 );
     this->ui->propertyView->setItem( rows, 0, new QTableWidgetItem( ExtractionDialog::tr( "Structural formula" )));

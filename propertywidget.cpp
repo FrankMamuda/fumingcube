@@ -179,7 +179,7 @@ PropertyWidget::PropertyWidget( QWidget *parent, const QPixmap &pixmap ) : QWidg
 
     const bool darkMode = Variable::isEnabled( "darkMode" );
     this->label = new QLabel();
-    this->label->setPixmap( darkMode ? PixmapUtils::invert( PixmapUtils::autoCrop( pixmap )) : pixmap );
+    this->label->setPixmap( darkMode ? PixmapUtils::invert( PixmapUtils::cropAndRemoveAlpha( pixmap )) : pixmap );
     this->label->setFixedSize( pixmap.width(), pixmap.height());
     this->layout->addWidget( label );
     this->setLayout( this->layout );

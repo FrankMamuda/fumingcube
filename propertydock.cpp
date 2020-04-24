@@ -219,9 +219,16 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
             case Tag::Formula: {
                 // load image
-                const QPixmap pixmap( PixmapUtils::getOpenPixmap( PropertyDock::instance()));
-                if ( !pixmap.isNull())
-                    return QPair<QString, QVariant>( QString(), PixmapUtils::toData( pixmap ));
+                // TODO: check if title is not empty
+                const QByteArray data( Property::instance()->propertyData( propertyId ).toByteArray());
+                QPixmap pixmap;
+                bool ok = false;
+                if ( !data.isEmpty())
+                    ok = pixmap.loadFromData( data );
+
+                ImageUtils iu( PropertyDock::instance(), ImageUtils::EditMode, ok ? pixmap.toImage() : QImage());
+                if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
+                    return QPair<QString, QVariant>( QString(), PixmapUtils::toData( QPixmap::fromImage( iu.image())));
 
                 break;
             }
@@ -351,14 +358,9 @@ void PropertyDock::on_addPropButton_clicked() {
     // add an option to embed images
     menu.addAction( PropertyDock::tr( "Add image to '%1'" ).arg( TextUtils::elidedString( reagentName )), this, [ this, reagentId ]() {
         // load image
-        const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
-        if ( !pixmap.isNull()) {
-            bool ok;
-            const QString title( QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",  &ok ));
-
-            if ( ok && !title.isEmpty())
-                this->addProperty( title, PixmapUtils::toData( pixmap ), reagentId, PixmapTag );
-        }
+        ImageUtils iu( PropertyDock::instance(), ImageUtils::PropertyMode );
+        if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
+            this->addProperty( iu.title(), PixmapUtils::toData( QPixmap::fromImage( iu.image())), reagentId, PixmapTag );
     } )->setIcon( QIcon::fromTheme( "image" ));
 
     // add an option to get properties from the internet
@@ -482,15 +484,13 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
                 if ( pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray())) {
                     if ( Variable::isEnabled( "darkMode" ) && type == Tag::Formula )
-                        pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( pixmap ));
+                        pixmap = PixmapUtils::invert( PixmapUtils::cropAndRemoveAlpha( pixmap ));
 
-                    ImageUtils iu( this, qAsConst( pixmap ), 0, true );
-                    iu.setWindowFlags( Qt::Dialog );
-                    iu.exec();
+                    ImageUtils( this, ImageUtils::ViewMode, pixmap.toImage()).exec();
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));
 
-            menu.addAction( PropertyDock::tr( "Replace" ), this, [ this, row ]() {
+            /*menu.addAction( PropertyDock::tr( "Replace" ), this, [ this, row ]() {
                 this->replacePixmap( row );
             } )->setIcon( QIcon::fromTheme( "replace" ));
 
@@ -501,12 +501,11 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 if ( ok && !title.isEmpty())
                     Property::instance()->setName( row, title );
 
-            } )->setIcon( QIcon::fromTheme( "edit" ));
+            } )->setIcon( QIcon::fromTheme( "edit" ));*/
         }
 
         if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
-            menu.addAction( PropertyDock::tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon(
-                    QIcon::fromTheme( "edit" ));
+            menu.addAction( PropertyDock::tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
 
         if ( tagId != Id::Invalid ) {
             const QString functionName( Tag::instance()->function( tagId ));
@@ -679,12 +678,25 @@ void PropertyDock::setCurrentIndex( const QModelIndex &index ) {
  * @brief PropertyDock::replacePixmap
  * @param row
  */
-void PropertyDock::replacePixmap( const Row &row ) {
+void PropertyDock::replacePixmap( const Row &row, bool isFormula ) {
     // load image
-    const QPixmap pixmap( PixmapUtils::getOpenPixmap( this ));
+    QPixmap pixmap;
+    pixmap.loadFromData( Property::instance()->propertyData( row ).toByteArray());
+
     if ( !pixmap.isNull()) {
-        Property::instance()->setPropertyData( row, PixmapUtils::toData( pixmap ));
-        this->updateView();
+        ImageUtils iu( PropertyDock::instance(), isFormula ? ImageUtils::EditMode : ImageUtils::PropertyMode, pixmap.toImage());
+
+        if ( !isFormula )
+            iu.setTitle( Property::instance()->name( row ));
+
+        if ( iu.exec() == QDialog::Accepted && !iu.image().isNull()) {
+            Property::instance()->setPropertyData( row, PixmapUtils::toData( QPixmap::fromImage( iu.image())));
+
+            if ( !isFormula )
+                Property::instance()->setName( row, iu.title());
+
+            this->updateView();
+        }
     }
 }
 
@@ -731,9 +743,9 @@ void PropertyDock::on_editPropButton_clicked() {
 
     // handle pixmaps
     const Id tagId = Property::instance()->tagId( propertyId );
-    if (( tagId == PixmapTag ) ||
-        ( tagId != Id::Invalid  && Tag::instance()->type( tagId ) == Tag::Formula )) {
-        this->replacePixmap( propertyRow );
+    const bool isFormula = tagId != Id::Invalid  && Tag::instance()->type( tagId ) == Tag::Formula;
+    if (( tagId == PixmapTag ) || isFormula ) {
+        this->replacePixmap( propertyRow, isFormula );
     } else {
         // set new value
         this->ui->propertyView->setUpdatesEnabled( false );
@@ -850,8 +862,6 @@ void PropertyDock::on_extractButton_clicked() {
         return;
 
     const Id parentId = Reagent::instance()->parentId( reagentId );
-
-    // FIXME DUP CODE
     ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
     ed.exec();
     this->updateView();

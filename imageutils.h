@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Factory #12
- * Copyright (C) 2019-2020 Armands Aleksejevs
+ * Copyright (C) 2020 Armands Aleksejevs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,39 +21,74 @@
 /*
  * includes
  */
+#include "cropwidget.h"
 #include <QDialog>
+#include <QRubberBand>
 
 /**
  * @brief The Ui namespace
  */
-namespace Ui {
-    class ImageUtils;
+namespace Ui { class ImageUtils; }
 
-    static const int MaxImageSize = 512;
-}
+/*
+ * classes
+ */
+class ImageWidget;
 
 /**
  * @brief The ImageUtils class
  */
 class ImageUtils : public QDialog {
     Q_OBJECT
-    Q_DISABLE_COPY( ImageUtils )
 
 public:
-    explicit ImageUtils( QWidget *parent = nullptr, const QPixmap &pixmap = QPixmap(), const int &preferredWidth = 0,
-                         bool view = false );
+    /**
+     * @brief The Modes enum
+     */
+    enum Modes {
+        EditMode = 0,
+        ViewMode,
+        OpenMode,
+        PropertyMode
+    };
+    Q_ENUM( Modes )
 
     // disable move
     ImageUtils( ImageUtils&& ) = delete;
     ImageUtils& operator=( ImageUtils&& ) = delete;
 
+    // constructor/destructor
+    explicit ImageUtils( QWidget *parent = nullptr, const Modes &mode = EditMode, const QImage &image = QImage());
     ~ImageUtils() override;
-    QPixmap pixmap;
 
-signals:
-    void accepted( const QPixmap &pixmap );
+    bool loadImage( const QString &fileName );
+
+    /**
+     * @brief cropWidget
+     * @return
+     */
+    [[nodiscard]] CropWidget *cropWidget() const { return this->m_cropWidget; }
+    [[nodiscard]] static QImage autoCrop( const QImage &image, bool preserveAspectRatio = false );
+    [[nodiscard]] static QImage colourToAlpha( const QImage &image, const QColor &key = Qt::white );
+    [[nodiscard]] ImageWidget *imageWidget() const;
+    [[nodiscard]] QImage image() const;
+    [[nodiscard]] QString title() const;
+
+public slots:
+    void setImage( const QImage &image, bool reset = false );
+    void scaleImage( qreal scale );
+    void setViewMode();
+    void setAddMode();
+    void setTitle( const QString &title );
+
+protected:
+    void resizeEvent( QResizeEvent *event ) override;
+    void showEvent( QShowEvent *event ) override;
+    void mouseReleaseEvent( QMouseEvent *event ) override;
 
 private:
     Ui::ImageUtils *ui;
-    QSize size;
+    CropWidget *m_cropWidget = nullptr;
+    QRect lastImageGeometry;
+    QImage originalImage;
 };

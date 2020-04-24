@@ -25,7 +25,6 @@
 #include "textedit.h"
 #include "tag.h"
 #include "variable.h"
-#include "imageutils.h"
 #include "cache.h"
 #include "reagent.h"
 #include "reagentmodel.h"
@@ -175,15 +174,14 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
 
         // special handling of formulas
         if ( isFormula ) {
-            pixmap = PixmapUtils::autoCrop( qAsConst( pixmap ));
+            // NOTE: cropping will not be done here, all images should be processed beforehand
             if ( isDarkMode )
-                pixmap = PixmapUtils::invert( PixmapUtils::autoCrop( qAsConst( pixmap )));
+                pixmap = PixmapUtils::invert( qAsConst( pixmap ));
         }
 
         // FAST downscale pixmap
-        // NOTE: use pixmap.width(), since autocrop could have made it smaller
-        if ( width * 2 < pixmap.width())
-            pixmap = pixmap.scaled( width * 2, height, Qt::IgnoreAspectRatio, Qt::FastTransformation );
+        if ( width * 2 < info.width )
+            pixmap = pixmap.scaled( width * 2, height * 2, Qt::IgnoreAspectRatio, Qt::FastTransformation );
 
         // SLOW downscale pixmap
         pixmap = pixmap.scaled( width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation );

@@ -72,6 +72,10 @@ misc/unsorted:
  - adding structure property should open ImageUtils by default
    where user can either paste an image or load from file
  - PropertyEditor insert image should go through ImageUtils
+
+imageutils:
+ - icons in ImageUtils
+ - drop in ImageUtils
 */
 
 /*
@@ -85,7 +89,6 @@ future:
  - molecule drawing (and search)
  - tables (make custom tables reagents and select properties)
  - theme browser
- - menu option to add image from clipboard
  - all fileOpen dialogs must remember last location
  - warning when added property tag is hidden
  - first open dialog?
@@ -131,14 +134,6 @@ scripting:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
-
-ImageUtils:
- - replace/zoom
- - invert option
- - add background option
- - alpha-by-colour
- - save/open (at least in view mode)
- - proper sizing (at least for dragged/pasted images)
 */
 
 /**
