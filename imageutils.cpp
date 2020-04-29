@@ -485,7 +485,7 @@ QImage ImageUtils::autoCrop( const QImage &image, bool preserveAspectRatio ) {
             break;
     }
 
-    // find bottom
+    // find top
     for ( int y = 0; y < image.height(); y++ ) {
         bool found = false;
 
@@ -519,42 +519,56 @@ QImage ImageUtils::autoCrop( const QImage &image, bool preserveAspectRatio ) {
  */
 QImage ImageUtils::colourToAlpha( const QImage &image, const QColor &key ) {
     QImage out( image.convertToFormat( QImage::Format_ARGB32 ));
+    QRgb *ptr = reinterpret_cast<QRgb*>( out.scanLine( 0 ));
+    const QRgb *end = ptr + out.width() * out.height();
+//#define DOUBLE_C2A
+#ifndef DOUBLE_C2A
+    const int keyColours[3] { key.red(), key.green(), key.blue() };
+    for ( ; ptr < end; ptr++ ) {
+        int colours[4] { qRed( *ptr ), qGreen( *ptr ), qBlue( *ptr ), qAlpha( *ptr ) };
+        int alpha[4] { 0, 0, 0, colours[3] };
 
-    auto alphaFromKey = []( const QColor &colour, const QColor &key ) {
-        QVector<qreal> alpha( 3 );
-        QVector<qreal> colours = { colour.redF(), colour.greenF(), colour.blueF(), colour.alphaF() };
-        const QVector<qreal> keyColours = { key.redF(), key.greenF(), key.blueF(), key.alphaF() };
+        for ( int y = 0; y < 3; y++ ) {
+            if ( colours[y] > keyColours[y] )
+                alpha[y] = ( colours[y] - keyColours[y] ) / ( 255 - keyColours[y] );
+            else if ( colours[y] < keyColours[y] )
+                alpha[y] = 255 * ( keyColours[y] - colours[y] ) / keyColours[y];
+        }
+
+        colours[3] = ( alpha[0] > alpha[1] ) ? qMax( alpha[0], alpha[2] ) : qMax( alpha[1], alpha[2] );
+        if ( colours[3] > 1 ) {
+            for ( int y = 0; y < 3; y++ )
+                colours[y] = qBound( 0, 255 * ( colours[y] - keyColours[y] ) / colours[3] + keyColours[y], 255 );
+
+            colours[3] = qBound( 0, colours[3] * alpha[3] / 255, 255 );
+        }
+
+        *ptr = qRgba( colours[0], colours[1], colours[2], colours[3] );
+    }
+#else
+    const qreal keyColours[3] { key.redF(), key.greenF(), key.blueF() };
+    for ( ; ptr < end; ptr++ ) {
+        qreal colours[4] { static_cast<qreal>( qRed( *ptr ) / 255.0 ), static_cast<qreal>( qGreen( *ptr ) / 255.0 ), static_cast<qreal>( qBlue( *ptr ) / 255.0 ), static_cast<qreal>( qAlpha( *ptr ) / 255.0 ) };
+        qreal alpha[4] { 0.0, 0.0, 0.0, colours[3] };
 
         for ( int y = 0; y < 3; y++ ) {
             if ( colours[y] > keyColours[y] )
                 alpha[y] = ( colours[y] - keyColours[y] ) / ( 255.0 - keyColours[y] );
             else if ( colours[y] < keyColours[y] )
                 alpha[y] = ( keyColours[y] - colours[y] ) / ( keyColours[y] );
-            else
-                alpha[y] = 0.0;
         }
 
-        if ( alpha[0] > alpha[1] )
-            colours[3] = ( alpha[0] > alpha[2] ) ? alpha[0] : alpha[2];
-        else
-            colours[3] = ( alpha[1] > alpha[2] ) ? alpha[1] : alpha[2];
-
-        colours[3] *= 255.0;
-
-        if ( colours[3] > 1.0 ) {
+        colours[3] = ( alpha[0] > alpha[1] ) ? qMax( alpha[0], alpha[2] ) : qMax( alpha[1], alpha[2] );
+        if ( colours[3] > 0.004 ) {
             for ( int y = 0; y < 3; y++ )
-                colours[y] = qBound( 0.0, 255.0 * ( colours[y] - keyColours[y] ) / colours[3] + keyColours[y], 1.0 );
+                colours[y] = qBound( 0.0, 255.0 * ( colours[y] - keyColours[y] ) / ( colours[3] * 255.0 ) + keyColours[y], 1.0 );
 
-            colours[3] = qBound( 0.0, colours[3] * colour.alphaF() / 255.0, 1.0 );
+            colours[3] = qBound( 0.0, colours[3] * alpha[3], 1.0 );
         }
 
-        return QColor::fromRgbF( colours[0], colours[1], colours[2], colours[3] );
-    };
-
-    for ( int x = 0; x < out.width(); x++ ) {
-        for ( int y = 0; y < out.height(); y++ )
-            out.setPixelColor( x, y, alphaFromKey( image.pixelColor( x, y ), key ));
+        *ptr = qRgba( static_cast<int>( colours[0] * 255 ), static_cast<int>( colours[1] * 255 ), static_cast<int>( colours[2] * 255 ), static_cast<int>( colours[3] * 255 ));
     }
+#endif
 
     return out;
 }
