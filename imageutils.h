@@ -80,6 +80,8 @@ public slots:
     void setViewMode();
     void setAddMode();
     void setTitle( const QString &title );
+    void hideCropWidget();
+    void paste( const QImage &image );
 
 protected:
     void resizeEvent( QResizeEvent *event ) override;

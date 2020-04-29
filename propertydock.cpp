@@ -310,7 +310,7 @@ void PropertyDock::on_addPropButton_clicked() {
 
     // get UNFILTERED tags that have been set
     QSqlQuery query;
-    query.exec( QString( "select %1 from %2 where %3=%4" )
+    query.exec( QString( "select %1 from %2 where %3=%4 and %1>=0" )
                         .arg( Property::instance()->fieldName( Property::TagId ),
                               Property::instance()->tableName(),
                               Property::instance()->fieldName( Property::ReagentId ),
@@ -347,7 +347,17 @@ void PropertyDock::on_addPropButton_clicked() {
         } );
         //action->setDisabled( tags.contains( tagId ));
     }
+
     subMenu->setIcon( QIcon::fromTheme( "add" ));
+
+    // TODO: these are overrides (prioritize these instead of previous values (move up the property list))
+    QMenu *setTagMenu( subMenu->addMenu( Property::tr( "Used tags" )));
+    for ( const Id tagId : qAsConst( allSetTags )) {
+        setTagMenu->addAction( QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()), this, [ this, reagentId, tagId ]() {
+            const QPair<QString, QVariant> values( this->getPropertyValue( reagentId, tagId ));
+            this->addProperty( values.first, values.second, reagentId, values.first.isEmpty() ? tagId : Id::Invalid );
+        } );
+    }
 
     // add an option to add custom properties
     menu.addAction( PropertyDock::tr( "Add custom property to '%1'" ).arg( TextUtils::elidedString( reagentName )), this, [ this, reagentId ]() {
@@ -416,7 +426,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
              type == Tag::Formula ||
              tagId == Id::Invalid ) {
 
-            menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId
+            QAction *copyAction( menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId
 #ifdef Q_CC_MSVC
             , mimeTag, mimeData, mimeName
 #endif
@@ -475,7 +485,10 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
                 // set mime data to clipboard
                 QGuiApplication::clipboard()->setMimeData( propertyData );
-            } )->setIcon( QIcon::fromTheme( "copy" ));
+            } ));
+
+            copyAction->setIcon( QIcon::fromTheme( "copy" ));
+            copyAction->setShortcut( QKeySequence::Copy );
         }
 
         if ( type == Tag::Formula || tagId == PixmapTag ) {
@@ -504,8 +517,11 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             } )->setIcon( QIcon::fromTheme( "edit" ));*/
         }
 
-        if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag )
-            menu.addAction( PropertyDock::tr( "Edit" ), this, SLOT( on_editPropButton_clicked()))->setIcon( QIcon::fromTheme( "edit" ));
+        if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag ) {
+            QAction *editAction( menu.addAction( PropertyDock::tr( "Edit" ), this, SLOT( on_editPropButton_clicked())));
+            editAction->setIcon( QIcon::fromTheme( "edit" ));
+            editAction->setShortcut( QKeySequence::Open );
+        }
 
         if ( tagId != Id::Invalid ) {
             const QString functionName( Tag::instance()->function( tagId ));
@@ -526,19 +542,23 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 subMenu2->addAction( PropertyDock::tr( "Value" ), this, paste )->setIcon( QIcon::fromTheme( "paste" ));
             }
 
-            menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), this, [ this, tagId ]() {
+            QAction *hideAction( menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), this, [ this, tagId ]() {
                 this->hiddenTags << QString::number( static_cast<int>( tagId ));
                 this->hiddenTags.removeAll( "" );
                 ReagentDock::instance()->view()->updateView();
-            } )->setIcon( QIcon::fromTheme( "hide" ));
+            } ));
+            hideAction->setIcon( QIcon::fromTheme( "hide" ));
+            hideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_H ));
         }
     }
 
     if ( !this->hiddenTags.isEmpty()) {
-        menu.addAction( PropertyDock::tr( "Show all properties" ), this, [ this ]() {
+        QAction *unHideAction( menu.addAction( PropertyDock::tr( "Show all properties" ), this, [ this ]() {
             this->hiddenTags.clear();
             ReagentDock::instance()->view()->updateView();
-        } )->setIcon( QIcon::fromTheme( "show" ));
+        } ));
+        unHideAction->setIcon( QIcon::fromTheme( "show" ));
+        unHideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_H ));
     }
 
     // paste property from clipboard (paste between reagents)
@@ -563,9 +583,11 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
             if ( ok ) {
                 const QString prettyName( PropertyDock::tr( R"(Paste property "%1")" ).arg( tagId != Id::Invalid ? Tag::instance()->name( tagId ) : name ));
-                menu.addAction( prettyName, this, [ this, name, tagId, reagentId, data ]() {
+                QAction *pasteAction( menu.addAction( prettyName, this, [ this, name, tagId, reagentId, data ]() {
                     this->addProperty( name.constData(), data, reagentId, tagId );
-                } )->setIcon( QIcon::fromTheme( "paste" ));
+                } ));
+                pasteAction->setIcon( QIcon::fromTheme( "paste" ));
+                pasteAction->setShortcut( QKeySequence::Paste );
             }
         }
     }

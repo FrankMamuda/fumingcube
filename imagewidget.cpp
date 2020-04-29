@@ -20,10 +20,20 @@
  * includes
  */
 #include "imagewidget.h"
+#include "pixmaputils.h"
 #include <QPainter>
 #include <QFontMetrics>
 #include <QApplication>
 #include <QPaintEvent>
+#include <QMimeData>
+
+/**
+ * @brief ImageWidget::ImageWidget
+ * @param parent
+ */
+ImageWidget::ImageWidget(QWidget *parent) : QWidget( parent ) {
+    this->setAcceptDrops( true );
+}
 
 /**
  * @brief ImageWidget::imageGeometry
@@ -81,4 +91,27 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
 
     painter.setFont( font );
     painter.drawText( this->width() - fm.width( text ) - margin, margin + fm.height(), text );
+}
+
+/**
+ * @brief ImageWidget::dropEvent
+ * @param event
+ */
+void ImageWidget::dropEvent( QDropEvent *event ) {
+    for ( const QUrl &url : event->mimeData()->urls()) {
+        QPixmap pixmap( PixmapUtils::fromUrl( url ));
+        if ( !pixmap.isNull()) {
+            this->imageUtilsParent()->paste( pixmap.toImage());
+            return;
+        }
+    }
+}
+
+/**
+ * @brief ImageWidget::dragEnterEvent
+ * @param event
+ */
+void ImageWidget::dragEnterEvent( QDragEnterEvent *event ) {
+    if ( !event->mimeData()->urls().isEmpty())
+        event->acceptProposedAction();
 }

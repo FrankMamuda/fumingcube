@@ -60,16 +60,9 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
         this->lastImageGeometry = this->imageWidget()->imageGeometry();
     };
 
-    // hideCropWidget lambda
-    auto hideCropWidget = [ this ]() {
-        this->cropWidget()->hide();
-        this->ui->actionFit->trigger();
-        this->ui->stackedWidget->setCurrentIndex( 0 );
-    };
-
     // SCALE lambda
-    QAction::connect( this->ui->actionScale, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        hideCropWidget();
+    QAction::connect( this->ui->actionScale, &QAction::triggered, this, [ this ] () {
+        this->hideCropWidget();
 
         bool ok;
         const qreal scale = QInputDialog::getInt( this, ImageUtils::tr( "Scale image" ), ImageUtils::tr( "Input scale factor (%)" ), 100, 5, 200, 1, &ok ) / 100.0;
@@ -115,14 +108,14 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     } );
 
     // AUTOCROP lambda
-    QAction::connect( this->ui->actionAutocrop, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        hideCropWidget();
+    QAction::connect( this->ui->actionAutocrop, &QAction::triggered, this, [ this ] () {
+        this->hideCropWidget();
         this->setImage( ImageUtils::autoCrop( this->image()));
     } );
 
     // ROTATE lambda
-    QAction::connect( this->ui->actionRotate, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        hideCropWidget();
+    QAction::connect( this->ui->actionRotate, &QAction::triggered, this, [ this ] () {
+        this->hideCropWidget();
         this->setImage( this->image().transformed( QTransform().rotate( 90 )));
     } );
 
@@ -149,13 +142,13 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     } );
 
     // RESTORE lambda
-    QAction::connect( this->ui->actionRestoreOriginal, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        hideCropWidget();
+    QAction::connect( this->ui->actionRestoreOriginal, &QAction::triggered, this, [ this ] () {
+        this->hideCropWidget();
         this->setImage( this->originalImage );
     } );
 
     // MANUAL CROP lambda
-    QAction::connect( this->ui->actionCrop, &QAction::triggered, this, [ this, hideCropWidget ] () {
+    QAction::connect( this->ui->actionCrop, &QAction::triggered, this, [ this ] () {
         if ( !this->cropWidget()->isVisible()) {
             if ( !this->ui->scrollArea->geometry().contains( this->imageWidget()->imageGeometry()))
                 this->ui->actionFit->trigger();
@@ -164,19 +157,19 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
             this->cropWidget()->show();
             this->ui->stackedWidget->setCurrentIndex( 1 );
         } else {
-            hideCropWidget();
+            this->hideCropWidget();
         }
     } );
 
     // DONE button lambda
-    QPushButton::connect( this->ui->doneButton, &QPushButton::clicked, this, [ this, hideCropWidget ] () {
+    QPushButton::connect( this->ui->doneButton, &QPushButton::clicked, this, [ this ] () {
         if ( this->cropWidget()->isVisible()) {
             const QPointF delta( QPointF( this->cropWidget()->geometry().topLeft() - this->imageWidget()->imageGeometry().topLeft()) / this->imageWidget()->zoomScale());
             const QSizeF scale( this->cropWidget()->size() / this->imageWidget()->zoomScale());
 
             const QImage image( this->image().convertToFormat( QImage::Format_ARGB32 ).copy( QRect( delta.toPoint(), scale.toSize())));
             this->setImage( image );
-            hideCropWidget();
+            this->hideCropWidget();
         }
     } );
 
@@ -185,36 +178,24 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     this->ui->titleLabel->hide();
 
     // PASTE lambda
-    QAction::connect( this->ui->actionPaste, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        if ( !QApplication::clipboard()->image().isNull()) {
-            bool replace = !this->imageWidget()->image().isNull();
-            if ( replace )
-                replace = QMessageBox::question( this, ImageUtils::tr( "Confirm replacement" ), ImageUtils::tr( "Replace current image?" )) == QMessageBox::Yes;
-
-            if ( replace ) {
-                hideCropWidget();
-                this->setImage( QApplication::clipboard()->image(), true );
-                this->ui->actionFit->trigger();
-            }
-        } else {
-            QMessageBox::information( this, ImageUtils::tr( "Paste error" ), ImageUtils::tr( "Clipboard contains no valid images" ));
-        }
+    QAction::connect( this->ui->actionPaste, &QAction::triggered, this, [ this ] () {
+        this->paste( QApplication::clipboard()->image());
     } );
 
     // CLEAR lambda
-    QAction::connect( this->ui->actionClear, &QAction::triggered, this, [ this, hideCropWidget ] () {
-        hideCropWidget();
+    QAction::connect( this->ui->actionClear, &QAction::triggered, this, [ this ] () {
+        this->hideCropWidget();
         this->originalImage = QImage();
         this->imageWidget()->setImage( QImage());
     } );
 
     // OPEN/REPLACE lambda
-    QAction::connect( this->ui->actionReplace, &QAction::triggered, this, [ this, hideCropWidget ] () {
+    QAction::connect( this->ui->actionReplace, &QAction::triggered, this, [ this ] () {
         const QString fileName( QFileDialog::getOpenFileName( this, QWidget::tr( "Open Image" ), "", QWidget::tr( "Images (*.png *.jpg)" )));
         if ( fileName.isEmpty())
             return;
 
-        hideCropWidget();
+        this->hideCropWidget();
         this->loadImage( fileName );
         this->ui->actionFit->trigger();
     } );
@@ -362,6 +343,35 @@ void ImageUtils::setAddMode() {
  */
 void ImageUtils::setTitle( const QString &title ) {
     this->ui->titleEdit->setText( title );
+}
+
+/**
+ * @brief ImageUtils::hideCropWidget
+ */
+void ImageUtils::hideCropWidget() {
+    this->cropWidget()->hide();
+    this->ui->actionFit->trigger();
+    this->ui->stackedWidget->setCurrentIndex( 0 );
+}
+
+/**
+ * @brief ImageUtils::paste
+ * @param image
+ */
+void ImageUtils::paste( const QImage &image ) {
+    if ( !image.isNull()) {
+        bool ok = true;
+        if ( !this->imageWidget()->image().isNull())
+            ok = QMessageBox::question( this, ImageUtils::tr( "Confirm replacement" ), ImageUtils::tr( "Replace current image?" )) == QMessageBox::Yes;
+
+        if ( ok ) {
+            this->hideCropWidget();
+            this->setImage( image, true );
+            this->ui->actionFit->trigger();
+        }
+    } else {
+        QMessageBox::information( this, ImageUtils::tr( "Paste error" ), ImageUtils::tr( "Clipboard contains no valid images" ));
+    }
 }
 
 /**

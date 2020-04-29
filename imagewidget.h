@@ -27,12 +27,12 @@
 /**
  * @brief The ImageWidget class
  */
-class ImageWidget : public QWidget {
+class ImageWidget final : public QWidget {
     Q_OBJECT
 
 public:
     // constructor
-    explicit ImageWidget( QWidget *parent = nullptr ) : QWidget( parent ) {}
+    explicit ImageWidget( QWidget *parent = nullptr );
 
     // disable move
     ImageWidget( ImageUtils&& ) = delete;
@@ -59,6 +59,8 @@ public:
 
 protected:
     void paintEvent( QPaintEvent * ) override;
+    void dropEvent( QDropEvent *event ) override;
+    void dragEnterEvent( QDragEnterEvent *event ) override;
 
 public slots:
     void setImageUtilsParent( ImageUtils *iu ) { this->m_iu = iu; }

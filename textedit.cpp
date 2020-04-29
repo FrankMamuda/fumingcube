@@ -254,17 +254,10 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
     // check dropped items for images
     for ( const QUrl &url : source->urls()) {
-        // TODO: resolve links from the internet
-
-        if ( !url.isLocalFile())
-            continue;
-
-        if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" ) && !this->isSimpleEditor()) {
-            const QImage image( QImageReader( url.toLocalFile()).read());
-            if ( !image.isNull()) {
-                this->insertImage( image );
-                return;
-            }
+        QPixmap pixmap( PixmapUtils::fromUrl( url ));
+        if ( !pixmap.isNull()) {
+            this->insertImage( pixmap.toImage());
+            return;
         }
     }
 

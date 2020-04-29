@@ -66,6 +66,7 @@ public:
     [[nodiscard]] static QByteArray toData( const QPixmap &pixmap );
     [[nodiscard]] static QPixmap getOpenPixmap( QWidget *context );
     [[nodiscard]] static bool readHeader( const QByteArray &array, PixmapInfo *info = nullptr );
+    [[nodiscard]] static QPixmap fromUrl( const QUrl &url );
 
 private:
     explicit PixmapUtils() {

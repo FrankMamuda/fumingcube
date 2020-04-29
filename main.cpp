@@ -69,13 +69,10 @@ extraction:
 misc/unsorted:
  - restore previously selected label on start
  - view custom properties in a separate dialog
- - adding structure property should open ImageUtils by default
-   where user can either paste an image or load from file
- - PropertyEditor insert image should go through ImageUtils
+ - some keysequences to not work
 
 imageutils:
  - icons in ImageUtils
- - drop in ImageUtils
 */
 
 /*

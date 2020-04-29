@@ -23,6 +23,7 @@
 #include <QBuffer>
 #include <QFileDialog>
 #include <QImageReader>
+#include <QMimeDatabase>
 #include "cache.h"
 #include "imageutils.h"
 
@@ -153,6 +154,23 @@ bool PixmapUtils::readHeader( const QByteArray &array, PixmapInfo *info ) {
     }
 
     return false;
+}
+
+/**
+ * @brief PixmapUtils::fromUrl
+ * @param url
+ * @return
+ */
+QPixmap PixmapUtils::fromUrl( const QUrl &url ) {
+    QPixmap pixmap;
+
+    if ( !url.isLocalFile())
+        return QPixmap();
+
+    if ( QMimeDatabase().mimeTypeForFile( url.toLocalFile(), QMimeDatabase::MatchContent ).iconName().startsWith( "image" ))
+        pixmap.load( url.toLocalFile());
+
+    return pixmap;
 }
 
 /**
