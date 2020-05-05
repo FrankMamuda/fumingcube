@@ -113,7 +113,6 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
         painter.restore();
         return;
     }
-    painter.restore();
 
     if ( this->imageUtilsParent()->cropWidget()->isVisible()) {
         painter.save();
@@ -134,6 +133,7 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
 
     painter.setFont( font );
     painter.drawText( this->width() - fm.width( text ) - margin, margin + fm.height(), text );
+    painter.restore();
 }
 
 /**

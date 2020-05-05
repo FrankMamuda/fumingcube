@@ -70,6 +70,9 @@ misc/unsorted:
  - restore previously selected label on start
  - view custom properties in a separate dialog
  - some keysequences to not work (in PropertyDock)
+
+imageutils:
+ - crop and zoom does not work well
 */
 
 /*

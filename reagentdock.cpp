@@ -232,7 +232,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
     // add 'Add' menu
-    menu->addMenu( buildAddMenu( context ));
+    menu->addMenu( this->buildAddMenu( context ));
 
     // add 'Edit' menu
     menu->addAction( ReagentDock::tr( "Edit" ), this, [ this ]() { this->on_editButton_clicked(); } )->setIcon( QIcon::fromTheme( "edit" ));
@@ -507,7 +507,7 @@ Id ReagentDock::addReagent( const Id &parentId, const QString &reagentName, cons
  * @param pos
  */
 void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos ) {
-    QMenu *menu( this->buildAddMenu( true ));
+    QMenu *menu( this->buildMenu( true ));
     menu->exec( this->mapToGlobal( pos ));
 }
 
@@ -515,7 +515,7 @@ void ReagentDock::on_reagentView_customContextMenuRequested( const QPoint &pos )
  * @brief ReagentDock::on_addButton_clicked
  */
 void ReagentDock::on_addButton_clicked() {
-    QMenu *menu( this->buildMenu( false ));
+    QMenu *menu( this->buildAddMenu());
     menu->exec( this->mapToGlobal( this->ui->addButton->pos()));
 }
 
