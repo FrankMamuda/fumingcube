@@ -48,7 +48,7 @@ public:
         FormulaRequestBrowser,
         NameRequest,
         FavIcon,
-        TextEditImage
+        DropImageRequest
     };
     Q_ENUM( Types )
 

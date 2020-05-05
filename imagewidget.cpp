@@ -21,18 +21,60 @@
  */
 #include "imagewidget.h"
 #include "pixmaputils.h"
+#include "networkmanager.h"
+#include <QRandomGenerator>
 #include <QPainter>
 #include <QFontMetrics>
 #include <QApplication>
 #include <QPaintEvent>
 #include <QMimeData>
+#include <QRegularExpression>
 
 /**
  * @brief ImageWidget::ImageWidget
  * @param parent
  */
-ImageWidget::ImageWidget(QWidget *parent) : QWidget( parent ) {
+ImageWidget::ImageWidget( QWidget *parent ) : QWidget( parent ) {
     this->setAcceptDrops( true );
+    this->m_id = QRandomGenerator::global()->generate();
+
+     // setup finished connection to the NetworkManager
+     NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
+         switch ( type ) {
+         // FIXME: dup code
+         case NetworkManager::DropImageRequest:
+         {
+             const quint32 idn = userData.value<quint32>();
+             if ( idn != this->id())
+                 return;
+
+             // TODO: svg not implemented yet
+             if ( url.endsWith( ".svg" )) {
+                 qDebug() << "network->image; svg not implemented yet" << idn << this->id();
+                 return;
+             }
+
+             qDebug() << "network->image" << idn << this->id();
+             QPixmap pixmap;
+             if ( pixmap.loadFromData( data )) {
+                 this->imageUtilsParent()->paste( pixmap.toImage());
+                 return;
+             }
+
+             return;
+         }
+
+         default:
+             ;
+         }
+     } );
+}
+
+/**
+ * @brief ImageWidget::~ImageWidget
+ */
+ImageWidget::~ImageWidget() {
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
 }
 
 /**
@@ -61,16 +103,17 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
 
     const QRect imageGeometry( this->imageGeometry());
 
+    painter.save();
+    painter.setPen( QApplication::palette().color( QPalette::Text ));
     if ( !this->image().isNull()) {
         painter.drawImage( imageGeometry, this->image());
-        painter.save();
-        painter.setPen( QApplication::palette().color( QPalette::Text ));
         painter.drawRect( imageGeometry.adjusted( -1, -1, 0, 0 ));
-        painter.restore();
     } else {
         painter.drawText( event->rect(), ImageWidget::tr( "No image has been set.\nOpen from file or paste from clipboard.\n\nClick anywhere on this window to open an image." ), QTextOption(  Qt::AlignCenter ));
+        painter.restore();
         return;
     }
+    painter.restore();
 
     if ( this->imageUtilsParent()->cropWidget()->isVisible()) {
         painter.save();
@@ -97,13 +140,25 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
  * @brief ImageWidget::dropEvent
  * @param event
  */
-void ImageWidget::dropEvent( QDropEvent *event ) {
+void ImageWidget::dropEvent( QDropEvent *event ) {   
     for ( const QUrl &url : event->mimeData()->urls()) {
         QPixmap pixmap( PixmapUtils::fromUrl( url ));
         if ( !pixmap.isNull()) {
             this->imageUtilsParent()->paste( pixmap.toImage());
             return;
         }
+    }
+
+    if ( event->mimeData()->hasHtml()) {
+        // handle img urls
+        QRegularExpression re( "<img[^>]*src=\"([^\"]+?(?=\"))\"" );
+        QRegularExpressionMatch match( re.match( event->mimeData()->html()));
+        if ( match.hasMatch()) {
+            const QString imgSource( match.captured( 1 ));
+            NetworkManager::instance()->execute( imgSource, NetworkManager::DropImageRequest, this->id());
+            return;
+        }
+        return;
     }
 }
 

@@ -26,8 +26,6 @@
 #include <QRandomGenerator>
 #include <QTextEdit>
 
-
-
 /**
  * @brief The TextEdit class
  */
@@ -40,7 +38,6 @@ public:
     ~TextEdit() override;
     void insertImage( const QImage &image );
     void insertImageData( const int width, const int height, const QString &base64 );
-    quint32 id() const { return this->m_id; }
 
     /**
      * @brief cleanHTML
@@ -59,6 +56,12 @@ public:
      * @return
      */
     [[nodiscard]] QCompleter *completer() const { return this->m_completer; }
+
+    /**
+     * @brief id
+     * @return
+     */
+    [[nodiscard]] quint32 id() const { return this->m_id; }
 
 signals:
     void entered();

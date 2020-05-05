@@ -50,7 +50,7 @@ TextEdit::TextEdit( QWidget *parent ) : QTextEdit( parent ) {
     // setup finished connection to the NetworkManager
     NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
         switch ( type ) {
-        case NetworkManager::TextEditImage:
+        case NetworkManager::DropImageRequest:
         {
             const quint32 idn = userData.value<quint32>();
             if ( idn != this->id())
@@ -237,7 +237,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
             QRegularExpressionMatch match( re.match( source->html()));
             if ( match.hasMatch()) {
                 const QString imgSource( match.captured( 1 ));
-                NetworkManager::instance()->execute( imgSource, NetworkManager::TextEditImage, this->id());
+                NetworkManager::instance()->execute( imgSource, NetworkManager::DropImageRequest, this->id());
                 return;
             }
         }

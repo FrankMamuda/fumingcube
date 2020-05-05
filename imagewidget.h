@@ -33,6 +33,7 @@ class ImageWidget final : public QWidget {
 public:
     // constructor
     explicit ImageWidget( QWidget *parent = nullptr );
+    ~ImageWidget() override;
 
     // disable move
     ImageWidget( ImageUtils&& ) = delete;
@@ -57,6 +58,12 @@ public:
      */
     [[nodiscard]] QImage image() const { return this->m_image; }
 
+    /**
+     * @brief id
+     * @return
+     */
+    [[nodiscard]] quint32 id() const { return this->m_id; }
+
 protected:
     void paintEvent( QPaintEvent * ) override;
     void dropEvent( QDropEvent *event ) override;
@@ -71,4 +78,5 @@ private:
     ImageUtils *m_iu = nullptr;
     qreal m_zoomScale = 1.0;
     QImage m_image;
+    quint32 m_id = 0;
 };
