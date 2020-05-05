@@ -254,16 +254,25 @@ No scaling however will be applied for images in custom properties as they will 
       </property>
      </action>
      <action name="actionInvert">
+      <property name="icon">
+       <iconset theme="invert"/>
+      </property>
       <property name="text">
        <string>Invert</string>
       </property>
      </action>
      <action name="actionSetBackground">
+      <property name="icon">
+       <iconset theme="background"/>
+      </property>
       <property name="text">
        <string>Set background</string>
       </property>
      </action>
      <action name="actionScale">
+      <property name="icon">
+       <iconset theme="scale"/>
+      </property>
       <property name="text">
        <string>Scale</string>
       </property>
@@ -279,7 +288,7 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionReplace">
       <property name="icon">
-       <iconset theme="replace">
+       <iconset theme="open_image">
         <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
@@ -287,11 +296,17 @@ No scaling however will be applied for images in custom properties as they will 
       </property>
      </action>
      <action name="actionMakeTransparent">
+      <property name="icon">
+       <iconset theme="transparent"/>
+      </property>
       <property name="text">
        <string>Make transparent</string>
       </property>
      </action>
      <action name="actionZoomIn">
+      <property name="icon">
+       <iconset theme="zoom_in"/>
+      </property>
       <property name="text">
        <string>Zoom in</string>
       </property>
@@ -300,26 +315,41 @@ No scaling however will be applied for images in custom properties as they will 
       </property>
      </action>
      <action name="actionZoomOut">
+      <property name="icon">
+       <iconset theme="zoom_out"/>
+      </property>
       <property name="text">
        <string>Zoom out</string>
       </property>
      </action>
      <action name="actionFit">
+      <property name="icon">
+       <iconset theme="zoom_fit"/>
+      </property>
       <property name="text">
        <string>Fit screen</string>
       </property>
      </action>
      <action name="actionNormalSize">
+      <property name="icon">
+       <iconset theme="zoom_normal"/>
+      </property>
       <property name="text">
        <string>Normal size</string>
       </property>
      </action>
      <action name="actionAutocrop">
+      <property name="icon">
+       <iconset theme="autocrop"/>
+      </property>
       <property name="text">
        <string>Autocrop</string>
       </property>
      </action>
      <action name="actionCrop">
+      <property name="icon">
+       <iconset theme="crop"/>
+      </property>
       <property name="text">
        <string>Manual crop</string>
       </property>
@@ -337,11 +367,17 @@ No scaling however will be applied for images in custom properties as they will 
    </item>
   </layout>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset theme="paste"/>
+   </property>
    <property name="text">
     <string>Paste from clipboard</string>
    </property>
   </action>
   <action name="actionClear">
+   <property name="icon">
+    <iconset theme="clear_image"/>
+   </property>
    <property name="text">
     <string>Clear</string>
    </property>

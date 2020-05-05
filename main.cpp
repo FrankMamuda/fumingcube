@@ -69,10 +69,7 @@ extraction:
 misc/unsorted:
  - restore previously selected label on start
  - view custom properties in a separate dialog
- - some keysequences to not work
-
-imageutils:
- - icons in ImageUtils
+ - some keysequences to not work (in PropertyDock)
 */
 
 /*
@@ -263,6 +260,9 @@ int main( int argc, char *argv[] ) {
         Variable::reset( "reagentDock/openNodes" );
         Variable::reset( "propertyDock/hiddenTags" );
         Variable::reset( "reagentDock/hiddenNodes" );
+        Variable::reset( "properyDock/selection" );
+        Variable::reset( "searchFragment/history" );
+        Variable::reset( "propertyFragment/selectedTags" );
 
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));

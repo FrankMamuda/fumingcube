@@ -38,6 +38,19 @@
         <file alias="16x16/structure.png">icons/dark/16x16/structure.png</file>
         <file alias="16x16/deprecate.png">icons/dark/16x16/deprecate.png</file>
         <file alias="16x16/delete_cache.png">icons/dark/16x16/delete_cache.png</file>
+        <file alias="16x16/calendar.png">icons/dark/16x16/calendar.png</file>
+		<file alias="16x16/background.png">icons/dark/16x16/background.png</file>
+		<file alias="16x16/crop.png">icons/dark/16x16/crop.png</file>		
+		<file alias="16x16/open_image.png">icons/dark/16x16/open_image.png</file>
+		<file alias="16x16/scale.png">icons/dark/16x16/scale.png</file>
+		<file alias="16x16/zoom_out.png">icons/dark/16x16/zoom_out.png</file>
+		<file alias="16x16/transparent.png">icons/dark/16x16/transparent.png</file>
+		<file alias="16x16/zoom_in.png">icons/dark/16x16/zoom_in.png</file>
+		<file alias="16x16/zoom_fit.png">icons/dark/16x16/zoom_fit.png</file>
+		<file alias="16x16/zoom_normal.png">icons/dark/16x16/zoom_normal.png</file>
+		<file alias="16x16/clear_image.png">icons/dark/16x16/clear_image.png</file>
+		<file alias="16x16/autocrop.png">icons/dark/16x16/autocrop.png</file>
+		<file alias="16x16/invert.png">icons/dark/16x16/invert.png</file>
         <file alias="scalable/accept.svg">icons/dark/scalable/accept.svg</file>
         <file alias="scalable/add.svg">icons/dark/scalable/add.svg</file>
         <file alias="scalable/clean.svg">icons/dark/scalable/clean.svg</file>
@@ -75,7 +88,18 @@
         <file alias="scalable/add_all_properties.svg">icons/dark/scalable/add_all_properties.svg</file>
         <file alias="scalable/collapse.svg">icons/dark/scalable/collapse.svg</file>
         <file alias="scalable/select_tag.svg">icons/dark/scalable/select_tag.svg</file>
-        <file alias="16x16/calendar.png">icons/dark/16x16/calendar.png</file>
         <file alias="scalable/calendar.svg">icons/dark/scalable/calendar.svg</file>
+		<file alias="scalable/background.svg">icons/dark/scalable/background.svg</file>
+		<file alias="scalable/crop.svg">icons/dark/scalable/crop.svg</file>		
+		<file alias="scalable/open_image.svg">icons/dark/scalable/open_image.svg</file>
+		<file alias="scalable/scale.svg">icons/dark/scalable/scale.svg</file>
+		<file alias="scalable/zoom_out.svg">icons/dark/scalable/zoom_out.svg</file>
+		<file alias="scalable/transparent.svg">icons/dark/scalable/transparent.svg</file>
+		<file alias="scalable/zoom_in.svg">icons/dark/scalable/zoom_in.svg</file>
+		<file alias="scalable/zoom_fit.svg">icons/dark/scalable/zoom_fit.svg</file>
+		<file alias="scalable/zoom_normal.svg">icons/dark/scalable/zoom_normal.svg</file>
+		<file alias="scalable/clear_image.svg">icons/dark/scalable/clear_image.svg</file>
+		<file alias="scalable/autocrop.svg">icons/dark/scalable/autocrop.svg</file>
+		<file alias="scalable/invert.svg">icons/dark/scalable/invert.svg</file>
     </qresource>
 </RCC>
