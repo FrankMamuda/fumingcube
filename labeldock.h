@@ -24,6 +24,7 @@
 #include "dockwidget.h"
 #include <QModelIndexList>
 #include <QShortcut>
+#include <QStyledItemDelegate>
 #include "table.h"
 
 /**
@@ -32,6 +33,15 @@
 namespace Ui {
     class LabelDock;
 }
+
+
+/**
+ * @brief The LabelDelegate class
+ */
+class LabelDelegate : public QStyledItemDelegate {
+protected:
+    void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+};
 
 /**
  * @brief The LabelDock class
@@ -62,10 +72,13 @@ public:
      */
     static void setFilter( const QModelIndexList &list = QModelIndexList());
 
+protected:
+    void showEvent( QShowEvent *event ) override;
+
 private slots:
     void on_labelView_customContextMenuRequested( const QPoint &pos );
-
     void on_noButton_clicked();
+    void changed();
 
 private:
     explicit LabelDock( QWidget *parent = nullptr );

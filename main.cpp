@@ -62,11 +62,7 @@ extraction:
   - better 'not found' and 'server busy' error handling in search
 
 misc/unsorted:
- - restore previously selected label on start
  - view custom properties in a separate dialog
-
-imageutils:
- - cropping while zooming does not work well
 */
 
 /*
@@ -202,9 +198,7 @@ int main( int argc, char *argv[] ) {
     Variable::add( "decimalSeparator", QString( QLocale::system().decimalPoint()), Var::Flag::Hidden );
     Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
     Variable::add( "propertyFragment/selectedTags", "", Var::Flag::Hidden );
-
-    // TODO:
-    Variable::add( "properyDock/selection", "", Var::Flag::Hidden );
+    Variable::add( "labelDock/selectedRows", "", Var::Flag::Hidden );
 
     // read configuration
     XMLTools::read();

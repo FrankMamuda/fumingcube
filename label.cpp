@@ -20,8 +20,11 @@
  * includes
  */
 #include "label.h"
+#include "reagent.h"
 #include "field.h"
 #include "database.h"
+#include "variable.h"
+#include "listutils.h"
 #include <QPixmap>
 #include <QPainter>
 #include <QSqlQuery>
@@ -61,6 +64,15 @@ QVariant Label::data( const QModelIndex &index, int role ) const {
         // NOTE: for now use this i18n method, in future replace with something better
         const QString originalString( Table::data( index, role ).toString());
         return QApplication::translate( "Label", originalString.toUtf8().constData());
+    }
+
+    if ( role == Qt::BackgroundRole ) {
+        const QList<int> rows( ListUtils::toNumericList<int>( Variable::string( "labelDock/selectedRows" ).split( ";" )));
+        if ( rows.contains( index.row()) || Reagent::instance()->filter().isEmpty()) {
+            QColor highlight( QApplication::palette().highlight().color());
+            highlight.setAlpha( 16 );
+            return highlight;
+        }
     }
 
     return Table::data( index, role );

@@ -51,9 +51,15 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     auto adjustCropWidget = [ this ]() {
         // move crop rectangle along with the image
         if ( this->cropWidget()->isVisible()) {
-            const QPoint delta( this->imageWidget()->imageGeometry().topLeft() + QPoint( this->cropWidget()->geometry().topLeft() - this->lastImageGeometry.topLeft()));
-            this->cropWidget()->move( delta );
-            this->cropWidget()->resize( this->cropWidget()->size() * ( this->imageWidget()->imageGeometry().size().width() / static_cast<qreal>( this->lastImageGeometry.size().width())));
+            const qreal lastRelativePosX = static_cast<qreal>( this->cropWidget()->x() - this->lastImageGeometry.x()) / static_cast<qreal>( this->lastImageGeometry.width());
+            const qreal lastRelativePosY = static_cast<qreal>( this->cropWidget()->y() - this->lastImageGeometry.y()) / static_cast<qreal>( this->lastImageGeometry.height());
+
+            const QPoint delta( this->imageWidget()->imageGeometry().x() + static_cast<int>( this->imageWidget()->imageGeometry().width() * lastRelativePosX ),
+                                this->imageWidget()->imageGeometry().y() + static_cast<int>( this->imageWidget()->imageGeometry().height() * lastRelativePosY ));
+
+            const qreal factor = static_cast<qreal>( this->imageWidget()->imageGeometry().size().width()) / static_cast<qreal>( this->lastImageGeometry.size().width());
+            const QSize size( QSizeF( this->cropWidget()->size().width() * factor, this->cropWidget()->size().height() * factor ).toSize());
+            this->cropWidget()->setGeometry( delta.x(), delta.y(), size.width(), size.height());
         }
 
         // store last geometry for crop widget
@@ -150,6 +156,8 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     // MANUAL CROP lambda
     QAction::connect( this->ui->actionCrop, &QAction::triggered, this, [ this ] () {
         if ( !this->cropWidget()->isVisible()) {
+            //this->lastImageGeometry = this->imageWidget()->imageGeometry();
+
             if ( !this->ui->scrollArea->geometry().contains( this->imageWidget()->imageGeometry()))
                 this->ui->actionFit->trigger();
 
@@ -408,7 +416,7 @@ void ImageUtils::showEvent( QShowEvent *event ) {
 void ImageUtils::mouseReleaseEvent( QMouseEvent *event ) {
     QDialog::mouseReleaseEvent( event );
 
-    if ( this->ui->imageWidget->image().isNull())
+    if ( this->ui->imageWidget->image().isNull() && event->button() == Qt::LeftButton )
         this->ui->actionReplace->trigger();
 }
 

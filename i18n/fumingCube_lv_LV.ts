@@ -86,6 +86,29 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>CalcView</name>
+    <message>
+        <location filename="../calcview.cpp" line="55"/>
+        <source>Override theme</source>
+        <translation>Izskats</translation>
+    </message>
+    <message>
+        <location filename="../calcview.cpp" line="73"/>
+        <source>Zoom in</source>
+        <translation>Pietuvināt</translation>
+    </message>
+    <message>
+        <location filename="../calcview.cpp" line="74"/>
+        <source>Zoom out</source>
+        <translation>Attālināt</translation>
+    </message>
+    <message>
+        <location filename="../calcview.cpp" line="75"/>
+        <source>Restore zoom</source>
+        <translation>Atiestatīt</translation>
+    </message>
+</context>
+<context>
     <name>CharacterMap</name>
     <message>
         <location filename="../charactermap.cpp" line="35"/>
@@ -413,24 +436,199 @@ pārlūks</translation>
 <context>
     <name>ImageUtils</name>
     <message>
-        <location filename="../imageutils.ui" line="14"/>
         <source>Insert image</source>
-        <translation>Attēla apstrāde</translation>
+        <translation type="vanished">Attēla apstrāde</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="76"/>
-        <source>_pixmap</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../imageutils.ui" line="120"/>
         <source>Scale:</source>
-        <translation>Izmērs:</translation>
+        <translation type="vanished">Izmērs:</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="149"/>
-        <source>_percent</source>
+        <location filename="../imageutils.ui" line="14"/>
+        <source>Image editor</source>
+        <translation>Attēlu rediģētājs</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="39"/>
+        <source>ImageUtils</source>
+        <translation>Attēlu pārvaldnieks</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="48"/>
+        <source>Title</source>
+        <translation>Nosaukums</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="116"/>
+        <source>Formulas and image properties will be automatically scaled to fit property window width.
+No scaling however will be applied for images in custom properties as they will appear in full size.</source>
+        <translation type="unfinished">Formulas un attēli tiks automātiski mērogoti, lai ietilptu īpašību pārlūkā.
+Nestandarta īpašības ar attēliem netiek mērogotas un tiek attēlotas pilnā izmērā.</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="164"/>
+        <source>Done</source>
+        <translation>Darīts</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="202"/>
+        <source>Transform</source>
+        <translation>Transformācijas</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="209"/>
+        <source>Colours</source>
+        <translation>Krāsas</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="217"/>
+        <source>Crop</source>
+        <translation>Apgriezt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="224"/>
+        <source>View</source>
+        <translation>Skats</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="233"/>
+        <source>Image</source>
+        <translation>Attēls</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="253"/>
+        <source>Rotate</source>
+        <translation>Pagriezt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="261"/>
+        <source>Invert</source>
+        <translation>Invertēt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="269"/>
+        <source>Set background</source>
+        <translation>Pievienot fonu</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="277"/>
+        <source>Scale</source>
+        <translation>Mērogot</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="286"/>
+        <source>Save as...</source>
+        <translation>Saglabāt kā...</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="295"/>
+        <source>Open</source>
+        <translation>Atvērt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="303"/>
+        <source>Make transparent</source>
+        <translation>Padarīt caurspīdīgu</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="311"/>
+        <location filename="../imageutils.ui" line="314"/>
+        <source>Zoom in</source>
+        <translation>Pietuvināt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="322"/>
+        <source>Zoom out</source>
+        <translation>Attālināt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="330"/>
+        <source>Fit screen</source>
+        <translation>Ietilpināt ekrānā</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="338"/>
+        <source>Normal size</source>
+        <translation>Patiesais izmērs</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="346"/>
+        <source>Autocrop</source>
+        <translation>Apgriezt automātiski</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="354"/>
+        <source>Manual crop</source>
+        <translation>Apgriezt manuāli</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="363"/>
+        <source>Restore original</source>
+        <translation>Atjaunot oriģinālu</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="374"/>
+        <source>Paste from clipboard</source>
+        <translation>Ielīmēt no starpliktuves</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.ui" line="382"/>
+        <source>Clear</source>
+        <translation>Notīrīt</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="68"/>
+        <source>Scale image</source>
+        <translation>Mērogot attēlu</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="68"/>
+        <source>Input scale factor (%)</source>
+        <translation>Mērogošanas faktors (%)</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="96"/>
+        <source>Pick current background colour (colour key)</source>
+        <translation>Izvēlies fona krāsu (atslēgas krāsu)</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="329"/>
+        <source>Image viewer</source>
+        <translation>Attēlu pārvaldnieks</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="365"/>
+        <source>Confirm replacement</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="365"/>
+        <source>Replace current image?</source>
+        <translation>Aizvietot esošo attēlu?</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="373"/>
+        <source>Paste error</source>
+        <translation>Ielīmēšanas kļūda</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="373"/>
+        <source>Clipboard contains no valid images</source>
+        <translation>Starpliktuvē nav derīgu attēlu</translation>
+    </message>
+</context>
+<context>
+    <name>ImageWidget</name>
+    <message>
+        <location filename="../imagewidget.cpp" line="112"/>
+        <source>No image has been set.
+Open from file or paste from clipboard.
+
+Click anywhere on this window to open an image.</source>
+        <translation>Nav attēla.
+Atver failu vai ielīmē no starpliktuves.
+
+Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
     </message>
 </context>
 <context>
@@ -548,42 +746,62 @@ pārlūks</translation>
         <translation>Reaģenti</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="118"/>
+        <location filename="../mainwindow.ui" line="109"/>
+        <source>Ctrl+Shift+R</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="121"/>
         <source>Properties</source>
         <translation>Īpašības</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="127"/>
+        <location filename="../mainwindow.ui" line="124"/>
+        <source>Ctrl+Shift+P</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="133"/>
         <source>Clear</source>
         <translation>Notīrīt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="136"/>
+        <location filename="../mainwindow.ui" line="142"/>
         <source>Tags</source>
         <translation>Raksturlielumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="145"/>
+        <location filename="../mainwindow.ui" line="151"/>
         <source>Settings</source>
         <translation>Uzstādījumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="154"/>
+        <location filename="../mainwindow.ui" line="160"/>
         <source>About</source>
         <translation>Par</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="166"/>
+        <location filename="../mainwindow.ui" line="172"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="175"/>
+        <source>Ctrl+Shift+L</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="184"/>
         <source>Search</source>
         <translation>Meklēšana</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="145"/>
+        <location filename="../mainwindow.ui" line="187"/>
+        <source>Ctrl+Shift+F</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="152"/>
         <source>Paste</source>
         <translation>Ielīmēt</translation>
     </message>
@@ -665,26 +883,31 @@ pārlūks</translation>
         <source>Value</source>
         <translation>Vērtība</translation>
     </message>
+    <message>
+        <location filename="../propertydock.cpp" line="358"/>
+        <source>Used tags</source>
+        <translation>Izmantotie raksturlielumi</translation>
+    </message>
 </context>
 <context>
     <name>PropertyDelegate</name>
     <message>
-        <location filename="../propertydelegate.cpp" line="112"/>
+        <location filename="../propertydelegate.cpp" line="111"/>
         <source>Solid</source>
         <translation>Cietveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="116"/>
+        <location filename="../propertydelegate.cpp" line="115"/>
         <source>Liquid</source>
         <translation>Šķidra</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="120"/>
+        <location filename="../propertydelegate.cpp" line="119"/>
         <source>Gaseous</source>
         <translation>Gāzveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="124"/>
+        <location filename="../propertydelegate.cpp" line="123"/>
         <source>Unknown</source>
         <translation>Nezināms</translation>
     </message>
@@ -753,27 +976,27 @@ pārlūks</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="241"/>
+        <location filename="../propertydock.cpp" line="252"/>
         <source>Cannot add property</source>
         <translation>Nebija iespējams pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="242"/>
+        <location filename="../propertydock.cpp" line="253"/>
         <source>Property missing name</source>
         <translation>Nav izvēlēts īpašības nosaukums</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="317"/>
+        <location filename="../propertydock.cpp" line="328"/>
         <source>Add property</source>
         <translation>Pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="346"/>
+        <location filename="../propertydock.cpp" line="367"/>
         <source>Add custom property to &apos;%1&apos;</source>
         <translation>Pievienot nestandarta īpašību &apos;%1&apos;  reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="352"/>
+        <location filename="../propertydock.cpp" line="373"/>
         <source>Add image to &apos;%1&apos;</source>
         <translation>Pievienot attēlu &apos;%1&apos; reaģentam</translation>
     </message>
@@ -786,100 +1009,94 @@ pārlūks</translation>
         <translation type="vanished">Attēli (*.png *.jpg)</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="357"/>
-        <location filename="../propertydock.cpp" line="499"/>
         <source>Set title</source>
-        <translation>Pievienot nosaukumu</translation>
+        <translation type="vanished">Pievienot nosaukumu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="357"/>
-        <location filename="../propertydock.cpp" line="499"/>
         <source>Title:</source>
-        <translation>Nosaukums:</translation>
+        <translation type="vanished">Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="365"/>
+        <location filename="../propertydock.cpp" line="381"/>
         <source>Get properties from the internet</source>
         <translation>Izgūt īpašības no interneta</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="417"/>
+        <location filename="../propertydock.cpp" line="433"/>
         <source>Copy</source>
         <translation>Kopēt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="480"/>
+        <location filename="../propertydock.cpp" line="499"/>
         <source>View</source>
         <translation>Parādīt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="493"/>
         <source>Replace</source>
-        <translation>Aizstāt ar citu attēlu</translation>
+        <translation type="vanished">Aizstāt ar citu attēlu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="497"/>
         <source>Rename</source>
-        <translation>Pārsaukt</translation>
+        <translation type="vanished">Pārsaukt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="508"/>
+        <location filename="../propertydock.cpp" line="512"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="522"/>
+        <location filename="../propertydock.cpp" line="528"/>
         <source>Paste to calculator</source>
         <translation>Ielīmēt kalkulatorā</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="524"/>
+        <location filename="../propertydock.cpp" line="530"/>
         <source>Reference</source>
         <translation>Atsauci</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="527"/>
+        <location filename="../propertydock.cpp" line="533"/>
         <source>Value</source>
         <translation>Vērtību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="530"/>
+        <location filename="../propertydock.cpp" line="536"/>
         <source>Hide property &quot;%1&quot;</source>
         <translation>Slēpt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="539"/>
+        <location filename="../propertydock.cpp" line="547"/>
         <source>Show all properties</source>
         <translation>Rādīt visas īpašības</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="566"/>
+        <location filename="../propertydock.cpp" line="576"/>
         <source>Paste property &quot;%1&quot;</source>
         <translation>Ielīmēt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="611"/>
-        <location filename="../propertydock.cpp" line="615"/>
+        <location filename="../propertydock.cpp" line="623"/>
+        <location filename="../propertydock.cpp" line="627"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="611"/>
+        <location filename="../propertydock.cpp" line="623"/>
         <source>Remove selected property?</source>
         <translation>Dzēst izvēlēto īpašību?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="616"/>
+        <location filename="../propertydock.cpp" line="628"/>
         <source>Remove %1 properties?</source>
         <translation>Dzēst %1 īpašību(-as)?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="774"/>
+        <location filename="../propertydock.cpp" line="799"/>
         <source>Duplicate property</source>
         <translation>Īpašība jau eksistē</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="775"/>
+        <location filename="../propertydock.cpp" line="800"/>
         <source>Reagent already has this property, add regardless?</source>
         <translation>Reaģentam šobrīd jau ir šī īpašība, pievienot vēlreiz?</translation>
     </message>
@@ -1073,12 +1290,12 @@ izvēlētās</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="307"/>
+        <location filename="../main.cpp" line="301"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="308"/>
+        <location filename="../main.cpp" line="302"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -1088,14 +1305,26 @@ Please restart the application</source>
 <context>
     <name>QWidget</name>
     <message>
-        <location filename="../pixmaputils.cpp" line="270"/>
+        <location filename="../imageutils.cpp" line="194"/>
+        <location filename="../pixmaputils.cpp" line="182"/>
         <source>Open Image</source>
         <translation>Atvērt attēlu</translation>
     </message>
     <message>
-        <location filename="../pixmaputils.cpp" line="270"/>
+        <location filename="../imageutils.cpp" line="194"/>
+        <location filename="../pixmaputils.cpp" line="182"/>
         <source>Images (*.png *.jpg)</source>
         <translation>Attēli (*.png *.jpg)</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="205"/>
+        <source>Save Image</source>
+        <translation>Saglabāt attēlu</translation>
+    </message>
+    <message>
+        <location filename="../imageutils.cpp" line="205"/>
+        <source>Image (*.png)</source>
+        <translation>Attēls (*.png)</translation>
     </message>
 </context>
 <context>

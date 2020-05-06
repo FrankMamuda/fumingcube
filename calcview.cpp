@@ -53,6 +53,7 @@ void CalcView::contextMenuEvent(QContextMenuEvent *event) {
     QMenu *menu( this->createStandardContextMenu());
     menu->setAttribute( Qt::WA_DeleteOnClose, true );
     QMenu *subMenu( menu->addMenu( CalcView::tr( "Override theme" )));
+    subMenu->setIcon( QIcon::fromTheme( "colour" ));
 
     const QString currentTheme( Variable::string( "calculator/theme" ));
     const QStringList themes( Theme::availableThemes().keys());
@@ -69,8 +70,8 @@ void CalcView::contextMenuEvent(QContextMenuEvent *event) {
         action->setChecked( current );
     }
 
-    menu->addAction( CalcView::tr( "Zoom in" ), this, SLOT( zoomIn()));
-    menu->addAction( CalcView::tr( "Zoom out" ), this, SLOT( zoomOut()));
+    menu->addAction( CalcView::tr( "Zoom in" ), this, SLOT( zoomIn()))->setIcon( QIcon::fromTheme( "zoom_in" ));
+    menu->addAction( CalcView::tr( "Zoom out" ), this, SLOT( zoomOut()))->setIcon( QIcon::fromTheme( "zoom_out" ));
     menu->addAction( CalcView::tr( "Restore zoom" ), this, SLOT( zoomRestore()));
 
     menu->exec( event->globalPos());

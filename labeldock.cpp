@@ -27,8 +27,10 @@
 #include "ui_labeldock.h"
 #include "labeldialog.h"
 #include "propertydock.h"
+#include "listutils.h"
 #include <QDebug>
 #include <QMenu>
+#include <QPainter>
 #include <QSqlQuery>
 
 /**
@@ -39,6 +41,9 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
     this->ui->setupUi( this );
     this->ui->labelView->setModel( Label::instance());
     this->ui->labelView->setModelColumn( Label::Name );
+
+    // TODO: deleteme
+    this->ui->labelView->setItemDelegate( new LabelDelegate());
 
     QPushButton::connect( this->ui->allButton, &QPushButton::clicked, [ this ]() {
         this->ui->labelView->selectionModel()->blockSignals( true );
@@ -52,12 +57,15 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
                                   [ this ]( const QItemSelection &, const QItemSelection & ) {
                                       LabelDock::setFilter( this->ui->labelView->selectionModel()->selectedRows());
                                   } );
+
+    Variable::instance()->bind( "labelDock/selectedRows", this, SLOT( changed()));
 }
 
 /**
  * @brief LabelDock::~LabelDock
  */
 LabelDock::~LabelDock() {
+    Variable::instance()->unbind( "labelDock/selectedRows" );
     delete this->ui;
 }
 
@@ -86,11 +94,15 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
             return;
 
         Reagent::instance()->setFilter( "" );
+        Variable::setString( "labelDock/selectedRows", "" );
     } else {
         QList<Id> labelIds;
-        for ( const QModelIndex &index : list )
-            labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
+        QStringList rows;
 
+        for ( const QModelIndex &index : list ) {
+            labelIds << Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
+            rows << QString::number( index.row());
+        }
 
         QString whereStatement( QString( "select %1.%2 from %1 " )
                                 .arg( LabelSet::instance()->tableName(),
@@ -119,10 +131,46 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
             return;
 
         Reagent::instance()->setFilter( filter );
+
+        // store variable
+        Variable::setString( "labelDock/selectedRows", rows.join( ";" ));
+
     }
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();
     PropertyDock::instance()->updateView();
+}
+
+/**
+ * @brief LabelDock::showEvent
+ * @param event
+ */
+void LabelDock::showEvent( QShowEvent *event ) {
+    DockWidget::showEvent( event );
+
+    // restore filter
+    // TODO: why not store Label actual filter as a string
+    //       since I cannot figure out how to select rows
+    const QList<int> rows( ListUtils::toNumericList<int>( Variable::string( "labelDock/selectedRows" ).split( ";" )));
+    if ( rows.count() == 1 ) {
+        if ( rows.first() == -1 ) {
+            this->on_noButton_clicked();
+            return;
+        }
+    }
+
+    if ( !rows.isEmpty()) {
+        QModelIndexList list;
+
+        for ( const int row : rows ) {
+            if ( row == -1 )
+                continue;
+
+            list << Label::instance()->index( row, 0 );
+        }
+
+        this->setFilter( list );
+    }
 }
 
 /**
@@ -190,4 +238,32 @@ void LabelDock::on_noButton_clicked() {
     Reagent::instance()->select();
     ReagentDock::instance()->view()->updateView();
     PropertyDock::instance()->updateView();
+    Variable::setString( "labelDock/selectedRows", "-1" );
+}
+
+/**
+ * @brief LabelDock::changed
+ */
+void LabelDock::changed() {
+    this->ui->labelView->repaint();
+}
+
+/**
+ * @brief LabelDelegate::paint
+ * @param painter
+ * @param option
+ * @param index
+ */
+void LabelDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
+    // NOTE: basically we don't want to see an extra selection highlight here
+    //       currently active labels are stored in a variable and selection is
+    //       applied via Label::data Qt::BackgroundRole
+
+    // remove selection
+    QStyleOptionViewItem optionNoSelection( option );
+    if ( option.state & QStyle::State_Selected )
+        optionNoSelection.state &= ~QStyle::State_Selected;
+
+    // paint as usual
+    QStyledItemDelegate::paint( painter, qAsConst( optionNoSelection ), index );
 }
