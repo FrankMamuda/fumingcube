@@ -86,7 +86,7 @@ void CalcView::paintEvent( QPaintEvent * ) {
     painter.save();
 
     painter.scale( this->zoom(), this->zoom());
-    this->document()->setTextWidth( static_cast<qreal>( this->viewport()->width()) / this->zoom());
+    this->document()->setTextWidth( static_cast<qreal>( this->width()) / this->zoom());
     this->document()->drawContents( &painter );
 
     painter.restore();

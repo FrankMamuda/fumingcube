@@ -65,7 +65,6 @@ LabelDock::LabelDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::Labe
  * @brief LabelDock::~LabelDock
  */
 LabelDock::~LabelDock() {
-    Variable::instance()->unbind( "labelDock/selectedRows" );
     delete this->ui;
 }
 

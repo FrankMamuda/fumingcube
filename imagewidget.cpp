@@ -132,7 +132,7 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
     const int margin = 8;
 
     painter.setFont( font );
-    painter.drawText( this->width() - fm.width( text ) - margin, margin + fm.height(), text );
+    painter.drawText( this->width() - fm.horizontalAdvance( text ) - margin, margin + fm.height(), text );
     painter.restore();
 }
 

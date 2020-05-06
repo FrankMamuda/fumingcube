@@ -217,6 +217,8 @@ int main( int argc, char *argv[] ) {
         delete emf;
 #endif
 
+        Variable::instance()->unbind( "labelDock/selectedRows" );
+
         // save zoom value
         Variable::setDecimalValue( "calculator/zoom", MainWindow::instance()->calcView()->zoom());
 
