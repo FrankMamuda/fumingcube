@@ -134,7 +134,8 @@
        <string>...</string>
       </property>
       <property name="icon">
-       <iconset theme="extract"/>
+       <iconset theme="extract">
+        <normaloff>.</normaloff>.</iconset>
       </property>
      </widget>
     </item>

@@ -34,7 +34,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QTextBrowser" name="calcView">
+     <widget class="CalcView" name="calcView">
       <property name="minimumSize">
        <size>
         <width>256</width>
@@ -105,6 +105,9 @@
    <property name="text">
     <string>Reagents</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
   </action>
   <action name="actionProperties">
    <property name="checkable">
@@ -116,6 +119,9 @@
    </property>
    <property name="text">
     <string>Properties</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
    </property>
   </action>
   <action name="actionClear">
@@ -165,6 +171,9 @@
    <property name="text">
     <string>Labels</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
+   </property>
   </action>
   <action name="actionSearch">
    <property name="icon">
@@ -174,6 +183,9 @@
    <property name="text">
     <string>Search</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
+   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -182,6 +194,11 @@
    <class>CalcEdit</class>
    <extends>QLineEdit</extends>
    <header>calcedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CalcView</class>
+   <extends>QTextBrowser</extends>
+   <header>calcview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

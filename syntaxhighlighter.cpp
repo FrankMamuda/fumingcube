@@ -48,15 +48,16 @@ SyntaxHighlighter::SyntaxHighlighter( QTextDocument *parent ) : QSyntaxHighlight
  * @param text
  */
 void SyntaxHighlighter::highlightBlock( const QString &text ) {
-    const QColor number( MainWindow::instance()->theme()->syntaxColour( "Number" ));
-    const QColor op( MainWindow::instance()->theme()->syntaxColour( "Operator" ));
-    const QColor comment( MainWindow::instance()->theme()->syntaxColour( "Comment" ));
-    const QColor parenthesis( MainWindow::instance()->theme()->syntaxColour( "Parenthesis" ));
-    const QColor keyword( MainWindow::instance()->theme()->syntaxColour( "Keyword" ));
-    const QColor reference( MainWindow::instance()->theme()->syntaxColour( "Reference" ));
-    const QColor error( MainWindow::instance()->theme()->syntaxColour( "Error" ));
-    const QColor undefined( MainWindow::instance()->theme()->syntaxColour( "Undefined" ));
-    const QColor string( MainWindow::instance()->theme()->syntaxColour( "String" ));
+    const Theme *theme( MainWindow::instance()->calcTheme());
+    const QColor number( theme->syntaxColour( "Number" ));
+    const QColor op( theme->syntaxColour( "Operator" ));
+    const QColor comment( theme->syntaxColour( "Comment" ));
+    const QColor parenthesis( theme->syntaxColour( "Parenthesis" ));
+    const QColor keyword( theme->syntaxColour( "Keyword" ));
+    const QColor reference( theme->syntaxColour( "Reference" ));
+    const QColor error( theme->syntaxColour( "Error" ));
+    const QColor undefined( theme->syntaxColour( "Undefined" ));
+    const QColor string( theme->syntaxColour( "String" ));
 
     /**
      * @brief The SyntaxHighlighterOption struct

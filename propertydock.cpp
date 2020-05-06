@@ -60,6 +60,10 @@
 PropertyDock::PropertyDock( QWidget *parent ) : DockWidget( parent ), ui( new Ui::PropertyDock ) {
     this->ui->setupUi( this );
 
+    // setup shortcuts
+    this->ui->editPropButton->setShortcut( QKeySequence::Open );
+
+
     // load hidden tags
     this->loadHiddenTags();
 
@@ -488,7 +492,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             } ));
 
             copyAction->setIcon( QIcon::fromTheme( "copy" ));
-            copyAction->setShortcut( QKeySequence::Copy );
+            //copyAction->setShortcut( QKeySequence::Copy );
         }
 
         if ( type == Tag::Formula || tagId == PixmapTag ) {
@@ -502,19 +506,6 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                     ImageUtils( this, ImageUtils::ViewMode, pixmap.toImage()).exec();
                 }
             } )->setIcon( QIcon::fromTheme( "image" ));
-
-            /*menu.addAction( PropertyDock::tr( "Replace" ), this, [ this, row ]() {
-                this->replacePixmap( row );
-            } )->setIcon( QIcon::fromTheme( "replace" ));
-
-            menu.addAction( PropertyDock::tr( "Rename" ), this, [ this, row ]() {
-                bool ok;
-                const QString title( QInputDialog::getText( this, PropertyDock::tr( "Set title" ), PropertyDock::tr( "Title:" ), QLineEdit::Normal, "",  &ok ));
-
-                if ( ok && !title.isEmpty())
-                    Property::instance()->setName( row, title );
-
-            } )->setIcon( QIcon::fromTheme( "edit" ));*/
         }
 
         if ( type != Tag::Formula && type != Tag::NoType && tagId != PixmapTag ) {
@@ -548,7 +539,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 ReagentDock::instance()->view()->updateView();
             } ));
             hideAction->setIcon( QIcon::fromTheme( "hide" ));
-            hideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_H ));
+            //hideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_H ));
         }
     }
 

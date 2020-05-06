@@ -46,6 +46,7 @@
 #include <QSettings>
 #include <QTranslator>
 #include "pixmaputils.h"
+#include "calcview.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
 #endif
@@ -57,22 +58,15 @@ database:
  - fix crash on argument count mismatch
  - expand built-in database with more reagents
 
-theming:
- - separate app theme from calculator theme
-   (calculator window background styling to be defined independently from
-    app window background)
- - option to change syntax highlighter (and font size) (partially supported)
-
 extraction:
   - better 'not found' and 'server busy' error handling in search
 
 misc/unsorted:
  - restore previously selected label on start
  - view custom properties in a separate dialog
- - some keysequences to not work (in PropertyDock)
 
 imageutils:
- - crop and zoom does not work well
+ - cropping while zooming does not work well
 */
 
 /*
@@ -191,6 +185,8 @@ int main( int argc, char *argv[] ) {
     Variable::add( "calculator/commands", "", Var::Flag::ReadOnly );
     Variable::add( "calculator/history", qAsConst( history ), Var::Flag::ReadOnly );
     Variable::add( "calculator/ans", "", Var::Flag::ReadOnly );
+    Variable::add( "calculator/theme", "", Var::Flag::ReadOnly | Var::Flag::Hidden );
+    Variable::add( "calculator/zoom", 1.0, Var::Flag::ReadOnly | Var::Flag::Hidden );
     Variable::add( "mainWindow/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::add( "mainWindow/state", QByteArray(), Var::Flag::ReadOnly );
     Variable::add( "reagentDock/selection", -1, Var::Flag::Hidden );
@@ -226,6 +222,9 @@ int main( int argc, char *argv[] ) {
 #ifdef Q_OS_WIN
         delete emf;
 #endif
+
+        // save zoom value
+        Variable::setDecimalValue( "calculator/zoom", MainWindow::instance()->calcView()->zoom());
 
         Cache::instance()->writeReagentCache();
 

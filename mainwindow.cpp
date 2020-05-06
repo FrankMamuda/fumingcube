@@ -77,10 +77,17 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
     this->ui->calcView->document()->setDefaultStyleSheet( "a { text-decoration:none; } ​p { margin: 0px; }​" );
     this->ui->calcView->append( Variable::compressedString( "calculator/history" ));
 
+    // set calculator theme
+    const QString currentTheme( Variable::string( "calculator/theme" ));
+    if ( !currentTheme.isEmpty()) {
+        this->m_calcTheme = new Theme( currentTheme );
+        this->ui->calcView->setPalette( this->calcTheme()->palette());
+    }
+
     // setup syntax highlighter
     this->highlighter = new SyntaxHighlighter( this->ui->calcView->document());
 
-    QTextBrowser::connect( this->ui->calcView, &QTextBrowser::anchorClicked, [ this ]( const QUrl &url ) {
+    QTextBrowser::connect( this->calcView(), &QTextBrowser::anchorClicked, [ this ]( const QUrl &url ) {
         const QStringList args( url.toString().split( ";" ));
         if ( args.count() < 2 || args.count() > 3 )
             return;
@@ -168,6 +175,14 @@ MainWindow::~MainWindow() {
 
     // clear ui
     delete this->ui;
+}
+
+/**
+ * @brief MainWindow::calcView
+ * @return
+ */
+CalcView *MainWindow::calcView() {
+    return this->ui->calcView;
 }
 
 /**
@@ -291,6 +306,21 @@ void MainWindow::saveHistory() {
  */
 void MainWindow::scrollToBottom() {
     this->ui->calcView->verticalScrollBar()->setValue( this->ui->calcView->verticalScrollBar()->maximum());
+}
+
+/**
+ * @brief MainWindow::setCalcTheme
+ * @param theme
+ */
+void MainWindow::setCalcTheme( Theme *theme ) {
+    if ( this->m_calcTheme != nullptr )
+        delete this->m_calcTheme;
+
+    this->m_calcTheme = theme;
+
+    // reset document
+    this->highlighter->setDocument( this->calcView()->document());
+    this->calcView()->setPalette( this->calcTheme()->palette());
 }
 
 /**

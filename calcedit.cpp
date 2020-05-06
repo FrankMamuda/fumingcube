@@ -28,6 +28,7 @@
 #include "reagent.h"
 #include "htmlutils.h"
 #include <QComboBox>
+#include <QMenu>
 #include <QSqlQuery>
 #include <QStringListModel>
 
@@ -311,7 +312,6 @@ bool CalcEdit::eventFilter( QObject *, QEvent *event ) {
     }
     return false;
 }
-
 
 /**
  * @brief CalcEdit::CalcEdit

@@ -39,6 +39,7 @@ CONFIG += c++1z
 SOURCES += \
     about.cpp \
     cache.cpp \
+    calcview.cpp \
     charactermap.cpp \
     cropwidget.cpp \
     datepicker.cpp \
@@ -97,6 +98,7 @@ HEADERS += \
     about.h \
     buttonbox.h \
     cache.h \
+    calcview.h \
     charactermap.h \
     cropwidget.h \
     datepicker.h \

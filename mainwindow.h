@@ -34,6 +34,11 @@ namespace Ui {
     class MainWindow;
 }
 
+/*
+ * classes
+ */
+class CalcView;
+
 /**
  * @brief The MainWindow class
  */
@@ -62,6 +67,19 @@ public:
      */
     [[nodiscard]] auto *theme() const { return this->m_theme; }
 
+    /**
+     * @brief calcTheme
+     * @return
+     */
+    [[nodiscard]] auto *calcTheme() const { return this->m_calcTheme == nullptr ? this->m_theme : this->m_calcTheme; }
+
+
+    /**
+     * @brief calculator
+     * @return
+     */
+    [[nodiscard]] CalcView *calcView();
+
 public slots:
     void appendToCalculator( const QString &line );
     void insertCommand( const QString &command );
@@ -73,13 +91,13 @@ public slots:
      * @param theme
      */
     void setTheme( Theme *theme ) { this->m_theme = theme; }
+    void setCalcTheme( Theme *theme );
 
 private slots:
     void on_actionClear_triggered();
     void on_actionTags_triggered();
     void on_actionSettings_triggered();
     void on_actionAbout_triggered();
-
     void on_actionSearch_triggered();
 
 protected:
@@ -90,4 +108,5 @@ private:
     Ui::MainWindow *ui;
     SyntaxHighlighter *highlighter;
     Theme *m_theme = new Theme();
+    Theme *m_calcTheme = nullptr;
 };
