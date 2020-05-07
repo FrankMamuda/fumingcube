@@ -68,11 +68,12 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
         if ( all )
             this->ui->propertyView->selectAll();
 
+        const Id addId = this->host()->batchId() != Id::Invalid ? this->host()->batchId() : this->host()->reagentId();
         for ( const QModelIndex &index : this->ui->propertyView->selectionModel()->selectedRows()) {
             auto *widget( qobject_cast<PropertyWidget *>( this->ui->propertyView->cellWidget( index.row(), 1 )));
             if ( widget != nullptr ) {
                 if ( widget->tagId() != Id::Invalid ) {
-                    widget->add( this->host()->reagentId());
+                    widget->add( addId );
                 } else {
                     Row row = Row::Invalid;
                     const QPixmap pixmap( widget->pixmap());
@@ -88,7 +89,7 @@ PropertyFragment::PropertyFragment( QWidget *parent ) : Fragment( parent ), ui( 
                     }
 
                     if ( row != Row::Invalid )
-                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::toData( pixmap ), this->host()->reagentId());
+                        Property::instance()->add( ExtractionDialog::tr( "Structural formula" ), Tag::instance()->id( row ), PixmapUtils::toData( pixmap ), addId );
                 }
             }
         }
@@ -448,7 +449,14 @@ void PropertyFragment::readData( const QByteArray &uncompressed ) {
         } );
     };
 
-    const QJsonDocument document( QJsonDocument::fromJson( uncompressed ));
+    // NOTE: must be UTF8, otherwise json parser fails
+    QJsonParseError error;
+    const QJsonDocument document( QJsonDocument::fromJson( QString( uncompressed ).toUtf8(), &error ));
+    if ( error.error != QJsonParseError::NoError ) {
+        this->host()->setErrorMessage( StructureFragment::tr( "JSON parse error: " ) + error.errorString());
+        return;
+    }
+
     const QJsonValue value( document.isArray() ? QJsonValue( document.array()) : document.object());
     auto getPropertyFromJson = [ value, findTag, extractValues ]( const QString &tagName, const QString &valueName = QString(), const QString &pattern = QString(), bool global = false ) {
         QList<QJsonArray> matches;

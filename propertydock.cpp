@@ -380,8 +380,9 @@ void PropertyDock::on_addPropButton_clicked() {
     // add an option to get properties from the internet
     menu.addAction( PropertyDock::tr( "Get properties from the internet" ), this, [ this, reagentId ]() {
         const Id parentId = Reagent::instance()->parentId( reagentId );
+        const Id batchId = parentId != Id::Invalid ? reagentId : Id::Invalid;
 
-        ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
+        ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId, batchId );
         ed.exec();
         this->updateView();
     } )->setIcon( QIcon::fromTheme( "extract" ));
@@ -875,7 +876,9 @@ void PropertyDock::on_extractButton_clicked() {
         return;
 
     const Id parentId = Reagent::instance()->parentId( reagentId );
-    ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId );
+    const Id batchId = parentId != Id::Invalid ? reagentId : Id::Invalid;
+
+    ExtractionDialog ed( this, parentId != Id::Invalid ? parentId : reagentId, batchId );
     ed.exec();
     this->updateView();
 }

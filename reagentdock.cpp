@@ -232,7 +232,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     auto *menu( new QMenu());
 
     // add 'Add' menu
-    menu->addMenu( this->buildAddMenu( context ));
+    menu->addMenu( this->buildAddMenu());
 
     // add 'Edit' menu
     menu->addAction( ReagentDock::tr( "Edit" ), this, [ this ]() { this->on_editButton_clicked(); } )->setIcon( QIcon::fromTheme( "edit" ));
@@ -380,23 +380,19 @@ QMenu *ReagentDock::buildMenu( bool context ) {
  * @brief ReagentDock::buildAddMenu
  * @return
  */
-QMenu *ReagentDock::buildAddMenu( bool context ) {
+QMenu *ReagentDock::buildAddMenu() {
     auto *addMenu( new QMenu( ReagentDock::tr( "Add" )));
     addMenu->setIcon( QIcon::fromTheme( "add" ));
-    addMenu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )->setIcon(
-            QIcon::fromTheme( "reagent" ));
+    addMenu->addAction( ReagentDock::tr( "Add new reagent" ), this, [ this ]() { this->addReagent( Id::Invalid ); } )
+            ->setIcon( QIcon::fromTheme( "reagent" ));
 
-    const QModelIndex index( this->view()->filterModel()->mapToSource( context ? this->view()->indexAt( this->view()->mapFromGlobal( QCursor::pos())) : this->view()->currentIndex()));
-    if ( index.isValid()) {
-        const QStandardItem *item( this->view()->itemFromIndex( index ));
-        const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
-        const QString name(( parentId == Id::Invalid ) ? item->text() : item->parent()->text());
+    const Id id = Variable::value<Id>( "reagentDock/selection" );
+    if ( id != Id::Invalid ) {
+        const auto parentId = Reagent::instance()->parentId( id );
+        const QString name( Reagent::instance()->name(( parentId == Id::Invalid ) ? id : parentId ));
 
-        addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this,
-                         [ this, parentId, item ]() { this->addReagent(
-                                    ( parentId == Id::Invalid ) ?
-                                        static_cast<Id>( item->data( ReagentModel::ID ).toInt())
-                                      : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
+        addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id, parentId ]() {
+            this->addReagent(( parentId == Id::Invalid ) ? id : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
     }
 
     return addMenu;
@@ -480,7 +476,7 @@ Id ReagentDock::addReagent( const Id &parentId, const QString &reagentName, cons
 
             // open extraction dialog if this feature is enabled
             if ( Variable::isEnabled( "fetchPropertiesOnAddition" ) && parentId == Id::Invalid && cid == 0 ) {
-                ExtractionDialog ed( this, reagentId ); // cid );
+                ExtractionDialog ed( this, reagentId );
                 ed.exec();
                 PropertyDock::instance()->updateView();
             }

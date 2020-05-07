@@ -37,7 +37,7 @@
  * @brief ExtractionDialog::ExtractionDialog
  * @param parent
  */
-ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ) {
+ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const Id &batchId ) : QDialog( parent ), ui( new Ui::ExtractionDialog ), m_reagentId( reagentId ), m_batchId( batchId ) {
     // setup ui and get rid of verticalHeader in property view
     this->ui->setupUi( this );
     this->ui->ExtractionDialogContents->setWindowFlags( Qt::Widget );

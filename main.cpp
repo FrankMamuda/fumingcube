@@ -60,9 +60,18 @@ database:
 
 extraction:
   - better 'not found' and 'server busy' error handling in search
+  - delete cache for a single reagent does not work
 
 misc/unsorted:
  - view custom properties in a separate dialog
+ - deprecation should be cleared on removal,
+   otherwise new reagents could appear deprecated on addition
+   for some reason DMF was deprecated as a reagent
+ - sometimes too many labels are added (for example:
+   add sodium carbonate with 'bases' and 'inorganics' labels,
+   but the label in ReagentDock appears as a set of three
+   where one is an unknown black portion
+
 */
 
 /*
@@ -159,12 +168,16 @@ int main( int argc, char *argv[] ) {
 
     // i18n
     QTranslator translator;
+#ifdef FORCE_EN_LOCALE
+    const QString locale( "en_EN" );
+#else
 #ifndef FORCE_LV_LOCALE
     const QString locale( QLocale::system().name());
 #else
     const QString locale( "lv_LV" );
-    QLocale::setDefault( locale );
 #endif
+#endif
+    QLocale::setDefault( locale );
     translator.load( ":/i18n/fumingCube_" + locale );
     QApplication::installTranslator( &translator );
 

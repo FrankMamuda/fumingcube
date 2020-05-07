@@ -62,7 +62,7 @@ public:
     Q_ENUM( Modes )
 
     // ExistingMode constructor
-    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid );
+    explicit ExtractionDialog( QWidget *parent = nullptr, const Id &reagentId = Id::Invalid, const Id &batchId = Id::Invalid );
 
     // SearchMode constructor
     //ExtractionDialog( QWidget *parent = nullptr, const int id = 0 );
@@ -78,6 +78,12 @@ public:
      * @return
      */
     [[nodiscard]] Id reagentId() const { return this->m_reagentId; }
+
+    /**
+     * @brief batchId
+     * @return
+     */
+    [[nodiscard]] Id batchId() const { return this->m_batchId; }
     [[nodiscard]] SearchFragment *searchFragment() const;
     [[nodiscard]] StructureFragment *structureFragment() const;
     [[nodiscard]] PropertyFragment *propertyFragment() const;
@@ -101,6 +107,7 @@ public slots:
 private:
     Ui::ExtractionDialog *ui;
     Id m_reagentId = Id::Invalid;
+    Id m_batchId = Id::Invalid;
     Modes m_mode = SearchMode;
 
     SearchFragment *m_searchFragment;

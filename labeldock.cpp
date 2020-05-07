@@ -73,12 +73,11 @@ LabelDock::~LabelDock() {
  * @return
  */
 Id LabelDock::currentLabel() const {
-    const QModelIndex index( this->ui->labelView->currentIndex());
-
-    if ( !index.isValid())
+    const QList<Row> list( ListUtils::toNumericList<Row>( Variable::string( "labelDock/selectedRows" ).split( ";" )));
+    if ( list.count() != 1 )
         return Id::Invalid;
 
-    return Label::instance()->id( Label::instance()->row( static_cast<int>( index.row())));
+    return Label::instance()->id( list.first());
 }
 
 /**
