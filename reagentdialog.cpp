@@ -215,7 +215,7 @@ ReagentDialog::ReagentDialog( QWidget *parent, const QString &name, const QStrin
     this->variables << Variable::instance()->bind( "fetchPropertiesOnAddition", this->ui->propertyCheck );
 
     // set current label
-    this->labels << LabelDock::instance()->currentLabel();
+    this->labels << LabelDock::instance()->currentLabels();
     ReagentDialog::connect( this->ui->labelButton, &QPushButton::pressed, [ this ]() {
         // modify labels in label selector
         LabelSelector ls( this, this->labels );

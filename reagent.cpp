@@ -23,6 +23,7 @@
 #include "field.h"
 #include "database.h"
 #include "labelset.h"
+#include "nodehistory.h"
 #include <QSqlQuery>
 
 /**
@@ -103,4 +104,13 @@ void Reagent::removeOrphanedEntries() {
     // NOTE: labels do not have foreign ids, therefore they cannot be orphaned
     //       batch deletion is handled elsewhere, so that there should not be
     //       any orphaned batches
+}
+
+/**
+ * @brief Reagent::remove
+ * @param row
+ */
+void Reagent::remove( const Row &row ) {
+    NodeHistory::instance()->removeFromHistory( this->id( row ));
+    Table::remove( row );
 }

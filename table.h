@@ -162,7 +162,7 @@ public slots:
     void addField( int id, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid,
                    const QString &format = QString( "text" ), bool unique = false, bool autoValue = false );
     Row add( const QVariantList &arguments );
-    void remove( const Row &row );
+    virtual void remove( const Row &row );
     void setValue( const Row &row, int fieldId, const QVariant &value );
 
     /**

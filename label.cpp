@@ -103,12 +103,17 @@ QPixmap Label::pixmap( const QColor &colour ) const {
  * @return
  */
 QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
+    // sort colours for a uniform look
+    QList<QColor> colourListSorted( colourList );
+    std::sort( colourListSorted.begin(), colourListSorted.end(), []( const QColor &left, const QColor &right ) {
+        return left.rgb() < right.rgb();
+    } );
 
-    if ( colourList.count() <= 1 )
-        return this->pixmap( colourList.isEmpty() ? QColor() : colourList.first());
+    if ( qAsConst( colourListSorted ).count() <= 1 )
+        return this->pixmap( qAsConst( colourListSorted ).isEmpty() ? QColor() : qAsConst( colourListSorted ).first());
 
     QString name;
-    for ( const QColor &colour : colourList )
+    for ( const QColor &colour : qAsConst( colourListSorted ))
         name.append( colour.name());
 
     if ( this->cache.contains( qAsConst( name )))
@@ -119,7 +124,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
     QPainter painter( &pixmap );
     painter.setPen( Qt::transparent );
 
-    if ( colourList.count() > 4 ) {
+    if ( qAsConst( colourListSorted ).count() > 4 ) {
         QLinearGradient gradient( 0, 0, Label::Width, Label::Height );
         gradient.setColorAt( 0.0, Qt::red );
         gradient.setColorAt( 1.0 / 6.0, QColor( 255, 100, 0 ));
@@ -136,7 +141,7 @@ QPixmap Label::pixmap( const QList<QColor> &colourList ) const {
                                     { 4, 3 }};
 
         int offset = 0;
-        for ( const QColor &colour : colourList ) {
+        for ( const QColor &colour : qAsConst( colourListSorted )) {
             const int size = sizes[colourList.count()];
             painter.setBrush( colour );
             painter.drawRect( QRect( offset, 0, size, 8 ));

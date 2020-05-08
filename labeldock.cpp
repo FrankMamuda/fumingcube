@@ -69,15 +69,24 @@ LabelDock::~LabelDock() {
 }
 
 /**
- * @brief LabelDock::currentLabel
+ * @brief LabelDock::currentLabels
  * @return
  */
-Id LabelDock::currentLabel() const {
+QList<Id> LabelDock::currentLabels() const {
     const QList<Row> list( ListUtils::toNumericList<Row>( Variable::string( "labelDock/selectedRows" ).split( ";" )));
-    if ( list.count() != 1 )
-        return Id::Invalid;
+    QList<Id> labels;
+    for ( const Row &row : list ) {
+        if ( row == Row::Invalid )
+            continue;
 
-    return Label::instance()->id( list.first());
+        const Id id = Label::instance()->id( row );
+        if ( id == Id::Invalid )
+            continue;
+
+        labels << id;
+    }
+
+    return labels;
 }
 
 /**

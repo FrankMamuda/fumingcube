@@ -90,8 +90,8 @@ public slots:
     void restoreNodeState();
     void saveHistory();
     void loadHistory();
-
     void setTreeParent( QTreeView *parent );
+    void removeFromHistory( const Id &id );
 
     /**
      * @brief hide

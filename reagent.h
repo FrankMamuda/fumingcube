@@ -95,6 +95,7 @@ public:
 
 public slots:
     void removeOrphanedEntries() override;
+    void remove( const Row &row ) override;
 
     /**
      * @brief setDateTime

@@ -129,3 +129,13 @@ void NodeHistory::setTreeParent( QTreeView *parent ) {
         saveNodeState( index, false );
     } );
 }
+
+/**
+ * @brief NodeHistory::removeFromHistory
+ * @param id
+ */
+void NodeHistory::removeFromHistory( const Id &id ) {
+    this->openNodes.removeOne( id );
+    this->hiddenNodes.removeOne( id );
+    this->deprecatedNodes.removeOne( id );
+}

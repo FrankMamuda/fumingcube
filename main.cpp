@@ -63,13 +63,6 @@ extraction:
 
 misc/unsorted:
  - view custom properties in a separate dialog
- - deprecation should be cleared on removal,
-   otherwise new reagents could appear deprecated on addition
-   for some reason DMF was deprecated as a reagent
- - sometimes too many labels are added (for example:
-   add sodium carbonate with 'bases' and 'inorganics' labels,
-   but the label in ReagentDock appears as a set of three
-   where one is an unknown black portion
 */
 
 /*

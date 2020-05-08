@@ -146,8 +146,8 @@ void ReagentView::restoreIndex() {
         this->selectReagent( index );
 
         // NOTE: this must be delayed
-        QTimer::singleShot( 100, [ this, index ]() {
-            this->scrollTo( index, QAbstractItemView::PositionAtTop );
+        QTimer::singleShot( 100, [ this ]() {
+            this->scrollTo( this->currentIndex(), ScrollHint::PositionAtCenter );
         } );
 
         return;

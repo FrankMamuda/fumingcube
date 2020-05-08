@@ -64,7 +64,7 @@ public:
         return labelDock;
     }
     ~LabelDock() override;
-    [[nodiscard]] Id currentLabel() const;
+    [[nodiscard]] QList<Id> currentLabels() const;
 
     /**
      * @brief setFilter
