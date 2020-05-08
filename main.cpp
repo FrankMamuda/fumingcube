@@ -56,7 +56,6 @@
 
 database:
  - fix crash on argument count mismatch
- - expand built-in database with more reagents
 
 extraction:
   - better 'not found' and 'server busy' error handling in search
@@ -71,7 +70,6 @@ misc/unsorted:
    add sodium carbonate with 'bases' and 'inorganics' labels,
    but the label in ReagentDock appears as a set of three
    where one is an unknown black portion
-
 */
 
 /*
@@ -112,6 +110,7 @@ future:
  - interactive label maker (label as in something you can
    print out and glue on a bottle)
  - tag sub categories
+ - rely more on Variable::bind for updates
 
 properties:
  - filter in dock

@@ -44,7 +44,23 @@ void NFPAWidget::setScale( const int &scale ) {
                                   QRectF( -this->vscale(), -this->vscale() * 0.5, this->vscale(), this->vscale()) <<
                                   QRectF( -this->vscale() * 0.5, -this->vscale(), this->vscale(), this->vscale()) <<
                                   QRectF( 0, -this->vscale() * 0.5, this->vscale(), this->vscale()) <<
-                                  QRectF( -this->vscale() * 0.5, 0, this->vscale(), this->vscale());
+                                     QRectF( -this->vscale() * 0.5, 0, this->vscale(), this->vscale());
+}
+
+/**
+ * @brief NFPAWidget::fontScaleF
+ * @param len
+ * @return
+ */
+qreal NFPAWidget::fontScaleF( int len ) const {
+    if ( len < 0 )
+        len = 0;
+
+    if ( len >= 4 )
+        len = 4;
+
+    const QVector<qreal> scales { 0.5, 0.42, 0.35, 0.22, 0.20 };
+    return static_cast<qreal>( this->scale()) * scales[len];
 }
 
 /**
@@ -89,9 +105,7 @@ void NFPAWidget::paintEvent( QPaintEvent * ) {
             if ( !QString::compare( this->parameters().at( y ), "W" ))
                 font.setStrikeOut( true );
 
-            font.setPointSize(
-                    ( y == 3 ) ? static_cast<int>( this->scales[parm.length()] ) : static_cast<int>( this->scale() *
-                                                                                                     0.5 ));
+            font.setPointSizeF(( y == 3 ) ? this->fontScaleF( parm.length()) : static_cast<qreal>( this->scale() * 0.5 ));
             painter.setFont( font );
         }
 

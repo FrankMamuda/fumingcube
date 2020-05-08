@@ -30,7 +30,7 @@
  * @brief The NFPAWidget class
  */
 class NFPAWidget final : public PropertyViewWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit NFPAWidget( QWidget *parent = nullptr, const QStringList &parms = QStringList());
@@ -47,6 +47,13 @@ public:
      */
     [[nodiscard]] qreal vscale() const { return this->m_vscale; }
 
+    /**
+     * @brief fontScaleF
+     * @param len
+     * @return
+     */
+    [[nodiscard]] qreal fontScaleF( int len ) const;
+
 public slots:
     /**
      * @brief update
@@ -60,6 +67,10 @@ public slots:
         this->repaint();
     }
 
+    /**
+     * @brief setScale
+     * @param scale
+     */
     void setScale( const int &scale = 32 );
 
 protected:
@@ -85,10 +96,5 @@ protected:
 private:
     int m_scale = 0;
     qreal m_vscale = 0.0;
-    const QMap<int, qreal> scales {{ 0, 0 },
-                                   { 1, this->scale() * 0.5 },
-                                   { 2, this->scale() * 0.42 },
-                                   { 3, this->scale() * 0.35 },
-                                   { 4, this->scale() * 0.22 }};
     QList<QRectF> rects;
 };

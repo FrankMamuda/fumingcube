@@ -598,7 +598,7 @@ void ReagentDock::on_removeButton_clicked() {
             if ( parentId != Id::Invalid )
                 this->view()->selectReagent(
                         this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
-        } );
+        } )->setIcon( QIcon::fromTheme( "remove" ));
     }
 
     // display menu

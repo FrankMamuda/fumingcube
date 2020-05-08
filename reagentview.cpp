@@ -87,7 +87,7 @@ void ReagentView::updateView() {
     // clear selection
     this->filterModel()->sort( 0, Qt::AscendingOrder );
     NodeHistory::instance()->restoreNodeState();
-    this->restoreIndex();    
+    this->restoreIndex();
 }
 
 /**
@@ -144,7 +144,11 @@ void ReagentView::restoreIndex() {
 
         const QModelIndex index( this->filterModel()->mapFromSource( this->indexFromId( id )));
         this->selectReagent( index );
-        this->scrollTo( index );
+
+        // NOTE: this must be delayed
+        QTimer::singleShot( 100, [ this, index ]() {
+            this->scrollTo( index, QAbstractItemView::PositionAtTop );
+        } );
 
         return;
     }
