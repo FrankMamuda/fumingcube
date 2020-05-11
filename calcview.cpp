@@ -29,6 +29,7 @@
 #include <QContextMenuEvent>
 #include <QApplication>
 #include <QPainter>
+#include <QRegularExpression>
 
 CalcView::CalcView( QWidget *parent ) : QTextBrowser( parent ) {
     this->m_zoom = Variable::decimalValue( "calculator/zoom" );
@@ -44,6 +45,14 @@ CalcView::CalcView( QWidget *parent ) : QTextBrowser( parent ) {
 CalcView::~CalcView() {
     delete this->shortCutZoomIn;
     delete this->shortCutZoomOut;
+}
+
+/**
+ * @brief CalcView::fontSize
+ * @return
+ */
+int CalcView::fontSize() const {
+    return static_cast<int>( this->document()->defaultFont().pointSizeF() * this->zoom());
 }
 
 /**
@@ -78,16 +87,30 @@ void CalcView::contextMenuEvent(QContextMenuEvent *event) {
 }
 
 /**
- * @brief CalcView::paintEvent
+ * @brief CalcView::wheelEvent
+ * @param e
+ */
+void CalcView::wheelEvent( QWheelEvent *event ){
+    if (( event->modifiers() == Qt::ControlModifier ) && ( event->delta() > 0 ))
+       this->zoomIn();
+    else if (( event->modifiers() == Qt::ControlModifier ) && ( event->delta() < 0 ))
+        this->zoomOut();
+}
+
+/**
+ * @brief CalcView::showEvent
  * @param event
  */
-void CalcView::paintEvent( QPaintEvent * ) {
-    QPainter painter( this->viewport());
-    painter.save();
+void CalcView::showEvent( QShowEvent *event ) {
+    QTextBrowser::showEvent( event );
+    this->adjustFonts();
+}
 
-    painter.scale( this->zoom(), this->zoom());
-    this->document()->setTextWidth( static_cast<qreal>( this->width()) / this->zoom());
-    this->document()->drawContents( &painter );
-
-    painter.restore();
+/**
+ * @brief CalcView::adjustFonts
+ */
+void CalcView::adjustFonts() {
+    const QString html( QString( this->document()->toHtml()).replace( QRegularExpression( "(<span\\s+style=\"\\s+font-size:)(\\d+)" ), QString( "\\1%1" ).arg( this->fontSize())));
+    this->setHtml( html );
+    MainWindow::instance()->scrollToBottom();
 }

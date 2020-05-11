@@ -23,6 +23,7 @@
  */
 #include <QShortcut>
 #include <QTextBrowser>
+#include <QWheelEvent>
 
 /**
  * @brief The CalcView class
@@ -40,6 +41,12 @@ public:
      */
     [[nodiscard]] qreal zoom() const { return this->m_zoom; }
 
+    /**
+     * @brief fontSize
+     * @return
+     */
+    [[nodiscard]] int fontSize() const;
+
 public slots:
     /**
      * @brief zoomIn
@@ -47,7 +54,7 @@ public slots:
     void zoomIn() {
         this->m_zoom += 0.1;
         this->m_zoom = qMin( this->m_zoom, 4.0 );
-        this->repaint();
+        this->adjustFonts();
     }
 
     /**
@@ -56,7 +63,7 @@ public slots:
     void zoomOut() {
         this->m_zoom -= 0.1;
         this->m_zoom = qMax( this->m_zoom, 0.5 );
-        this->repaint();
+        this->adjustFonts();
     }
 
     /**
@@ -64,15 +71,20 @@ public slots:
      */
     void zoomRestore() {
         this->m_zoom = 1.0;
-        this->repaint();
+        this->adjustFonts();
     }
 
 protected:
     void contextMenuEvent( QContextMenuEvent *event ) override;
-    void paintEvent( QPaintEvent *e ) override;
+    void wheelEvent( QWheelEvent *event ) override;
+    void showEvent( QShowEvent *event ) override;
+
+private slots:
+    void adjustFonts();
 
 private:
     qreal m_zoom = 1.0;
     QShortcut *shortCutZoomIn;
     QShortcut *shortCutZoomOut;
+    QString savedText;
 };

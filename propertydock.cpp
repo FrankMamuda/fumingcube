@@ -517,7 +517,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
 
         if ( tagId != Id::Invalid ) {
             const QString functionName( Tag::instance()->function( tagId ));
-            if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
+            if (( type == Tag::Integer || type == Tag::Real )) {
                 auto paste = [ row, tagId ]() {
                     // paste
                     const QString value( QString::number(
@@ -525,13 +525,20 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                     MainWindow::instance()->insertCommand( value );
                 };
 
-                // paste to calculator
-                QMenu *subMenu2( menu.addMenu( PropertyDock::tr( "Paste to calculator" )));
-                subMenu2->setIcon( QIcon::fromTheme( "paste" ));
-                subMenu2->addAction( PropertyDock::tr( "Reference" ), this, [ this ]() {
-                    this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex());
-                } )->setIcon( QIcon::fromTheme( "clean" ));
-                subMenu2->addAction( PropertyDock::tr( "Value" ), this, paste )->setIcon( QIcon::fromTheme( "paste" ));
+                if ( !functionName.isEmpty()) {
+                    // paste to calculator
+                    QMenu *subMenu2( menu.addMenu( PropertyDock::tr( "Paste to calculator" )));
+                    subMenu2->setIcon( QIcon::fromTheme( "paste" ));
+                    subMenu2->addAction( PropertyDock::tr( "Reference" ), this, [ this ]() {
+                        this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex());
+                    } )->setIcon( QIcon::fromTheme( "clean" ));
+                    subMenu2->addAction( PropertyDock::tr( "Value" ), this, paste )->setIcon( QIcon::fromTheme( "paste" ));
+                } else {
+                    // paste to calculator
+                    menu.addAction(  PropertyDock::tr( "Paste to calculator" ), this, [ this ]() {
+                        this->on_propertyView_doubleClicked( this->ui->propertyView->currentIndex());
+                    } )->setIcon( QIcon::fromTheme( "paste" ));
+                }
             }
 
             QAction *hideAction( menu.addAction( PropertyDock::tr( "Hide property \"%1\"" ).arg( Tag::instance()->name( tagId )), this, [ this, tagId ]() {
@@ -832,26 +839,31 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
     const Tag::Types type = Tag::instance()->type( tagId );
     const QString functionName( Tag::instance()->function( tagId ));
 
-    if (( type == Tag::Integer || type == Tag::Real ) && !functionName.isEmpty()) {
-        QString parents;
+    if (( type == Tag::Integer || type == Tag::Real )) {
+        if ( !functionName.isEmpty()) {
+            QString parents;
 
-        const Id reagentId = Property::instance()->reagentId( row );
-        if ( reagentId == Id::Invalid )
-            return;
+            const Id reagentId = Property::instance()->reagentId( row );
+            if ( reagentId == Id::Invalid )
+                return;
 
-        const Id parentId = Reagent::instance()->parentId( reagentId );
-        if ( parentId != Id::Invalid ) {
-            parents = QString( R"("%1", "%2")" ).arg(
-                    HTMLUtils::convertToPlainText( Reagent::instance()->reference( parentId )),
-                    HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+            const Id parentId = Reagent::instance()->parentId( reagentId );
+            if ( parentId != Id::Invalid ) {
+                parents = QString( R"("%1", "%2")" ).arg(
+                        HTMLUtils::convertToPlainText( Reagent::instance()->reference( parentId )),
+                        HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+            } else {
+                parents = QString( "\"%1\"" ).arg( HTMLUtils::convertToPlainText( Reagent::instance()->reference( reagentId )));
+            }
+
+            // paste
+            const QString completed( QString( "%1( %2 ) " ).arg( functionName, qAsConst( parents )));
+            MainWindow::instance()->insertCommand( completed );
         } else {
-            parents = QString( "\"%1\"" ).arg( HTMLUtils::convertToPlainText( Reagent::instance()->reference( reagentId )));
+            MainWindow::instance()->insertCommand( Property::instance()->propertyData( row ).toString());
         }
-
-        // paste
-        const QString completed( QString( "%1( %2 ) " ).arg( functionName, qAsConst( parents )));
-        MainWindow::instance()->insertCommand( completed );
     }
+
 
     if ( type == Tag::PubChemId ) {
         const int cid = Property::instance()->propertyData( row ).toInt();

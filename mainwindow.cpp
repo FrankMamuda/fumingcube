@@ -260,12 +260,12 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
         // finally append the end result to the calculator
         // NOTE: must be wrapped in <span></span> to avoid trailing anchors
-        this->ui->calcView->append( "<span>" + ( result.isError() ? line : replacedLine ) + "</span>" );
+        this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">" ).arg( calcView()->fontSize()) + ( result.isError() ? line : replacedLine ) + "</span>" );
         if ( result.isError()) {
-            this->ui->calcView->append( QString( "<span>%1</span><br>" ).arg( string ));
+            this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">%2</span><br>" ).arg( calcView()->fontSize()).arg( string ));
             Variable::setString( "calculator/ans", "" );
         } else {
-            this->ui->calcView->append( QString( "<span>= <a href=\"ans;%1\">%1<\a></span><br>" ).arg( string ));
+            this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">= <a href=\"ans;%2\">%2<\a></span><br>" ).arg( calcView()->fontSize()).arg( string ));
             Variable::setString( "calculator/ans", string );
         }
     }
