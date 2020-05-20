@@ -63,6 +63,8 @@ extraction:
 
 misc/unsorted:
  - view custom properties in a separate dialog
+ - replace initial greeting with one that supports internal zooming
+   implementation
 */
 
 /*
@@ -104,6 +106,7 @@ future:
    print out and glue on a bottle)
  - tag sub categories
  - rely more on Variable::bind for updates
+ - release candidate
 
 properties:
  - filter in dock

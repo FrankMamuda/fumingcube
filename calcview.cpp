@@ -95,6 +95,8 @@ void CalcView::wheelEvent( QWheelEvent *event ){
        this->zoomIn();
     else if (( event->modifiers() == Qt::ControlModifier ) && ( event->delta() < 0 ))
         this->zoomOut();
+    else
+        QTextBrowser::wheelEvent( event );
 }
 
 /**
