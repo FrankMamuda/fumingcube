@@ -43,6 +43,8 @@
 #include "extractiondialog.h"
 #include "listutils.h"
 #include "structurefragment.h"
+#include "labelset.h"
+#include "label.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -116,6 +118,37 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
             reagentId = batchId;
         }
+
+        // NOTE: sometimes the reagent list is filtered and reagent might be hidden
+        //       therefore we must find its label and select it
+        {
+            QSqlQuery query;
+            query.exec( QString( "select %1 from %2 where %3=%4" )
+                                .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ),
+                                      LabelSet::instance()->tableName(),
+                                      LabelSet::instance()->fieldName( LabelSet::ReagentId ),
+                                      QString::number( static_cast<int>( reagentId ))));
+
+            // find the first label the reagent has
+            if ( query.next()) {
+                const Id labelId = query.value( 0 ).value<Id>();
+                if ( labelId != Id::Invalid ) {
+                    const QList<Row> list( ListUtils::toNumericList<Row>( Variable::string( "labelDock/selectedRows" ).split( ";" )));
+                    const Row labelRow = Label::instance()->row( labelId );
+
+                    // test if label has already been selected
+                    if ( !list.contains( labelRow )) {
+                        // if not, append it to the selection and reset view
+                        Variable::setString( "labelDock/selectedRows", Variable::string( "labelDock/selectedRows" ).append( ";" ).append( QString::number( static_cast<int>( labelRow ))));
+                        LabelDock::instance()->restoreFilter();
+
+                        qDebug() << "reagentId" << reagentId << "label" << labelId << labelRow;
+                        //LabelDock::instance()->setFilter( )
+                    }
+                }
+            }
+        }
+
 
         // select reagent or batch
         Variable::setValue<int>( "reagentDock/selection", static_cast<int>( qAsConst( reagentId )));

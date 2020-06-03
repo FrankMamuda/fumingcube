@@ -303,3 +303,13 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
 
     return query.next() ? query.value( 0 ) : QVariant();
 }
+
+/**
+ * @brief Script::round
+ * @param value
+ * @param precision
+ * @return
+ */
+QJSValue Script::round( qreal value, int precision ) {
+    return QString::number( value, 'f', precision );
+}

@@ -65,6 +65,10 @@ misc/unsorted:
  - view custom properties in a separate dialog
  - replace initial greeting with one that supports internal zooming
    implementation
+ - labeldock must set/restore selection in selection model (not just
+   highlight active row)
+ - math functions (such as round, floor, etc.)
+ - option to explicitly override property
 */
 
 /*

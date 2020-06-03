@@ -71,6 +71,7 @@ public:
      * @param list
      */
     static void setFilter( const QModelIndexList &list = QModelIndexList());
+    void restoreFilter();
 
 protected:
     void showEvent( QShowEvent *event ) override;

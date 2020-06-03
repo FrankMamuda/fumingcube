@@ -149,12 +149,9 @@ void LabelDock::setFilter( const QModelIndexList &list ) {
 }
 
 /**
- * @brief LabelDock::showEvent
- * @param event
+ * @brief LabelDock::restoreFilter
  */
-void LabelDock::showEvent( QShowEvent *event ) {
-    DockWidget::showEvent( event );
-
+void LabelDock::restoreFilter() {
     // restore filter
     // TODO: why not store Label actual filter as a string
     //       since I cannot figure out how to select rows
@@ -178,6 +175,20 @@ void LabelDock::showEvent( QShowEvent *event ) {
 
         this->setFilter( list );
     }
+
+    // FIXME: does not work
+    //this->update();
+    //
+    //this->repaint();
+}
+
+/**
+ * @brief LabelDock::showEvent
+ * @param event
+ */
+void LabelDock::showEvent( QShowEvent *event ) {
+    DockWidget::showEvent( event );
+    this->restoreFilter();
 }
 
 /**
