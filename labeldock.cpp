@@ -164,22 +164,19 @@ void LabelDock::restoreFilter() {
     }
 
     if ( !rows.isEmpty()) {
-        QModelIndexList list;
+        this->ui->labelView->selectionModel()->clearSelection();
 
+        QItemSelection selection;
         for ( const int row : rows ) {
             if ( row == -1 )
                 continue;
 
-            list << Label::instance()->index( row, 0 );
+            const QModelIndex index( Label::instance()->index( row, 0 ));
+            selection.select( index, index );
         }
 
-        this->setFilter( list );
+        this->ui->labelView->selectionModel()->select( selection, QItemSelectionModel::Select | QItemSelectionModel::Rows );
     }
-
-    // FIXME: does not work
-    //this->update();
-    //
-    //this->repaint();
 }
 
 /**

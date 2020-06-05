@@ -54,9 +54,6 @@
 /*
  TODO:
 
-database:
- - fix crash on argument count mismatch
-
 extraction:
   - better 'not found' and 'server busy' error handling in search
   - delete cache for a single reagent does not work
@@ -65,9 +62,6 @@ misc/unsorted:
  - view custom properties in a separate dialog
  - replace initial greeting with one that supports internal zooming
    implementation
- - labeldock must set/restore selection in selection model (not just
-   highlight active row)
- - math functions (such as round, floor, etc.)
  - option to explicitly override property
 */
 
@@ -120,6 +114,10 @@ i18n:
    input dialogs can have an i18n button, to localize names
    add reagent-> sodium hydroxide [flag button]
  - language selector in settings
+
+database:
+ - fix crash on argument count mismatch (can happen only when
+   breaking API, so it is a non-issue right now)
 
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:

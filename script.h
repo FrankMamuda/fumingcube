@@ -63,7 +63,10 @@ public:
     [[nodiscard]] Id getPropertyId( const QString &name ) const;
     [[nodiscard]] Id getReagentId( const QString &reference, const Id &parentId = Id::Invalid ) const;
     [[nodiscard]] QVariant getPropertyValue( const Id &tagId, const Id &reagentId, const Id &parentId = Id::Invalid ) const;
-    Q_INVOKABLE QJSValue round( qreal value, int precision = 2 );
+    [[nodiscard]] Q_INVOKABLE QJSValue round( qreal value, int precision = 2 );
+    [[nodiscard]] Q_INVOKABLE QJSValue floor( qreal value );
+    [[nodiscard]] Q_INVOKABLE QJSValue ceil( qreal value );
+    [[nodiscard]] Q_INVOKABLE QJSValue abs( qreal value );
 
 private:
     explicit Script();

@@ -30,6 +30,7 @@
 #include <QSqlQuery>
 #include "htmlutils.h"
 #include "variable.h"
+#include <QtMath>
 
 /**
  * @brief Script::Script
@@ -67,6 +68,9 @@ QJSValue Script::evaluate( const QString &script ) {
     // also not the preferred way, since we also have to track tag updates)
     if ( !result.isError()) {
         const QStringList functions( Tag::instance()->getFunctionList());
+        // FIXME: hardcoded basic math functions
+        //        can't really think why we would need anything else at this point
+        const QStringList internalFunctions { "round", "ceil", "floor", "abs" };
 
         // do replacement magic:
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
@@ -76,7 +80,9 @@ QJSValue Script::evaluate( const QString &script ) {
                 QRegularExpression( QString( R"((%1)\s*\(\s*\")" ).arg( functions.join( "|" ))),
                 R"(JS.getProperty( "\1", ")" ).replace(
                 QRegularExpression( R"((\d+),(\d+)(?=(?:[^"]|"[^"]*")*$))" ), "\\1.\\2" ).replace(
-                QRegularExpression( R"((?<!")\b(ans)\b(?!"))" ), "JS.ans()" ).simplified());
+                QRegularExpression( R"((?<!")\b(ans)\b(?!"))" ), "JS.ans()" ).replace(
+                QRegularExpression( QString( R"((?<!")\b(%1\s*\(.+?(?=\))\)))" ).arg( internalFunctions.join( "|" ))), "JS.\\1" )
+                                 .simplified());
 
         // evaluate script
         result = this->engine.evaluate( processed );
@@ -312,4 +318,31 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
  */
 QJSValue Script::round( qreal value, int precision ) {
     return QString::number( value, 'f', precision );
+}
+
+/**
+ * @brief Script::floor
+ * @param value
+ * @return
+ */
+QJSValue Script::floor( qreal value ) {
+    return QString::number( qFloor( value ));
+}
+
+/**
+ * @brief Script::ceil
+ * @param value
+ * @return
+ */
+QJSValue Script::ceil( qreal value ) {
+    return QString::number( qCeil( value ));
+}
+
+/**
+ * @brief Script::abs
+ * @param value
+ * @return
+ */
+QJSValue Script::abs( qreal value ) {
+    return QString::number( qAbs( value ));
 }
