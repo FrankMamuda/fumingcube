@@ -40,6 +40,27 @@
      </property>
      <widget class="QWidget" name="centralwidget">
       <layout class="QGridLayout" name="gridLayout">
+       <item row="7" column="0" colspan="4">
+        <widget class="QPushButton" name="closeButton">
+         <property name="text">
+          <string>Close</string>
+         </property>
+         <property name="icon">
+          <iconset theme="close">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="4">
+        <widget class="QListView" name="tagView">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+        </widget>
+       </item>
        <item row="5" column="0" colspan="4">
         <widget class="QDockWidget" name="dockWidget">
          <property name="sizePolicy">
@@ -238,7 +259,8 @@
                 <string>...</string>
                </property>
                <property name="icon">
-                <iconset theme="calendar"/>
+                <iconset theme="calendar">
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
@@ -274,27 +296,6 @@
            </item>
           </layout>
          </widget>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="4">
-        <widget class="QListView" name="tagView">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="4">
-        <widget class="QPushButton" name="closeButton">
-         <property name="text">
-          <string>Close</string>
-         </property>
-         <property name="icon">
-          <iconset theme="close">
-           <normaloff>.</normaloff>.</iconset>
-         </property>
         </widget>
        </item>
       </layout>

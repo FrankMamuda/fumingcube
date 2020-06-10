@@ -127,17 +127,17 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         const QDialogButtonBox::ButtonRole role = this->ui->buttonBox->buttonRole( button );
 
         if ( role == QDialogButtonBox::AcceptRole ) {
-            const QModelIndex index( this->ui->tagView->currentIndex());
-            if ( !index.isValid())
-                return;
-
-            const Row row = Tag::instance()->row( index );
-            if ( row == Row::Invalid )
-                return;
-
             const bool isDate = this->ui->typeCombo->currentIndex() == Tag::Date;
 
             if ( this->mode() == Edit ) {
+                const QModelIndex index( this->ui->tagView->currentIndex());
+                if ( !index.isValid())
+                    return;
+
+                const Row row = Tag::instance()->row( index );
+                if ( row == Row::Invalid )
+                    return;
+
                 Tag::instance()->setType( row, static_cast<Tag::Types>( this->ui->typeCombo->currentIndex()));
                 Tag::instance()->setName( row, this->ui->nameEdit->text());
                 Tag::instance()->setUnits( row, HTMLUtils::captureBody( this->ui->unitsEdit->toHtml()));

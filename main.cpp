@@ -47,6 +47,8 @@
 #include <QTranslator>
 #include "pixmaputils.h"
 #include "calcview.h"
+#include "tableentry.h"
+#include "tableproperty.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
 #endif
@@ -289,6 +291,9 @@ int main( int argc, char *argv[] ) {
         success &= Database::instance()->add( Tag::instance());
         success &= Database::instance()->add( Label::instance());
         success &= Database::instance()->add( LabelSet::instance());
+        success &= Database::instance()->add( TableEntry::instance());
+        success &= Database::instance()->add( TableProperty::instance());
+
 
         if ( !Tag::instance()->count())
             Tag::instance()->populate();
