@@ -31,6 +31,8 @@
 #include "reagentdelegate.h"
 #include <QSqlQuery>
 #include <QDebug>
+#include <QScrollBar>
+#include <QScreen>
 #include <QLabel>
 
 /**
@@ -194,6 +196,8 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     // resize contents
     this->ui->tableView->resizeColumnsToContents();
     this->ui->tableView->resizeRowsToContents();
+
+    qDebug() << "document cache" << delegate->documentMap.count();
 }
 
 /**
@@ -202,4 +206,50 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
 TableViewer::~TableViewer() {
     delete this->model;
     delete this->ui;
+}
+
+/**
+ * @brief TableViewer::showEvent
+ * @param event
+ */
+void TableViewer::showEvent( QShowEvent *event ) {
+    QDialog::showEvent( event );
+
+    //this->ui->tableView->resizeRowsToContents();
+    //this->ui->tableView->resizeColumnsToContents();
+
+    // FIXME: magic number
+    int width = 48;
+    for( int c = 0; c < this->model->columnCount(); c++ )
+        width += this->ui->tableView->columnWidth( c );
+    width += this->ui->tableView->verticalScrollBar()->width();
+
+    this->resize( width, QApplication::primaryScreen()->availableSize().height() * 3 / 5 );
+    this->move( QApplication::primaryScreen()->geometry().center().x() - this->width() / 2, QApplication::primaryScreen()->geometry().center().y() - this->height() / 2 );
+
+    for ( int r = 0; r < this->model->rowCount(); r++ ) {
+        for ( int c = 0; c < this->model->columnCount(); c++ ) {
+            const QModelIndex index( this->model->index( r, c ));
+
+
+            qDebug() << this->ui->tableView->sizeHintForIndex( index );
+
+            PropertyDelegate *delegate( qobject_cast<PropertyDelegate *>( this->ui->tableView->itemDelegateForColumn( c )));
+
+            if ( delegate == nullptr )
+                continue;
+
+            qDebug() << "document cache" << delegate->documentMap.count();
+
+/*
+            QTextDocument *doc( delegate->documentMap.contains( index ) ? delegate->documentMap[index] : nullptr );
+            if ( doc == nullptr )
+                continue;
+
+            qDebug() << doc->size().height() << doc->pageSize().height();
+            //delegate->documentMap[index]->adjustSize();*/
+        }
+    }
+
+
 }

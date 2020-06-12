@@ -40,6 +40,9 @@ public:
     explicit TableViewer( QWidget *parent = nullptr, const Id &tableId = Id::Invalid );
     ~TableViewer();
 
+protected:
+    void showEvent( QShowEvent *event ) override;
+
 private:
     Ui::TableViewer *ui;
     QSqlQueryModel *model = new QSqlQueryModel();

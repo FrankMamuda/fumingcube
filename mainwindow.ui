@@ -192,6 +192,9 @@
    </property>
   </action>
   <action name="actionTables">
+   <property name="icon">
+    <iconset theme="table"/>
+   </property>
    <property name="text">
     <string>Tables</string>
    </property>

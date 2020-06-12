@@ -213,6 +213,7 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
                        .arg( pixmapData.toBase64().constData()));
 
     // just add to cache
+    if ( this->viewMode()) qDebug() << "finalize pixmap document" << document->toPlainText();
     this->documentMap[index] = document;
 }
 
@@ -274,6 +275,8 @@ void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocumen
     document->setTextWidth( document->idealWidth());
 
     // add to cache
+    if ( this->viewMode()) qDebug() << "finalize document" << document->toPlainText();
+
     this->documentMap[index] = document;
 }
 

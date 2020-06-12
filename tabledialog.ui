@@ -241,6 +241,9 @@
    </property>
   </action>
   <action name="actionView">
+   <property name="icon">
+    <iconset theme="table"/>
+   </property>
    <property name="text">
     <string>View</string>
    </property>
