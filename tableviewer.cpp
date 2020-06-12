@@ -28,6 +28,7 @@
 #include "tag.h"
 #include "ghswidget.h"
 #include "nfpawidget.h"
+#include "reagentdelegate.h"
 #include <QSqlQuery>
 #include <QDebug>
 #include <QLabel>
@@ -39,13 +40,16 @@
 TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent ), ui( new Ui::TableViewer ) {
     this->ui->setupUi( this );
 
+    // abort if tableId is invalid
     if ( tableId == Id::Invalid )
         return;
 
+    //
     // step one: get selected tags
+    //
     QMap<Id, bool> settings;
-    QStringList tags;
 
+    // run a simple query to retrieve tags (currently in unordered from)
     QSqlQuery query;
     query.exec( QString( "select %1, %2 from %3 where %4=%5" )
                 .arg( TableProperty::instance()->fieldName( TableProperty::TagId ),
@@ -54,11 +58,9 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
                       TableProperty::instance()->fieldName( TableProperty::TableId ),
                       QString::number( static_cast<int>( tableId ))));
 
-    while ( query.next()) {
+    // store results in a map
+    while ( query.next())
         settings[query.value( 0 ).value<Id>()] = query.value( 1 ).toBool();
-        tags << query.value( 0 ).toString();
-    }
-
 
     //
     // TODO: add switch to require certain columns for an item to be displayed
@@ -67,132 +69,137 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     //           b) reagents and batches
     //           c) batches only
     //
-    // step two: get items
-    this->ui->tableWidget->setColumnCount( settings.count() + 1 );
-
     // ONLY reagents for now
-    QList<Id> reagents;
-    query.exec( QString( "select %1 from %2 where %3!=-1" )
-                .arg( Reagent::instance()->fieldName( Reagent::ID ),
-                      Reagent::instance()->tableName(),
-                      Reagent::instance()->fieldName( Reagent::ParentId )));
 
-    while ( query.next())
-        reagents << query.value( 0 ).value<Id>();
+    //
+    // step two: run an sql query that returns [reagentId] [propertyId_0] ... [propertyId_N]
+    //
+    QString statement( QString( "select %1.%2, " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
+    int c = 0;
+    const QList<Id> tagIds( settings.keys());
+    for ( c = 0; c < tagIds.count(); c++ )
+        statement.append( QString( " ifnull( t%1.id, -1 ) as c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "," : "" )));
 
-    // step three: fetch properties
-    // MAP <REAGENT, TAG, VALUE>
+    statement.append( " from " + Reagent::instance()->tableName());
 
-
-    QMap<Id, QMap<Id, QByteArray>> propertyData;
-    query.exec( QString( "select %1, %2, %3, %4 from %5 where %3 in ( %6 )" )
-                .arg( Property::instance()->fieldName( Property::ID ),
-                      Property::instance()->fieldName( Property::ReagentId ),
-                      Property::instance()->fieldName( Property::TagId ),
-                      Property::instance()->fieldName( Property::PropertyData ),
-                      Property::instance()->tableName(),
-                      tags.join( ", " ))
-                );
-
-    qDebug() << QString( "select %1, %2, %3, %4 from %5 where %3 in ( %6 )" )
-                .arg( Property::instance()->fieldName( Property::ID ),
-                      Property::instance()->fieldName( Property::ReagentId ),
-                      Property::instance()->fieldName( Property::TagId ),
-                      Property::instance()->fieldName( Property::PropertyData ),
-                      Property::instance()->tableName(),
-                      tags.join( ", " ));
-
-    while ( query.next())
-        propertyData[query.value( 1 ).value<Id>()][query.value( 2 ).value<Id>()] = query.value( 3 ).toByteArray();
-
-    // step four: populate table
-    this->ui->tableWidget->setRowCount( propertyData.keys().count());
-
-
-    // terrible implementation, but it works for now
-    // TODO: use delegates, dummy models and tableview instead of tablewidget
-    int y = 0;
-    for ( const Id &reagentId : propertyData.keys()) {
-        //this->ui->tableWidget->setItem( y, 0, new QTableWidgetItem( HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId ))));
-        //qDebug() << HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )) << reagentId;
-        this->ui->tableWidget->setCellWidget( y, 0, new QLabel( Reagent::instance()->name( reagentId )));
-
-        for ( const Id &tagId : propertyData[reagentId].keys()) {
-            const int column = settings.keys().indexOf( tagId );
-            //this->ui->tableWidget->setItem( y, column + 1, new QTableWidgetItem( HTMLUtils::convertToPlainText( QString::fromUtf8( propertyData[reagentId][tagId].constData()))));
-
-           /* NoType = -1,
-            Text,
-            Integer,
-            Real,
-            GHS,
-            NFPA,
-            CAS,
-            State,
-            Formula,
-            PubChemId,
-            Date*/
-
-            const Tag::Types tagType = Tag::instance()->type( tagId );
-            QLabel *label( new QLabel());
-            if ( tagId == PixmapTag || tagType == Tag::Formula ) {
-                //qDebug() << "READ FROM DATA";
-
-                QPixmap pixmap;
-                //qDebug() << QString::fromUtf8( propertyData[reagentId][tagId] ).left( 5 );
-                if ( pixmap.loadFromData( propertyData[reagentId][tagId] ))
-                    label->setPixmap( pixmap );
-
-                this->ui->tableWidget->setCellWidget( y, column + 1, label );
-            } else {
-                switch ( tagType ) {
-                case Tag::Integer:
-                case Tag::Real:
-                case Tag::Formula:
-                case Tag::PubChemId:
-                case Tag::CAS:
-                    label->setText( QString::fromUtf8( propertyData[reagentId][tagId].constData()));
-                    label->setAlignment( Qt::AlignCenter );
-                    this->ui->tableWidget->setCellWidget( y, column + 1, label );
-                    break;
-
-                case Tag::GHS:
-                {
-                    GHSWidget *ghs( new GHSWidget( nullptr, QString::fromUtf8( propertyData[reagentId][tagId].constData()).split( " " )));
-                    this->ui->tableWidget->setCellWidget( y, column + 1, ghs );
-                }
-                    break;
-
-                case Tag::NFPA:
-                {
-                    NFPAWidget *nfpa( new NFPAWidget( nullptr, QString::fromUtf8( propertyData[reagentId][tagId].constData()).split( " " )));
-                    this->ui->tableWidget->setCellWidget( y, column + 1, nfpa );
-                }
-                    break;
-
-                default:
-                    ;
-                }
-            }
-
-        }
-
-        y++;
+    for ( c = 0; c < tagIds.count(); c++ ) {
+        statement.append( QString( " left join "
+                                   "( select %2, %3.%4 from %3 where %5=%8 ) "
+                                   "as t%1 "
+                                   "on t%1.%2=%6.%7" )
+                          .arg( QString::number( c ), // 1
+                                Property::instance()->fieldName( Property::ReagentId ), // 2
+                                Property::instance()->tableName(), // 3
+                                Property::instance()->fieldName( Property::ID ), // 4
+                                Property::instance()->fieldName( Property::TagId ), // 5
+                                Reagent::instance()->tableName(), // 6
+                                Reagent::instance()->fieldName( Reagent::ID ), // 7
+                                QString::number( static_cast<int>( tagIds.at( c ))) // 8
+                                )
+                          );
     }
 
-    QStringList tagNames( QStringList() << TableViewer::tr( "Reagent" ));
-    for ( const Id &id : settings.keys())
-        tagNames << Tag::instance()->name( id );
+    statement.append( " where " );
+    for ( c = 0; c < tagIds.count(); c++ )
+        statement.append( QString( "c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "+" : "" )));
+    statement.append( QString( "!=-%1" ).arg( QString::number( c )));
 
-    this->ui->tableWidget->setHorizontalHeaderLabels( tagNames );
-    this->ui->tableWidget->resizeColumnsToContents();
-    this->ui->tableWidget->resizeRowsToContents();
+    //
+    // step three: visualize data, using QSqlQueryModel and QTreeView
+    //
+    this->model->setQuery( QSqlQuery( statement ));
+    this->ui->tableView->setModel( this->model );
 
+    // setup column names
+    this->model->setHeaderData( 0, Qt::Horizontal, TableViewer::tr( "Reagent" ));
+    for ( c = 0; c < tagIds.count(); c++ )
+        this->model->setHeaderData( c + 1, Qt::Horizontal, QApplication::translate( "Tag", Tag::instance()->name( tagIds.at( c )).toUtf8().constData()));
+
+    // setup index widgets (NFPA, GHS)
+    // NOTE: similar to PropertyDock::setSpecialWidgets
+    for ( int r = 0; r < this->model->rowCount(); r++ ) {
+        for ( int c = 0; c < this->model->columnCount(); c++ ) {
+            const QModelIndex index( this->model->index( r, c ));
+
+            // handle first column (reagent name)
+            if ( c == 0 ) {
+                const Id reagentId = static_cast<Id>( index.data( Qt::DisplayRole ).value<Id>());
+                if ( reagentId == Id::Invalid )
+                    continue;
+
+                // display name as a simple QLabel with html data
+                QLabel *label( new QLabel( Reagent::instance()->name( reagentId )));
+                label->setAutoFillBackground( true );
+                label->setAttribute( Qt::WA_DeleteOnClose, true );
+                this->ui->tableView->setIndexWidget( index, label );
+                continue;
+            }
+
+            // handle the rest of columns, setting index widgets if needed
+            const Id propertyId = static_cast<Id>( index.data( Qt::DisplayRole ).value<Id>());
+            if ( propertyId == Id::Invalid )
+                continue;
+            const Id tagId = Property::instance()->tagId( propertyId );
+
+            bool pixmap = false;
+            if ( tagId != Id::Invalid )
+                pixmap = Tag::instance()->type( tagId ) == Tag::Formula || tagId == PixmapTag;
+
+            if ( tagId == Id::Invalid || pixmap )
+                continue;
+
+            const Tag::Types type = Tag::instance()->type( tagId );
+            if ( type == Tag::NFPA || type == Tag::GHS ) {
+                const QStringList parms( Property::instance()->propertyData( propertyId ).toString().split( " " ));
+                QWidget *widget( this->ui->tableView->indexWidget( index ));
+
+                if ( type == Tag::NFPA ) {
+                    NFPAWidget *nfpa( new NFPAWidget( nullptr, parms ));
+                    widget = nfpa;
+                } else {
+                    GHSWidget *ghs( new GHSWidget( nullptr, parms ));
+                    widget = ghs;
+                }
+
+                // there aren't supposed to be updates (disimilar to PropertyDock::setSpecialWidgets)
+                // therefore we can set the widget and forget about it
+                //widget->setAttribute( Qt::WA_DeleteOnClose, true );
+
+                // FIXME: dirty hack to fix alignment
+                QWidget *container = new QWidget();
+                container->setAttribute( Qt::WA_DeleteOnClose, true );
+                QGridLayout *grid( new QGridLayout());
+                grid->setSpacing(0);
+                grid->setMargin(0);
+                grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding ), 0, 0, 1, 3 );
+                grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed ), 1, 0 );
+                grid->addWidget( widget, 1, 1 );
+                grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed ), 1, 2 );
+                grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding ), 2, 0, 1, 3 );
+                container->setLayout( grid );
+
+                this->ui->tableView->setIndexWidget( index, container );
+            }
+        }
+    }
+
+    // the rest of data is handle throught the property delegate via special viewMode
+    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
+    delegate->setViewMode();
+
+    // set property delegate to columns with properties (1+)
+    for ( c = 0; c < tagIds.count(); c++ )
+        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
+
+    // resize contents
+    this->ui->tableView->resizeColumnsToContents();
+    this->ui->tableView->resizeRowsToContents();
 }
 
 /**
  * @brief TableViewer::~TableViewer
  */
 TableViewer::~TableViewer() {
+    delete this->model;
     delete this->ui;
 }

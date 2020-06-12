@@ -361,7 +361,8 @@ void MainWindow::setCalcTheme( Theme *theme ) {
  * @brief MainWindow::on_actionClear_triggered
  */
 void MainWindow::on_actionClear_triggered() {
-    this->ui->calcView->clear();
+    if ( QMessageBox::question( this, MainWindow::tr( "Confirm action" ), MainWindow::tr( "Clear calculator history?" )) == QMessageBox::Yes )
+        this->ui->calcView->clear();
 }
 
 /**

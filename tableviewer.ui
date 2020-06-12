@@ -15,10 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="tableWidget">
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
+    <widget class="QTableView" name="tableView">
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
@@ -30,7 +27,8 @@
       <string>Close</string>
      </property>
      <property name="icon">
-      <iconset theme="close"/>
+      <iconset theme="close">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
    </item>

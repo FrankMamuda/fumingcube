@@ -20,6 +20,7 @@
  * includes
  */
 #include <QDialog>
+#include <QSqlRelationalTableModel >
 #include "table.h"
 
 /**
@@ -41,4 +42,5 @@ public:
 
 private:
     Ui::TableViewer *ui;
+    QSqlQueryModel *model = new QSqlQueryModel();
 };

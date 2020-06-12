@@ -60,6 +60,12 @@ public:
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const override;
     mutable QMap<QModelIndex, QTextDocument *> documentMap;
 
+    /**
+     * @brief viewMode
+     * @return
+     */
+    [[nodiscard]] bool viewMode() const { return this->m_viewMode; }
+
 public slots:
     /**
      * @brief clearDocumentCache
@@ -67,6 +73,14 @@ public slots:
     void clearDocumentCache() {
         qDeleteAll( this->documentMap );
         this->documentMap.clear();
+    }
+
+    /**
+     * @brief setViewMode
+     * @param viewMode
+     */
+    void setViewMode( bool viewMode = true ) {
+        this->m_viewMode = viewMode;
     }
 
 private slots:
@@ -78,4 +92,5 @@ private slots:
 
 private:
     mutable QMap<QString, QSize> sizeCache;
+    bool m_viewMode = false;
 };
