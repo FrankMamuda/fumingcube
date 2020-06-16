@@ -275,12 +275,27 @@ void TableDialog::populate() {
         const Row tagRow = Tag::instance()->row( y );
         const Id tagId = Tag::instance()->id( tagRow );
         const QString tagName( Tag::instance()->name( tagRow )); // TODO: i18n
+        const Tag::Types type( Tag::instance()->type( tagRow ));
 
         if ( tagId == Id::Invalid )
             continue;
 
-        this->ui->tabBox->addItem( tagName, static_cast<int>( tagId ));
-        comboIds[tagId] = this->ui->tabBox->count() - 1;
+        /*NoType = -1,
+        Text,
+        Integer,
+        Real,
+        GHS,
+        NFPA,
+        CAS,
+        State,
+        Formula,
+        PubChemId,
+        Date*/
+
+        if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::Date ) {
+            this->ui->tabBox->addItem( tagName, static_cast<int>( tagId ));
+            comboIds[tagId] = this->ui->tabBox->count() - 1;
+        }
         if ( settings.contains( tagId ))
             continue;
 
@@ -293,7 +308,7 @@ void TableDialog::populate() {
     // populate selected tag table
     this->ui->selectedWidget->clear();
     for ( const Id tagId : orderedList ) {
-        if ( settings[tagId] ) {
+        if ( settings[tagId] && comboIds.contains( tagId )) {
             const int index = comboIds[tagId];
             this->ui->tabBox->setCurrentIndex( index );
 

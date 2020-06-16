@@ -20,7 +20,7 @@
  * includes
  */
 #include <QDialog>
-#include <QSqlRelationalTableModel >
+#include <QSqlQueryModel>
 #include "table.h"
 
 /**
@@ -40,10 +40,21 @@ public:
     explicit TableViewer( QWidget *parent = nullptr, const Id &tableId = Id::Invalid );
     ~TableViewer() override;
 
+    /**
+     * @brief filter
+     * @return
+     */
+    [[nodiscard]] QString filter() const { return this->m_filter; }
+
 protected:
     void showEvent( QShowEvent *event ) override;
+
+public slots:
+    void populateTable( const QList<Id> tagIds, const QString &filter );
+    void setFilter( const Id tabId, const QList<Id> tagList );
 
 private:
     Ui::TableViewer *ui;
     QSqlQueryModel *model = new QSqlQueryModel();
+    QString m_filter;
 };

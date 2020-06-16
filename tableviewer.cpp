@@ -36,6 +36,18 @@
 #include <QLabel>
 #include <QTimer>
 
+//
+// TODO: add switch to require certain columns for an item to be displayed
+//       also a flag to display:
+//           a) reagents (double click for batches?);
+//           b) reagents and batches
+//           c) batches only
+//
+// add an option to export data
+// add an option to dynamically sort data
+//
+//
+
 /**
  * @brief TableViewer::TableViewer
  * @param parent
@@ -50,7 +62,6 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     //
     // step one: get selected tags
     //
-    QMap<Id, bool> settings;
     QList<Id> tagIds;
     Id tabId = Id::Invalid;
 
@@ -65,50 +76,123 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
                       TableProperty::instance()->fieldName( TableProperty::TableOrder )
                       ));
 
-    // store them in an unordered map (for now)
+    // store selected tagIds them in a list
+    // also store the selected tabId for use in a horizonatal tab filter
     while ( query.next()) {
         const Id id = query.value( 0 ).value<Id>();
         const bool tabbed = query.value( 1 ).toBool();
 
-        settings[id] = tabbed;
         if ( !tabbed )
             tagIds << id;
         else
             tabId = id;
     }
 
+    // retrieve corresponding unique properties where tagId=tabId
+    // for example:
+    //     tagName: "Location"
+    //     unique entries: "C1", "C2", "C3" + "Unsorted" (when values are missing)
     //
-    // TODO: add switch to require certain columns for an item to be displayed
-    //       also a flag to display:
-    //           a) reagents (double click for batches?);
-    //           b) reagents and batches
-    //           c) batches only
-    //
-    // ONLY reagents for now
-
-    //
-    // now we should get unique entries of tabId for example:
-    // tagName "Location", unique entries "C1", "C2", "C3" + "Unsorted" (with a null value)
-    //
-    // tabs will be displayed in a QTabBar
+    // unique entries (or categories) are displayed as tabs in the QTabBar
     // on tab change, select statement changes and table data is refreshed
+
+
     if ( tabId == Id::Invalid ) {
+        // if we do not have a tabId set, there is no need for filtering
+        // just populate the table
         this->ui->tabBar->hide();
+        this->populateTable( tagIds, this->filter());
     } else {
+        // setup tabBar
         this->ui->tabBar->setShape( QTabBar::RoundedSouth );
 
-        QSqlQuery query( "..." );
-        // TODO: implement this
+        // get unique categories to use as tabs
+        QStringList categories;
+        QSqlQuery query( QString( "select %1, count( %1 ) from %2 where %3=%4 group by %1 order by %1" ).arg(
+                             Property::instance()->fieldName( Property::PropertyData ), // 1
+                             Property::instance()->tableName(), // 2
+                             Property::instance()->fieldName( Property::TagId ), // 3
+                             QString::number( static_cast<int>( tabId )) // 4
+                             ));
 
+        // store them in a list
+        while ( query.next())
+            categories.append( query.value( 0 ).toString());
 
-        // 1) get count and name from sql
-        // 2) append new tabs
-        // 3) append 'unsorted' tab
-        // if total count is zero, hide tabBar and do no filtering at all
+        if ( categories.count() > 1 ) {
+            // add corresponding tabs
+            for ( const QString &category : qAsConst( categories ))
+                this->ui->tabBar->addTab( category );
+
+            // append 'unsorted' tab (for entries withou values)
+            this->ui->tabBar->addTab( TableViewer::tr( "Unsorted" ));
+
+            // connect tabBar for updates (click on a tab triggers setFilter which in turn repopulates the table)
+            QTabBar::connect( this->ui->tabBar, &QTabBar::currentChanged, this, [ this, tabId, tagIds ] { this->setFilter( tabId, tagIds ); } );
+
+            // populate with the first category
+            this->setFilter( tabId, tagIds );
+        } else {
+            // a malformed filter may return zero categories
+            // in this case populate the table without filtering it
+            this->ui->tabBar->hide();
+            this->populateTable( tagIds, this->filter());
+        }
     }
 
+    // property data is handled through the property delegate via special viewMode
+    // NOTE: code is reused in PropertyDock and here
+    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
+    delegate->setViewMode();
+
+    // set property delegate to columns with properties (1+)
+    this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
+    for ( int c = 0; c < tagIds.count(); c++ )
+        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
+}
+
+/**
+ * @brief TableViewer::~TableViewer
+ */
+TableViewer::~TableViewer() {
+    delete this->model;
+    delete this->ui;
+}
+
+/**
+ * @brief TableViewer::showEvent
+ * @param event
+ */
+void TableViewer::showEvent( QShowEvent *event ) {
+    QDialog::showEvent( event );
+
+    // get optimal dialog width
+    // FIXME: magic number
+    int width = 48;
+    for( int c = 0; c < this->model->columnCount(); c++ )
+        width += this->ui->tableView->columnWidth( c );
+    width += this->ui->tableView->verticalScrollBar()->width();
+
+    // get optimal dialog height
+    // FIXME: magic number
+    int height = 128;
+    for( int r = 0; r < this->model->rowCount(); r++ )
+        height += this->ui->tableView->rowHeight( r );
+
+    // adjust dialog size
+    const QSize size( QApplication::primaryScreen()->availableSize());
+    this->resize( qMin( width, size.width() * 3 / 5 ), qMin( height, size.height() * 3 / 5 ));
+
+    // reposition dialog in the middle of the screen
+    this->move( QApplication::primaryScreen()->geometry().center().x() - this->width() / 2, QApplication::primaryScreen()->geometry().center().y() - this->height() / 2 );
+}
+
+/**
+ * @brief TableViewer::populateTable
+ */
+void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter ) {
     //
-    // step two: run an sql query that returns [reagentId] [propertyId_0] ... [propertyId_N]
+    // step one: run an sql query that returns [reagentId] [propertyId_0] ... [propertyId_N]
     //
     QString statement( QString( "select %1.%2, " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
     int c = 0;
@@ -133,31 +217,18 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
                                 )
                           );
     }
-    // TODO: add tab statement
 
-    statement.append( " where " );
+    statement.append( " where " + filter );
     for ( c = 0; c < tagIds.count(); c++ )
         statement.append( QString( "c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "+" : "" )));
     statement.append( QString( "!=-%1" ).arg( QString::number( c )));
 
     //
-    // step two: setup delegate early
-    //
-
-    // the rest of data is handled through the property delegate via special viewMode
-    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
-    delegate->setViewMode();
-
-    // set property delegate to columns with properties (1+)
-    this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
-    for ( c = 0; c < tagIds.count(); c++ )
-        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
-
-    //
-    // step four: visualize data, using QSqlQueryModel and QTreeView
+    // step two: visualize data, using QSqlQueryModel and QTableView
     //
     this->model->setQuery( QSqlQuery( statement ));
     this->ui->tableView->setModel( this->model );
+    this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
 
     // setup column names
     this->model->setHeaderData( 0, Qt::Horizontal, TableViewer::tr( "Reagent" ));
@@ -238,26 +309,42 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
 }
 
 /**
- * @brief TableViewer::~TableViewer
+ * @brief TableViewer::setFilter
  */
-TableViewer::~TableViewer() {
-    delete this->model;
-    delete this->ui;
-}
+void TableViewer::setFilter( const Id tabId, const QList<Id> tagList ) {
+    // clear filter just in case
+    this->m_filter.clear();
 
-/**
- * @brief TableViewer::showEvent
- * @param event
- */
-void TableViewer::showEvent( QShowEvent *event ) {
-    QDialog::showEvent( event );
+    // no tabs - no filter
+    if ( this->ui->tabBar->currentIndex() < 0 )
+        return;
 
-    // FIXME: magic number
-    int width = 48;
-    for( int c = 0; c < this->model->columnCount(); c++ )
-        width += this->ui->tableView->columnWidth( c );
-    width += this->ui->tableView->verticalScrollBar()->width();
+    // get tab name which is also the category filter
+    const QString text( this->ui->tabBar->currentIndex() == this->ui->tabBar->count() - 1 ? "" : this->ui->tabBar->tabText( this->ui->tabBar->currentIndex()));
 
-    this->resize( width, QApplication::primaryScreen()->availableSize().height() * 3 / 5 );
-    this->move( QApplication::primaryScreen()->geometry().center().x() - this->width() / 2, QApplication::primaryScreen()->geometry().center().y() - this->height() / 2 );
+    // [filter0] [filter1] .. [filterN] [Unsorted]
+    // if text is empty - it indicates that we have selected the last or 'Unsorted' tab which uses a simplified query
+    if ( text.isEmpty())
+        this->m_filter = QString( " %1.%2 not in ( select %3 from %4 where %5=%6 ) and " ).arg(
+                    Reagent::instance()->tableName(), // 1
+                    Reagent::instance()->fieldName( Reagent::ID ), // 2
+                    Property::instance()->fieldName( Property::ReagentId ), // 3
+                    Property::instance()->tableName(), // 4
+                    Property::instance()->fieldName( Property::TagId ), // 5
+                    QString::number( static_cast<int>( tabId ))
+                    );
+    else
+        this->m_filter = QString( " %1.%2 in ( select %3 from %4 where %5=%6 and cast( %7 as text )='%8' ) and " ).arg(
+                    Reagent::instance()->tableName(), // 1
+                    Reagent::instance()->fieldName( Reagent::ID ), // 2
+                    Property::instance()->fieldName( Property::ReagentId ), // 3
+                    Property::instance()->tableName(), // 4
+                    Property::instance()->fieldName( Property::TagId ), // 5
+                    QString::number( static_cast<int>( tabId )), // 6
+                    Property::instance()->fieldName( Property::PropertyData ), // 7
+                    text // 8
+                    );
+
+    // repopulate table with filtering enabled
+    this->populateTable( tagList, this->filter());
 }
