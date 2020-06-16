@@ -28,13 +28,6 @@
 #include <QMap>
 #include "table.h"
 
-//
-// THIS IS A MESS
-//
-// DON'T STORE PIXMAP IN CACHE IF SIZE MATCHES THE ORIGINAL DATA
-//
-//
-
 /**
  * @brief The PropertyDelegate class
  */

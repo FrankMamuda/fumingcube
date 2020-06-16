@@ -38,7 +38,7 @@ class TableViewer : public QDialog {
 
 public:
     explicit TableViewer( QWidget *parent = nullptr, const Id &tableId = Id::Invalid );
-    ~TableViewer();
+    ~TableViewer() override;
 
 protected:
     void showEvent( QShowEvent *event ) override;

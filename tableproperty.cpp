@@ -30,6 +30,8 @@ TableProperty::TableProperty() : Table( "table_prop" ) {
     this->addField( FIELD( TableId, Int ));
     this->addField( FIELD( TagId, Int ));
     this->addField( FIELD( Tab, Int ));
+    this->addField( FIELD( TableOrder, Int ));
+    this->addUniqueConstraint( QList<QSharedPointer<Field_>>() << this->field( TagId ) << this->field( TableId ) << this->field( Tab ));
 }
 
 /**
@@ -39,8 +41,8 @@ TableProperty::TableProperty() : Table( "table_prop" ) {
  * @param tabbed
  * @return
  */
-Row TableProperty::add( const Id &tableId, const Id &tagId, bool tabbed ) {
-    return Table::add( QVariantList() << Database_::null << static_cast<int>( tableId ) << static_cast<int>( tagId ) << static_cast<int>( tabbed ));
+Row TableProperty::add( const Id &tableId, const Id &tagId, bool tabbed, int order ) {
+    return Table::add( QVariantList() << Database_::null << static_cast<int>( tableId ) << static_cast<int>( tagId ) << static_cast<int>( tabbed ) << order );
 }
 
 /**
@@ -49,4 +51,3 @@ Row TableProperty::add( const Id &tableId, const Id &tagId, bool tabbed ) {
 void TableProperty::removeOrphanedEntries() {
     // NOTE: table props do not have foreign ids, therefore they cannot be orphaned
 }
-

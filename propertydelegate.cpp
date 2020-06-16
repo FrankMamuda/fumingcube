@@ -213,7 +213,6 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
                        .arg( pixmapData.toBase64().constData()));
 
     // just add to cache
-    if ( this->viewMode()) qDebug() << "finalize pixmap document" << document->toPlainText();
     this->documentMap[index] = document;
 }
 
@@ -275,8 +274,6 @@ void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocumen
     document->setTextWidth( document->idealWidth());
 
     // add to cache
-    if ( this->viewMode()) qDebug() << "finalize document" << document->toPlainText();
-
     this->documentMap[index] = document;
 }
 
@@ -390,8 +387,6 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
-    // FIXME: sizeHint for pixmaps is not exactly right (as seen in TableViewer)
-
     if ( !this->viewMode()) {
         const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
         if ( view->isResizeInProgress())
@@ -410,17 +405,19 @@ QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModel
     if ( propertyId == Id::Invalid )
         return QSize();
 
-    const auto reagentId = Variable::value<Id>( "reagentDock/selection" );
-    const Id parentId = Reagent::instance()->parentId( reagentId );
-    const Id propertyParentId = Property::instance()->reagentId( qAsConst( propertyId ));
-    if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
-        return QSize();
+    if ( !this->viewMode()) {
+        const auto reagentId = Variable::value<Id>( "reagentDock/selection" );
+        const Id parentId = Reagent::instance()->parentId( reagentId );
+        const Id propertyParentId = Property::instance()->reagentId( qAsConst( propertyId ));
+        if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
+            return QSize();
 
-    if ( parentId == Id::Invalid && propertyParentId != reagentId )
-        return QSize();
+        if ( parentId == Id::Invalid && propertyParentId != reagentId )
+            return QSize();
 
-    if ( parentId != Id::Invalid && ( propertyParentId != reagentId && propertyParentId != parentId ))
-        return QSize();
+        if ( parentId != Id::Invalid && ( propertyParentId != reagentId && propertyParentId != parentId ))
+            return QSize();
+    }
 
     // setup html document
     this->setupDocument( index, item.font );

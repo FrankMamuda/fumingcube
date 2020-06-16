@@ -40,6 +40,7 @@ public:
         TableId,
         TagId,
         Tab,
+        TableOrder,
 
         // count (DO NOT REMOVE)
         Count
@@ -52,14 +53,14 @@ public:
      */
     static TableProperty *instance() { static TableProperty *i( new TableProperty()); return i; }
     ~TableProperty() override = default;
-    Row add( const Id &tableId = Id::Invalid, const Id &tagId = Id::Invalid, bool tabbed = false );
+    Row add( const Id &tableId = Id::Invalid, const Id &tagId = Id::Invalid, bool tabbed = false, int order = -1 );
 
     // initialize field setters and getters
-    INITIALIZE_FIELD( Id,     ID,      id )
-    INITIALIZE_FIELD( Id,     TableId, tableId )
-    INITIALIZE_FIELD( Id,     TagId,   tagId )
-    INITIALIZE_FIELD( int,    Tab,     tab )
-
+    INITIALIZE_FIELD( Id,     ID,         id )
+    INITIALIZE_FIELD( Id,     TableId,    tableId )
+    INITIALIZE_FIELD( Id,     TagId,      tagId )
+    INITIALIZE_FIELD( int,    Tab,        tab )
+    INITIALIZE_FIELD( int,    TableOrder, tableOrder )
 
 public slots:
     void removeOrphanedEntries() override;

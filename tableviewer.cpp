@@ -34,6 +34,7 @@
 #include <QScrollBar>
 #include <QScreen>
 #include <QLabel>
+#include <QTimer>
 
 /**
  * @brief TableViewer::TableViewer
@@ -50,19 +51,31 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     // step one: get selected tags
     //
     QMap<Id, bool> settings;
+    QList<Id> tagIds;
+    Id tabId = Id::Invalid;
 
-    // run a simple query to retrieve tags (currently in unordered from)
+    // find all TableProperty entries matching tableId
     QSqlQuery query;
-    query.exec( QString( "select %1, %2 from %3 where %4=%5" )
+    query.exec( QString( "select %1, %2 from %3 where %4=%5 order by %6" )
                 .arg( TableProperty::instance()->fieldName( TableProperty::TagId ),
                       TableProperty::instance()->fieldName( TableProperty::Tab ),
                       TableProperty::instance()->tableName(),
                       TableProperty::instance()->fieldName( TableProperty::TableId ),
-                      QString::number( static_cast<int>( tableId ))));
+                      QString::number( static_cast<int>( tableId )),
+                      TableProperty::instance()->fieldName( TableProperty::TableOrder )
+                      ));
 
-    // store results in a map
-    while ( query.next())
-        settings[query.value( 0 ).value<Id>()] = query.value( 1 ).toBool();
+    // store them in an unordered map (for now)
+    while ( query.next()) {
+        const Id id = query.value( 0 ).value<Id>();
+        const bool tabbed = query.value( 1 ).toBool();
+
+        settings[id] = tabbed;
+        if ( !tabbed )
+            tagIds << id;
+        else
+            tabId = id;
+    }
 
     //
     // TODO: add switch to require certain columns for an item to be displayed
@@ -74,11 +87,31 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     // ONLY reagents for now
 
     //
+    // now we should get unique entries of tabId for example:
+    // tagName "Location", unique entries "C1", "C2", "C3" + "Unsorted" (with a null value)
+    //
+    // tabs will be displayed in a QTabBar
+    // on tab change, select statement changes and table data is refreshed
+    if ( tabId == Id::Invalid ) {
+        this->ui->tabBar->hide();
+    } else {
+        this->ui->tabBar->setShape( QTabBar::RoundedSouth );
+
+        QSqlQuery query( "..." );
+        // TODO: implement this
+
+
+        // 1) get count and name from sql
+        // 2) append new tabs
+        // 3) append 'unsorted' tab
+        // if total count is zero, hide tabBar and do no filtering at all
+    }
+
+    //
     // step two: run an sql query that returns [reagentId] [propertyId_0] ... [propertyId_N]
     //
     QString statement( QString( "select %1.%2, " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
     int c = 0;
-    const QList<Id> tagIds( settings.keys());
     for ( c = 0; c < tagIds.count(); c++ )
         statement.append( QString( " ifnull( t%1.id, -1 ) as c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "," : "" )));
 
@@ -100,6 +133,7 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
                                 )
                           );
     }
+    // TODO: add tab statement
 
     statement.append( " where " );
     for ( c = 0; c < tagIds.count(); c++ )
@@ -107,7 +141,20 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     statement.append( QString( "!=-%1" ).arg( QString::number( c )));
 
     //
-    // step three: visualize data, using QSqlQueryModel and QTreeView
+    // step two: setup delegate early
+    //
+
+    // the rest of data is handled through the property delegate via special viewMode
+    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
+    delegate->setViewMode();
+
+    // set property delegate to columns with properties (1+)
+    this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
+    for ( c = 0; c < tagIds.count(); c++ )
+        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
+
+    //
+    // step four: visualize data, using QSqlQueryModel and QTreeView
     //
     this->model->setQuery( QSqlQuery( statement ));
     this->ui->tableView->setModel( this->model );
@@ -185,19 +232,9 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
         }
     }
 
-    // the rest of data is handle throught the property delegate via special viewMode
-    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
-    delegate->setViewMode();
-
-    // set property delegate to columns with properties (1+)
-    for ( c = 0; c < tagIds.count(); c++ )
-        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
-
     // resize contents
     this->ui->tableView->resizeColumnsToContents();
     this->ui->tableView->resizeRowsToContents();
-
-    qDebug() << "document cache" << delegate->documentMap.count();
 }
 
 /**
@@ -215,9 +252,6 @@ TableViewer::~TableViewer() {
 void TableViewer::showEvent( QShowEvent *event ) {
     QDialog::showEvent( event );
 
-    //this->ui->tableView->resizeRowsToContents();
-    //this->ui->tableView->resizeColumnsToContents();
-
     // FIXME: magic number
     int width = 48;
     for( int c = 0; c < this->model->columnCount(); c++ )
@@ -226,30 +260,4 @@ void TableViewer::showEvent( QShowEvent *event ) {
 
     this->resize( width, QApplication::primaryScreen()->availableSize().height() * 3 / 5 );
     this->move( QApplication::primaryScreen()->geometry().center().x() - this->width() / 2, QApplication::primaryScreen()->geometry().center().y() - this->height() / 2 );
-
-    for ( int r = 0; r < this->model->rowCount(); r++ ) {
-        for ( int c = 0; c < this->model->columnCount(); c++ ) {
-            const QModelIndex index( this->model->index( r, c ));
-
-
-            qDebug() << this->ui->tableView->sizeHintForIndex( index );
-
-            PropertyDelegate *delegate( qobject_cast<PropertyDelegate *>( this->ui->tableView->itemDelegateForColumn( c )));
-
-            if ( delegate == nullptr )
-                continue;
-
-            qDebug() << "document cache" << delegate->documentMap.count();
-
-/*
-            QTextDocument *doc( delegate->documentMap.contains( index ) ? delegate->documentMap[index] : nullptr );
-            if ( doc == nullptr )
-                continue;
-
-            qDebug() << doc->size().height() << doc->pageSize().height();
-            //delegate->documentMap[index]->adjustSize();*/
-        }
-    }
-
-
 }

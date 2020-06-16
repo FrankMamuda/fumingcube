@@ -58,11 +58,6 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
         this->ui->actionView->setDisabled( list.count() == 0 || list.count() > 1 );
     } );
 
-    // FIXME: hide arrows for now
-    //        order not implemented yet
-    this->ui->upButton->hide();
-    this->ui->downButton->hide();
-
     /*
      * saveState lambda
      */
@@ -70,22 +65,25 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
         if ( id == Id::Invalid )
             return;
 
-        for ( int y = 0; y < this->ui->tagWidget->rowCount(); y++ ) {
-            const Id tagId = this->ui->tagWidget->item( y, 0 )->data( Qt::UserRole ).value<Id>();
+        int order = 0;
+        for ( int y = 0; y < this->ui->selectedWidget->count(); y++ ) {
+            const Id tagId = this->ui->selectedWidget->item( y )->data( Qt::UserRole ).value<Id>();
             if ( tagId == Id::Invalid )
                 continue;
 
-            auto usedCheck = qobject_cast<QCheckBox*>( this->ui->tagWidget->cellWidget( y, 1 ));
-            auto tabCheck = qobject_cast<QCheckBox*>( this->ui->tagWidget->cellWidget( y, 2 ));
-            if ( usedCheck == nullptr || tabCheck == nullptr )
-                continue;
-
-            if ( !usedCheck->isChecked())
-                continue;
-
-            //qDebug() << "save" << id << tagId << tabCheck->isChecked();
-            TableProperty::instance()->add( id, tagId, tabCheck->isChecked());
+            TableProperty::instance()->add( id, tagId, false, order );
+            order++;
         }
+
+        const QVariant currentData( this->ui->tabBox->currentData());
+        if ( !currentData.isValid() || currentData.isNull())
+            return;
+
+        const Id tabTagId = currentData.value<Id>();
+        if ( tabTagId == Id::Invalid )
+            return;
+
+        TableProperty::instance()->add( id, tabTagId, true );
     };
 
     // handle save button when edit dock is open
@@ -104,15 +102,13 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
 
                 TableEntry::instance()->setName( row, this->ui->nameEdit->text());
 
-
-
                 // NOTE: a proper way would be to check the modified values, but the easiest way is to
                 //       delete all entries and re-add anew
                 const Id id = TableEntry::instance()->id( row );
                 if ( id == Id::Invalid )
                     return;
 
-                QSqlQuery().exec( QString( "delete from %1 where %2=%3 )" )
+                QSqlQuery().exec( QString( "delete from %1 where %2=%3" )
                                           .arg( TableProperty::instance()->tableName(),
                                                 TableProperty::instance()->fieldName( TableProperty::TableId ),
                                                 QString::number( static_cast<int>( id ))));
@@ -237,64 +233,78 @@ void TableDialog::on_actionView_triggered() {
  * @brief TableDialog::populate
  */
 void TableDialog::populate() {
-    this->ui->tagWidget->clearContents();
-    this->ui->tagWidget->setRowCount( Tag::instance()->count());
-
+    // get previous settings (selected tags) from the database (EDIT mode)
     QMap<Id, bool> settings;
-
+    QList<Id> orderedList;
     const QModelIndex index( this->ui->tableView->currentIndex());
     if ( index.isValid() && this->mode() == Edit ) {
         const Row row = TableEntry::instance()->row( index );
         if ( row != Row::Invalid ) {
-            const Id id = TableEntry::instance()->id( row );
-            if ( id != Id::Invalid ) {
+            const Id tableId = TableEntry::instance()->id( row );
+            if ( tableId != Id::Invalid ) {
+
+                // find all TableProperty entries matching tableId
                 QSqlQuery query;
-                query.exec( QString( "select %1, %2 from %3 where %4=%5" )
+                query.exec( QString( "select %1, %2 from %3 where %4=%5 order by %6" )
                             .arg( TableProperty::instance()->fieldName( TableProperty::TagId ),
                                   TableProperty::instance()->fieldName( TableProperty::Tab ),
                                   TableProperty::instance()->tableName(),
                                   TableProperty::instance()->fieldName( TableProperty::TableId ),
-                                  QString::number( static_cast<int>( id ))));
+                                  QString::number( static_cast<int>( tableId )),
+                                  TableProperty::instance()->fieldName( TableProperty::TableOrder )
+                                  ));
 
-                while ( query.next())
-                    settings[query.value( 0 ).value<Id>()] = query.value( 1 ).toBool();
+                // store them in an unordered map (for now)
+                while ( query.next()) {
+                    const Id id = query.value( 0 ).value<Id>();
+                    settings[id] = query.value( 1 ).toBool();
+                    orderedList << id;
+                }
             }
         }
     }
 
-    qDebug() << "restore" << settings;
+    // populate tag tabBox
+    this->ui->tabBox->clear();
+    this->ui->tabBox->addItem( TableDialog::tr( "None" ), -1 );
 
+    // populate available tag table
+    this->ui->tagWidget->clear();
+    QMap<Id, int> comboIds;
     for ( int y = 0; y < Tag::instance()->count(); y++ ) {
         const Row tagRow = Tag::instance()->row( y );
         const Id tagId = Tag::instance()->id( tagRow );
+        const QString tagName( Tag::instance()->name( tagRow )); // TODO: i18n
+
         if ( tagId == Id::Invalid )
             continue;
 
-        auto item = new QTableWidgetItem( Tag::instance()->name( tagRow ));
-        item->setData( Qt::UserRole, static_cast<int>( tagId ));
-        this->ui->tagWidget->setItem( y, 0, item );
-
-        auto checkUsed = new QCheckBox();
-        checkUsed->setStyleSheet( "margin-left:50%; margin-right:50%;" );
-        checkUsed->setChecked( settings.contains( tagId ));
-        this->ui->tagWidget->setCellWidget( y, 1, checkUsed );
-
-        auto checkTabbed = new QCheckBox();
-        checkTabbed->setStyleSheet( "margin-left:50%; margin-right:50%;" );
+        this->ui->tabBox->addItem( tagName, static_cast<int>( tagId ));
+        comboIds[tagId] = this->ui->tabBox->count() - 1;
         if ( settings.contains( tagId ))
-            checkTabbed->setChecked( settings[tagId] );
+            continue;
 
-        if ( !checkUsed->isChecked())
-            checkTabbed->setDisabled( true );
-
-        QCheckBox::connect( checkUsed, &QCheckBox::toggled, this, [ checkTabbed ]( bool check ) {
-            checkTabbed->setEnabled( check );
-        } );
-
-        this->ui->tagWidget->setCellWidget( y, 2, checkTabbed );
+        // create a simple item and store tableId
+        QListWidgetItem *item( new QListWidgetItem( tagName ));
+        item->setData( Qt::UserRole, static_cast<int>( tagId ));
+        this->ui->tagWidget->addItem( item );
     }
 
-    this->ui->tagWidget->resizeColumnsToContents();
+    // populate selected tag table
+    this->ui->selectedWidget->clear();
+    for ( const Id tagId : orderedList ) {
+        if ( settings[tagId] ) {
+            const int index = comboIds[tagId];
+            this->ui->tabBox->setCurrentIndex( index );
+
+            continue;
+        }
+
+        // create a simple item and store tableId
+        QListWidgetItem *item( new QListWidgetItem( Tag::instance()->name( tagId )));
+        item->setData( Qt::UserRole, static_cast<int>( tagId ));
+        this->ui->selectedWidget->addItem( item );
+    }
 }
 
 /**
@@ -304,7 +314,6 @@ void TableDialog::clear() {
     this->ui->nameEdit->clear();
 
     // TODO: clear table
-
     this->setMode();
 }
 

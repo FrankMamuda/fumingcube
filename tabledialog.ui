@@ -57,6 +57,66 @@
         <widget class="QDockWidget" name="dockWidget">
          <widget class="QWidget" name="dockWidgetContents">
           <layout class="QGridLayout" name="gridLayout">
+           <item row="6" column="0" colspan="3">
+            <widget class="QDialogButtonBox" name="buttonBox">
+             <property name="standardButtons">
+              <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="nameEdit"/>
+           </item>
+           <item row="4" column="0" colspan="3">
+            <layout class="QGridLayout" name="tagLayout">
+             <item row="0" column="1">
+              <widget class="QLabel" name="selectedLabel">
+               <property name="text">
+                <string>Selected columns</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QListWidget" name="selectedWidget">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+               <property name="dragDropMode">
+                <enum>QAbstractItemView::DragDrop</enum>
+               </property>
+               <property name="defaultDropAction">
+                <enum>Qt::MoveAction</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QListWidget" name="tagWidget">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+               <property name="dragDropMode">
+                <enum>QAbstractItemView::DragDrop</enum>
+               </property>
+               <property name="defaultDropAction">
+                <enum>Qt::MoveAction</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="tagLabel">
+               <property name="text">
+                <string>Available tags</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="nameLabel">
              <property name="text">
@@ -64,78 +124,41 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0" colspan="3">
-            <layout class="QGridLayout" name="tagLayout">
-             <item row="0" column="0" rowspan="2">
-              <widget class="QTableWidget" name="tagWidget">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="editTriggers">
-                <set>QAbstractItemView::NoEditTriggers</set>
-               </property>
-               <property name="selectionMode">
-                <enum>QAbstractItemView::SingleSelection</enum>
-               </property>
-               <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectRows</enum>
-               </property>
-               <attribute name="verticalHeaderVisible">
-                <bool>false</bool>
-               </attribute>
-               <column>
-                <property name="text">
-                 <string>Property</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Is used</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Is tabbed</string>
-                </property>
-               </column>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QToolButton" name="downButton">
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset theme="down">
-                 <normaloff>.</normaloff>.</iconset>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QToolButton" name="upButton">
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset theme="up">
-                 <normaloff>.</normaloff>.</iconset>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QDialogButtonBox" name="buttonBox">
-               <property name="standardButtons">
-                <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Selection mode</string>
+             </property>
+            </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="nameEdit"/>
+           <item row="2" column="2">
+            <widget class="QComboBox" name="comboBox">
+             <item>
+              <property name="text">
+               <string>Reagents</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Batches</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Both</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="tabLabel">
+             <property name="text">
+              <string>Horizontal tab property</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QComboBox" name="tabBox"/>
            </item>
           </layout>
          </widget>
@@ -242,7 +265,8 @@
   </action>
   <action name="actionView">
    <property name="icon">
-    <iconset theme="table"/>
+    <iconset theme="table">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>View</string>
