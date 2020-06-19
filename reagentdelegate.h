@@ -22,12 +22,13 @@
  * includes
  */
 #include "reagentmodel.h"
-
+#include <QListWidget>
 #include <QSortFilterProxyModel>
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <QTextDocument>
 #include <QTreeView>
+#include <QApplication>
 
 /**
  * @brief The ReagentDelegate class
@@ -36,6 +37,11 @@ class ReagentDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
 public:
+    explicit ReagentDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {
+        const QListWidget w;
+        this->internalFont = QFont( QApplication::font( &w ));
+    }
+
     /**
      * @brief model
      * @return
@@ -54,6 +60,11 @@ public:
      */
     [[nodiscard]] QTreeView *parentView() const { return this->m_view; }
 
+    /**
+     * @brief viewMode
+     * @return
+     */
+    [[nodiscard]] bool viewMode() const { return this->m_viewMode; }
 
 public slots:
     /**
@@ -65,7 +76,13 @@ public slots:
     /**
      * @brief clearCache
      */
-    void clearCache() { this->cache.clear(); }
+    void clearCache() {
+        if ( this->cache.isEmpty())
+            return;
+
+        qDeleteAll( this->cache );
+        this->cache.clear();
+    }
 
     /**
      * @brief setParentView
@@ -73,12 +90,22 @@ public slots:
      */
     void setParentView( QTreeView *view ) { this->m_view = view; }
 
+    /**
+     * @brief setViewMode
+     * @param viewMode
+     */
+    void setViewMode( bool viewMode = true ) {
+        this->m_viewMode = viewMode;
+    }
+
 protected:
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 
 private:
     QSortFilterProxyModel *m_model = nullptr;
-    mutable QMap<QString, QTextDocument *> cache;
+    mutable QMap<QModelIndex, QTextDocument *> cache;
     QTreeView *m_view = nullptr;
+    bool m_viewMode = false;
+    QFont internalFont;
 };

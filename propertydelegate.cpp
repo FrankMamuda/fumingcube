@@ -51,13 +51,24 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     QFont font( defaultFont );
 
     // reuse document from cache if any
-    if ( this->documentMap.contains( index ) || !index.isValid())
+    if ( this->cache.contains( index ) || !index.isValid())
         return;
 
     // get data and tag/property info
-    const Row propertyRow = Property::instance()->row( index );
-    const QVariant data( Property::instance()->propertyData( propertyRow ));
-    const Id tagId = Property::instance()->tagId( propertyRow );
+    Id propertyId = Id::Invalid;
+    Row propertyRow = Row::Invalid;
+    if ( this->viewMode())
+        propertyId = index.data( Qt::DisplayRole ).value<Id>();
+    else {
+        propertyRow = Property::instance()->row( index );
+        propertyId = Property::instance()->id( propertyRow );
+    }
+
+    if ( propertyId == Id::Invalid )
+        return;
+
+    const QVariant data( Property::instance()->propertyData( propertyId ));
+    const Id tagId = Property::instance()->tagId( propertyId );
     const Tag::Types tagType = Tag::instance()->type( tagId );
 
     // create a new document
@@ -65,19 +76,19 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
 
     // set special modifiers
     TextFlags flags;
-    if ( index.column() == Property::Name )
+    if ( index.column() == Property::Name && !this->viewMode() )
        this->setTextFlags( flags, tagId, propertyRow );
 
     // special handling of pixmaps and formulas
     if ( tagType == Tag::Formula || tagId == PixmapTag ) {
         // name column
-        if ( index.column() == Property::Name ) {
+        if ( index.column() == Property::Name && !this->viewMode()) {
             this->setupTextDocument( index, document, tagType == Tag::Formula ?
                                          QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
-                                         Property::instance()->name( propertyRow ),
+                                         Property::instance()->name( propertyId ),
                                      qAsConst( flags ),
                                      font );
-        } else if ( index.column() == Property::PropertyData ) {
+        } else if ( index.column() == Property::PropertyData || this->viewMode()) {
             this->setupPixmapDocument( index, document, data.toByteArray(), Tag::instance()->type( tagId ) == Tag::Formula );
         }
 
@@ -87,7 +98,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     // handle custom properties
     if ( tagId == Id::Invalid ) {
         // custom properties however do display their names
-        this->setupTextDocument( index, document, ( index.column() == Property::Name ) ? Property::instance()->name( propertyRow ) : data.toString(), qAsConst( flags ), qAsConst( font ));
+        this->setupTextDocument( index, document, ( index.column() == Property::Name ) ? Property::instance()->name( propertyId ) : data.toString(), qAsConst( flags ), qAsConst( font ));
         return;
     }
 
@@ -131,9 +142,9 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     // setup document
     this->setupTextDocument( index,
                              document,
-                             ( index.column() == Property::Name ?
+                             ( index.column() == Property::Name && !this->viewMode() ?
                              QApplication::translate( "Tag", Tag::instance()->name( tagId ).toUtf8().constData()) :
-                             ( HTMLUtils::simplify( qAsConst( stringData ) + units ))),
+                             ( HTMLUtils::simplify( qAsConst( stringData ) + ( this->viewMode() ? "" : units )))),
                              qAsConst( flags ),
                              font );
 }
@@ -202,7 +213,7 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
                        .arg( pixmapData.toBase64().constData()));
 
     // just add to cache
-    this->documentMap[index] = document;
+    this->cache[index] = document;
 }
 
 /**
@@ -263,14 +274,16 @@ void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocumen
     document->setTextWidth( document->idealWidth());
 
     // add to cache
-    this->documentMap[index] = document;
+    this->cache[index] = document;
 }
 
 /**
  * @brief PropertyDelegate::setTextFlags
- * @param document
+ * @param flags
+ * @param tagId
+ * @param propertyId
  */
-void PropertyDelegate::setTextFlags( TextFlags &flags, const Id &tagId, const Row &propertyRow ) const {
+void PropertyDelegate::setTextFlags(TextFlags &flags, const Id &tagId, const Row &propertyRow ) const {
     // get reagent info
     const Id reagentId = Property::instance()->reagentId( propertyRow );
     const Id reagentParentId = Reagent::instance()->parentId( reagentId );
@@ -325,10 +338,12 @@ void PropertyDelegate::setTextFlags( TextFlags &flags, const Id &tagId, const Ro
  * @param option
  * @param index
  */
-void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {    
-    const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
-    if ( view->isResizeInProgress())
-        return;
+void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
+    if ( !this->viewMode()) {
+        const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
+        if ( view->isResizeInProgress())
+            return;
+    }
 
     // draw custom selection highlight
     if ( option.state & QStyle::State_Selected ) {
@@ -338,59 +353,77 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     }
 
     // don't draw anything else if a custom widget is used
-    if ( view->indexWidget( index ) != nullptr )
+    if ( qobject_cast<QTableView *>( this->parent())->indexWidget( index ) != nullptr )
         return;
 
     // setup html document
     this->setupDocument( index, painter->font());
-    if ( !this->documentMap.contains( index ))
+    if ( !this->cache.contains( index ))
         return;
 
     // get document
-    QTextDocument *document( this->documentMap[index] );
+    QTextDocument *document( this->cache[index] );
 
     // draw html
     painter->save();
-    painter->translate( option.rect.left(),
-                        option.rect.top() + static_cast<int>( option.rect.height() / 2 ) -
-                        document->size().height() / 2 );
+
+    if ( this->viewMode())
+        painter->translate( option.rect.center().x() - document->size().width() / 2,
+                            option.rect.top() + static_cast<int>( option.rect.height() / 2 ) -
+                            document->size().height() / 2 );
+    else
+        painter->translate( option.rect.left(),
+                            option.rect.top() + static_cast<int>( option.rect.height() / 2 ) -
+                            document->size().height() / 2 );
+
     document->drawContents( painter );
     painter->restore();
 }
 
 /**
- * @brief WordItemDelegate::sizeHint
- * @param option
+ * @brief PropertyDelegate::sizeHint
+ * @param item
  * @param index
  * @return
  */
 QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const {
-    const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
-    if ( view->isResizeInProgress())
-        return QSize();
+    if ( !this->viewMode()) {
+        const PropertyView *view( qobject_cast<PropertyView *>( this->parent()));
+        if ( view->isResizeInProgress())
+            return QSize();
+    }
 
     // prevents caching before the model initializes
-    const Row row = Property::instance()->row( index );
-    if ( row == Row::Invalid )
+    Id propertyId = Id::Invalid;
+    if ( this->viewMode())
+        propertyId = index.data( Qt::DisplayRole ).value<Id>();
+    else {
+        const Row propertyRow = Property::instance()->row( index );
+        propertyId = Property::instance()->id( propertyRow );
+    }
+
+    if ( propertyId == Id::Invalid )
         return QSize();
 
-    const auto reagentId = Variable::value<Id>( "reagentDock/selection" );
-    const Id parentId = Reagent::instance()->parentId( reagentId );
-    const Id propertyParentId = Property::instance()->reagentId( row );
-    if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
-        return QSize();
+    if ( !this->viewMode()) {
+        const auto reagentId = Variable::value<Id>( "reagentDock/selection" );
+        const Id parentId = Reagent::instance()->parentId( reagentId );
+        const Id propertyParentId = Property::instance()->reagentId( qAsConst( propertyId ));
+        if ( reagentId == Id::Invalid || propertyParentId == Id::Invalid )
+            return QSize();
 
-    if ( parentId == Id::Invalid && propertyParentId != reagentId )
-        return QSize();
+        if ( parentId == Id::Invalid && propertyParentId != reagentId )
+            return QSize();
 
-    if ( parentId != Id::Invalid && ( propertyParentId != reagentId && propertyParentId != parentId ))
-        return QSize();
+        if ( parentId != Id::Invalid && ( propertyParentId != reagentId && propertyParentId != parentId ))
+            return QSize();
+    }
 
     // setup html document
     this->setupDocument( index, item.font );
-    if ( !this->documentMap.contains( index ))
+    if ( !this->cache.contains( index ))
         return QStyledItemDelegate::sizeHint( item, index );
 
     // return document size
-    return this->documentMap[index]->size().toSize();
+    return this->cache[index]->size().toSize();
 }

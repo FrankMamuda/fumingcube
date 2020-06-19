@@ -45,6 +45,7 @@
 #include "structurefragment.h"
 #include "labelset.h"
 #include "label.h"
+#include "tabledialog.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -360,7 +361,8 @@ void MainWindow::setCalcTheme( Theme *theme ) {
  * @brief MainWindow::on_actionClear_triggered
  */
 void MainWindow::on_actionClear_triggered() {
-    this->ui->calcView->clear();
+    if ( QMessageBox::question( this, MainWindow::tr( "Confirm action" ), MainWindow::tr( "Clear calculator history?" )) == QMessageBox::Yes )
+        this->ui->calcView->clear();
 }
 
 /**
@@ -402,4 +404,12 @@ void MainWindow::on_actionAbout_triggered() {
 void MainWindow::on_actionSearch_triggered() {
     ExtractionDialog ed( this );
     ed.exec();
+}
+
+/**
+ * @brief MainWindow::on_actionTables_triggered
+ */
+void MainWindow::on_actionTables_triggered() {
+    TableDialog td( this );
+    td.exec();
 }

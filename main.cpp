@@ -47,6 +47,8 @@
 #include <QTranslator>
 #include "pixmaputils.h"
 #include "calcview.h"
+#include "tableentry.h"
+#include "tableproperty.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
 #endif
@@ -74,7 +76,6 @@ future:
  - use bind in queries
  - common reaction browser
  - molecule drawing (and search)
- - tables (make custom tables reagents and select properties)
  - theme browser
  - all fileOpen dialogs must remember last location
  - warning when added property tag is hidden
@@ -289,6 +290,9 @@ int main( int argc, char *argv[] ) {
         success &= Database::instance()->add( Tag::instance());
         success &= Database::instance()->add( Label::instance());
         success &= Database::instance()->add( LabelSet::instance());
+        success &= Database::instance()->add( TableEntry::instance());
+        success &= Database::instance()->add( TableProperty::instance());
+
 
         if ( !Tag::instance()->count())
             Tag::instance()->populate();

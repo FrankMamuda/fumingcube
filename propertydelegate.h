@@ -28,13 +28,6 @@
 #include <QMap>
 #include "table.h"
 
-//
-// THIS IS A MESS
-//
-// DON'T STORE PIXMAP IN CACHE IF SIZE MATCHES THE ORIGINAL DATA
-//
-//
-
 /**
  * @brief The PropertyDelegate class
  */
@@ -58,15 +51,32 @@ public:
     explicit PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const override;
-    mutable QMap<QModelIndex, QTextDocument *> documentMap;
+    mutable QMap<QModelIndex, QTextDocument *> cache;
+
+    /**
+     * @brief viewMode
+     * @return
+     */
+    [[nodiscard]] bool viewMode() const { return this->m_viewMode; }
 
 public slots:
     /**
-     * @brief clearDocumentCache
+     * @brief clearCache
      */
-    void clearDocumentCache() {
-        qDeleteAll( this->documentMap );
-        this->documentMap.clear();
+    void clearCache() {
+        if ( this->cache.isEmpty())
+            return;
+
+        qDeleteAll( this->cache );
+        this->cache.clear();
+    }
+
+    /**
+     * @brief setViewMode
+     * @param viewMode
+     */
+    void setViewMode( bool viewMode = true ) {
+        this->m_viewMode = viewMode;
     }
 
 private slots:
@@ -78,4 +88,5 @@ private slots:
 
 private:
     mutable QMap<QString, QSize> sizeCache;
+    bool m_viewMode = false;
 };

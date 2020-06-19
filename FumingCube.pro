@@ -81,6 +81,10 @@ SOURCES += \
     structurefragment.cpp \
     syntaxhighlighter.cpp \
     table.cpp \
+    tabledialog.cpp \
+    tableentry.cpp \
+    tableproperty.cpp \
+    tableviewer.cpp \
     tag.cpp \
     tagdialog.cpp \
     tagselectiondialog.cpp \
@@ -147,6 +151,10 @@ HEADERS += \
     structurefragment.h \
     syntaxhighlighter.h \
     table.h \
+    tabledialog.h \
+    tableentry.h \
+    tableproperty.h \
+    tableviewer.h \
     tag.h \
     tagdialog.h \
     tagselectiondialog.h \
@@ -183,6 +191,8 @@ FORMS += \
         searchfragment.ui \
         settingsdialog.ui \
         structurefragment.ui \
+        tabledialog.ui \
+        tableviewer.ui \
         tagdialog.ui \
         tagselectiondialog.ui
 
