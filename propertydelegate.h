@@ -51,7 +51,7 @@ public:
     explicit PropertyDelegate( QObject *parent = nullptr ) : QStyledItemDelegate( parent ) {}
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
     [[nodiscard]] QSize sizeHint( const QStyleOptionViewItem &item, const QModelIndex &index ) const override;
-    mutable QMap<QModelIndex, QTextDocument *> documentMap;
+    mutable QMap<QModelIndex, QTextDocument *> cache;
 
     /**
      * @brief viewMode
@@ -61,11 +61,14 @@ public:
 
 public slots:
     /**
-     * @brief clearDocumentCache
+     * @brief clearCache
      */
-    void clearDocumentCache() {
-        qDeleteAll( this->documentMap );
-        this->documentMap.clear();
+    void clearCache() {
+        if ( this->cache.isEmpty())
+            return;
+
+        qDeleteAll( this->cache );
+        this->cache.clear();
     }
 
     /**

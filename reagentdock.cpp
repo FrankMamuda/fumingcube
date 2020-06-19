@@ -240,10 +240,6 @@ QMenu *ReagentDock::buildMenu( bool context ) {
     // add 'Remove' menu
     menu->addAction( ReagentDock::tr( "Remove" ), this, [ this ]() { this->on_removeButton_clicked(); } )->setIcon( QIcon::fromTheme( "remove" ));
 
-    // add 'Date' menu
-    auto *dateMenu( menu->addMenu( ReagentDock::tr( "Date" )));
-    dateMenu->setIcon( QIcon::fromTheme( "calendar" ));
-
     // add 'Visibility' menu
     auto *visMenu( menu->addMenu( ReagentDock::tr( "Visibility" )));
     visMenu->setIcon( QIcon::fromTheme( "show" ));
@@ -261,6 +257,9 @@ QMenu *ReagentDock::buildMenu( bool context ) {
             const QDateTime current( Reagent::instance()->dateTime( id ));
 
             // add/edit date menu
+            // add 'Date' menu
+            auto *dateMenu( menu->addMenu( ReagentDock::tr( "Date" )));
+            dateMenu->setIcon( QIcon::fromTheme( "calendar" ));
             dateMenu->addAction( current.isValid() ? ReagentDock::tr( "Edit date" ) : ReagentDock::tr( "Add date to batch \"%1\"" ).arg( batchName ), this, [ this, item, current, id ]() {
                 DatePicker datePicker( this );
                 datePicker.setDate( current.isValid() ? current.date() : QDate::currentDate());

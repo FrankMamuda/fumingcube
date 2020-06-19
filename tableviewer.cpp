@@ -29,6 +29,7 @@
 #include "ghswidget.h"
 #include "nfpawidget.h"
 #include "reagentdelegate.h"
+#include "tableentry.h"
 #include <QSqlQuery>
 #include <QDebug>
 #include <QScrollBar>
@@ -37,22 +38,16 @@
 #include <QTimer>
 
 //
-// TODO: add switch to require certain columns for an item to be displayed
-//       also a flag to display:
-//           a) reagents (double click for batches?);
-//           b) reagents and batches
-//           c) batches only
-//
-// add an option to export data
-// add an option to dynamically sort data
-//
+// TODO: add an option to export data
+// TODO: add an option to dynamically sort data
+// FIXME: remove empty categories
 //
 
 /**
  * @brief TableViewer::TableViewer
  * @param parent
  */
-TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent ), ui( new Ui::TableViewer ) {
+TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent ), ui( new Ui::TableViewer ), tableId( tableId ) {
     this->ui->setupUi( this );
 
     // abort if tableId is invalid
@@ -64,6 +59,11 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     //
     QList<Id> tagIds;
     Id tabId = Id::Invalid;
+
+    // name column uses ReagentDelegate
+    this->reagentDelegate = new ReagentDelegate();
+    this->reagentDelegate->setViewMode();
+    this->ui->tableView->setItemDelegateForColumn( 0, this->reagentDelegate );
 
     // find all TableProperty entries matching tableId
     QSqlQuery query;
@@ -96,6 +96,10 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     // unique entries (or categories) are displayed as tabs in the QTabBar
     // on tab change, select statement changes and table data is refreshed
 
+    // property data is handled through the property delegate via special viewMode
+    // NOTE: code is reused in PropertyDock and here
+    this->propertyDelegate = new PropertyDelegate( this->ui->tableView );
+    this->propertyDelegate->setViewMode();
 
     if ( tabId == Id::Invalid ) {
         // if we do not have a tabId set, there is no need for filtering
@@ -140,22 +144,21 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
         }
     }
 
-    // property data is handled through the property delegate via special viewMode
-    // NOTE: code is reused in PropertyDock and here
-    PropertyDelegate *delegate( new PropertyDelegate( this->ui->tableView ));
-    delegate->setViewMode();
-
     // set property delegate to columns with properties (1+)
     this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
     for ( int c = 0; c < tagIds.count(); c++ )
-        this->ui->tableView->setItemDelegateForColumn( c + 1, delegate );
+        this->ui->tableView->setItemDelegateForColumn( c + 1, this->propertyDelegate );
 }
+
 
 /**
  * @brief TableViewer::~TableViewer
  */
 TableViewer::~TableViewer() {
+    delete this->reagentDelegate;
+    delete this->propertyDelegate;
     delete this->model;
+    //delete this->filterModel;
     delete this->ui;
 }
 
@@ -175,9 +178,12 @@ void TableViewer::showEvent( QShowEvent *event ) {
 
     // get optimal dialog height
     // FIXME: magic number
-    int height = 128;
+    int height = 0;
     for( int r = 0; r < this->model->rowCount(); r++ )
         height += this->ui->tableView->rowHeight( r );
+
+    width = qMax( width, 256 );
+    height = qMax( height, 256 );
 
     // adjust dialog size
     const QSize size( QApplication::primaryScreen()->availableSize());
@@ -185,35 +191,41 @@ void TableViewer::showEvent( QShowEvent *event ) {
 
     // reposition dialog in the middle of the screen
     this->move( QApplication::primaryScreen()->geometry().center().x() - this->width() / 2, QApplication::primaryScreen()->geometry().center().y() - this->height() / 2 );
+
+    // resize contents
+    this->ui->tableView->resizeColumnsToContents();
+    this->ui->tableView->resizeRowsToContents();
 }
 
 /**
  * @brief TableViewer::populateTable
  */
 void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter ) {
+    this->reagentDelegate->clearCache();
+    this->propertyDelegate->clearCache();
+
     //
     // step one: run an sql query that returns [reagentId] [propertyId_0] ... [propertyId_N]
     //
-    QString statement( QString( "select %1.%2, " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
+    QString statement( QString( "with base_table as ( select %1.%2 as rid, " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
     int c = 0;
     for ( c = 0; c < tagIds.count(); c++ )
         statement.append( QString( " ifnull( t%1.id, -1 ) as c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "," : "" )));
 
+    statement.append( QString( ", %1.%2 as pid " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ParentId )));
     statement.append( " from " + Reagent::instance()->tableName());
 
     for ( c = 0; c < tagIds.count(); c++ ) {
         statement.append( QString( " left join "
-                                   "( select %2, %3.%4 from %3 where %5=%8 ) "
+                                   "( select %2, %3.%4 from %3 where %5=%6 ) "
                                    "as t%1 "
-                                   "on t%1.%2=%6.%7" )
+                                   "on t%1.%2=rid " )
                           .arg( QString::number( c ), // 1
                                 Property::instance()->fieldName( Property::ReagentId ), // 2
                                 Property::instance()->tableName(), // 3
                                 Property::instance()->fieldName( Property::ID ), // 4
                                 Property::instance()->fieldName( Property::TagId ), // 5
-                                Reagent::instance()->tableName(), // 6
-                                Reagent::instance()->fieldName( Reagent::ID ), // 7
-                                QString::number( static_cast<int>( tagIds.at( c ))) // 8
+                                QString::number( static_cast<int>( tagIds.at( c ))) // 6
                                 )
                           );
     }
@@ -223,10 +235,41 @@ void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter )
         statement.append( QString( "c%1" ).arg( QString::number( c )) + QString(( c < tagIds.count() - 1 ? "+" : "" )));
     statement.append( QString( "!=-%1" ).arg( QString::number( c )));
 
+    const TableEntry::Modes mode = TableEntry::instance()->mode( this->tableId );
+    if ( mode == TableEntry::Reagents )
+        statement.append( QString( " and %1.%2=-1 " ).arg( Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ParentId )));
+
+    const QString orderClause( QString( " order by case when %1.%3=-1 then %1.%4 else %1.%3 end, %1.%4, %1.%2" )
+                               .arg( Reagent::instance()->tableName(), // 1
+                                     Reagent::instance()->fieldName( Reagent::Name ), // 2 NOTE: html names are not sorted correctly
+                                     Reagent::instance()->fieldName( Reagent::ParentId ), // 3
+                                     Reagent::instance()->fieldName( Reagent::ID ) // 4
+                               ));
+
+    statement.append( orderClause );
+
+    QStringList tags;
+    QStringList minusOnes;
+    for ( c = 0; c < tagIds.count(); c++ ) {
+        tags <<  QString( "c%1" ).arg( QString::number( c ));
+        minusOnes << "-1";
+    }
+
+    statement.append( QString( " ) select rid, %1 from base_table " ).arg( tags.join( ", " )));
+    statement.append( QString( "union select %2.%3 as rid_, %1 from %2 where " ).arg( minusOnes.join( ", " ), Reagent::instance()->tableName(), Reagent::instance()->fieldName( Reagent::ID )));
+    statement.append( "rid_ in ( select pid from base_table ) and rid_ not in ( select rid from base_table )" );
+
+    // DEBUG:
+    // qDebug() << statement;
+
+    // select name, id, parentId from reagent order by name, case when parentId=-1 then id else parentId end
+
     //
     // step two: visualize data, using QSqlQueryModel and QTableView
     //
     this->model->setQuery( QSqlQuery( statement ));
+    //this->filterModel->setSourceModel( this->model );
+    //this->ui->tableView->setModel( this->filterModel );
     this->ui->tableView->setModel( this->model );
     this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
 
@@ -236,24 +279,10 @@ void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter )
         this->model->setHeaderData( c + 1, Qt::Horizontal, QApplication::translate( "Tag", Tag::instance()->name( tagIds.at( c )).toUtf8().constData()));
 
     // setup index widgets (NFPA, GHS)
-    // NOTE: similar to PropertyDock::setSpecialWidgets
+    // NOTE: similar to PropertyDock::
     for ( int r = 0; r < this->model->rowCount(); r++ ) {
-        for ( int c = 0; c < this->model->columnCount(); c++ ) {
+        for ( int c = 1; c < this->model->columnCount(); c++ ) {
             const QModelIndex index( this->model->index( r, c ));
-
-            // handle first column (reagent name)
-            if ( c == 0 ) {
-                const Id reagentId = static_cast<Id>( index.data( Qt::DisplayRole ).value<Id>());
-                if ( reagentId == Id::Invalid )
-                    continue;
-
-                // display name as a simple QLabel with html data
-                QLabel *label( new QLabel( Reagent::instance()->name( reagentId )));
-                label->setAutoFillBackground( true );
-                label->setAttribute( Qt::WA_DeleteOnClose, true );
-                this->ui->tableView->setIndexWidget( index, label );
-                continue;
-            }
 
             // handle the rest of columns, setting index widgets if needed
             const Id propertyId = static_cast<Id>( index.data( Qt::DisplayRole ).value<Id>());
@@ -303,7 +332,7 @@ void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter )
         }
     }
 
-    // resize contents
+    // resize to contents
     this->ui->tableView->resizeColumnsToContents();
     this->ui->tableView->resizeRowsToContents();
 }

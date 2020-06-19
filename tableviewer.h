@@ -21,6 +21,8 @@
  */
 #include <QDialog>
 #include <QSqlQueryModel>
+#include "propertydelegate.h"
+#include "reagentdelegate.h"
 #include "table.h"
 
 /**
@@ -57,4 +59,8 @@ private:
     Ui::TableViewer *ui;
     QSqlQueryModel *model = new QSqlQueryModel();
     QString m_filter;
+    //QSortFilterProxyModel *filterModel = new QSortFilterProxyModel();
+    ReagentDelegate *reagentDelegate = nullptr;
+    PropertyDelegate *propertyDelegate = nullptr;
+    Id tableId = Id::Invalid;
 };

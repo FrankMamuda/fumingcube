@@ -76,7 +76,6 @@ future:
  - use bind in queries
  - common reaction browser
  - molecule drawing (and search)
- - tables (make custom tables reagents and select properties)
  - theme browser
  - all fileOpen dialogs must remember last location
  - warning when added property tag is hidden

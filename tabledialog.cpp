@@ -58,6 +58,9 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
         this->ui->actionView->setDisabled( list.count() == 0 || list.count() > 1 );
     } );
 
+    const QPixmap pixmap( QIcon::fromTheme( "info" ).pixmap( 16, 16 ));
+    this->ui->infoLabel->setPixmap( pixmap );
+
     /*
      * saveState lambda
      */
@@ -101,6 +104,7 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
                     return;
 
                 TableEntry::instance()->setName( row, this->ui->nameEdit->text());
+                TableEntry::instance()->setMode( row, static_cast<TableEntry::Modes>( this->ui->modeCombo->currentIndex()));
 
                 // NOTE: a proper way would be to check the modified values, but the easiest way is to
                 //       delete all entries and re-add anew
@@ -114,7 +118,7 @@ TableDialog::TableDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::Tab
                                                 QString::number( static_cast<int>( id ))));
                 saveState( id );
             } else if ( this->mode() == Add ) {
-                const Row row = TableEntry::instance()->add( this->ui->nameEdit->text());
+                const Row row = TableEntry::instance()->add( this->ui->nameEdit->text(), static_cast<TableEntry::Modes>( this->ui->modeCombo->currentIndex()));
                 if ( row == Row::Invalid )
                     return;
 
@@ -162,6 +166,7 @@ void TableDialog::on_actionEdit_triggered() {
     this->setMode( Edit );
 
     this->ui->nameEdit->setText( TableEntry::instance()->name( row ));
+    this->ui->modeCombo->setCurrentIndex( static_cast<int>( TableEntry::instance()->mode( row )));
 
     //
     // TODO/STUB: populate tags
@@ -279,18 +284,6 @@ void TableDialog::populate() {
 
         if ( tagId == Id::Invalid )
             continue;
-
-        /*NoType = -1,
-        Text,
-        Integer,
-        Real,
-        GHS,
-        NFPA,
-        CAS,
-        State,
-        Formula,
-        PubChemId,
-        Date*/
 
         if ( type == Tag::Text || type == Tag::Integer || type == Tag::Real || type == Tag::Date ) {
             this->ui->tabBox->addItem( tagName, static_cast<int>( tagId ));

@@ -60,7 +60,7 @@ public slots:
     /**
      * @brief clearDocumentCache
      */
-    void clearDocumentCache() { this->delegate->clearDocumentCache(); }
+    void clearDocumentCache() { this->delegate->clearCache(); }
 
 private:
     PropertyDelegate *delegate = nullptr;

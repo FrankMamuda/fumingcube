@@ -64,18 +64,15 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="nameEdit"/>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Selection mode</string>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0" colspan="3">
             <layout class="QGridLayout" name="tagLayout">
-             <item row="0" column="1">
-              <widget class="QLabel" name="selectedLabel">
-               <property name="text">
-                <string>Selected columns</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="1">
               <widget class="QListWidget" name="selectedWidget">
                <property name="editTriggers">
@@ -89,6 +86,13 @@
                </property>
                <property name="defaultDropAction">
                 <enum>Qt::MoveAction</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="selectedLabel">
+               <property name="text">
+                <string>Selected columns</string>
                </property>
               </widget>
              </item>
@@ -115,40 +119,40 @@
                </property>
               </widget>
              </item>
+             <item row="2" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="infoLayout">
+               <item>
+                <widget class="QLabel" name="infoLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>16</width>
+                   <height>16</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16</width>
+                   <height>16</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>_pixmap</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="infoTextLabel">
+                 <property name="text">
+                  <string>Drag and drop required columns to use them in the table</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="nameLabel">
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Selection mode</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QComboBox" name="comboBox">
-             <item>
-              <property name="text">
-               <string>Reagents</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Batches</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Both</string>
-              </property>
-             </item>
-            </widget>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="nameEdit"/>
            </item>
            <item row="5" column="0">
             <widget class="QLabel" name="tabLabel">
@@ -157,8 +161,29 @@
              </property>
             </widget>
            </item>
+           <item row="2" column="2">
+            <widget class="QComboBox" name="modeCombo">
+             <item>
+              <property name="text">
+               <string>Reagents</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Reagents and batches</string>
+              </property>
+             </item>
+            </widget>
+           </item>
            <item row="5" column="2">
             <widget class="QComboBox" name="tabBox"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="nameLabel">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

@@ -27,7 +27,8 @@
  */
 TableEntry::TableEntry() : Table( "table_" ) {
     this->addField( PRIMARY_FIELD( ID ) );
-    this->addField( UNIQUE_FIELD( Name, String ) );
+    this->addField( UNIQUE_FIELD( Name, String ));
+    this->addField( FIELD( Mode, Int ));
 }
 
 /**
@@ -35,8 +36,8 @@ TableEntry::TableEntry() : Table( "table_" ) {
  * @param name
  * @return
  */
-Row TableEntry::add( const QString &name ) {
-    return Table::add( QVariantList() << Database_::null << name );
+Row TableEntry::add( const QString &name, const Modes &mode ) {
+    return Table::add( QVariantList() << Database_::null << name << static_cast<int>( mode ));
 }
 
 /**

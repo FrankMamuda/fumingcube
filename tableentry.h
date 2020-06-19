@@ -38,6 +38,7 @@ public:
         NoField = -1,
         ID,
         Name,
+        Mode,
 
         // count (DO NOT REMOVE)
         Count
@@ -45,16 +46,27 @@ public:
     Q_ENUM( Fields )
 
     /**
+     * @brief The Modes enum
+     */
+    enum Modes {
+        NoMode = -1,
+        Reagents,
+        ReagentsAndBatches
+    };
+    Q_ENUM( Modes )
+
+    /**
      * @brief instance
      * @return
      */
     static TableEntry *instance() { static TableEntry *i( new TableEntry()); return i; }
     ~TableEntry() override = default;
-    Row add( const QString &name );
+    Row add( const QString &name, const Modes &mode = Reagents );
 
     // initialize field setters and getters
     INITIALIZE_FIELD( Id,       ID,           id )
     INITIALIZE_FIELD( QString,  Name,         name )
+    INITIALIZE_FIELD( Modes,    Mode,         mode )
 
 
 public slots:
@@ -65,3 +77,4 @@ private:
 
 // declare enums
 Q_DECLARE_METATYPE( TableEntry::Fields )
+Q_DECLARE_METATYPE( TableEntry::Modes )

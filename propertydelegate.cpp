@@ -51,7 +51,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     QFont font( defaultFont );
 
     // reuse document from cache if any
-    if ( this->documentMap.contains( index ) || !index.isValid())
+    if ( this->cache.contains( index ) || !index.isValid())
         return;
 
     // get data and tag/property info
@@ -213,7 +213,7 @@ void PropertyDelegate::setupPixmapDocument( const QModelIndex &index, QTextDocum
                        .arg( pixmapData.toBase64().constData()));
 
     // just add to cache
-    this->documentMap[index] = document;
+    this->cache[index] = document;
 }
 
 /**
@@ -274,7 +274,7 @@ void PropertyDelegate::finializeDocument( const QModelIndex &index, QTextDocumen
     document->setTextWidth( document->idealWidth());
 
     // add to cache
-    this->documentMap[index] = document;
+    this->cache[index] = document;
 }
 
 /**
@@ -358,11 +358,11 @@ void PropertyDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
 
     // setup html document
     this->setupDocument( index, painter->font());
-    if ( !this->documentMap.contains( index ))
+    if ( !this->cache.contains( index ))
         return;
 
     // get document
-    QTextDocument *document( this->documentMap[index] );
+    QTextDocument *document( this->cache[index] );
 
     // draw html
     painter->save();
@@ -421,9 +421,9 @@ QSize PropertyDelegate::sizeHint( const QStyleOptionViewItem &item, const QModel
 
     // setup html document
     this->setupDocument( index, item.font );
-    if ( !this->documentMap.contains( index ))
+    if ( !this->cache.contains( index ))
         return QStyledItemDelegate::sizeHint( item, index );
 
     // return document size
-    return this->documentMap[index]->size().toSize();
+    return this->cache[index]->size().toSize();
 }
