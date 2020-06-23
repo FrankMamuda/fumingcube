@@ -65,6 +65,11 @@ misc/unsorted:
  - replace initial greeting with one that supports internal zooming
    implementation
  - option to explicitly override property
+ - ability to use labels in table
+ - table double click to choose columns
+ - table sort
+ - experimental: replace QTextDocument delegates with QLabel delegates
+   and evalutate performance
 */
 
 /*
