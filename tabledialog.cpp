@@ -349,3 +349,21 @@ bool TableDialog::eventFilter( QObject *object, QEvent *event ) {
 void TableDialog::on_tableView_doubleClicked( const QModelIndex & ) {
     this->on_actionView_triggered();
 }
+
+/**
+ * @brief TableDialog::on_tagWidget_itemDoubleClicked
+ * @param item
+ */
+void TableDialog::on_tagWidget_itemDoubleClicked( QListWidgetItem *item ) {
+    QListWidgetItem *taken( this->ui->tagWidget->takeItem( this->ui->tagWidget->row( item )));
+    this->ui->selectedWidget->addItem( taken );
+}
+
+/**
+ * @brief TableDialog::on_selectedWidget_itemDoubleClicked
+ * @param item
+ */
+void TableDialog::on_selectedWidget_itemDoubleClicked( QListWidgetItem *item ) {
+    QListWidgetItem *taken( this->ui->selectedWidget->takeItem( this->ui->selectedWidget->row( item )));
+    this->ui->tagWidget->addItem( taken );
+}

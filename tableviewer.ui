@@ -50,7 +50,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTabBar" name="tabBar" native="true"/>
+      <widget class="TabBar" name="tabBar" native="true"/>
      </item>
     </layout>
    </item>
@@ -58,9 +58,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QTabBar</class>
+   <class>TabBar</class>
    <extends>QWidget</extends>
-   <header location="global">&lt;QTabBar&gt;</header>
+   <header>tabbar.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

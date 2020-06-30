@@ -150,6 +150,7 @@ HEADERS += \
     settingsdialog.h \
     structurefragment.h \
     syntaxhighlighter.h \
+    tabbar.h \
     table.h \
     tabledialog.h \
     tableentry.h \

@@ -22,6 +22,7 @@
  * includes
  */
 #include <QDialog>
+#include <QListWidget>
 
 /**
  * @brief The Ui namespace
@@ -76,6 +77,8 @@ private slots:
      */
     void setMode( const TableDialog::Modes &mode = NoMode ) { this->m_mode = mode; }
     void on_tableView_doubleClicked( const QModelIndex & );
+    void on_tagWidget_itemDoubleClicked( QListWidgetItem *item );
+    void on_selectedWidget_itemDoubleClicked( QListWidgetItem *item );
 
 protected:
     bool eventFilter( QObject *object, QEvent *event ) override;

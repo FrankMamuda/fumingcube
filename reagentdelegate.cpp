@@ -71,7 +71,7 @@ void ReagentDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opti
                                      pixmap.width(),
                                      pixmap.height()), pixmap );
 
-        x += option.rect.left() + ( pixmap.isNull() ? 0 : pixmap.width());
+        x += ( pixmap.isNull() ? 0 : pixmap.width());
     }
 
     // adjust position
