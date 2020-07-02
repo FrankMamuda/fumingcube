@@ -148,8 +148,20 @@ TableViewer::TableViewer( QWidget *parent, const Id &tableId ) : QDialog( parent
     this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
     for ( int c = 0; c < tagIds.count(); c++ )
         this->ui->tableView->setItemDelegateForColumn( c + 1, this->propertyDelegate );
-}
 
+    // refresh table on sort
+    this->connect( this->ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, [ this ]( int, Qt::SortOrder ) {
+        this->reagentDelegate->clearCache();
+        this->propertyDelegate->clearCache();
+
+        //this->ui->tableView->update();
+        this->ui->tableView->resizeColumnsToContents();
+        this->ui->tableView->resizeRowsToContents();
+    } );
+
+    // initial sort
+    this->ui->tableView->sortByColumn( 0, Qt::AscendingOrder );
+}
 
 /**
  * @brief TableViewer::~TableViewer
@@ -158,7 +170,7 @@ TableViewer::~TableViewer() {
     delete this->reagentDelegate;
     delete this->propertyDelegate;
     delete this->model;
-    //delete this->filterModel;
+    delete this->filterModel;
     delete this->ui;
 }
 
@@ -268,9 +280,9 @@ void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter )
     // step two: visualize data, using QSqlQueryModel and QTableView
     //
     this->model->setQuery( QSqlQuery( statement ));
-    //this->filterModel->setSourceModel( this->model );
-    //this->ui->tableView->setModel( this->filterModel );
-    this->ui->tableView->setModel( this->model );
+    this->filterModel->setSourceModel( this->model );
+    this->ui->tableView->setModel( this->filterModel );
+    //this->ui->tableView->setModel( this->model );
     this->ui->tableView->setSizeAdjustPolicy( QTableView::AdjustToContents );
 
     // setup column names
@@ -376,4 +388,48 @@ void TableViewer::setFilter( const Id tabId, const QList<Id> tagList ) {
 
     // repopulate table with filtering enabled
     this->populateTable( tagList, this->filter());
+}
+
+/**
+ * @brief FilterModel::lessThan
+ * @param left
+ * @param right
+ * @return
+ */
+bool FilterModel::lessThan( const QModelIndex &left, const QModelIndex &right ) const {
+    const Id leftId = left.data( Qt::DisplayRole ).value<Id>();
+    const Id rightId = right.data( Qt::DisplayRole ).value<Id>();
+
+    if ( static_cast<int>( leftId ) <= 0 || static_cast<int>( rightId ) <= 0 )
+        return leftId < rightId;
+
+    bool reagent = left.column() == 0;
+
+
+    // FIXME: or just check if .toReal() succeeds and compare output?
+    if ( !reagent ) {
+        const Id leftTagId = Property::instance()->tagId( leftId );
+        const Id rightTagId = Property::instance()->tagId( rightId );
+
+        if ( leftTagId != Id::Invalid && rightTagId != Id::Invalid ) {
+            const Tag::Types leftType = Tag::instance()->type( leftTagId );
+            const Tag::Types rightType = Tag::instance()->type( rightTagId );
+
+            //qDebug() << "compare numbazzz";
+
+            if (( leftType == Tag::Integer || leftType == Tag::Real ) && ( rightType == Tag::Integer || rightType == Tag::Real )) {
+                const qreal leftNumber = Property::instance()->propertyData( leftId ).toReal();
+                const qreal rightNumber = Property::instance()->propertyData( rightId ).toReal();
+
+                return leftNumber < rightNumber;
+            }
+        }
+    }
+
+    const QString leftString( HTMLUtils::convertToPlainText( reagent ? Reagent::instance()->name( leftId ) : Property::instance()->propertyData( leftId ).toString()));
+    const QString rightString( HTMLUtils::convertToPlainText( reagent ? Reagent::instance()->name( rightId ) : Property::instance()->propertyData( rightId ).toString()));
+
+    return leftString < rightString;
+    //qDebug() << leftString << rightString;
+    //return QString::localeAwareCompare( leftString, rightString );
 }

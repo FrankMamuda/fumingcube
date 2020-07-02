@@ -80,6 +80,7 @@ SOURCES += \
     settingsdialog.cpp \
     structurefragment.cpp \
     syntaxhighlighter.cpp \
+    system.cpp \
     table.cpp \
     tabledialog.cpp \
     tableentry.cpp \
@@ -150,6 +151,7 @@ HEADERS += \
     settingsdialog.h \
     structurefragment.h \
     syntaxhighlighter.h \
+    system.h \
     tabbar.h \
     table.h \
     tabledialog.h \

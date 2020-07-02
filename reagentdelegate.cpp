@@ -97,11 +97,17 @@ QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QMode
 
     // viewMode fetches html directtly from the reagent
     if ( this->viewMode()) {
-        if ( !index.isValid() || index.data( Qt::DisplayRole ).isNull())
+        //if ( !index.isValid() || index.data( Qt::DisplayRole ).isNull())
+        //    return defaultSize;
+
+        const QSortFilterProxyModel *proxyModel( qobject_cast<const QSortFilterProxyModel*>( index.model()));
+        const QSqlQueryModel *sourceModel( qobject_cast<const QSqlQueryModel*>( proxyModel->sourceModel()));
+        if ( !index.isValid() || sourceModel->data( proxyModel->mapToSource( index ), Qt::DisplayRole ).isNull())
             return defaultSize;
 
         // get reagent id
-        const Id id = index.data( Qt::DisplayRole ).value<Id>();
+        //const Id id = index.data( Qt::DisplayRole ).value<Id>();
+        const Id id = sourceModel->data( proxyModel->mapToSource( index ), Qt::DisplayRole ).value<Id>();
         if ( id == Id::Invalid )
             return defaultSize;
 

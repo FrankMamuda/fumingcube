@@ -74,13 +74,12 @@ public slots:
         this->adjustFonts();
     }
 
+    void adjustFonts();
+
 protected:
     void contextMenuEvent( QContextMenuEvent *event ) override;
     void wheelEvent( QWheelEvent *event ) override;
     void showEvent( QShowEvent *event ) override;
-
-private slots:
-    void adjustFonts();
 
 private:
     qreal m_zoom = 1.0;

@@ -143,7 +143,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
                         Variable::setString( "labelDock/selectedRows", Variable::string( "labelDock/selectedRows" ).append( ";" ).append( QString::number( static_cast<int>( labelRow ))));
                         LabelDock::instance()->restoreFilter();
 
-                        qDebug() << "reagentId" << reagentId << "label" << labelId << labelRow;
+                        //qDebug() << "reagentId" << reagentId << "label" << labelId << labelRow;
                         //LabelDock::instance()->setFilter( )
                     }
                 }
@@ -230,6 +230,15 @@ void MainWindow::appendToCalculator( const QString &line ) {
 
     // evaluate expression
     const QJSValue result( Script::instance()->evaluate( line ));
+
+    // handle system commands
+    if ( line.contains( "sys." )) {
+        this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">" ).arg( calcView()->fontSize()) + "# " + line + "</span>" );
+        this->scrollToBottom();
+        return;
+    }
+
+    // get result string
     const QString string( result.toString());
 
     // output either error or result

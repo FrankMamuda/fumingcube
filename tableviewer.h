@@ -33,6 +33,13 @@ class TableViewer;
 }
 
 /**
+ * @brief The FilterModel class
+ */
+class FilterModel : public QSortFilterProxyModel {
+    bool lessThan( const QModelIndex &left, const QModelIndex &right ) const;
+};
+
+/**
  * @brief The TableViewer class
  */
 class TableViewer : public QDialog {
@@ -59,7 +66,7 @@ private:
     Ui::TableViewer *ui;
     QSqlQueryModel *model = new QSqlQueryModel();
     QString m_filter;
-    //QSortFilterProxyModel *filterModel = new QSortFilterProxyModel();
+    FilterModel *filterModel = new FilterModel();
     ReagentDelegate *reagentDelegate = nullptr;
     PropertyDelegate *propertyDelegate = nullptr;
     Id tableId = Id::Invalid;

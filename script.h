@@ -24,6 +24,7 @@
  */
 #include <QJSEngine>
 #include <QTime>
+#include "system.h"
 #include "table.h"
 
 /**
@@ -53,7 +54,14 @@ public:
         static auto *instance = new Script();
         return instance;
     }
-    ~Script() override = default;
+
+    /**
+     * @brief ~Script
+     */
+    ~Script() override {
+        delete this->system;
+    }
+
     [[nodiscard]] QJSValue evaluate( const QString &script );
     Q_INVOKABLE QJSValue ans();
     Q_INVOKABLE QJSValue getProperty( const QString &functionName, const QString &reference );
@@ -71,4 +79,5 @@ public:
 private:
     explicit Script();
     QJSEngine engine;
+    System *system = new System();
 };

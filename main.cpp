@@ -62,14 +62,8 @@ extraction:
 
 misc/unsorted:
  - view custom properties in a separate dialog
- - replace initial greeting with one that supports internal zooming
-   implementation
  - option to explicitly override property
  - ability to use labels in table
- - table double click to choose columns
- - table sort
- - experimental: replace QTextDocument delegates with QLabel delegates
-   and evalutate performance
 */
 
 /*
@@ -114,6 +108,8 @@ future:
 
 properties:
  - filter in dock
+ - experimental: replace QTextDocument delegates with QLabels
+   and evalutate performance
 
 i18n:
  - better i18n support
@@ -133,6 +129,7 @@ scripting:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
+ - autocomplete for system commands
 */
 
 /**

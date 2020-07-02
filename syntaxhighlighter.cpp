@@ -58,6 +58,7 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
     const QColor error( theme->syntaxColour( "Error" ));
     const QColor undefined( theme->syntaxColour( "Undefined" ));
     const QColor string( theme->syntaxColour( "String" ));
+    const QColor system( theme->syntaxColour( "System" ));
 
     /**
      * @brief The SyntaxHighlighterOption struct
@@ -87,7 +88,9 @@ void SyntaxHighlighter::highlightBlock( const QString &text ) {
             { "\".+?(?=\")\"",                 reference, true },
             { "\\w+Error.+",                   error,     true, true },
             { R"(\bundefined\b(?!"))",         undefined },
-            { "\\/\\/.+",                      comment }
+            { "\\/\\/.+",                      comment },
+            { "^#.+",                          system, true }
+
     };
 
     // add keywords

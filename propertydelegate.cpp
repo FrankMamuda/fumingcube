@@ -57,9 +57,15 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
     // get data and tag/property info
     Id propertyId = Id::Invalid;
     Row propertyRow = Row::Invalid;
-    if ( this->viewMode())
-        propertyId = index.data( Qt::DisplayRole ).value<Id>();
-    else {
+    if ( this->viewMode()) {
+        const QSortFilterProxyModel *proxyModel( qobject_cast<const QSortFilterProxyModel*>( index.model()));
+        const QSqlQueryModel *sourceModel( qobject_cast<const QSqlQueryModel*>( proxyModel->sourceModel()));
+        if ( !index.isValid() || sourceModel->data( proxyModel->mapToSource( index ), Qt::DisplayRole ).isNull())
+            return;
+
+        propertyId = sourceModel->data( proxyModel->mapToSource( index ), Qt::DisplayRole ).value<Id>();
+        //propertyId = index.data( Qt::DisplayRole ).value<Id>();
+    } else {
         propertyRow = Property::instance()->row( index );
         propertyId = Property::instance()->id( propertyRow );
     }

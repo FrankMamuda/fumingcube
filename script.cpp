@@ -43,6 +43,11 @@ Script::Script() {
 
     // add database related tables to the engine
     this->engine.globalObject().setProperty( "JS", this->engine.newQObject( this ));
+
+    // add system related (debug) commands
+#ifdef QT_DEBUG
+    this->engine.globalObject().setProperty( "sys", this->engine.newQObject( this->system ));
+#endif
 }
 
 /**
