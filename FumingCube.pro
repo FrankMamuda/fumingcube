@@ -58,6 +58,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     database.cpp \
+    math.cpp \
     networkmanager.cpp \
     nfpabuilder.cpp \
     nfpawidget.cpp \
@@ -127,6 +128,7 @@ HEADERS += \
     mainwindow.h \
     database.h \
     field.h \
+    math.h \
     networkmanager.h \
     nfpabuilder.h \
     nfpawidget.h \

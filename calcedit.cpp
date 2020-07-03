@@ -38,8 +38,7 @@
  */
 bool CalcEdit::completeCommand() {
     // NOTE: lots of duplicate code, but it works for now
-    // FIXME: hardcoded system functions
-    const QStringList functions( Tag::instance()->getFunctionList() << "sys.print" << "sys.replaceGreeting" << "round" << "ceil" << "floor" << "abs" );
+    const QStringList functions( Tag::instance()->getFunctionList() << Script::instance()->getSystemFunctionList() << Script::instance()->getMathFunctionList() );
     const QString functionExpression( functions.join( "|" ));
     QString left( this->text().left( this->cursorPosition()));
     const QString mid( this->text().mid( this->cursorPosition(), this->text().length() - left.length()));

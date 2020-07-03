@@ -45,6 +45,7 @@ Script::Script() {
     this->engine.globalObject().setProperty( "JS", this->engine.newQObject( this ));
 
     // add system related (debug) commands
+    this->engine.globalObject().setProperty( "math", this->engine.newQObject( this->math ));
 #ifdef QT_DEBUG
     this->engine.globalObject().setProperty( "sys", this->engine.newQObject( this->system ));
 #endif
@@ -73,10 +74,6 @@ QJSValue Script::evaluate( const QString &script ) {
     // also not the preferred way, since we also have to track tag updates)
     if ( !result.isError()) {
         const QStringList functions( Tag::instance()->getFunctionList());
-        // FIXME: hardcoded basic math functions
-        //        can't really think why we would need anything else at this point
-        const QStringList internalFunctions { "round", "ceil", "floor", "abs" };
-
         // do replacement magic:
         //  1) replace proto-functions with JS.getProperty( functionName, args, .. )
         //  2) replace comma decimal separator with a dot
@@ -86,7 +83,7 @@ QJSValue Script::evaluate( const QString &script ) {
                 R"(JS.getProperty( "\1", ")" ).replace(
                 QRegularExpression( R"((\d+),(\d+)(?=(?:[^"]|"[^"]*")*$))" ), "\\1.\\2" ).replace(
                 QRegularExpression( R"((?<!")\b(ans)\b(?!"))" ), "JS.ans()" ).replace(
-                QRegularExpression( QString( R"((?<!")\b(%1\s*\(.+?(?=\))\)))" ).arg( internalFunctions.join( "|" ))), "JS.\\1" )
+                QRegularExpression( QString( R"((?<!")\b(%1\s*\(.+?(?=\))\)))" ).arg( this->getMathFunctionList().join( "|" ))), "math.\\1" )
                                  .simplified());
 
         // evaluate script
@@ -316,38 +313,37 @@ QVariant Script::getPropertyValue( const Id &tagId, const Id &reagentId, const I
 }
 
 /**
- * @brief Script::round
- * @param value
- * @param precision
+ * @brief Script::getSystemFunctionList
  * @return
  */
-QJSValue Script::round( qreal value, int precision ) {
-    return QString::number( value, 'f', precision );
+QStringList Script::getSystemFunctionList() const {
+    QStringList functions;
+    for ( int y = 0; y < this->system->metaObject()->methodCount(); y++ ) {
+        QMetaMethod method( this->system->metaObject()->method( y ));
+
+        if ( method.methodType() != QMetaMethod::Method || method.access() != QMetaMethod::Public )
+            continue;
+
+         functions << method.name().prepend( "sys." );
+    }
+
+    return functions;
 }
 
 /**
- * @brief Script::floor
- * @param value
+ * @brief Script::getMathFunctionList
  * @return
  */
-QJSValue Script::floor( qreal value ) {
-    return QString::number( qFloor( value ));
-}
+QStringList Script::getMathFunctionList() const {
+    QStringList functions;
+    for ( int y = 0; y < this->math->metaObject()->methodCount(); y++ ) {
+        QMetaMethod method( this->math->metaObject()->method( y ));
 
-/**
- * @brief Script::ceil
- * @param value
- * @return
- */
-QJSValue Script::ceil( qreal value ) {
-    return QString::number( qCeil( value ));
-}
+        if ( method.methodType() != QMetaMethod::Method || method.access() != QMetaMethod::Public )
+            continue;
 
-/**
- * @brief Script::abs
- * @param value
- * @return
- */
-QJSValue Script::abs( qreal value ) {
-    return QString::number( qAbs( value ));
+         functions << method.name();
+    }
+
+    return functions;
 }
