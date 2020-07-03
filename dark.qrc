@@ -52,6 +52,7 @@
 		<file alias="16x16/clear_image.png">icons/dark/16x16/clear_image.png</file>
 		<file alias="16x16/autocrop.png">icons/dark/16x16/autocrop.png</file>
 		<file alias="16x16/invert.png">icons/dark/16x16/invert.png</file>
+		<file alias="16x16/donate.png">icons/dark/16x16/donate.png</file>
         <file alias="scalable/accept.svg">icons/dark/scalable/accept.svg</file>
         <file alias="scalable/add.svg">icons/dark/scalable/add.svg</file>
         <file alias="scalable/clean.svg">icons/dark/scalable/clean.svg</file>
@@ -103,5 +104,6 @@
 		<file alias="scalable/clear_image.svg">icons/dark/scalable/clear_image.svg</file>
 		<file alias="scalable/autocrop.svg">icons/dark/scalable/autocrop.svg</file>
 		<file alias="scalable/invert.svg">icons/dark/scalable/invert.svg</file>
+		<file alias="scalable/donate.svg">icons/dark/scalable/donate.svg</file>
     </qresource>
 </RCC>

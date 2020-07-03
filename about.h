@@ -41,6 +41,9 @@ public:
     explicit About( QWidget *parent = nullptr );
     ~About() override;
 
+private slots:
+    void on_donateButton_clicked();
+
 private:
     Ui::About *ui;
 };

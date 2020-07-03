@@ -20,6 +20,8 @@
 /*
  * includes
  */
+#include <QUrl>
+#include <QDesktopServices>
 #include <QMessageBox>
 #include "about.h"
 #include "ui_about.h"
@@ -57,4 +59,11 @@ About::~About() {
     this->disconnect( this->ui->closeButton, SIGNAL( clicked()));
     this->disconnect( this->ui->qtButton, SIGNAL( clicked()));
     delete this->ui;
+}
+
+/**
+ * @brief About::on_donateButton_clicked
+ */
+void About::on_donateButton_clicked() {
+    QDesktopServices::openUrl( QUrl( "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SFBR96VLBHA8G&currency_code=EUR" ));
 }

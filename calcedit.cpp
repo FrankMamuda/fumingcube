@@ -38,7 +38,8 @@
  */
 bool CalcEdit::completeCommand() {
     // NOTE: lots of duplicate code, but it works for now
-    const QStringList functions( Tag::instance()->getFunctionList());
+    // FIXME: hardcoded system functions
+    const QStringList functions( Tag::instance()->getFunctionList() << "sys.print" << "sys.replaceGreeting" << "round" << "ceil" << "floor" << "abs" );
     const QString functionExpression( functions.join( "|" ));
     QString left( this->text().left( this->cursorPosition()));
     const QString mid( this->text().mid( this->cursorPosition(), this->text().length() - left.length()));
@@ -206,7 +207,7 @@ bool CalcEdit::completeCommand() {
     }
 
     {
-        const QRegularExpression keywords( R"((?<!\")\s*\b(\w+)$)" );
+        const QRegularExpression keywords( R"((?<!\")\s*\b((?:\w+)|(?:sys\.\w*))$)" );
         const QRegularExpressionMatch match( keywords.match( left ));
         if ( match.hasMatch() && !mid.contains( QRegularExpression( "^\\\"" ))) {
             const QString captured( match.captured( 1 ));
@@ -242,14 +243,20 @@ bool CalcEdit::completeCommand() {
                 completion = filtered.first().left( matchPos );
             }
 
-            const int index = left.indexOf( captured, initialPosition - captured.length());
+                        const int index = left.indexOf( captured, initialPosition - captured.length());
             if ( index == -1 )
                 return false;
 
             left = left.remove( index, captured.length());
-            this->setText( left.insert( index, completion + ( filtered.count() == 1 ? "( \"\"" : "" ) + mid ));
-            this->setCursorPosition(
-                    initialPosition + completion.length() - captured.length() + ( filtered.count() == 1 ? 3 : 0 ));
+
+            if ( completion.startsWith( "sys." )) {
+                this->setText( left.insert( index, completion + ( filtered.count() == 1 ? "()" : "" ) + mid ));
+                this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( filtered.count() == 1 ? 1 : 0 ));
+            } else {
+                this->setText( left.insert( index, completion + ( filtered.count() == 1 ? "( \"\"" : "" ) + mid ));
+                this->setCursorPosition( initialPosition + completion.length() - captured.length() + ( filtered.count() == 1 ? 3 : 0 ));
+            }
+
             return true;
         }
     }

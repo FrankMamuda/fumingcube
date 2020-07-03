@@ -129,7 +129,6 @@ scripting:
  - implement Avogadro constant, etc.
  - smart formulas such as 'purity' (uses assay, HPLC, 100-related substances,
    in that order; useful when assay is not defined)
- - autocomplete for system commands
 */
 
 /**
