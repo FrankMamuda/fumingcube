@@ -24,13 +24,13 @@
 #include <QJSEngine>
 
 /**
- * @brief The Math class
+ * @brief The ScriptMath class
  */
-class Math : public QObject {
+class ScriptMath : public QObject {
     Q_OBJECT
 
 public:
-    Math();
+    ScriptMath();
     [[nodiscard]] Q_INVOKABLE QJSValue round( qreal value, int precision = 2 );
     [[nodiscard]] Q_INVOKABLE QJSValue floor( qreal value );
     [[nodiscard]] Q_INVOKABLE QJSValue ceil( qreal value );

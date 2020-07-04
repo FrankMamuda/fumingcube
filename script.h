@@ -24,7 +24,7 @@
  */
 #include <QJSEngine>
 #include <QTime>
-#include "math.h"
+#include "scriptmath.h"
 #include "system.h"
 #include "table.h"
 
@@ -80,5 +80,5 @@ private:
     explicit Script();
     QJSEngine engine;
     System *system = new System();
-    Math *math = new Math();
+    ScriptMath *math = new ScriptMath();
 };

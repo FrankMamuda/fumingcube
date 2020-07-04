@@ -33,8 +33,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++17
-CONFIG += c++1z
-#QMAKE_CXXFLAGS += /std:c++17
 
 SOURCES += \
     about.cpp \
@@ -58,7 +56,6 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     database.cpp \
-    math.cpp \
     networkmanager.cpp \
     nfpabuilder.cpp \
     nfpawidget.cpp \
@@ -76,6 +73,7 @@ SOURCES += \
     reagentmodel.cpp \
     reagentview.cpp \
     script.cpp \
+    scriptmath.cpp \
     searchengine.cpp \
     searchfragment.cpp \
     settingsdialog.cpp \
@@ -128,7 +126,6 @@ HEADERS += \
     mainwindow.h \
     database.h \
     field.h \
-    math.h \
     networkmanager.h \
     nfpabuilder.h \
     nfpawidget.h \
@@ -148,6 +145,7 @@ HEADERS += \
     reagentmodel.h \
     reagentview.h \
     script.h \
+    scriptmath.h \
     searchengine.h \
     searchfragment.h \
     settingsdialog.h \

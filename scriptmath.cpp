@@ -19,47 +19,47 @@
 /*
  * includes
  */
-#include "math.h"
+#include "scriptmath.h"
 #include <QtMath>
 
 /**
- * @brief Math::Math
+ * @brief ScriptMath::ScriptMath
  */
-Math::Math() {}
+ScriptMath::ScriptMath() {}
 
 /**
- * @brief Math::round
+ * @brief ScriptMath::round
  * @param value
  * @param precision
  * @return
  */
-QJSValue Math::round( qreal value, int precision ) {
+QJSValue ScriptMath::round( qreal value, int precision ) {
     return QString::number( value, 'f', precision );
 }
 
 /**
- * @brief Math::floor
+ * @brief ScriptMath::floor
  * @param value
  * @return
  */
-QJSValue Math::floor( qreal value ) {
+QJSValue ScriptMath::floor( qreal value ) {
     return QString::number( qFloor( value ));
 }
 
 /**
- * @brief Math::ceil
+ * @brief ScriptMath::ceil
  * @param value
  * @return
  */
-QJSValue Math::ceil( qreal value ) {
+QJSValue ScriptMath::ceil( qreal value ) {
     return QString::number( qCeil( value ));
 }
 
 /**
- * @brief Math::abs
+ * @brief ScriptMath::abs
  * @param value
  * @return
  */
-QJSValue Math::abs( qreal value ) {
+QJSValue ScriptMath::abs( qreal value ) {
     return QString::number( qAbs( value ));
 }
