@@ -36,7 +36,8 @@ class SortFilterProxyModel : public QSortFilterProxyModel {
 
 public:
     explicit SortFilterProxyModel( QObject *parent = nullptr ) : QSortFilterProxyModel( parent ) {}
-    bool lessThan( const QModelIndex &left, const QModelIndex &right ) const;
+    bool lessThan( const QModelIndex &left, const QModelIndex &right ) const override;
+    bool filterAcceptsRow( int sourceRow, const QModelIndex &sourceParent ) const override;
 };
 
 /**

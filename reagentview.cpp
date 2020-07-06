@@ -218,3 +218,28 @@ bool SortFilterProxyModel::lessThan( const QModelIndex &left, const QModelIndex 
 
     return leftDate < rightDate;
 }
+
+/**
+ * @brief SortFilterProxyModel::filterAcceptsRow
+ * @param sourceRow
+ * @param sourceParent
+ * @return
+ */
+bool SortFilterProxyModel::filterAcceptsRow( int sourceRow, const QModelIndex &sourceParent ) const {
+    if ( QSortFilterProxyModel::filterAcceptsRow( sourceRow, sourceParent ))
+        return true;
+
+    QModelIndex parent( sourceParent );
+    while ( parent.isValid()) {
+        if ( QSortFilterProxyModel::filterAcceptsRow( parent.row(), parent.parent()))
+            return true;
+
+        parent = parent.parent();
+    }
+
+    QModelIndex index( this->sourceModel()->index( sourceRow, 0, sourceParent ));
+    if ( !index.isValid())
+        return true;
+
+    return false;
+}
