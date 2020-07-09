@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Fuming Cube</Name>
+    <Version>r221-pre</Version>
+    <Title>Fuming Cube Installer</Title>
+    <Publisher>Factory #12</Publisher>
+    <StartMenuDir>fumingcube</StartMenuDir>
+    <TargetDir>@HomeDir@/fumingcube</TargetDir>
+    <ControlScript>controlscript.js</ControlScript>
+    <RunProgram>@TargetDir@/FumingCube</RunProgram>
+    <InstallerApplicationIcon>icon</InstallerApplicationIcon>
+</Installer>

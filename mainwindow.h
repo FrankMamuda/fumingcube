@@ -73,7 +73,6 @@ public:
      */
     [[nodiscard]] auto *calcTheme() const { return this->m_calcTheme == nullptr ? this->m_theme : this->m_calcTheme; }
 
-
     /**
      * @brief calculator
      * @return
@@ -81,7 +80,7 @@ public:
     [[nodiscard]] CalcView *calcView();
 
 public slots:
-    void appendToCalculator( const QString &line );
+    void appendToCalculator( const QString &line, bool debug = false );
     void insertCommand( const QString &command );
     void saveHistory();
     void scrollToBottom();

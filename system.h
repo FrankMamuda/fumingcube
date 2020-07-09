@@ -33,4 +33,7 @@ public:
     System();    
     Q_INVOKABLE void print( const QString &message );
     Q_INVOKABLE void replaceGreeting();
+    Q_INVOKABLE void dbInfo();
+    Q_INVOKABLE void clearCommandHistory();
+    Q_INVOKABLE void printVariableValue( const QString &key );
 };

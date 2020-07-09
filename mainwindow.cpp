@@ -223,7 +223,7 @@ CalcView *MainWindow::calcView() {
  * @brief MainWindow::appendToCalculator
  * @param line
  */
-void MainWindow::appendToCalculator( const QString &line ) {
+void MainWindow::appendToCalculator( const QString &line, bool debug ) {
     // ignore empty lines
     if ( line.isEmpty())
         return;
@@ -234,6 +234,10 @@ void MainWindow::appendToCalculator( const QString &line ) {
     // handle system commands
     if ( line.contains( "sys." )) {
         this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">" ).arg( calcView()->fontSize()) + "# " + line + "</span>" );
+        this->scrollToBottom();
+        return;
+    } else if ( debug ) {
+        this->ui->calcView->append( QString( "<span style=\"font-size: %1pt\">" ).arg( calcView()->fontSize()) + "$ " + line + "</span>" );
         this->scrollToBottom();
         return;
     }

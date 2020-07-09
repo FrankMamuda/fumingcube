@@ -220,11 +220,12 @@ int main( int argc, char *argv[] ) {
 #endif
 
     // clean up on exit
-    QApplication::connect( &a, &QApplication::aboutToQuit, [
-                       #ifdef Q_OS_WIN
-                           emf
-                       #endif
-                           ]() {
+    QApplication::connect( &a, &QApplication::aboutToQuit,
+        [
+#ifdef Q_OS_WIN
+        emf
+#endif
+        ]() {
 #ifdef Q_OS_WIN
         delete emf;
 #endif

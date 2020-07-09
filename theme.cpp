@@ -212,5 +212,6 @@ void Theme::initializeSyntaxColours() {
     this->syntaxMap["Error"] = ( this->isDark() ? QColor::fromRgb( 214, 86, 69 ) : QColor::fromRgb( 255, 0, 0 ));
     this->syntaxMap["Undefined"] = Qt::darkYellow;
     this->syntaxMap["System"] = ( this->isDark() ? QColor::fromRgb( 86, 214, 69 ) : QColor::fromRgb( 46, 124, 29 ));
+    this->syntaxMap["Debug"] = this->syntaxMap["System"];
     this->syntaxMap["String"] = this->syntaxMap["Undefined"];
 }

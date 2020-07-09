@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Fuming Cube</DisplayName>
+    <Description>Install the Fuming Cube app</Description>
+    <ReleaseDate>2020-07-08</ReleaseDate>
+    <Version>r221-pre</Version>
+    <Default>true</Default>
+	<Required>true</Required>
+    <Licenses>
+        <License name="GNU GENERAL PUBLIC LICENSE Version 3" file="LICENSE"/>
+    </Licenses>
+        <Script>installscript.js</Script>
+	<UserInterfaces>
+        <UserInterface>targetwidget.ui</UserInterface>
+    </UserInterfaces>
+</Package>

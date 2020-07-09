@@ -22,9 +22,16 @@
 #include "system.h"
 #include "mainwindow.h"
 #include "calcview.h"
+#include "reagent.h"
+#include "property.h"
+#include "label.h"
+#include "tableentry.h"
+#include "variable.h"
 #include <QDebug>
 #include <QFile>
 #include <QRegularExpression>
+#include <QMessageBox>
+#include <QSqlQuery>
 
 /**
  * @brief System::System
@@ -36,7 +43,7 @@ System::System() {}
  * @param message
  */
 void System::print( const QString &message ) {
-    qDebug() << message;
+    MainWindow::instance()->appendToCalculator( message + "\n\n", true );
 }
 
 /**
@@ -54,4 +61,38 @@ void System::replaceGreeting() {
         MainWindow::instance()->calcView()->adjustFonts();
         file.close();
     }
+}
+
+/**
+ * @brief System::dbInfo
+ */
+void System::dbInfo() {
+    int reagents = 0, properties = 0;
+
+    // avoid filters
+    QSqlQuery queryR( "select count(*) from " + Reagent::instance()->tableName()); queryR.exec(); if ( queryR.next()) reagents = queryR.value( 0 ).toInt();
+    QSqlQuery queryP( "select count(*) from " + Property::instance()->tableName()); queryP.exec(); if ( queryP.next()) properties = queryP.value( 0 ).toInt();
+
+    const QString string( QString( "Reagents: %1\nProperties: %2\nLabels: %3\nTables: %4\nPath: %5" )
+                          .arg( reagents ).arg( properties ).arg( Label::instance()->count()).arg( TableEntry::instance()->count()).arg( Variable::string( "databasePath" )));
+
+
+    QMessageBox::information( MainWindow::instance(), System::tr( "Database info" ), string );
+}
+
+/**
+ * @brief System::clearCommandHistory
+ */
+void System::clearCommandHistory() {
+    Variable::reset( "calculator/commands" );
+}
+
+/**
+ * @brief System::printVariableValue
+ */
+void System::printVariableValue( const QString &key ) {
+    if ( Variable::instance()->contains( key ))
+        MainWindow::instance()->appendToCalculator( key + ": " +  Variable::string( key ) + "<br>", true );
+    else
+        MainWindow::instance()->appendToCalculator( "Unknown variable: " + key + "<br>", true );
 }
