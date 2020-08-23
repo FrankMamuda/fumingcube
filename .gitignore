@@ -15,3 +15,8 @@ i18n/*.qm
 *.autosave
 cmake-build-*/
 .idea/
+parts/*
+snap/*
+.qmake.stash
+.qm/*
+

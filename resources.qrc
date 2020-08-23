@@ -25,7 +25,7 @@
         <file alias="calculator_history_lv_LV">initial/calculator_history_lv_LV</file>
     </qresource>
     <qresource prefix="/i18n">
-        <file alias="fumingCube_lv_LV">i18n/fumingCube_lv_LV.qm</file>
+        <file alias="fumingCube_lv_LV">.qm/fumingCube_lv_LV.qm</file>
     </qresource>
     <qresource prefix="/searchEngines">
         <file alias="google.conf">searchEngines/google.conf</file>
