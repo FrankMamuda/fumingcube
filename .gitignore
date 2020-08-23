@@ -19,4 +19,8 @@ parts/*
 snap/*
 .qmake.stash
 .qm/*
+prime/*
+*.snap
+stage/*
 
+*.yaml

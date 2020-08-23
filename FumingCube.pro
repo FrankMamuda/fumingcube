@@ -16,7 +16,8 @@ win32:HEADERS = emfmime.h
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = FumingCube
+win32:TARGET = fumingcube
+unix:TARGET = fumingcube
 TEMPLATE = app
 
 macx:ICON = icon.icns

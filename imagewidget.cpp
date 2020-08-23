@@ -22,7 +22,9 @@
 #include "imagewidget.h"
 #include "pixmaputils.h"
 #include "networkmanager.h"
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 #include <QRandomGenerator>
+#endif
 #include <QPainter>
 #include <QFontMetrics>
 #include <QApplication>
@@ -36,7 +38,12 @@
  */
 ImageWidget::ImageWidget( QWidget *parent ) : QWidget( parent ) {
     this->setAcceptDrops( true );
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     this->m_id = QRandomGenerator::global()->generate();
+#else
+    srand( time( nullptr ));
+    this->m_id = static_cast<quint32>( std::rand());
+#endif
 
      // setup finished connection to the NetworkManager
      NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &url, NetworkManager::Types type, const QVariant &userData, const QByteArray &data ) {
