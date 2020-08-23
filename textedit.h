@@ -23,7 +23,6 @@
  * includes
  */
 #include <QCompleter>
-#include <QRandomGenerator>
 #include <QTextEdit>
 
 /**
