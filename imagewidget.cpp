@@ -139,7 +139,11 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
     const int margin = 8;
 
     painter.setFont( font );
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     painter.drawText( this->width() - fm.horizontalAdvance( text ) - margin, margin + fm.height(), text );
+#else
+    painter.drawText( this->width() - fm.width( text ) - margin, margin + fm.height(), text );
+#endif
     painter.restore();
 }
 
@@ -147,7 +151,7 @@ void ImageWidget::paintEvent( QPaintEvent *event ) {
  * @brief ImageWidget::dropEvent
  * @param event
  */
-void ImageWidget::dropEvent( QDropEvent *event ) {   
+void ImageWidget::dropEvent( QDropEvent *event ) {
     for ( const QUrl &url : event->mimeData()->urls()) {
         QPixmap pixmap( PixmapUtils::fromUrl( url ));
         if ( !pixmap.isNull()) {
