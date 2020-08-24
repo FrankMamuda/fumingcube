@@ -1,18 +1,44 @@
 name: fumingcube
-version: '1.0'
-summary: summary
-description: description
-
+version: 'r228-git'
+summary: Chemistry calculations simplified 
+description: Chemical reagent management tool and interactive calculator
+base: core18
 grade: stable
 confinement: strict
+license: GPL-3.0+
+icon: icons/icon.png
+type: app
 
 apps:
   fumingcube:
     command: fumingcube
-
+    extensions:
+      - kde-neon
+    plugs:
+      - home
+      - opengl
+      - network
+      - network-bind
+      - pulseaudio
+    environment:
+       DISABLE_WAYLAND: 1
+       
 parts:
   fumingcube:
     plugin: qmake
+    build-packages:
+      - build-essential
+      - qtdeclarative5-dev
+      - qttools5-dev-tools
+      - libsqlite3-dev
+    stage-packages:
+      - libqt5gui5
+      - libqt5qml5
+      - libqt5sql5
+      - libqt5widgets5
+      - libqt5xml5
+      - libqt5svg5
+      - libqt5sql5-sqlite
     qt-version: qt5
     source: https://github.com/FrankMamuda/fumingcube.git
-    
+
