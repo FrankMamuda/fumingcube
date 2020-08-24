@@ -388,7 +388,7 @@ QMenu *ReagentDock::buildAddMenu() {
     const Id id = Variable::value<Id>( "reagentDock/selection" );
     if ( id != Id::Invalid ) {
         const auto parentId = Reagent::instance()->parentId( id );
-        const QString name( Reagent::instance()->name(( parentId == Id::Invalid ) ? id : parentId ));
+        const QString name( HTMLUtils::convertToPlainText( Reagent::instance()->name(( parentId == Id::Invalid ) ? id : parentId )));
 
         addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id, parentId ]() {
             this->addReagent(( parentId == Id::Invalid ) ? id : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));

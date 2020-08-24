@@ -320,9 +320,9 @@ Id Script::getReagentId( const QString &reference, const Id &parentId ) const {
     // build a map of plainText names as keys and ids as values
     QMap<QString, Id> map;
     while ( query.next()) {
-        map[HTMLUtils::convertToPlainText( query.value( 1 ).toString())] = query.value( 0 ).value<Id>();
+        map[HTMLUtils::toPlainText( query.value( 1 ).toString())] = query.value( 0 ).value<Id>();
 
-        const QString ref( HTMLUtils::convertToPlainText( query.value( 2 ).toString()));
+        const QString ref( HTMLUtils::toPlainText( query.value( 2 ).toString()));
         if ( !ref.isEmpty())
             map[ref] = query.value( 0 ).value<Id>();
     }

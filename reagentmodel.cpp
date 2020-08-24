@@ -110,7 +110,7 @@ void ReagentModel::setupModelData() {
                                          Reagent::instance()->name( row ).toUtf8().constData()),
                                          Reagent::instance()->reference( row )));
 
-        auto *reagent( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
+        auto *reagent( new QStandardItem( HTMLUtils::toPlainText( generatedName )));
 
         reagent->setData( static_cast<int>( reagentId ), ID );
         reagent->setData( static_cast<int>( Id::Invalid ), ParentId );
@@ -215,7 +215,7 @@ void ReagentModel::addItem( const Id &id, const Id &parentId, QStandardItem *par
                                                                  Reagent::instance()->reference( id ))
                                    :
                                      Reagent::instance()->name( id ));
-    auto *item( new QStandardItem( HTMLUtils::convertToPlainText( generatedName )));
+    auto *item( new QStandardItem( HTMLUtils::toPlainText( generatedName )));
     item->setData( static_cast<int>( id ), ID );
     item->setData( static_cast<int>( parentId ), ParentId );
     item->setData( Reagent::instance()->dateTime( id ), DateTime );

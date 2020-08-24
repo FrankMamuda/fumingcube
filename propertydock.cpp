@@ -244,7 +244,7 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
 
     PropertyEditor pe( PropertyDock::instance(), qAsConst( mode ), qAsConst( name ), qAsConst( value ));
     if ( pe.exec() == QDialog::Accepted ) {
-        const QString strippedName( HTMLUtils::convertToPlainText( pe.name()));
+        const QString strippedName( HTMLUtils::toPlainText( pe.name()));
 
         QTextEdit ed;
         ed.setText( strippedName );
@@ -310,7 +310,7 @@ void PropertyDock::on_addPropButton_clicked() {
         return;
 
     // get reagent name
-    const QString reagentName( HTMLUtils::convertToPlainText( Reagent::instance()->name( Reagent::instance()->row( reagentId ))));
+    const QString reagentName( HTMLUtils::toPlainText( Reagent::instance()->name( Reagent::instance()->row( reagentId ))));
 
     // get UNFILTERED tags that have been set
     QSqlQuery query;
@@ -476,7 +476,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                         propertyData->setData( "image/png", pixmapData );
                     }
                 } else {
-                    QGuiApplication::clipboard()->setText( HTMLUtils::convertToPlainText( data.toString()));
+                    QGuiApplication::clipboard()->setText( HTMLUtils::toPlainText( data.toString()));
                 }
 
                 // set fumingcube-specific mime information (for copy/paste of whole properties)
@@ -850,10 +850,10 @@ void PropertyDock::on_propertyView_doubleClicked( const QModelIndex &index ) {
             const Id parentId = Reagent::instance()->parentId( reagentId );
             if ( parentId != Id::Invalid ) {
                 parents = QString( R"("%1", "%2")" ).arg(
-                        HTMLUtils::convertToPlainText( Reagent::instance()->reference( parentId )),
-                        HTMLUtils::convertToPlainText( Reagent::instance()->name( reagentId )));
+                        HTMLUtils::toPlainText( Reagent::instance()->reference( parentId )),
+                        HTMLUtils::toPlainText( Reagent::instance()->name( reagentId )));
             } else {
-                parents = QString( "\"%1\"" ).arg( HTMLUtils::convertToPlainText( Reagent::instance()->reference( reagentId )));
+                parents = QString( "\"%1\"" ).arg( HTMLUtils::toPlainText( Reagent::instance()->reference( reagentId )));
             }
 
             // paste

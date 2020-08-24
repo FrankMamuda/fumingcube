@@ -37,11 +37,11 @@ QString HTMLUtils::captureBody( const QString &html ) {
 }
 
 /**
- * @brief HTMLUtils::convertToPlainText
+ * @brief HTMLUtils::toPlainText
  * @param input
  * @return
  */
-QString HTMLUtils::convertToPlainText( const QString &html ) {
+QString HTMLUtils::toPlainText( const QString &html ) {
     // NOTE/TODO: since all plainText ops are routed through this method
     //            we could reduce overhead by writing more efficient code
     return QTextEdit( html ).toPlainText();

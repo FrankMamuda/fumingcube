@@ -124,8 +124,8 @@ bool CalcEdit::completeCommand() {
 
                 // append plainText names
                 while ( query.next()) {
-                    const QString name( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
-                    const QString reference( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
+                    const QString name( HTMLUtils::toPlainText( query.value( 0 ).toString()));
+                    const QString reference( HTMLUtils::toPlainText( query.value( 1 ).toString()));
 
                     if ( !QString::compare( name, parent, Qt::CaseInsensitive ) ||
                          !QString::compare( reference, parent, Qt::CaseInsensitive )) {
@@ -149,8 +149,8 @@ bool CalcEdit::completeCommand() {
 
             // append plainText names
             while ( query.next()) {
-                const QString name( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
-                const QString reference( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
+                const QString name( HTMLUtils::toPlainText( query.value( 0 ).toString()));
+                const QString reference( HTMLUtils::toPlainText( query.value( 1 ).toString()));
 
                 if ( name.startsWith( captured, Qt::CaseInsensitive ))
                     reagents << name;

@@ -277,7 +277,7 @@ void TextEdit::insertFromMimeData( const QMimeData *source ) {
 
         // TODO: need special handling of subscript, superscript and italic
         if ( this->isSimpleEditor())
-            html = HTMLUtils::convertToPlainText( html ).simplified();
+            html = HTMLUtils::toPlainText( html ).simplified();
 
         // insert clean html
         this->insertHtml( html );

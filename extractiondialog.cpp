@@ -55,7 +55,7 @@ ExtractionDialog::ExtractionDialog( QWidget *parent, const Id &reagentId, const 
     this->fragmentNavigation()->installCloseButton( this );
 
     if ( this->reagentId() != Id::Invalid )
-        this->searchFragment()->setIdentifier( HTMLUtils::convertToPlainText( Reagent::instance()->name( this->reagentId())));
+        this->searchFragment()->setIdentifier( HTMLUtils::toPlainText( Reagent::instance()->name( this->reagentId())));
 
     // hide initial fragments for now
     this->setFragmentEnabled( this->structureFragment(), false );

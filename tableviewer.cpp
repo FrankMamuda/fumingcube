@@ -426,8 +426,8 @@ bool FilterModel::lessThan( const QModelIndex &left, const QModelIndex &right ) 
         }
     }
 
-    const QString leftString( HTMLUtils::convertToPlainText( reagent ? Reagent::instance()->name( leftId ) : Property::instance()->propertyData( leftId ).toString()));
-    const QString rightString( HTMLUtils::convertToPlainText( reagent ? Reagent::instance()->name( rightId ) : Property::instance()->propertyData( rightId ).toString()));
+    const QString leftString( HTMLUtils::toPlainText( reagent ? Reagent::instance()->name( leftId ) : Property::instance()->propertyData( leftId ).toString()));
+    const QString rightString( HTMLUtils::toPlainText( reagent ? Reagent::instance()->name( rightId ) : Property::instance()->propertyData( rightId ).toString()));
 
     return leftString < rightString;
     //qDebug() << leftString << rightString;
