@@ -1,4 +1,4 @@
-*.pro.user
+*.pro.user*
 *.DS_Store
 *.bak
 *.user
@@ -22,5 +22,4 @@ snap/*
 prime/*
 *.snap
 stage/*
-
 *.yaml

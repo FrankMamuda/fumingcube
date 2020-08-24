@@ -32,7 +32,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
+CONFIG += c++14
 CONFIG += c++17
 
 SOURCES += \
@@ -219,8 +219,31 @@ win32:LIBS += -LC:/openssl-win64/lib -lcrypto -lssl
 # DEFINES += FORCE_EN_LOCALE
 TRANSLATIONS = i18n/fumingCube_lv_LV.ts
 
-CONFIG += lrelease
+# CONFIG += lrelease
 
 DISTFILES += \
     CMakeLists.txt
+
+TRANSLATION_TARGET_DIR = $${_PRO_FILE_PWD_}/i18n/
+
+isEmpty(QMAKE_LUPDATE) {
+    win32:LANGUPD = $$[QT_INSTALL_BINS]\lupdate.exe
+    else:LANGUPD = $$[QT_INSTALL_BINS]/lupdate
+}
+
+isEmpty(QMAKE_LRELEASE) {
+    win32:LANGREL = $$[QT_INSTALL_BINS]\lrelease.exe
+    else:LANGREL = $$[QT_INSTALL_BINS]/lrelease
+}
+
+langupd.command = $$LANGUPD $$shell_path($$_PRO_FILE_) -ts $$_PRO_FILE_PWD_/$$TRANSLATIONS
+langrel.depends = langupd
+langrel.input = TRANSLATIONS
+langrel.output = $$TRANSLATION_TARGET_DIR/${QMAKE_FILE_BASE}.qm
+langrel.commands = $$LANGREL ${QMAKE_FILE_IN} -qm $$TRANSLATION_TARGET_DIR/${QMAKE_FILE_BASE}.qm
+langrel.CONFIG += no_link
+
+QMAKE_EXTRA_TARGETS += langupd
+QMAKE_EXTRA_COMPILERS += langrel
+PRE_TARGETDEPS += langupd compiler_langrel_make_all
 

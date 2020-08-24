@@ -199,7 +199,7 @@ bool SearchFragment::parseIdList( const QList<int> &idList ) {
         return false;
 
     // remove null ids
-    QList cleanList( idList );
+    QList<int> cleanList( idList );
     cleanList.removeAll( 0 );
 
     // setup structureBrowser

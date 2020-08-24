@@ -39,7 +39,9 @@ ReagentView::ReagentView( QWidget *parent ) : QTreeView( parent ) {
 
     // setup model
     this->filterModel()->setSourceModel( this->reagentModel );
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     this->filterModel()->setRecursiveFilteringEnabled( true );
+#endif
     this->filterModel()->setSortCaseSensitivity( Qt::CaseInsensitive );
     this->filterModel()->setFilterCaseSensitivity( Qt::CaseInsensitive );
     this->setRootIndex( this->sourceModel()->invisibleRootItem()->index());

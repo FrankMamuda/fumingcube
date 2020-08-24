@@ -64,8 +64,13 @@ QJSValue Script::evaluate( const QString &script ) {
             "\\b(abstract|arguments|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield|Array|Date|eval|function|hasOwnProperty|Infinity|isFinite|isNaN|isPrototypeOf|length|Math|NaN|name|Number|Object|prototype|String|toString|undefined|valueOf|alert|all|anchor|anchors|area|assign|blur|button|checkbox|clearInterval|clearTimeout|clientInformation|close|closed|confirm|constructor|crypto|decodeURI|decodeURIComponent|defaultStatus|document|element|elements|embed|embeds|encodeURI|encodeURIComponent|escape|event|fileUpload|focus|form|forms|frame|innerHeight|innerWidth|layer|layers|link|location|mimeTypes|navigate|navigator|frames|frameRate|hidden|history|image|images|offscreenBuffering|open|opener|option|outerHeight|outerWidth|packages|pageXOffset|pageYOffset|parent|parseFloat|parseInt|password|pkcs11|plugin|prompt|propertyIsEnum|radio|reset|screenX|screenY|scroll|secure|select|self|setInterval|setTimeout|status|submit|taint|text|textarea|top|unescape|untaint|window)\\b" );
     const QRegularExpressionMatch match( keywords.match( script ));
     if ( match.hasMatch())
-        result = this->engine.newErrorObject( QJSValue::SyntaxError,
-                                              Script::tr( "keyword \"%1\" is not allowed" ).arg( match.captured( 1 )));
+        result =
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+                this->engine.newErrorObject( QJSValue::SyntaxError,
+#else
+                QJSValue(
+#endif
+                Script::tr( "keyword \"%1\" is not allowed" ).arg( match.captured( 1 )));
 
     // unfortunately we have to do this every time unless we start caching tag functions
     // which also is painful, since we have to track each add/edit/remove
@@ -108,7 +113,12 @@ QJSValue Script::ans() {
     const QString answer( Variable::string( "calculator/ans" ));
 
     if ( answer.isEmpty()) {
-        this->engine.throwError( QJSValue::EvalError, Script::tr( "answer is empty" ));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        this->engine.throwError( QJSValue::EvalError,
+#else
+        return QJSValue(
+#endif
+        Script::tr( "answer is empty" ));
         return QJSValue();
     }
 
@@ -124,8 +134,12 @@ QJSValue Script::ans() {
 QJSValue Script::getProperty( const QString &functionName, const QString &reference ) {
     // validate reagent reference
     if ( reference.isEmpty()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::SyntaxError,
-                                 Script::tr( "expected an argument for function \"%1\"" ).arg( functionName ));
+#else
+        return QJSValue(
+#endif
+        Script::tr( "expected an argument for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
@@ -142,8 +156,12 @@ QJSValue Script::getProperty( const QString &functionName, const QString &refere
 QJSValue Script::getProperty( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate batchName
     if ( batchName.isEmpty()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::SyntaxError,
-                                 Script::tr( "expected arguments for function \"%1\"" ).arg( functionName ));
+#else
+        return QJSValue(
+#endif
+        Script::tr( "expected arguments for function \"%1\"" ).arg( functionName ));
         return QJSValue();
     }
 
@@ -161,23 +179,37 @@ QJSValue
 Script::getPropertyInternal( const QString &functionName, const QString &reference, const QString &batchName ) {
     // validate functionName
     if ( functionName.isEmpty()) {
-        this->engine.throwError( QJSValue::SyntaxError, Script::tr( "function name expected" ));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        this->engine.throwError( QJSValue::SyntaxError,
+#else
+        return QJSValue(
+#endif
+        Script::tr( "function name expected" ));
         return QJSValue();
     }
 
     // get propertyId
     const Id propertyId = this->getPropertyId( functionName );
     if ( propertyId == Id::Invalid ) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::ReferenceError,
-                                 Script::tr( "function \"%1\" is not defined" ).arg( functionName ));
+#else
+        return QJSValue(
+#endif
+        Script::tr( "function \"%1\" is not defined" ).arg( functionName ));
         return QJSValue();
     }
 
     // get reagentId
     const Id reagentId = this->getReagentId( reference );
     if ( reagentId == Id::Invalid ) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::ReferenceError,
-                                 Script::tr( "reagent \"%1\" is not defined" ).arg( reference ));
+#else
+        return QJSValue(
+#endif
+        Script::tr( "reagent \"%1\" is not defined" ).arg( reference ));
+
         return QJSValue();
     }
 
@@ -187,8 +219,12 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
     if ( !batchName.isEmpty()) {
         const Id batchId = this->getReagentId( batchName, reagentId );
         if ( batchId == Id::Invalid ) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
             this->engine.throwError( QJSValue::ReferenceError,
-                                     Script::tr( "batch \"%1\" is not defined" ).arg( batchName ));
+#else
+            return QJSValue(
+#endif
+            Script::tr( "batch \"%1\" is not defined" ).arg( batchName ));
             return QJSValue();
         }
         propertyValue = this->getPropertyValue( propertyId, batchId, reagentId );
@@ -198,10 +234,15 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
 
     // get property value
     if ( propertyValue.isNull()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::TypeError,
-                                 Script::tr( R"(property "%1" is not defined for "%2")" )
-                                 .arg( functionName,
-                                       batchName.isEmpty() ? reference : batchName ));
+#else
+        return QJSValue(
+#endif
+        Script::tr( R"(property "%1" is not defined for "%2")" )
+        .arg( functionName,
+        batchName.isEmpty() ? reference : batchName ));
+
         return QJSValue();
     }
 
@@ -209,7 +250,11 @@ Script::getPropertyInternal( const QString &functionName, const QString &referen
     bool ok;
     const qreal value = propertyValue.toReal( &ok );
     if ( !ok ) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         this->engine.throwError( QJSValue::TypeError,
+#else
+        return QJSValue(
+#endif
                                  Script::tr( "%1( %2 ) does not evaluate to a valid number" )
                                  .arg( functionName,
                                        reference ) +

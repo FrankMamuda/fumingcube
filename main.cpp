@@ -64,6 +64,7 @@ misc/unsorted:
  - view custom properties in a separate dialog
  - option to explicitly override property
  - ability to use labels in table
+ - recursive filter pre 5.10
 */
 
 /*

@@ -116,7 +116,7 @@ void TextEdit::insertImageData( const int width, const int height, const QString
         return;
 
     // insert in textEdit
-    this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( width ).arg( height ).arg( base64.constData()));
+    this->textCursor().insertHtml( QString( R"(<img width="%1" height="%2" src="data:image/png;base64,%3">)" ).arg( width ).arg( height ).arg( base64 ));
 }
 
 /**
