@@ -174,8 +174,8 @@ bool ReagentDock::checkForDuplicates( const QString &name, const QString &refere
 
     // check plainText names
     while ( query.next()) {
-        const QString name_( HTMLUtils::convertToPlainText( query.value( 0 ).toString()));
-        const QString reference_( HTMLUtils::convertToPlainText( query.value( 1 ).toString()));
+        const QString name_( HTMLUtils::toPlainText( query.value( 0 ).toString()));
+        const QString reference_( HTMLUtils::toPlainText( query.value( 1 ).toString()));
 
         if ( !QString::compare( name, name_, Qt::CaseInsensitive ) ||
              !QString::compare( name, reference_, Qt::CaseInsensitive ) ||
@@ -344,7 +344,7 @@ QMenu *ReagentDock::buildMenu( bool context ) {
 
         if ( context ) {
             const auto id = item->data( ReagentModel::ID ).value<Id>();
-            const QString reagentName( HTMLUtils::convertToPlainText( Reagent::instance()->name(
+            const QString reagentName( HTMLUtils::toPlainText( Reagent::instance()->name(
                     Reagent::instance()->row( parentId == Id::Invalid ? id : parentId ))));
 
             // search online            
@@ -388,7 +388,7 @@ QMenu *ReagentDock::buildAddMenu() {
     const Id id = Variable::value<Id>( "reagentDock/selection" );
     if ( id != Id::Invalid ) {
         const auto parentId = Reagent::instance()->parentId( id );
-        const QString name( HTMLUtils::convertToPlainText( Reagent::instance()->name(( parentId == Id::Invalid ) ? id : parentId )));
+        const QString name( HTMLUtils::toPlainText( Reagent::instance()->name(( parentId == Id::Invalid ) ? id : parentId )));
 
         addMenu->addAction( ReagentDock::tr( "Add new batch to reagent \"%1\"" ).arg( TextUtils::elidedString( name )), this, [ this, id, parentId ]() {
             this->addReagent(( parentId == Id::Invalid ) ? id : parentId ); } )->setIcon( QIcon::fromTheme( "add" ));
@@ -415,7 +415,7 @@ Id ReagentDock::addReagent( const Id &parentId, const QString &reagentName, cons
     if ( parentId != Id::Invalid ) {
         ReagentDialog rd( this, reagentName, reagentName, ReagentDialog::BatchMode );
         ok = ( rd.exec() == QDialog::Accepted );
-        name = HTMLUtils::convertToPlainText( rd.name());
+        name = HTMLUtils::toPlainText( rd.name());
 
         if ( ok ) {
             if ( !this->checkBatchForDuplicates( qAsConst( name ), parentId ))
@@ -662,7 +662,7 @@ void ReagentDock::on_editButton_clicked() {
     if ( parentId != Id::Invalid ) {
         ReagentDialog rd( this, previousName, "", ReagentDialog::BatchEditMode );
         ok = ( rd.exec() == QDialog::Accepted );
-        const QString name( HTMLUtils::convertToPlainText( rd.name()));
+        const QString name( HTMLUtils::toPlainText( rd.name()));
 
         if ( !name.isEmpty() && ok ) {
             if ( !this->checkBatchForDuplicates( name, parentId ))
@@ -672,7 +672,7 @@ void ReagentDock::on_editButton_clicked() {
 
             // rename without resetting the model
             const QString generatedName( ReagentModel::generateName( name ));
-            item->setText( HTMLUtils::convertToPlainText( generatedName ));
+            item->setText( HTMLUtils::toPlainText( generatedName ));
             item->setData( generatedName, ReagentModel::HTML );
         }
     } else {
@@ -689,7 +689,7 @@ void ReagentDock::on_editButton_clicked() {
 
         // rename without resetting the model
         const QString generatedName( ReagentModel::generateName( name, reference ));
-        item->setText( HTMLUtils::convertToPlainText( generatedName ));
+        item->setText( HTMLUtils::toPlainText( generatedName ));
         item->setData( generatedName, ReagentModel::HTML );
     }
 }

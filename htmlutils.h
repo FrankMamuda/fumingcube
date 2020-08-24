@@ -35,7 +35,7 @@ public:
     HTMLUtils& operator=( HTMLUtils&& ) = delete;
 
     [[nodiscard]] static QString simplify( const QString &html );
-    [[nodiscard]] static QString convertToPlainText( const QString &html );
+    [[nodiscard]] static QString toPlainText( const QString &html );
     [[nodiscard]] static QString captureBody( const QString &html );
 
 private:
