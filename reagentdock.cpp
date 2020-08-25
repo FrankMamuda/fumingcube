@@ -553,13 +553,16 @@ void ReagentDock::on_removeButton_clicked() {
         this->view()->selectReagent();
     };
 
-    QMenu menu;
+    //QMenu menu;
     const QModelIndexList list( this->view()->selectionModel()->selectedRows());
 
     // remove reagents and batches (list)
     if ( list.count() > 1 ) {
-        menu.addAction( ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count()),
-                        this, [ this, list, removeReagentsAndBatches ]() {
+        if ( QMessageBox::question( this,
+                                    ReagentDock::tr( "Confirm removal" ),
+                                    ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count())) == QMessageBox::Yes ) {
+        //menu.addAction( ReagentDock::tr( "Remove %1 selected reagents and their batches" ).arg( list.count()),
+        //                this, [ this, list, removeReagentsAndBatches ]() {
             QModelIndexList sourceList;
             for ( const QModelIndex &filter : list ) {
                 const QModelIndex &index( this->view()->filterModel()->mapToSource( filter ));
@@ -572,7 +575,7 @@ void ReagentDock::on_removeButton_clicked() {
 
             // remove items without resetting model
             this->view()->sourceModel()->remove( qAsConst( sourceList ));
-        } )->setIcon( QIcon::fromTheme( "remove" ));
+        }// )->setIcon( QIcon::fromTheme( "remove" ));
     } else {
         // remove just one entry
         // get current index
@@ -584,10 +587,18 @@ void ReagentDock::on_removeButton_clicked() {
         // remove reagent and batches
         const QStandardItem *item( this->view()->itemFromIndex( index ));
         const auto parentId = item->data( ReagentModel::ParentId ).value<Id>();
-        menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
-                                             "Remove reagent '%1' and its batches" :
-                                             "Remove batch '%1'"
-                                             ).arg( TextUtils::elidedString( item->text())), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
+
+        if ( QMessageBox::question( this,
+                                    ReagentDock::tr( "Confirm removal" ),
+                                    ReagentDock::tr( parentId == Id::Invalid ?
+                                                     "Remove reagent '%1' and its batches" :
+                                                     "Remove batch '%1'" )
+                                    .arg( TextUtils::elidedString( item->text()))) == QMessageBox::Yes ) {
+
+        //menu.addAction( ReagentDock::tr( parentId == Id::Invalid ?
+        //                                     "Remove reagent '%1' and its batches" :
+        //                                     "Remove batch '%1'"
+        //                                     ).arg( TextUtils::elidedString( item->text())), this, [ this, item, index, parentId, removeReagentsAndBatches ]() {
             removeReagentsAndBatches( item );
 
             // remove items without resetting model
@@ -597,11 +608,11 @@ void ReagentDock::on_removeButton_clicked() {
             if ( parentId != Id::Invalid )
                 this->view()->selectReagent(
                         this->view()->filterModel()->mapFromSource( this->view()->indexFromId( parentId )));
-        } )->setIcon( QIcon::fromTheme( "remove" ));
+        }// )->setIcon( QIcon::fromTheme( "remove" ));
     }
 
     // display menu
-    menu.exec( this->mapToGlobal( this->ui->removeButton->pos()));
+    //menu.exec( this->mapToGlobal( this->ui->removeButton->pos()));
 }
 
 /**

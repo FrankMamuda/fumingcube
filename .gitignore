@@ -16,7 +16,6 @@ i18n/*.qm
 cmake-build-*/
 .idea/
 parts/*
-snap/*
 .qmake.stash
 .qm/*
 prime/*

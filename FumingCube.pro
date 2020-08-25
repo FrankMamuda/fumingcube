@@ -222,7 +222,15 @@ TRANSLATIONS = i18n/fumingCube_lv_LV.ts
 # CONFIG += lrelease
 
 DISTFILES += \
-    CMakeLists.txt
+    .gitattributes \
+    .gitignore \
+    CMakeLists.txt \
+    README.md \
+    _config.yml \
+    icon.ico \
+    icon.rc \
+    snap/gui/FumingCube.desktop \
+    snapcraft.yaml
 
 TRANSLATION_TARGET_DIR = $${_PRO_FILE_PWD_}/i18n/
 
