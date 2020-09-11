@@ -36,4 +36,8 @@
         <file alias="sigmaaldrich.conf">searchEngines/sigmaaldrich.conf</file>
         <file alias="wikipedia.conf">searchEngines/wikipedia.conf</file>
     </qresource>
+    <qresource prefix="/chemDoodle">
+        <file alias="export.js">chemDoodle/export.js</file>
+        <file alias="index.html">chemDoodle/index.html</file>
+    </qresource>
 </RCC>

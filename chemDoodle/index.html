@@ -1,0 +1,48 @@
+<!--
+Replace all colours to match theme (allow overrides)
+Copy/Paste actions in Qt dialog
+Save/Open internal buttons in Qt dialog
+-->
+
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <link rel="stylesheet" href="[_PATH]/uis/jquery-ui-1.11.4.css" type="text/css">
+        <script type="text/javascript" src="[_PATH]/ChemDoodleWeb.js"></script>
+        <script type="text/javascript" src="[_PATH]/uis/ChemDoodleWeb-uis.js"></script>
+        <style>
+canvas.ChemDoodleWebComponent {
+    border: 0px;
+    position:fixed;
+    left:0;
+    top:76;
+    width:100%;
+    height:100%;
+}
+body { background-color: [_COLOUR]; }
+        </style>
+    </head>
+    <body>
+        <center>
+            <div id="chemdoodle" style="font-family:'Times New Roman';font-size:12px;text-align:left;text-shadow:none;display:inline-block;background:[_COLOUR];">
+                <script>
+    ChemDoodle.DEFAULT_STYLES.atoms_font_size_2D = 12;
+    ChemDoodle.DEFAULT_STYLES.atoms_font_families_2D = ['Times New Roman', 'Arial', 'sans-serif'];
+    ChemDoodle.DEFAULT_STYLES.atoms_displayTerminalCarbonLabels_2D = true;
+    ChemDoodle.DEFAULT_STYLES.atoms_useJMOLColors = true;
+    ChemDoodle.ELEMENT['H'].jmolColor = 'black';
+    ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
+    let sketcher = new ChemDoodle.SketcherCanvas('sketcher', 1024, 1024, { useServices:false, resizable:false, floatDrawTools:false, requireStartingAtom:false, includeToolbar:true, includeQuery:false });
+    sketcher.styles.atoms_displayTerminalCarbonLabels_2D = true;
+    sketcher.styles.atoms_useJMOLColors = true;
+    sketcher.styles.bonds_clearOverlaps_2D = true;
+    sketcher.styles.shapes_color = '#c10000';
+    sketcher.styles.atoms_font_size_2D = 12;
+    sketcher.styles.atoms_font_families_2D = ['Times New Roman', 'Arial', 'sans-serif'];
+    sketcher.resize( window.innerWidth, window.innerHeight - 76 );
+    sketcher.repaint();
+                </script>
+            </div>
+        </center>
+    </body>
+</html>

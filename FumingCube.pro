@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql xml qml
+QT       += core gui sql xml qml webenginewidgets
 
 win32:QT += winextras
 win32:LIBS += -lgdi32 -luser32 -lole32
@@ -42,6 +42,7 @@ SOURCES += \
     charactermap.cpp \
     cropwidget.cpp \
     datepicker.cpp \
+    drawdialog.cpp \
     extractiondialog.cpp \
     fragmentnavigation.cpp \
     ghsbuilder.cpp \
@@ -108,6 +109,7 @@ HEADERS += \
     cropwidget.h \
     datepicker.h \
     dockwidget.h \
+    drawdialog.h \
     extractiondialog.h \
     extractionmodel.h \
     fragment.h \
@@ -179,6 +181,7 @@ HEADERS += \
 FORMS += \
         about.ui \
         datepicker.ui \
+        drawdialog.ui \
         extractiondialog.ui \
         imageutils.ui \
         labeldialog.ui \

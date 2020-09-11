@@ -86,6 +86,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionSearch"/>
+   <addaction name="actionDraw"/>
    <addaction name="separator"/>
    <addaction name="actionReagents"/>
    <addaction name="actionProperties"/>
@@ -193,10 +194,20 @@
   </action>
   <action name="actionTables">
    <property name="icon">
-    <iconset theme="table"/>
+    <iconset theme="table">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Tables</string>
+   </property>
+  </action>
+  <action name="actionDraw">
+   <property name="icon">
+    <iconset theme="structure">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Draw</string>
    </property>
   </action>
  </widget>

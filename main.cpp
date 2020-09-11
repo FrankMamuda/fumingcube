@@ -56,6 +56,16 @@
 /*
  TODO:
 
+draw:
+  - implement option to install draw capability:
+    settings-> 'install draw' -> 'license agreement'
+    app downloads package and extracts to app dir
+    enabled via variable
+  - don't destroy paint window, but hide and clear
+    (to avoid reinitializing)
+    (best to preload it on app start?)
+  - add license agreement in About
+
 extraction:
   - better 'not found' and 'server busy' error handling in search
   - delete cache for a single reagent does not work

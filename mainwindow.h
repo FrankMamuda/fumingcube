@@ -98,8 +98,8 @@ private slots:
     void on_actionSettings_triggered();
     void on_actionAbout_triggered();
     void on_actionSearch_triggered();
-
     void on_actionTables_triggered();
+    void on_actionDraw_triggered();
 
 protected:
     void closeEvent( QCloseEvent *event ) override;

@@ -46,6 +46,7 @@
 #include "labelset.h"
 #include "label.h"
 #include "tabledialog.h"
+#include "drawdialog.h"
 
 /**
  * @brief MainWindow::MainWindow
@@ -425,4 +426,12 @@ void MainWindow::on_actionSearch_triggered() {
 void MainWindow::on_actionTables_triggered() {
     TableDialog td( this );
     td.exec();
+}
+
+/**
+ * @brief MainWindow::on_actionDraw_triggered
+ */
+void MainWindow::on_actionDraw_triggered() {
+    DrawDialog dd( this );
+    dd.exec();
 }

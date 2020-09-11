@@ -255,7 +255,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionInvert">
       <property name="icon">
-       <iconset theme="invert"/>
+       <iconset theme="invert">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Invert</string>
@@ -263,7 +264,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionSetBackground">
       <property name="icon">
-       <iconset theme="background"/>
+       <iconset theme="background">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Set background</string>
@@ -271,7 +273,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionScale">
       <property name="icon">
-       <iconset theme="scale"/>
+       <iconset theme="scale">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Scale</string>
@@ -297,7 +300,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionMakeTransparent">
       <property name="icon">
-       <iconset theme="transparent"/>
+       <iconset theme="transparent">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Make transparent</string>
@@ -305,7 +309,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionZoomIn">
       <property name="icon">
-       <iconset theme="zoom_in"/>
+       <iconset theme="zoom_in">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Zoom in</string>
@@ -316,7 +321,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionZoomOut">
       <property name="icon">
-       <iconset theme="zoom_out"/>
+       <iconset theme="zoom_out">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Zoom out</string>
@@ -324,7 +330,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionFit">
       <property name="icon">
-       <iconset theme="zoom_fit"/>
+       <iconset theme="zoom_fit">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Fit screen</string>
@@ -332,7 +339,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionNormalSize">
       <property name="icon">
-       <iconset theme="zoom_normal"/>
+       <iconset theme="zoom_normal">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Normal size</string>
@@ -340,7 +348,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionAutocrop">
       <property name="icon">
-       <iconset theme="autocrop"/>
+       <iconset theme="autocrop">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Autocrop</string>
@@ -348,7 +357,8 @@ No scaling however will be applied for images in custom properties as they will 
      </action>
      <action name="actionCrop">
       <property name="icon">
-       <iconset theme="crop"/>
+       <iconset theme="crop">
+        <normaloff>.</normaloff>.</iconset>
       </property>
       <property name="text">
        <string>Manual crop</string>
@@ -368,7 +378,8 @@ No scaling however will be applied for images in custom properties as they will 
   </layout>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="paste"/>
+    <iconset theme="paste">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Paste from clipboard</string>
@@ -376,7 +387,8 @@ No scaling however will be applied for images in custom properties as they will 
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset theme="clear_image"/>
+    <iconset theme="clear_image">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Clear</string>
