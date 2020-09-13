@@ -47,9 +47,13 @@ protected:
 private slots:
     void on_scriptButton_clicked();
     void on_copyButton_clicked();
+    void loadComponent();
 
 private:
     Ui::DrawDialog *ui;
     QTimer resizeTimer;
     bool m_resizeInProgress = false;
+    bool script = false;
+    bool scriptUI = false;
+    bool jQuery = false;
 };

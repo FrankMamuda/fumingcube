@@ -22,11 +22,13 @@
 #include "drawdialog.h"
 #include "imageutils.h"
 #include "mainwindow.h"
+#include "networkmanager.h"
 #include "ui_drawdialog.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QClipboard>
+#include <QMessageBox>
 
 /**
  * @brief DrawDialog::DrawDialog
@@ -36,27 +38,126 @@ DrawDialog::DrawDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::DrawD
     this->ui->setupUi( this );
     this->ui->contents->setWindowFlags( Qt::Widget );
 
-    const QColor baseColour( QApplication::palette().color( QPalette::Window ));
-    QString colour( QString( "rgb( %1, %2, %3 )" ).arg( baseColour.red()).arg( baseColour.green()).arg( baseColour.blue()));
+    QDir dir( QDir::currentPath() + "/chemDoodle/" );
+    if ( !dir.exists()) {
+        dir.mkpath( QDir::currentPath() + "/chemDoodle/" );
 
-    QFile file( ":/chemDoodle/index.html" );
-    if ( file.open( QFile::ReadOnly )) {
-        QString buffer( file.readAll());
-        const QString path( QDir::currentPath() + "/ChemDoodleWeb" );
-
-        buffer.replace( "[_PATH]", path );
-        buffer.replace( "[_COLOUR]", colour );
-
-        file.close();
-        this->ui->webView->setHtml( buffer, path );
+        if ( !dir.exists()) {
+            QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
+            QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+        }
     }
 
-    // setup timer
-    this->resizeTimer.setSingleShot( true );
-    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this ]() {
-        this->m_resizeInProgress = false;
-        this->ui->webView->page()->runJavaScript( "if ( typeof( sketcher) != \"undefined\" ) { sketcher.resize( window.innerWidth, window.innerHeight - 76 ); sketcher.repaint(); }" );
+    // setup finished connection to the NetworkManager
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::finished, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QByteArray &data ) {
+        switch ( type ) {
+        case NetworkManager::CDDemoPage:
+        {
+            qDebug() << "network->CDDemoPage";
+            //this->loadComponent();
+
+            const QString page( data );
+
+            QRegularExpression reJSQ( R"(href=\"(.+uis\/jquery.+?\.css))" );
+            const QRegularExpressionMatch matchJSQ( reJSQ.match( page ));
+            QRegularExpression reCDW( R"(src=\"(.+ChemDoodleWeb.js))" );
+            const QRegularExpressionMatch matchCDW( reCDW.match( page ));
+            QRegularExpression reUI( R"(src=\"(.+uis\/ChemDoodleWeb-uis.js))" );
+            const QRegularExpressionMatch matchUI( reUI.match( page ));
+
+            if ( matchJSQ.hasMatch() && matchCDW.hasMatch() && matchUI.hasMatch()) {
+                qDebug() << "success" << matchJSQ.captured( 1 ) << matchCDW.captured( 1 ) << matchUI.captured( 1 );
+
+                NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchJSQ.captured( 1 ), NetworkManager::CDjQueryCSS );
+                NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchCDW.captured( 1 ), NetworkManager::CDScript );
+                NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchUI.captured( 1 ), NetworkManager::CDUIScript );
+
+            } else {
+                QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
+                QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+                return;
+            }
+
+        }
+            break;
+
+
+        case NetworkManager::CDScript:
+        {
+            if ( !data.isEmpty()) {
+                QFile file( QDir::currentPath() + "/chemDoodle/ChemDoodleWeb.js" );
+                if ( file.open( QIODevice::WriteOnly )) {
+                    file.write( data );
+                    file.close();
+                    this->script = true;
+                }
+            }
+        }
+            break;
+
+
+        case NetworkManager::CDUIScript:
+        {
+            if ( !data.isEmpty()) {
+                QFile file( QDir::currentPath() + "/chemDoodle/ChemDoodleWeb-uis.js" );
+                if ( file.open( QIODevice::WriteOnly )) {
+                    file.write( data );
+                    file.close();
+                    this->scriptUI = true;
+                }
+            }
+        }
+            break;
+
+
+        case NetworkManager::CDjQueryCSS:
+        {
+            if ( !data.isEmpty()) {
+                QFile file( QDir::currentPath() + "/chemDoodle/jquery-ui.css" );
+                if ( file.open( QIODevice::WriteOnly )) {
+                    file.write( data );
+                    file.close();
+                    this->jQuery = true;
+                }
+            }
+        }
+            break;
+
+        default:
+            ;
+        }
+
+        if ( this->script && this->scriptUI && this->jQuery )
+            this->loadComponent();
     } );
+
+    // setup error connection to the NetworkManager
+    NetworkManager::connect( NetworkManager::instance(), &NetworkManager::error, this, [ this ]( const QString &, NetworkManager::Types type, const QVariant &, const QString & ) {
+        switch ( type ) {
+        case NetworkManager::CDDemoPage:
+        case NetworkManager::CDScript:
+        case NetworkManager::CDUIScript:
+        case NetworkManager::CDjQueryCSS:
+            QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
+            QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+            return;
+
+        default:
+            ;
+        }
+    } );
+
+    if ( !QFileInfo( QDir::currentPath() + "/chemDoodle/ChemDoodleWeb.js" ).exists() || !QFileInfo( QDir::currentPath() + "/chemDoodle/ChemDoodleWeb-uis.js" ).exists() || !QFileInfo( QDir::currentPath() + "/chemDoodle/jquery-ui.css" ).exists()) {
+        if ( QMessageBox::question( this, DrawDialog::tr( "Install draw tool component" ), DrawDialog::tr( "To use the draw tool, ChemDoodle Web Components must be downloaded.\nContinue with the download?" )) == QMessageBox::No ) {
+            QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+            return;
+        }
+
+        NetworkManager::instance()->execute( QString( "https://web.chemdoodle.com/demos/2d-sketcher" ), NetworkManager::CDDemoPage );
+        return;
+    } else {
+        this->loadComponent();
+    }
 }
 
 /**
@@ -64,6 +165,9 @@ DrawDialog::DrawDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::DrawD
  */
 DrawDialog::~DrawDialog() {
     QTimer::disconnect( &this->resizeTimer, &QTimer::timeout, this, nullptr );
+
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
+    NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
 
     delete this->ui;
 }
@@ -136,4 +240,31 @@ void DrawDialog::on_copyButton_clicked() {
         }
     }
     );*/
+}
+
+/**
+ * @brief DrawDialog::loadComponent
+ */
+void DrawDialog::loadComponent() {
+    const QColor baseColour( QApplication::palette().color( QPalette::Window ));
+    QString colour( QString( "rgb( %1, %2, %3 )" ).arg( baseColour.red()).arg( baseColour.green()).arg( baseColour.blue()));
+
+    QFile file( ":/chemDoodle/index.html" );
+    if ( file.open( QFile::ReadOnly )) {
+        QString buffer( file.readAll());
+        const QString path( QDir::currentPath() + "/chemDoodle" );
+
+        buffer.replace( "[_PATH]", path );
+        buffer.replace( "[_COLOUR]", colour );
+
+        file.close();
+        this->ui->webView->setHtml( buffer, path );
+    }
+
+    // setup timer
+    this->resizeTimer.setSingleShot( true );
+    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this ]() {
+        this->m_resizeInProgress = false;
+        this->ui->webView->page()->runJavaScript( "if ( typeof( sketcher) != \"undefined\" ) { sketcher.resize( window.innerWidth, window.innerHeight - 76 ); sketcher.repaint(); }" );
+    } );
 }
