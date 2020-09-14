@@ -57,11 +57,11 @@
  TODO:
 
 draw:
-  - implement option to install draw capability:
-    settings-> 'install draw' -> 'license agreement'
-    app downloads package and extracts to app dir
-    enabled via variable
-    (partially)
+  - add new icons
+  - i18n
+  - when adding a new StructuralFormula property
+    user must choose between 'DrawDialog' or 'ImageTools'
+  - rewrite upscaling code (works only with 2x res)
   - don't destroy paint window, but hide and clear
     (to avoid reinitializing)
     (best to preload it on app start?)
@@ -75,6 +75,7 @@ misc/unsorted:
  - option to explicitly override property
  - ability to use labels in table
  - recursive filter pre 5.10
+ - default molecular formula tag should not be '0'
 */
 
 /*

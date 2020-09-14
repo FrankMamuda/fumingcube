@@ -40,6 +40,7 @@
 #include "htmlutils.h"
 #include "textutils.h"
 #include "datepicker.h"
+#include "drawdialog.h"
 #include <QBuffer>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -430,6 +431,29 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
              type == Tag::NFPA ||
              type == Tag::Formula ||
              tagId == Id::Invalid ) {
+
+            if ( type == Tag::Formula ) {
+                const QByteArray data( Property::instance()->propertyData( row ).toByteArray());
+                const QImage image( QImage::fromData( data ));
+
+                menu.addAction( PropertyDock::tr( "Draw" ), this, [ this, row ]() {
+                    DrawDialog dd( this );
+                    if ( dd.exec() == QDialog::Accepted ) {
+                        Property::instance()->setPropertyData( row, dd.data );
+                        this->updateView();
+                    }
+                } );
+
+                if ( !image.text( "ChemDoodleData" ).isEmpty()) {
+                    menu.addAction( PropertyDock::tr( "Edit" ), this, [ this, row, image ]() {
+                        DrawDialog dd( this, image.text( "ChemDoodleData" ) );
+                        if ( dd.exec() == QDialog::Accepted ) {
+                            Property::instance()->setPropertyData( row, dd.data );
+                            this->updateView();
+                        }
+                    } );
+                }
+            }
 
             QAction *copyAction( menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId
 #ifdef Q_CC_MSVC

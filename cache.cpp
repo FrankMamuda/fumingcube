@@ -201,6 +201,7 @@ void Cache::readReagentCache() {
 
         // finally read in the maps
         in >> this->idNameMap >> this->nameIdMap;
+        buffer.close();
     }
 }
 
@@ -217,4 +218,5 @@ void Cache::writeReagentCache() {
 
     // store maps into disk cache
     Cache::instance()->insert( Cache::IdMapContext, "data.map", byteArray, true );
+    buffer.close();
 }

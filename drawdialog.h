@@ -38,16 +38,19 @@ class DrawDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit DrawDialog( QWidget *parent = nullptr );
+    explicit DrawDialog( QWidget *parent = nullptr, const QString &json = QString());
     ~DrawDialog() override;
+    void getPixmapAndAccept();
+    QByteArray data;
+    QString json;
 
 protected:
     void resizeEvent( QResizeEvent * ) override;
 
 private slots:
     void on_scriptButton_clicked();
-    void on_copyButton_clicked();
     void loadComponent();
+    void on_buttonBox_accepted();
 
 private:
     Ui::DrawDialog *ui;
