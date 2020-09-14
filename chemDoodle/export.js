@@ -15,9 +15,9 @@ canvas.loadContent( molecules, shapes );
 const bounds = canvas.getContentBounds();
 const width = bounds.maxX - bounds.minX;
 const height = bounds.maxY - bounds.minY;
-const padding = 16;
+const padding = 10;
 const scale = 2.0;
-canvas.resize( width * 2 + padding, height * 2 + padding );
+canvas.resize( width * scale + padding, height * scale + padding );
 
 // get html canvas and upscale
 var htmlCanvas = document.getElementById( 'exportCanvas' );

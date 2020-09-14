@@ -65,6 +65,8 @@ draw:
   - don't destroy paint window, but hide and clear
     (to avoid reinitializing)
     (best to preload it on app start?)
+  - allow non-draw builds (mingw)
+  - update ImageUtils not to strip PNG text tags
 
 extraction:
   - better 'not found' and 'server busy' error handling in search

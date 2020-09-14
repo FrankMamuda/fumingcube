@@ -226,14 +226,25 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 // load image
                 // TODO: check if title is not empty
                 const QByteArray data( Property::instance()->propertyData( propertyId ).toByteArray());
+#ifdef DRAW_TOOL_DISABLED
                 QPixmap pixmap;
-                bool ok = false;
-                if ( !data.isEmpty())
+                if ( !data.isEmpty()) {
+                    // TODO: check via cvar
                     ok = pixmap.loadFromData( data );
 
-                ImageUtils iu( PropertyDock::instance(), ImageUtils::EditMode, ok ? pixmap.toImage() : QImage());
-                if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
-                    return QPair<QString, QVariant>( QString(), PixmapUtils::toData( QPixmap::fromImage( iu.image())));
+                    ImageUtils iu( PropertyDock::instance(), ImageUtils::EditMode, ok ? pixmap.toImage() : QImage());
+                    if ( iu.exec() == QDialog::Accepted && !iu.image().isNull())
+                        return QPair<QString, QVariant>( QString(), PixmapUtils::toData( QPixmap::fromImage( iu.image())));
+               }
+#else
+                const QImage image( QImage::fromData( data ));
+                const QString jsonData( image.isNull() ? "" : image.text( "ChemDoodleData" ));
+
+                DrawDialog dd( PropertyDock::instance(), jsonData );
+                if ( dd.exec() == QDialog::Accepted ) {
+                    return QPair<QString, QVariant>( QString(), dd.data );
+#endif
+                }
 
                 break;
             }
@@ -436,23 +447,14 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 const QByteArray data( Property::instance()->propertyData( row ).toByteArray());
                 const QImage image( QImage::fromData( data ));
 
-                menu.addAction( PropertyDock::tr( "Draw" ), this, [ this, row ]() {
-                    DrawDialog dd( this );
+                const QString jsonData( image.isNull() ? "" : image.text( "ChemDoodleData" ));
+                menu.addAction( PropertyDock::tr( "Edit" ), this, [ this, row, jsonData ]() {
+                    DrawDialog dd( this, jsonData );
                     if ( dd.exec() == QDialog::Accepted ) {
                         Property::instance()->setPropertyData( row, dd.data );
                         this->updateView();
                     }
-                } );
-
-                if ( !image.text( "ChemDoodleData" ).isEmpty()) {
-                    menu.addAction( PropertyDock::tr( "Edit" ), this, [ this, row, image ]() {
-                        DrawDialog dd( this, image.text( "ChemDoodleData" ) );
-                        if ( dd.exec() == QDialog::Accepted ) {
-                            Property::instance()->setPropertyData( row, dd.data );
-                            this->updateView();
-                        }
-                    } );
-                }
+                } )->setIcon( QIcon::fromTheme( "edit" ));
             }
 
             QAction *copyAction( menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId
