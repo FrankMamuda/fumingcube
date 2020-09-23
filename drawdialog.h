@@ -23,6 +23,9 @@
  */
 #include <QDialog>
 #include <QTimer>
+#include <QWebChannel>
+#include <QMessageBox>
+#include <QInputDialog>
 
 /**
  * @brief The Ui namespace
@@ -30,6 +33,26 @@
 namespace Ui {
 class DrawDialog;
 }
+
+/**
+ * @brief The Core class
+ */
+class Core : public QObject {
+    Q_OBJECT
+
+public:
+    Core( QObject *parent = nullptr ) : QObject( parent ) {}
+   // QString getLabel() const { return this->m_label; }
+    QString m_label;
+
+signals:
+    void sendText( const QString &text );
+
+public slots:
+    void receiveText( const QString &defaultLabel );
+
+private:
+};
 
 /**
  * @brief The DrawDialog class
@@ -43,12 +66,13 @@ public:
     void getPixmapAndAccept();
     QByteArray data;
     QString json;
+    QString fileName;
+    QIcon fetchIcon( const QString &name ) const;
 
 protected:
     void resizeEvent( QResizeEvent * ) override;
 
 private slots:
-    void on_scriptButton_clicked();
     void loadComponent();
     void on_buttonBox_accepted();
 
@@ -59,4 +83,5 @@ private:
     bool script = false;
     bool scriptUI = false;
     bool jQuery = false;
+    QWebChannel *channel = nullptr;
 };

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333333 4.2333335"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="bond_wavy.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:export-filename="C:\Home\Development\build-FumingCube-Desktop_Qt_5_15_0_MSVC2019_64bit-Release\chemDoodle\bond_wavy.png"
+   inkscape:export-xdpi="144.00002"
+   inkscape:export-ydpi="144.00002">
+  <defs
+     id="defs2">
+    <pattern
+       y="0"
+       x="0"
+       height="6"
+       width="6"
+       patternUnits="userSpaceOnUse"
+       id="EMFhbasepattern" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="16"
+     inkscape:cx="-9.8750577"
+     inkscape:cy="-2.7227379"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     showguides="true"
+     inkscape:window-width="732"
+     inkscape:window-height="405"
+     inkscape:window-x="786"
+     inkscape:window-y="429"
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid815"
+       dotted="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-292.76664)">
+    <g
+       id="g6275"
+       transform="translate(0.26458334,-3.3333333e-6)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.91388641,293.68052 c 0,0 0.21047739,-0.21047 0.42095209,0 0.2104748,0.21047 -2.6e-6,0.42095 -2.6e-6,0.42095 0,0 -0.2104775,0.21047 -2.7e-6,0.42095 0.2104747,0.21048 0.4209522,0 0.4209522,0 0,0 0.2104774,-0.21048 0.4209521,0 0.2104748,0.21047 -2.6e-6,0.42095 -2.6e-6,0.42095 0,0 -0.2104775,0.21048 -2.7e-6,0.42095 0.2104747,0.21047 0.4209521,0 0.4209521,0 0,0 0.2104775,-0.21048 0.4209522,-1e-5 0.2104748,0.21048 -2.7e-6,0.42096 -2.7e-6,0.42096 0,0 -0.2104774,0.21048 -2.6e-6,0.42095 0.2104747,0.21047 0.4209521,0 0.4209521,0"
+       id="path7461"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

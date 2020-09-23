@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333333 4.2333335"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="lasso.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:export-filename="C:\Home\Development\build-FumingCube-Desktop_Qt_5_15_0_MSVC2019_64bit-Release\chemDoodle\lasso.png"
+   inkscape:export-xdpi="144.00002"
+   inkscape:export-ydpi="144.00002">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="15.839192"
+     inkscape:cx="-29.618983"
+     inkscape:cy="20.919519"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     showguides="true"
+     inkscape:window-width="1078"
+     inkscape:window-height="882"
+     inkscape:window-x="26"
+     inkscape:window-y="26"
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid815"
+       dotted="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-292.76664)">
+    <g
+       id="g6275"
+       transform="translate(0.26458334,-3.3333333e-6)" />
+    <path
+       style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#404040;stroke-width:0.26499999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       d="m 2.1192505,293.51181 a 1.601274,0.84242261 0 0 0 -1.60145265,0.84285 1.601274,0.84242261 0 0 0 0.56999105,0.64389 0.26458332,0.26458332 0 0 1 0.2377116,-0.14987 0.26458332,0.26458332 0 0 1 0.2645833,0.26459 0.26458332,0.26458332 0 0 1 -0.00258,0.0346 1.601274,0.84242261 0 0 0 0.5317505,0.0491 1.601274,0.84242261 0 0 0 1.6014525,-0.84232 1.601274,0.84242261 0 0 0 -1.6014525,-0.84285 z"
+       id="path1424"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#404040;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.4000001;stroke-dasharray:none;stroke-opacity:1"
+       d="m 1.2586831,295.27971 c -0.2151579,0.30612 -0.2151579,0.30612 0.090977,0.52129 0.3061365,0.21517 0.3516184,0.47578 0.3516184,0.47578"
+       id="path1996"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

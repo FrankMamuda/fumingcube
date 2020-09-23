@@ -67,6 +67,8 @@ draw:
     (best to preload it on app start?)
   - allow non-draw builds (mingw)
   - update ImageUtils not to strip PNG text tags
+  - edit button should not open ImageUtils
+  - allow searching by molecule
 
 extraction:
   - better 'not found' and 'server busy' error handling in search
@@ -78,6 +80,9 @@ misc/unsorted:
  - ability to use labels in table
  - recursive filter pre 5.10
  - default molecular formula tag should not be '0'
+ - allow to easily override properties
+ - label sorting
+ - property deprecation
 */
 
 /*
@@ -134,6 +139,7 @@ i18n:
 database:
  - fix crash on argument count mismatch (can happen only when
    breaking API, so it is a non-issue right now)
+ - import/export
 
 scripting:
  - add additional functions such as mol( mass, reagent ) which returns:

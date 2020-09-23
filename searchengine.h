@@ -81,13 +81,13 @@ public:
      * @param string
      * @return
      */
-    [[nodiscard]] static QIcon generateIcon( const QString &string ) {
-        QPixmap pixmap( 16, 16 );
+    [[nodiscard]] static QIcon generateIcon( const QString &string, const int scale = 16 ) {
+        QPixmap pixmap( scale, scale );
         pixmap.fill( Qt::transparent );
         QPainter painter( &pixmap );
         QTextOption opt;
         opt.setAlignment( Qt::AlignCenter );
-        painter.drawText( QRect( 0, 0, 16, 16 ), string, opt );
+        painter.drawText( QRect( 0, 0, scale, scale ), string, opt );
         return QIcon( pixmap );
     }
 

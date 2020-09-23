@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui sql xml qml webenginewidgets
+QT += webchannel
 
 win32:QT += winextras
 win32:LIBS += -lgdi32 -luser32 -lole32
