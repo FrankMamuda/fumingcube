@@ -102,6 +102,7 @@
         <iconset theme="about">
          <normaloff>.</normaloff>.</iconset>
        </property>
+       <addaction name="actionAbout"/>
       </widget>
       <widget class="QMenu" name="menuView">
        <property name="title">
@@ -260,6 +261,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About Web Components</string>
+   </property>
+   <property name="toolTip">
+    <string>ChemDoodle Web Components online</string>
    </property>
   </action>
  </widget>

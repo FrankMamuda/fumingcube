@@ -25,8 +25,11 @@
 //       brackets
 //       additional icons
 //       dark theme support (invert most icons? except for eraser)
-//       copy toolbar.js and icons from resources when downloading web components
 //       save window state
+//       cvar check in PropertyDialog
+//       plus button
+//       update window title to filename?
+//       undo/redo icons
 //
 // BIG TODO: write own implementation of everything
 //
@@ -52,6 +55,7 @@
 #include <QMimeData>
 #include <QFileDialog>
 #include <QWebChannel>
+#include <QDesktopServices>
 
 /**
  * @brief DrawDialog::DrawDialog
@@ -61,31 +65,6 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
     this->ui->setupUi( this );
     this->ui->contents->setWindowFlags( Qt::Widget );
 
-    const QString path( QDir::currentPath() + "/chemDoodle/" );
-    if ( !QFileInfo::exists( path )) {
-        if ( !QDir( path ).mkdir( path )) {
-            QMessageBox::critical( this, "aa", "Could not setup paths" );
-            return;
-        }
-    }
-
-    const QString webChannelPath( QDir::currentPath() + "/chemDoodle/qwebchannel.js" );
-    if ( !QFileInfo::exists( webChannelPath )) {
-        if ( !QFile::copy( ":/qtwebchannel/qwebchannel.js", webChannelPath )) {
-            QMessageBox::critical( this, "aa", "Could not initialize qwebchannel" );
-            return;
-        }
-    }
-
-    const QString scriptPath( QDir::currentPath() + "/chemDoodle/script.js" );
-    if ( !QFileInfo::exists( scriptPath )) {
-        qDebug() << "COPY TOOL";
-        if ( !QFile::copy( ":/chemDoodle/script.js", scriptPath )) {
-            QMessageBox::critical( this, "aa", "Could not initialize script" );
-            return;
-        }
-    }
-
     // check if draw component has been downloaded
     QDir dir( QDir::currentPath() + "/chemDoodle/" );
     if ( !dir.exists()) {
@@ -93,7 +72,25 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
         dir.mkpath( QDir::currentPath() + "/chemDoodle/" );
 
         if ( !dir.exists()) {
-            QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
+            QMessageBox::critical( this, DrawDialog::tr( "Error" ),  DrawDialog::tr( "Could not setup paths" ));
+            QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+        }
+    }
+
+    // copy qwebchannel.js
+    const QString webChannelPath( QDir::currentPath() + "/chemDoodle/qwebchannel.js" );
+    if ( !QFileInfo::exists( webChannelPath )) {
+        if ( !QFile::copy( ":/qtwebchannel/qwebchannel.js", webChannelPath )) {
+            QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Could not setup QWebChannel" ));
+            QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
+        }
+    }
+
+    // copy supplementary script
+    const QString scriptPath( QDir::currentPath() + "/chemDoodle/script.js" );
+    if ( !QFileInfo::exists( scriptPath )) {
+        if ( !QFile::copy( ":/chemDoodle/script.js", scriptPath )) {
+            QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Could not setup supplementary script" ));
             QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
         }
     }
@@ -103,8 +100,6 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
         switch ( type ) {
         case NetworkManager::CDDemoPage:
         {
-            qDebug() << "network->CDDemoPage";
-
             // parse 2d sketcher demo page (so that we don't have to download the whole archive and bother with compression)
             const QString page( data );
 
@@ -118,12 +113,9 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
 
             // find these in the demo page and downloaded them
             if ( matchJSQ.hasMatch() && matchCDW.hasMatch() && matchUI.hasMatch()) {
-                qDebug() << "success" << matchJSQ.captured( 1 ) << matchCDW.captured( 1 ) << matchUI.captured( 1 );
-
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchJSQ.captured( 1 ), NetworkManager::CDjQueryCSS );
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchCDW.captured( 1 ), NetworkManager::CDScript );
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchUI.captured( 1 ), NetworkManager::CDUIScript );
-
             } else {
                 QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
                 QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
@@ -132,7 +124,6 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
 
         }
             break;
-
 
         case NetworkManager::CDScript:
         {
@@ -148,7 +139,6 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
         }
             break;
 
-
         case NetworkManager::CDUIScript:
         {
             // write out ui script
@@ -162,7 +152,6 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
             }
         }
             break;
-
 
         case NetworkManager::CDjQueryCSS:
         {
@@ -233,6 +222,23 @@ DrawDialog::~DrawDialog() {
     NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::finished, this, nullptr );
     NetworkManager::disconnect( NetworkManager::instance(), &NetworkManager::error, this, nullptr );
 
+    // cleanup actions
+    QAction::disconnect( this->ui->actionSaveAs, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionSaveImage, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionUndo, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionRedo, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionSave, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionAbout, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionSelectAll, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionOpen, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionNew, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionCopy, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionCut, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionZoomIn, &QAction::triggered, this, nullptr );
+    QAction::disconnect( this->ui->actionZoomOut, &QAction::triggered, this, nullptr );
+
+    // delete QWebChannel and DrawBridge
+    delete this->bridge;
     if ( this->channel != nullptr )
         delete this->channel;
 
@@ -241,7 +247,7 @@ DrawDialog::~DrawDialog() {
 }
 
 /**
- * @brief DrawDialog::getPixmapAndAccept
+ * @brie-> DrawDialog::getPixmapAndAccept
  */
 void DrawDialog::getPixmapAndAccept() {
     // we do a couple of things here:
@@ -284,7 +290,6 @@ void DrawDialog::getPixmapAndAccept() {
             // at last we store the data in class and return success
             this->data = byteArray;
             this->accept();
-            //QMetaObject::invokeMethod( this, "accept", Qt::QueuedConnection );
         }
 
         // failure
@@ -300,8 +305,7 @@ void DrawDialog::getPixmapAndAccept() {
 QIcon DrawDialog::fetchIcon( const QString &name ) const {
     const bool isDarkMode = Variable::isEnabled( "darkMode" );
 
-    qDebug() << QString (":/chemDoodle/chemDoodle/icons/%1.png" ).arg( name ) <<  QFileInfo( QString (":/chemDoodle/chemDoodle/icons/%1.png" ).arg( name )).exists();
-
+    // get icon from internal resources and invert it for dark mode when anebled
     QIcon icon( QString( ":/chemDoodle/chemDoodle/icons/%1.png" ).arg( name ));
     if ( isDarkMode ) {
         QImage image( icon.pixmap( 24, 24 ).toImage());
@@ -316,6 +320,7 @@ QIcon DrawDialog::fetchIcon( const QString &name ) const {
  * @brief DrawDialog::resizeEvent
  */
 void DrawDialog::resizeEvent( QResizeEvent *event ) {
+    // don't resize too often
     this->resizeTimer.start( 200 );
     this->m_resizeInProgress = true;
     QDialog::resizeEvent( event );
@@ -345,11 +350,10 @@ void DrawDialog::loadComponent() {
         // render page
         this->ui->webView->setHtml( buffer, path );
 
-        // initialize coms
+        // initialize communications between cpp and js (QWebChannel)
         this->channel = new QWebChannel( this->ui->webView->page());
         this->ui->webView->page()->setWebChannel( this->channel );
-        Core *core = new Core();
-        channel->registerObject( "core", core );
+        channel->registerObject( "bridge", this->bridge );
     }
 
     // setup timer (so that canvas is resized, when dialog window is resized)
@@ -366,6 +370,8 @@ void DrawDialog::loadComponent() {
         } );
     }
 
+    // initialize supplementary script when page is loaded
+    // setup toolBars and actions
     QWebEnginePage::connect( this->ui->webView->page(), &QWebEnginePage::loadFinished, [ this ]() {
         // create and render a webpage, using draw components
         QFile file( "chemDoodle/script.js" );
@@ -375,23 +381,22 @@ void DrawDialog::loadComponent() {
             // close file
             file.close();
 
-            //qDebug() << "custom tb";
-
             // render page
             this->ui->webView->page()->runJavaScript( buffer );
 
-        //{
-            //this->ui->contents->addToolBarBreak();
+            // setup toolBars
             QToolBar *bondToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Bond toolbar" ));
             this->ui->contents->addToolBarBreak();
             QToolBar *ringToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Ring toolbar" ));
             QToolBar *arrowToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Arrow toolbar" ));
             this->ui->contents->addToolBarBreak();
             QToolBar *elementToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Element toolbar" ));
-            //elementToolBar->setIconSize( QSize( 16, 16 ));
 
+            // make actions exclusive via QActionGroup
             QActionGroup *group( new QActionGroup( this ));
             QMap<QString, QAction*> *toolButtons = new QMap<QString, QAction*>();
+
+            // add action to main toolBar lambda
             auto addToolButton = [ this, toolButtons, group ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
                 QAction *action( this->ui->primaryToolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
@@ -407,7 +412,7 @@ void DrawDialog::loadComponent() {
                 return action;
             };
 
-
+            // add action to ring toolBar lambda
             auto addRingButton = [ this, toolButtons, group, ringToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
                 QAction *action( ringToolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
@@ -423,6 +428,7 @@ void DrawDialog::loadComponent() {
                 return action;
             };
 
+            // add action to bond toolBar lambda
             auto addBondButton = [ this, toolButtons, group, bondToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
                 QAction *action( bondToolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
@@ -438,6 +444,7 @@ void DrawDialog::loadComponent() {
                 return action;
             };
 
+            // add action to arrow toolBar lambda
             auto addArrowButton = [ this, toolButtons, group, arrowToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
                 QAction *action( arrowToolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
@@ -452,6 +459,7 @@ void DrawDialog::loadComponent() {
                 return action;
             };
 
+            // add action to element toolBar lambda
             auto addElementButton = [ this, toolButtons, group, elementToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
                 QAction *action( elementToolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "elementTool( '%1' );" ).arg( script ));
@@ -467,19 +475,21 @@ void DrawDialog::loadComponent() {
                 return action;
             };
 
+            // setup main toolBar
             addToolButton( this->fetchIcon( "marquee" ), DrawDialog::tr( "Use marquee tool" ), "marqueeTool", true );
             QAction *lasso( addToolButton( this->fetchIcon( "lasso" ), DrawDialog::tr( "Use lasso tool" ), "lassoTool", true ));
             addToolButton( this->fetchIcon( "flip_horizontal" ), DrawDialog::tr( "Flip horizontally" ), "flipHTool", false );
             addToolButton( this->fetchIcon( "flip_vertical" ), DrawDialog::tr( "Flip vertically" ), "flipVTool", false );
+            addToolButton( this->fetchIcon( "eraser" ), DrawDialog::tr( "Use eraser tool" ), "eraserTool", true );
+            addToolButton( this->fetchIcon( "centre" ), DrawDialog::tr( "Centre canvas" ), "centreTool", false );
 
+            // setup arrow toolBar
             addArrowButton( this->fetchIcon( "arrow" ), DrawDialog::tr( "Use arrow tool" ), "arrowTool", true );
             addArrowButton( this->fetchIcon( "retrosynthetic" ), DrawDialog::tr( "Use retrosynthetic arrow tool" ), "retrosyntheticTool", true );
             addArrowButton( this->fetchIcon( "resonance" ), DrawDialog::tr( "Use resonance arrow tool" ), "resonanceTool", true );
             addArrowButton( this->fetchIcon( "equilibrium" ), DrawDialog::tr( "Use equilibrium arrow tool" ), "equilibriumTool", true );
 
-            addToolButton( this->fetchIcon( "eraser" ), DrawDialog::tr( "Use eraser tool" ), "eraserTool", true );
-            addToolButton( this->fetchIcon( "centre" ), DrawDialog::tr( "Centre canvas" ), "centreTool", false );
-
+            // setup element toolBar
             addElementButton( this->fetchIcon( "hydrogen" ), DrawDialog::tr( "Hydrogen atom" ), "H", true );
             addElementButton( this->fetchIcon( "carbon" ), DrawDialog::tr( "Carbon atom" ), "C", true );
             addElementButton( this->fetchIcon( "nitrogen" ), DrawDialog::tr( "Nitrogen atom" ), "N", true );
@@ -493,8 +503,7 @@ void DrawDialog::loadComponent() {
             addElementButton( this->fetchIcon( "silicon" ), DrawDialog::tr( "Silicon atom" ), "Si", true );
             addElementButton( this->fetchIcon( "label" ), DrawDialog::tr( "Label tool" ), "", true );
 
-           // addToolButton( QIcon( "chemDoodle/label.png" ), DrawDialog::tr( "Use label tool" ), "labelTool", true );
-
+            // setup ring toolBar
             addRingButton( this->fetchIcon( "benzene" ), DrawDialog::tr( "Draw benzene ring" ), "benzeneTool", true );
             addRingButton( this->fetchIcon( "cyclohexane" ), DrawDialog::tr( "Draw cyclohexane ring" ), "cyclohexaneTool", true );
             addRingButton( this->fetchIcon( "cyclopentane" ), DrawDialog::tr( "Draw cyclopentane ring" ), "cyclopentaneTool", true );
@@ -504,7 +513,7 @@ void DrawDialog::loadComponent() {
             addRingButton( this->fetchIcon( "chain" ), DrawDialog::tr( "Draw chains" ), "chainTool", true );
             addRingButton( QIcon::fromTheme( "right" ), DrawDialog::tr( "Draw arrow" ), "arrowTool", true );
 
-
+            // setup bond toolBar
             addBondButton( this->fetchIcon( "bond_solid" ), DrawDialog::tr( "Solid bond" ), "solidBondTool", true );
             addBondButton( this->fetchIcon( "bond_double" ), DrawDialog::tr( "Double bond" ), "doubleBondTool", true );
             addBondButton( this->fetchIcon( "bond_triple" ), DrawDialog::tr( "Triple bond" ), "tripleBondTool", true );
@@ -515,17 +524,16 @@ void DrawDialog::loadComponent() {
             addBondButton( this->fetchIcon( "bond_double_dashed" ), DrawDialog::tr( "Double dashed bond" ), "doubleDashedBondTool", true );
             addBondButton( this->fetchIcon( "bond_dotted" ), DrawDialog::tr( "Dotted bond" ), "dottedBondTool", true );
 
+            // zoom actions
             QAction::connect( this->ui->actionZoomIn, &QAction::triggered, [ this ]() { this->ui->webView->page()->runJavaScript( "zoomInTool();" ); } );
             QAction::connect( this->ui->actionZoomOut, &QAction::triggered, [ this ]() { this->ui->webView->page()->runJavaScript( "zoomOutTool();" ); } );
 
-
-            QAction::connect( this->ui->actionCopy, &QAction::triggered, [ this ]() {
-                this->ui->webView->page()->runJavaScript( "{ const shapes = sketcher.shapes; const molecules = sketcher.molecules; ChemDoodle.writeJSON( molecules, shapes ); }", [ this ]( const QVariant &v ) {
+            // copyCut lambda
+            auto copyCut = [ this ]( bool cut = false ) {
+                this->ui->webView->page()->runJavaScript( "{ const shapes = sketcher.shapes; const molecules = sketcher.molecules; ChemDoodle.writeJSON( molecules, shapes ); }", [ this, cut ]( const QVariant &v ) {
                     this->json = v.toByteArray();
 
-                    this->ui->webView->page()->runJavaScript( "copyTool();", [ this ]( const QVariant &v ) {
-
-
+                    this->ui->webView->page()->runJavaScript( cut ? "cutTool();" : "copyTool();", [ this ]( const QVariant &v ) {
 
                         QRegularExpression reg( "data:image\\/png;base64,(.+)" );
                         const QRegularExpressionMatch match( reg.match( v.toString()));
@@ -557,13 +565,24 @@ void DrawDialog::loadComponent() {
                         }
                     } );
                 } );
+            };
+
+            // copy action
+            QAction::connect( this->ui->actionCopy, &QAction::triggered, [ copyCut ]() {
+                copyCut( false );
             } );
 
+            // cut action
+            QAction::connect( this->ui->actionCut, &QAction::triggered, [ copyCut ]() {
+                copyCut( true );
+            } );
+
+            // paste action
             QAction::connect( this->ui->actionPaste, &QAction::triggered, [ this ]() {
                 this->ui->webView->page()->runJavaScript( "pasteTool();" );
             } );
 
-
+            // new action
             QAction::connect( this->ui->actionNew, &QAction::triggered, [ this ]() {
                 this->ui->webView->page()->runJavaScript( "{ let hasContent = function() { const shapes = sketcher.shapes; const molecules = sketcher.molecules; return shapes.length > 0 || molecules.length > 0; }; hasContent(); }", [ this ]( const QVariant &v ) {
                     const bool hasContent = v.toBool();
@@ -577,6 +596,7 @@ void DrawDialog::loadComponent() {
                 } );
             } );
 
+            // open action
             QAction::connect( this->ui->actionOpen, &QAction::triggered, [ this ]() {
                 const QString fileName( QFileDialog::getOpenFileName( this, QWidget::tr( "Open canvas" ), "", QWidget::tr( "ChemDoodle canvas (*.json)" )));
                 if ( fileName.isEmpty()) {
@@ -597,13 +617,16 @@ void DrawDialog::loadComponent() {
                 this->fileName.clear();
             } );
 
-
+            // selectAll action
             QAction::connect( this->ui->actionSelectAll, &QAction::triggered, [ this, lasso ]() {
                 lasso->trigger();
                 this->ui->webView->page()->runJavaScript( QString( "selectAllTool();" ));
             } );
 
+            // about action
+            QAction::connect( this->ui->actionAbout, &QAction::triggered, []() { QDesktopServices::openUrl( QUrl( "https://web.chemdoodle.com/#explanation" )); } );
 
+            // write lambda
             auto write = [ this ]( const QString &fileName, const bool storeFileName ) {
                 this->ui->webView->page()->runJavaScript( "{ const shapes = sketcher.shapes; const molecules = sketcher.molecules; ChemDoodle.writeJSON( molecules, shapes ); }", [ this, storeFileName, fileName ]( const QVariant &v ) {
                     this->json = v.toString();
@@ -621,6 +644,7 @@ void DrawDialog::loadComponent() {
                 } );
             };
 
+            // save lambda
             auto save = [ this, write ]( bool storeFileName ) {
                 const QString fileName( QFileDialog::getSaveFileName( this, QWidget::tr( "Save canvas" ), "", QWidget::tr( "ChemDoodle canvas (*.json)" )));
                 if ( fileName.isEmpty())
@@ -629,6 +653,7 @@ void DrawDialog::loadComponent() {
                 write( fileName, storeFileName );
             };
 
+            // save action
             QAction::connect( this->ui->actionSave, &QAction::triggered, [ this, save, write ]() {
                 if ( this->fileName.isEmpty()) {
                     save( true );
@@ -637,25 +662,17 @@ void DrawDialog::loadComponent() {
                 }
             } );
 
+            // undo action
+            QAction::connect( this->ui->actionUndo, &QAction::triggered, [ this ]() { this->ui->webView->page()->runJavaScript( "sketcher.historyManager.undo();" );  } );
 
-            QAction::connect( this->ui->actionUndo, &QAction::triggered, [ this ]() {
-                this->ui->webView->page()->runJavaScript( "sketcher.historyManager.undo();" );
-            } );
+            // redo action
+            QAction::connect( this->ui->actionRedo, &QAction::triggered, [ this ]() { this->ui->webView->page()->runJavaScript( "sketcher.historyManager.redo();" ); } );
 
-
-
-            QAction::connect( this->ui->actionRedo, &QAction::triggered, [ this ]() {
-                this->ui->webView->page()->runJavaScript( "sketcher.historyManager.redo();" );
-            } );
-
-
-
+            // save image action
             QAction::connect( this->ui->actionSaveImage, &QAction::triggered, [ this  ]() {
                 const QString fileName( QFileDialog::getSaveFileName( this, QWidget::tr( "Save image" ), "", QWidget::tr( "Image (*.png)" )));
                 if ( fileName.isEmpty())
                     return;
-
-                qDebug() << "SAVE";
 
                 this->ui->webView->page()->runJavaScript( "saveImageTool();", [ fileName ]( const QVariant &v ) {
                     QRegularExpression reg( "data:image\\/png;base64,(.+)" );
@@ -664,9 +681,6 @@ void DrawDialog::loadComponent() {
                     const QRegularExpressionMatch match( reg.match( v.toString()));
                     if ( match.hasMatch()) {
                         QString captured( match.captured( 1 ));
-
-                        qDebug() << "GET" << fileName;
-
 
                         // ...and reconstruct a pixmap from base64 data
                         QPixmap pixmap;
@@ -680,22 +694,9 @@ void DrawDialog::loadComponent() {
                 } );
             } );
 
-
-            // TODO: update window title to filename?
-
-            QAction::connect( this->ui->actionSaveAs, &QAction::triggered, [ save ]() {
-                save( false );
-            } );
-
-
-            // add arrow and shape tools
-            // add charge tools
-            // add label tools
-            // add plus button (or merge via label tool)
-            // figure out how to update undo/redo buttons internally
+            // saveAs action
+            QAction::connect( this->ui->actionSaveAs, &QAction::triggered, [ save ]() { save( false ); } );
         }
-
-        //this->ui->webView->page()->runJavaScript( "if ( typeof( sketcher) != \"undefined\" ) { sketcher.resize( window.innerWidth, window.innerHeight ); sketcher.repaint(); }" );
     } );
 }
 
@@ -707,16 +708,16 @@ void DrawDialog::on_buttonBox_accepted() {
 }
 
 /**
- * @brief Core::receiveText
+ * @brief DrawBridge::getLabel
  * @param defaultLabel
  */
-void Core::receiveText(const QString &defaultLabel) {
+void DrawBridge::getLabel(const QString &defaultLabel) {
     bool ok;
-    const QString label( QInputDialog::getText( nullptr, defaultLabel.isEmpty() ? Core::tr( "New label" ) : Core::tr(  "Edit label" ), Core::tr( "Implicit hydrogens are automatically resolved.\nCondensed labels currently not supported." ), QLineEdit::Normal, defaultLabel.isEmpty() ? "C" : defaultLabel, &ok ));
+    const QString label( QInputDialog::getText( nullptr, defaultLabel.isEmpty() ? DrawBridge::tr( "New label" ) : DrawBridge::tr(  "Edit label" ), DrawBridge::tr( "Implicit hydrogens are automatically resolved.\nCondensed labels currently not supported." ), QLineEdit::Normal, defaultLabel.isEmpty() ? "C" : defaultLabel, &ok ));
 
     if ( !ok )
         return;
 
     this->m_label = label.isEmpty() ? "C" : label;
-    emit this->sendText( label );
+    emit this->labelReady( label );
 }

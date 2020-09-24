@@ -35,21 +35,20 @@ class DrawDialog;
 }
 
 /**
- * @brief The Core class
+ * @brief The DrawBridge class
  */
-class Core : public QObject {
+class DrawBridge : public QObject {
     Q_OBJECT
 
 public:
-    Core( QObject *parent = nullptr ) : QObject( parent ) {}
-   // QString getLabel() const { return this->m_label; }
+    DrawBridge( QObject *parent = nullptr ) : QObject( parent ) {}
     QString m_label;
 
 signals:
-    void sendText( const QString &text );
+    void labelReady( const QString &label );
 
 public slots:
-    void receiveText( const QString &defaultLabel );
+    void getLabel( const QString &defaultLabel );
 
 private:
 };
@@ -84,4 +83,5 @@ private:
     bool scriptUI = false;
     bool jQuery = false;
     QWebChannel *channel = nullptr;
+    DrawBridge *bridge = new DrawBridge( this );
 };

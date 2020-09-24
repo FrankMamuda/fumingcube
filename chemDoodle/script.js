@@ -36,8 +36,12 @@
  *
  */
 
-let core;
+// DrawBridge object (via QWebChannel)
+let bridge;
 
+/*
+ * marqueeTool
+ */
 let marqueeTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_LASSO );
     sketcher.lasso.mode = ChemDoodle.uis.tools.Lasso.MODE_RECTANGLE_MARQUEE;
@@ -45,6 +49,9 @@ let marqueeTool = function() {
         sketcher.lasso.selectNextMolecule();
 };
 
+/*
+ * lassoTool
+ */
 let lassoTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_LASSO );
     sketcher.lasso.mode = ChemDoodle.uis.tools.Lasso.MODE_LASSO;
@@ -53,16 +60,25 @@ let lassoTool = function() {
         sketcher.lasso.selectNextMolecule();
 };
 
+/*
+ * benzeneTool
+ */
 let benzeneTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = 6;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = true;
 }
 
+/*
+ * eraseTool
+ */
 let eraseTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_ERASE );
 };
 
+/*
+ * clearTool
+ */
 let clearTool = function() {
     if ( sketcher.molecules.length > 0 || sketcher.shapes.length > 0 ) {
         sketcher.stateManager.getCurrentState().clearHover();
@@ -74,6 +90,9 @@ let clearTool = function() {
     }
 };
 
+/*
+ * centreTool
+ */
 let centreTool = function() {
     let diff = new ChemDoodle.structures.Point( sketcher.width / 2, sketcher.height / 2 );
     const bounds = sketcher.getContentBounds();
@@ -84,6 +103,9 @@ let centreTool = function() {
     sketcher.historyManager.pushUndo( new ChemDoodle.uis.actions.MoveAction( sketcher.getAllPoints(), diff ));
 };
 
+/*
+ * flipTool
+ */
 let flipTool = function( horizontal ) {
     let ps = sketcher.lasso.getAllPoints();
     let bs = [];
@@ -97,124 +119,192 @@ let flipTool = function( horizontal ) {
     sketcher.historyManager.pushUndo( new ChemDoodle.uis.actions.FlipAction( ps, bs, horizontal ));
 };
 
+/*
+ * flipHTool
+ */
 let flipHTool = function() {
     flipTool( true );
 };
+/*
 
+ * flipVTool
+ */
 let flipVTool = function() {
     flipTool( false );
 };
 
+/*
+ * zoomInTool
+ */
 let zoomInTool = function() {
     sketcher.styles.scale *= 1.5;
     sketcher.checkScale();
     sketcher.repaint();
 };
 
+/*
+ * zoomOutTool
+ */
 let zoomOutTool = function() {
     sketcher.styles.scale /= 1.5;
     sketcher.checkScale();
     sketcher.repaint();
 };
 
+/*
+ * solidBondTool
+ */
 let solidBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 1;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+/*
+ * wedgedHashedBondTool
+ */
 let wedgedHashedBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 1;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_RECESSED;
 };
 
+/*
+ * wedgedBondTool
+ */
 let wedgedBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 1;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_PROTRUDING;
 };
 
+/*
+ * doubleBondTool
+ */
 let doubleBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 2;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+/*
+ * dottedBondTool
+ */
 let dottedBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 0;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+/*
+ * dashedBondTool
+ */
 let dashedBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 0.5;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+/*
+ * wavyBondTool
+ */
 let wavyBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 1;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_AMBIGUOUS;
 };
 
+/*
+ * doubleDashedBondTool
+ */
 let doubleDashedBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 1.5;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+
+/*
+ *
+ */
 /*this.buttonDoubleAmbiguous = new desktop.Button( sketcher.id + '_button_bond_ambiguous_double', imageDepot.BOND_DOUBLE_AMBIGUOUS, 'Ambiguous Double Bond', function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 2;
     sketcher.stateManager.STATE_NEW_BOND.stereo = structures.Bond.STEREO_AMBIGUOUS;
 };*/
 
+
+/*
+ * tripleBondTool
+ */
 let tripleBondTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_BOND );
     sketcher.stateManager.STATE_NEW_BOND.bondOrder = 3;
     sketcher.stateManager.STATE_NEW_BOND.stereo = ChemDoodle.structures.Bond.STEREO_NONE;
 };
 
+/*
+ * eraserTool
+ */
 let eraserTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_ERASE );
 };
 
+/*
+ * cyclohexaneTool
+ */
 let cyclohexaneTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = 6;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = false;
 };
 
+/*
+ * cyclopropaneTool
+ */
 let cyclopropaneTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = 3;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = false;
 };
 
+/*
+ * cyclobutaneTool
+ */
 let cyclobutaneTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = 4;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = false;
 };
 
+/*
+ * cyclopentaneTool
+ */
 let cyclopentaneTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = 5;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = false;
 };
 
+/*
+ * varRingTool
+ */
 let varRingTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_RING );
     sketcher.stateManager.STATE_NEW_RING.numSides = -1;
     sketcher.stateManager.STATE_NEW_RING.unsaturated = false;
 };
 
+/*
+ * chainTool
+ */
 let chainTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_NEW_CHAIN );
 };
 
+/*
+ * getImage
+ */
 let getImage = function( molecules, shapes, modifySelection ) {
     // create an empty canvas
     let canvas = document.createElement( 'canvas' );
@@ -291,11 +381,17 @@ let getImage = function( molecules, shapes, modifySelection ) {
     return canvasToBase64( canvas );
 };
 
+/*
+ * saveImageTool
+ */
 let saveImageTool = function() {
     const shapes = sketcher.shapes; const molecules = sketcher.molecules;
     return getImage( molecules, shapes, false );
 };
 
+/*
+ * copyTool
+ */
 let copyTool = function() {
     if ( sketcher.lasso.isActive()) {
         // get content from lasso
@@ -306,13 +402,37 @@ let copyTool = function() {
 
         // store contents in paste buffer
         sketcher.copyPasteManager.data = interpreter.contentTo( molecules, shapes );
-        sketcher.toolbarManager.buttonPaste.enable();
 
         // get image
         return getImage( molecules, shapes, true );
     }
 };
 
+/*
+ * cutTool
+ */
+let cutTool = function() {
+    if ( sketcher.lasso.isActive()) {
+        // get content from lasso
+        const splitter = new ChemDoodle.informatics.Splitter();
+        const interpreter = new ChemDoodle.io.JSONInterpreter();
+        let molecules = splitter.split( { atoms: sketcher.lasso.atoms, bonds: sketcher.lasso.getBonds() } );
+        let shapes = sketcher.lasso.shapes;
+
+        // get image
+        let image = getImage( molecules, shapes, true );
+
+        // cut content
+        sketcher.copyPasteManager.copy( true );
+
+        // return image
+        return image;
+    }
+};
+
+/*
+ * pasteTool
+ */
 let pasteTool = function() {
     if ( sketcher.copyPasteManager.data === undefined ) {
         const json = '[_JSON]';
@@ -393,7 +513,7 @@ let pasteTool = function() {
             _.label = sketcher.hovering.label;
 
         // get label from Qt
-        core.receiveText( _.label );
+        bridge.getLabel( _.label );
     };
 
     /*
@@ -448,21 +568,26 @@ let pasteTool = function() {
     };
 
 })(ChemDoodle.monitor, ChemDoodle.structures, ChemDoodle.uis.actions, ChemDoodle.uis.states, Math);
-
 sketcher.stateManager.STATE_TEXT_INPUT = new ChemDoodle.uis.states.TextInputState( sketcher );
 
+/*
+ * webChannel
+ */
 let webChannel = new QWebChannel( qt.webChannelTransport, function( channel ) {
-     core = channel.objects.core;
-     core.sendText.connect( sketcher.stateManager.STATE_TEXT_INPUT.setLabel );
+     bridge = channel.objects.bridge;
+     bridge.labelReady.connect( sketcher.stateManager.STATE_TEXT_INPUT.setLabel );
 });
 
+/*
+ * labelTool
+ */
 let labelTool = function() {
-    //core.receiveText();
-     //ChemDoodle.uis.states.TextInputState = new TextInputState( sketcher );
-     //sketcher.stateManager.STATE_TEXT_INPUT = ChemDoodle.uis.states.TextInputState;
     sketcher.stateManager.setState( sketcher.stateManager.STATE_TEXT_INPUT );
 };
 
+/*
+ * elementTool
+ */
 let elementTool = function( label ) {
     if ( label === '' ) {
         labelTool();
@@ -473,31 +598,48 @@ let elementTool = function( label ) {
     sketcher.stateManager.STATE_LABEL.label = label;
 };
 
-
+/*
+ * arrowTool
+ */
 let arrowTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_SHAPE );
     sketcher.stateManager.STATE_SHAPE.shapeType = ChemDoodle.uis.states.ShapeState.ARROW_SYNTHETIC;
 };
 
+/*
+ * retrosyntheticTool
+ */
 let retrosyntheticTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_SHAPE );
     sketcher.stateManager.STATE_SHAPE.shapeType = ChemDoodle.uis.states.ShapeState.ARROW_RETROSYNTHETIC;
 };
 
+/*
+ * resonanceTool
+ */
 let resonanceTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_SHAPE );
     sketcher.stateManager.STATE_SHAPE.shapeType = ChemDoodle.uis.states.ShapeState.ARROW_RESONANCE;
 };
 
+/*
+ * equilibriumTool
+ */
 let equilibriumTool = function() {
     sketcher.stateManager.setState( sketcher.stateManager.STATE_SHAPE );
     sketcher.stateManager.STATE_SHAPE.shapeType = ChemDoodle.uis.states.ShapeState.ARROW_EQUILIBRIUM;
 };
 
+/*
+ * selectAllTool
+ */
 let selectAllTool = function() {
     sketcher.lasso.select( sketcher.getAllAtoms(), sketcher.shapes );
 }
 
+/*
+ * exportTool
+ */
 let exportTool = function() {
     // get data from sketcher
     const shapes = sketcher.shapes;
@@ -535,3 +677,4 @@ let exportTool = function() {
     // export base64 png
     return ChemDoodle.io.png.string( canvas );
 }
+
