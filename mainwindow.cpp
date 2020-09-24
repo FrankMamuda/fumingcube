@@ -432,6 +432,6 @@ void MainWindow::on_actionTables_triggered() {
  * @brief MainWindow::on_actionDraw_triggered
  */
 void MainWindow::on_actionDraw_triggered() {
-    DrawDialog dd( this );
+    DrawDialog dd( this, "", true );
     dd.exec();
 }

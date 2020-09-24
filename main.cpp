@@ -57,8 +57,6 @@
  TODO:
 
 draw:
-  - add new icons
-  - i18n
   - when adding a new StructuralFormula property
     user must choose between 'DrawDialog' or 'ImageTools'
   - rewrite upscaling code (works only with 2x res)
@@ -231,6 +229,8 @@ int main( int argc, char *argv[] ) {
     Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
     Variable::add( "propertyFragment/selectedTags", "", Var::Flag::Hidden );
     Variable::add( "labelDock/selectedRows", "", Var::Flag::Hidden );
+    Variable::add( "drawDialog/geometry", QByteArray(), Var::Flag::ReadOnly );
+    Variable::add( "drawDialog/state", QByteArray(), Var::Flag::ReadOnly );
 
     // read configuration
     XMLTools::read();

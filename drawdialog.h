@@ -60,16 +60,18 @@ class DrawDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit DrawDialog( QWidget *parent = nullptr, const QString &json = QString());
+    explicit DrawDialog( QWidget *parent = nullptr, const QString &json = QString(), bool drawMode = false );
     ~DrawDialog() override;
     void getPixmapAndAccept();
     QByteArray data;
     QString json;
     QString fileName;
     QIcon fetchIcon( const QString &name ) const;
+    bool hasInitialized() const { return this->m_initialized; }
 
 protected:
     void resizeEvent( QResizeEvent * ) override;
+    void closeEvent( QCloseEvent * ) override;
 
 private slots:
     void loadComponent();
@@ -84,4 +86,5 @@ private:
     bool jQuery = false;
     QWebChannel *channel = nullptr;
     DrawBridge *bridge = new DrawBridge( this );
+    bool m_initialized = false;
 };

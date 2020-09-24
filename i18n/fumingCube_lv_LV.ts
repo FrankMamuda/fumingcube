@@ -9,7 +9,62 @@
         <translation>Par</translation>
     </message>
     <message>
-        <location filename="../about.ui" line="24"/>
+        <location filename="../about.ui" line="38"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; cellspacing=&quot;2&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/icons/icon_128&quot; width=&quot;128&quot; height=&quot;128&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td style=&quot; vertical-align:middle;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;    &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:16pt; font-weight:600;&quot;&gt;Fuming cube&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600;&quot;&gt;chemical calculations simplified&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Developer&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;: Armands Aleksejevs&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Thanks to&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;: Loved ones and beer&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Project hosted on GitHub&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;: FrankMamuda/fumingcube&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;Fuming cube is distributed under the following license:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Copyright (C) 2013-2019 Factory #12&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Copyright (C) 2019-2020 Armands Aleksejevs&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;You should have received a copy of the GNU General Public License along with this library. If not, see http://www.gnu.org/licenses/.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-weight:600;&quot;&gt;ChemDoodle Web Components 9.1.0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;https://web.chemdoodle.com&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;Copyright 2009-2020 iChemLabs, LLC.  All rights reserved.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;The ChemDoodle Web Components library is licensed under version 3&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;of the GNU GENERAL PUBLIC LICENSE.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;You may redistribute it and/or modify it under the terms of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;GNU General Public License as published by the Free Software Foundation,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;either version 3 of the License, or (at your option) any later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;This program is distributed in the hope that it will be useful,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;but WITHOUT ANY WARRANTY; without even the implied warranty of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;You should have received a copy of the GNU General Public License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;along with this program.  If not, see &amp;lt;http://www.gnu.org/licenses/&amp;gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../about.ui" line="111"/>
+        <source>Donate via PayPal</source>
+        <translation>Ziedot caut PayPal</translation>
+    </message>
+    <message>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -35,7 +90,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;;&quot;&gt;You should have received a copy of the GNU General Public License along with this library. If not, see http://www.gnu.org/licenses/.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -62,12 +117,12 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;You should have received a copy of the GNU General Public License along with this library. If not, see http://www.gnu.org/licenses/.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../about.ui" line="55"/>
+        <location filename="../about.ui" line="91"/>
         <source>About Qt</source>
         <translation>Par Qt</translation>
     </message>
     <message>
-        <location filename="../about.ui" line="69"/>
+        <location filename="../about.ui" line="24"/>
         <source>Close</source>
         <translation>Aizvērt</translation>
     </message>
@@ -220,6 +275,477 @@ p, li { white-space: pre-wrap; }
         <location filename="../datepicker.ui" line="14"/>
         <source>Pick date</source>
         <translation>Datuma izvēle</translation>
+    </message>
+</context>
+<context>
+    <name>DrawBridge</name>
+    <message>
+        <location filename="../drawdialog.cpp" line="711"/>
+        <source>New label</source>
+        <translation>Jauna birka</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="711"/>
+        <source>Edit label</source>
+        <translation>Rediģēt birku</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="711"/>
+        <source>Implicit hydrogens are automatically resolved.
+Condensed labels currently not supported.</source>
+        <translation>Implicītie ūdeņraži tiks automātiski uzrādīti.
+Izvērstās birkas šobrīd nedarbojas.</translation>
+    </message>
+</context>
+<context>
+    <name>DrawDialog</name>
+    <message>
+        <location filename="../drawdialog.ui" line="20"/>
+        <source>Drawing tool (ChemDoodle)</source>
+        <translation>Zīmēšanas rīks (ChemDoodle)</translation>
+    </message>
+    <message>
+        <source>ImageUtils</source>
+        <translation type="vanished">Zīmēšanas rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="41"/>
+        <source>DrawDialog</source>
+        <translation>Zīmēšanas rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="75"/>
+        <source>File</source>
+        <translation>Fails</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="86"/>
+        <source>Edit</source>
+        <translation>Labot</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="99"/>
+        <source>About</source>
+        <translation>Par</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="109"/>
+        <source>View</source>
+        <translation>Skats</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="137"/>
+        <source>Open</source>
+        <translation>Atvērt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="140"/>
+        <source>Ctrl+O</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="149"/>
+        <source>Save</source>
+        <translation>Saglabāt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="152"/>
+        <location filename="../drawdialog.ui" line="224"/>
+        <source>Ctrl+S</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="161"/>
+        <source>Copy</source>
+        <translation>Kopēt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="164"/>
+        <source>Ctrl+C</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="173"/>
+        <source>Paste</source>
+        <translation>Ielīmēt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="176"/>
+        <source>Ctrl+V</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="185"/>
+        <source>Zoom in</source>
+        <translation>Pietuvināt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="188"/>
+        <source>Ctrl++</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="197"/>
+        <source>Zoom out</source>
+        <translation>Attālināt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="200"/>
+        <source>Ctrl+-</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="209"/>
+        <source>New</source>
+        <translation>Jauns zīmējums</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="212"/>
+        <source>Ctrl+N</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="221"/>
+        <source>Save image</source>
+        <translation>Saglabāt attēlu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="233"/>
+        <source>Select all</source>
+        <translation>Izvēlēties visu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="236"/>
+        <source>Ctrl+A</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="245"/>
+        <source>Undo</source>
+        <translation>Atsaukt darbību</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="248"/>
+        <source>Ctrl+Z</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="257"/>
+        <source>Redo</source>
+        <translation>Atjaunot darbību</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="260"/>
+        <source>Ctrl+Shift+Z, Ctrl+Y</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="269"/>
+        <source>Cut</source>
+        <translation>Izgriezt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="272"/>
+        <source>Ctrl+X</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="281"/>
+        <source>Save As...</source>
+        <translation>Saglabāt kā...</translation>
+    </message>
+    <message>
+        <source>Save as</source>
+        <translation type="obsolete">Saglabāt kā...</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="284"/>
+        <source>Ctrl+Shift+S</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="293"/>
+        <source>About Web Components</source>
+        <translation>Par Web Components</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="296"/>
+        <source>ChemDoodle Web Components online</source>
+        <translation>ChemDoodle Web Components tīmeklī</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.ui" line="304"/>
+        <source>Coloured atoms</source>
+        <translation>Krāsaini atomi</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="76"/>
+        <location filename="../drawdialog.cpp" line="85"/>
+        <location filename="../drawdialog.cpp" line="94"/>
+        <location filename="../drawdialog.cpp" line="123"/>
+        <location filename="../drawdialog.cpp" line="190"/>
+        <source>Error</source>
+        <translation>Kļūda</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="76"/>
+        <source>Could not setup paths</source>
+        <translation>Nebija iespējams izveidot mapi</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="85"/>
+        <source>Could not setup QWebChannel</source>
+        <translation>Nebija iespējams uzstādīt QWebChannel</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="94"/>
+        <source>Could not setup supplementary script</source>
+        <translation>Nebija iespējams uzstādīt skriptu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="123"/>
+        <location filename="../drawdialog.cpp" line="190"/>
+        <source>Something went wrong.
+Try again later.</source>
+        <translation>Kaut kas nogāja greizi.
+Mēģini vēlreiz vēlāk.</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="201"/>
+        <source>Install draw tool component</source>
+        <translation>Instalēt zīmēšanas rīku</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="201"/>
+        <source>To use the draw tool, ChemDoodle Web Components must be downloaded.
+Continue with the download?</source>
+        <translation>Lai izmantotu zīmēšanas rīkiu, ir jālejupielādē  ChemDoodle Web Components.
+Lejupielādēt tūlīt?</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="404"/>
+        <source>Bond toolbar</source>
+        <translation>Saišu rīkjosla</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="407"/>
+        <source>Ring toolbar</source>
+        <translation>Ciklu rīkjosla</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="409"/>
+        <source>Arrow toolbar</source>
+        <translation>Bultu rīkjosla</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="411"/>
+        <source>Charge toolbar</source>
+        <translation>Jonu rīkjosla</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="414"/>
+        <source>Element toolbar</source>
+        <translation>Elementu rīkjosla</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="454"/>
+        <source>Use marquee tool</source>
+        <translation>Atlasīšanas rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="455"/>
+        <source>Use lasso tool</source>
+        <translation>Lasso rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="456"/>
+        <source>Flip horizontally</source>
+        <translation>Apgriezt horizontāli</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="457"/>
+        <source>Flip vertically</source>
+        <translation>Apgriezt vertikāli</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="458"/>
+        <source>Use eraser tool</source>
+        <translation>Dzēšgumija</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="459"/>
+        <source>Centre canvas</source>
+        <translation>Centrēt</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="462"/>
+        <source>Use arrow tool</source>
+        <translation>Bultu rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="463"/>
+        <source>Use retrosynthetic arrow tool</source>
+        <translation>Retrosintēzes bulta</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="464"/>
+        <source>Use resonance arrow tool</source>
+        <translation>Rezonances bulta</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="465"/>
+        <source>Use equilibrium arrow tool</source>
+        <translation>Līdzsvara bulta</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="468"/>
+        <source>Hydrogen atom</source>
+        <translation>Ūdeņradis</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="469"/>
+        <source>Carbon atom</source>
+        <translation>Ogleklis</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="470"/>
+        <source>Nitrogen atom</source>
+        <translation>Slāpeklis</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="471"/>
+        <source>Oxygen atom</source>
+        <translation>Skābeklis</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="472"/>
+        <source>Fluorine atom</source>
+        <translation>Fluors</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="473"/>
+        <source>Chlorine atom</source>
+        <translation>Hlors</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="474"/>
+        <source>Bromine atom</source>
+        <translation>Broms</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="475"/>
+        <source>Iodine atom</source>
+        <translation>Jods</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="476"/>
+        <source>Phosphorus atom</source>
+        <translation>Fosfors</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="477"/>
+        <source>Sulphur atom</source>
+        <translation>Sērs</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="478"/>
+        <source>Silicon atom</source>
+        <translation>Silīcijs</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="479"/>
+        <source>Label tool</source>
+        <translation>Birku rīks</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="482"/>
+        <source>Draw benzene ring</source>
+        <translation>Benzola gredzens</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="483"/>
+        <source>Draw cyclohexane ring</source>
+        <translation>Cikloheksāns</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="484"/>
+        <source>Draw cyclopentane ring</source>
+        <translation>Ciklopentāns</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="485"/>
+        <source>Draw cyclopropane ring</source>
+        <translation>Ciklopropāns</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="486"/>
+        <source>Draw cyclobutane ring</source>
+        <translation>Ciklobutāns</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="487"/>
+        <source>Draw variable ring</source>
+        <translation>Zīmēt ciklu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="488"/>
+        <source>Draw chains</source>
+        <translation>Zīmēt ķēdi</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="491"/>
+        <source>Solid bond</source>
+        <translation>Vienkāršā saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="492"/>
+        <source>Double bond</source>
+        <translation>Dubultā saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="493"/>
+        <source>Triple bond</source>
+        <translation>Trīskāršā saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="494"/>
+        <source>Wedged bond</source>
+        <translation>Stereoķīmijas saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="495"/>
+        <source>Wedged hashed bond</source>
+        <translation>Stereoķīmijas saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="496"/>
+        <source>Wavy bond</source>
+        <translation>Nezināmas stereoķīmijas saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="497"/>
+        <source>Dashed bond</source>
+        <translation>Pātraukta saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="498"/>
+        <source>Double dashed bond</source>
+        <translation>Dubultā, pātraukta saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="499"/>
+        <source>Dotted bond</source>
+        <translation>Punktota saite</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="503"/>
+        <source>Increase charge</source>
+        <translation>Palielināt lādiņu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="504"/>
+        <source>Decrease charge</source>
+        <translation>Samazināt lādiņu</translation>
     </message>
 </context>
 <context>
@@ -501,78 +1027,78 @@ Nestandarta īpašības ar attēliem netiek mērogotas un tiek attēlotas pilnā
         <translation>Pagriezt</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="261"/>
+        <location filename="../imageutils.ui" line="262"/>
         <source>Invert</source>
         <translation>Invertēt</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="269"/>
+        <location filename="../imageutils.ui" line="271"/>
         <source>Set background</source>
         <translation>Pievienot fonu</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="277"/>
+        <location filename="../imageutils.ui" line="280"/>
         <source>Scale</source>
         <translation>Mērogot</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="286"/>
+        <location filename="../imageutils.ui" line="289"/>
         <source>Save as...</source>
         <translation>Saglabāt kā...</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="295"/>
+        <location filename="../imageutils.ui" line="298"/>
         <source>Open</source>
         <translation>Atvērt</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="303"/>
+        <location filename="../imageutils.ui" line="307"/>
         <source>Make transparent</source>
         <translation>Padarīt caurspīdīgu</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="311"/>
-        <location filename="../imageutils.ui" line="314"/>
+        <location filename="../imageutils.ui" line="316"/>
+        <location filename="../imageutils.ui" line="319"/>
         <source>Zoom in</source>
         <translation>Pietuvināt</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="322"/>
+        <location filename="../imageutils.ui" line="328"/>
         <source>Zoom out</source>
         <translation>Attālināt</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="330"/>
+        <location filename="../imageutils.ui" line="337"/>
         <source>Fit screen</source>
         <translation>Ietilpināt ekrānā</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="338"/>
+        <location filename="../imageutils.ui" line="346"/>
         <source>Normal size</source>
         <translation>Patiesais izmērs</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="346"/>
+        <location filename="../imageutils.ui" line="355"/>
         <source>Autocrop</source>
         <translation>Apgriezt automātiski</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="354"/>
+        <location filename="../imageutils.ui" line="364"/>
         <source>Manual crop</source>
         <translation>Apgriezt manuāli</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="363"/>
+        <location filename="../imageutils.ui" line="373"/>
         <source>Restore original</source>
         <translation>Atjaunot oriģinālu</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="374"/>
+        <location filename="../imageutils.ui" line="385"/>
         <source>Paste from clipboard</source>
         <translation>Ielīmēt no starpliktuves</translation>
     </message>
     <message>
-        <location filename="../imageutils.ui" line="382"/>
+        <location filename="../imageutils.ui" line="394"/>
         <source>Clear</source>
         <translation>Notīrīt</translation>
     </message>
@@ -620,7 +1146,7 @@ Nestandarta īpašības ar attēliem netiek mērogotas un tiek attēlotas pilnā
 <context>
     <name>ImageWidget</name>
     <message>
-        <location filename="../imagewidget.cpp" line="112"/>
+        <location filename="../imagewidget.cpp" line="119"/>
         <source>No image has been set.
 Open from file or paste from clipboard.
 
@@ -741,82 +1267,87 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
         <translation>Galvenā rīkjosla</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="110"/>
+        <location filename="../mainwindow.ui" line="111"/>
         <source>Reagents</source>
         <translation>Reaģenti</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="113"/>
+        <location filename="../mainwindow.ui" line="114"/>
         <source>Ctrl+Shift+R</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="125"/>
+        <location filename="../mainwindow.ui" line="126"/>
         <source>Properties</source>
         <translation>Īpašības</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="128"/>
+        <location filename="../mainwindow.ui" line="129"/>
         <source>Ctrl+Shift+P</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="137"/>
+        <location filename="../mainwindow.ui" line="138"/>
         <source>Clear</source>
         <translation>Notīrīt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="146"/>
+        <location filename="../mainwindow.ui" line="147"/>
         <source>Tags</source>
         <translation>Raksturlielumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="155"/>
+        <location filename="../mainwindow.ui" line="156"/>
         <source>Settings</source>
         <translation>Uzstādījumi</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="164"/>
+        <location filename="../mainwindow.ui" line="165"/>
         <source>About</source>
         <translation>Par</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="176"/>
+        <location filename="../mainwindow.ui" line="177"/>
         <source>Labels</source>
         <translation>Birkas</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="179"/>
+        <location filename="../mainwindow.ui" line="180"/>
         <source>Ctrl+Shift+L</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="188"/>
+        <location filename="../mainwindow.ui" line="189"/>
         <source>Search</source>
         <translation>Meklēšana</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="191"/>
+        <location filename="../mainwindow.ui" line="192"/>
         <source>Ctrl+Shift+F</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="199"/>
+        <location filename="../mainwindow.ui" line="201"/>
         <source>Tables</source>
         <translation>Tabulas</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="186"/>
+        <location filename="../mainwindow.ui" line="210"/>
+        <source>Draw</source>
+        <translation>Zīmēt</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="187"/>
         <source>Paste</source>
         <translation>Ielīmēt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="364"/>
+        <location filename="../mainwindow.cpp" line="378"/>
         <source>Confirm action</source>
         <translation>Apstiprināt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="364"/>
+        <location filename="../mainwindow.cpp" line="378"/>
         <source>Clear calculator history?</source>
         <translation>Izdzēst kalkulatora vēsturi?</translation>
     </message>
@@ -899,7 +1430,7 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
         <translation>Vērtība</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="358"/>
+        <location filename="../propertydock.cpp" line="370"/>
         <source>Used tags</source>
         <translation>Izmantotie raksturlielumi</translation>
     </message>
@@ -907,22 +1438,22 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
 <context>
     <name>PropertyDelegate</name>
     <message>
-        <location filename="../propertydelegate.cpp" line="122"/>
+        <location filename="../propertydelegate.cpp" line="128"/>
         <source>Solid</source>
         <translation>Cietveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="126"/>
+        <location filename="../propertydelegate.cpp" line="132"/>
         <source>Liquid</source>
         <translation>Šķidra</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="130"/>
+        <location filename="../propertydelegate.cpp" line="136"/>
         <source>Gaseous</source>
         <translation>Gāzveida</translation>
     </message>
     <message>
-        <location filename="../propertydelegate.cpp" line="134"/>
+        <location filename="../propertydelegate.cpp" line="140"/>
         <source>Unknown</source>
         <translation>Nezināms</translation>
     </message>
@@ -991,27 +1522,27 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="252"/>
+        <location filename="../propertydock.cpp" line="264"/>
         <source>Cannot add property</source>
         <translation>Nebija iespējams pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="253"/>
+        <location filename="../propertydock.cpp" line="265"/>
         <source>Property missing name</source>
         <translation>Nav izvēlēts īpašības nosaukums</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="328"/>
+        <location filename="../propertydock.cpp" line="340"/>
         <source>Add property</source>
         <translation>Pievienot īpašību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="367"/>
+        <location filename="../propertydock.cpp" line="379"/>
         <source>Add custom property to &apos;%1&apos;</source>
         <translation>Pievienot nestandarta īpašību &apos;%1&apos;  reaģentam</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="373"/>
+        <location filename="../propertydock.cpp" line="385"/>
         <source>Add image to &apos;%1&apos;</source>
         <translation>Pievienot attēlu &apos;%1&apos; reaģentam</translation>
     </message>
@@ -1032,17 +1563,17 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
         <translation type="vanished">Nosaukums:</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="381"/>
+        <location filename="../propertydock.cpp" line="393"/>
         <source>Get properties from the internet</source>
         <translation>Izgūt īpašības no interneta</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="434"/>
+        <location filename="../propertydock.cpp" line="460"/>
         <source>Copy</source>
         <translation>Kopēt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="500"/>
+        <location filename="../propertydock.cpp" line="526"/>
         <source>View</source>
         <translation>Parādīt</translation>
     </message>
@@ -1055,64 +1586,65 @@ Noklikšķini jebkur šajā logā, lai atvērtu attēlu.</translation>
         <translation type="vanished">Pārsaukt</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="513"/>
+        <location filename="../propertydock.cpp" line="451"/>
+        <location filename="../propertydock.cpp" line="539"/>
         <source>Edit</source>
         <translation>Labot</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="530"/>
-        <location filename="../propertydock.cpp" line="538"/>
+        <location filename="../propertydock.cpp" line="556"/>
+        <location filename="../propertydock.cpp" line="564"/>
         <source>Paste to calculator</source>
         <translation>Ielīmēt kalkulatorā</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="532"/>
+        <location filename="../propertydock.cpp" line="558"/>
         <source>Reference</source>
         <translation>Atsauci</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="535"/>
+        <location filename="../propertydock.cpp" line="561"/>
         <source>Value</source>
         <translation>Vērtību</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="544"/>
+        <location filename="../propertydock.cpp" line="570"/>
         <source>Hide property &quot;%1&quot;</source>
         <translation>Slēpt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="555"/>
+        <location filename="../propertydock.cpp" line="581"/>
         <source>Show all properties</source>
         <translation>Rādīt visas īpašības</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="584"/>
+        <location filename="../propertydock.cpp" line="610"/>
         <source>Paste property &quot;%1&quot;</source>
         <translation>Ielīmēt īpašību &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="631"/>
-        <location filename="../propertydock.cpp" line="635"/>
+        <location filename="../propertydock.cpp" line="657"/>
+        <location filename="../propertydock.cpp" line="661"/>
         <source>Confirm removal</source>
         <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="631"/>
+        <location filename="../propertydock.cpp" line="657"/>
         <source>Remove selected property?</source>
         <translation>Dzēst izvēlēto īpašību?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="636"/>
+        <location filename="../propertydock.cpp" line="662"/>
         <source>Remove %1 properties?</source>
         <translation>Dzēst %1 īpašību(-as)?</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="807"/>
+        <location filename="../propertydock.cpp" line="833"/>
         <source>Duplicate property</source>
         <translation>Īpašība jau eksistē</translation>
     </message>
     <message>
-        <location filename="../propertydock.cpp" line="808"/>
+        <location filename="../propertydock.cpp" line="834"/>
         <source>Reagent already has this property, add regardless?</source>
         <translation>Reaģentam šobrīd jau ir šī īpašība, pievienot vēlreiz?</translation>
     </message>
@@ -1306,12 +1838,12 @@ izvēlētās</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="316"/>
+        <location filename="../main.cpp" line="334"/>
         <source>Internal error</source>
         <translation>Iekšēja kļūda</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="317"/>
+        <location filename="../main.cpp" line="335"/>
         <source>Could not load database
 New database will be created
 Please restart the application</source>
@@ -1338,9 +1870,31 @@ Please restart the application</source>
         <translation>Saglabāt attēlu</translation>
     </message>
     <message>
+        <location filename="../drawdialog.cpp" line="580"/>
+        <source>Open canvas</source>
+        <translation>Atvērt audeklu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="580"/>
+        <location filename="../drawdialog.cpp" line="628"/>
+        <source>ChemDoodle canvas (*.json)</source>
+        <translation>ChemDoodle audekls (*.json)</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="628"/>
+        <source>Save canvas</source>
+        <translation>Saglabāt audeklu</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="652"/>
         <location filename="../imageutils.cpp" line="213"/>
         <source>Image (*.png)</source>
         <translation>Attēls (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../drawdialog.cpp" line="652"/>
+        <source>Save image</source>
+        <translation>Saglabāt attēlu</translation>
     </message>
 </context>
 <context>
@@ -1639,7 +2193,13 @@ Please restart the application</source>
         <translation>Pievienot</translation>
     </message>
     <message>
-        <location filename="../reagentdock.cpp" line="561"/>
+        <location filename="../reagentdock.cpp" line="562"/>
+        <location filename="../reagentdock.cpp" line="592"/>
+        <source>Confirm removal</source>
+        <translation>Apstiprināt dzēšanu</translation>
+    </message>
+    <message>
+        <location filename="../reagentdock.cpp" line="563"/>
         <source>Remove %1 selected reagents and their batches</source>
         <translation>Dzēst %1 izvēlētu(-os) reaģentus un tā/to sērijas</translation>
     </message>
@@ -1659,52 +2219,52 @@ Please restart the application</source>
 <context>
     <name>Script</name>
     <message>
-        <location filename="../script.cpp" line="62"/>
+        <location filename="../script.cpp" line="73"/>
         <source>keyword &quot;%1&quot; is not allowed</source>
         <translation>atslēgvārds &quot;%1&quot; nav atļauts</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="109"/>
+        <location filename="../script.cpp" line="121"/>
         <source>answer is empty</source>
         <translation>atbilde ir tukša</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="126"/>
+        <location filename="../script.cpp" line="142"/>
         <source>expected an argument for function &quot;%1&quot;</source>
         <translation>funkcijai &quot;%1&quot; trūkst argumenta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="144"/>
+        <location filename="../script.cpp" line="164"/>
         <source>expected arguments for function &quot;%1&quot;</source>
         <translation>funkcijai &quot;%1&quot; trūkst argumentu</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="162"/>
+        <location filename="../script.cpp" line="187"/>
         <source>function name expected</source>
         <translation>tika sagaidīts funkcijas nosaukums</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="170"/>
+        <location filename="../script.cpp" line="199"/>
         <source>function &quot;%1&quot; is not defined</source>
         <translation>funkcija &quot;%1&quot; nav definēta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="178"/>
+        <location filename="../script.cpp" line="211"/>
         <source>reagent &quot;%1&quot; is not defined</source>
         <translation>reaģents &quot;%1&quot; nav definēts</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="189"/>
+        <location filename="../script.cpp" line="227"/>
         <source>batch &quot;%1&quot; is not defined</source>
         <translation>sērija &quot;%1&quot; nav definēta</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="200"/>
+        <location filename="../script.cpp" line="242"/>
         <source>property &quot;%1&quot; is not defined for &quot;%2&quot;</source>
         <translation>īpašība &quot;%1&quot; nav definēta &quot;%2&quot; reaģentam</translation>
     </message>
     <message>
-        <location filename="../script.cpp" line="211"/>
+        <location filename="../script.cpp" line="258"/>
         <source>%1( %2 ) does not evaluate to a valid number</source>
         <translation>%1( %2 ) nav evaluējams par skaitli</translation>
     </message>
@@ -2070,6 +2630,14 @@ IUPAC nosaukumu</translation>
     </message>
 </context>
 <context>
+    <name>System</name>
+    <message>
+        <location filename="../system.cpp" line="80"/>
+        <source>Database info</source>
+        <translation>Datubāzes informācija</translation>
+    </message>
+</context>
+<context>
     <name>Table</name>
     <message>
         <location filename="../table.cpp" line="49"/>
@@ -2225,7 +2793,7 @@ IUPAC nosaukumu</translation>
         <translation>Nešķiroti</translation>
     </message>
     <message>
-        <location filename="../tableviewer.cpp" line="277"/>
+        <location filename="../tableviewer.cpp" line="289"/>
         <source>Reagent</source>
         <translation>Reaģents</translation>
     </message>

@@ -17,19 +17,17 @@
  */
 
 // TODO:
-//       configurable options
+//       other configurable options
+//       bind atom colours to cvar
 //       zoom!
 //       license copy?
 //       ambiguous bond
 //       pusher bonds
 //       brackets
-//       additional icons
-//       dark theme support (invert most icons? except for eraser)
-//       save window state
+//       eraser icon for dark mode
 //       cvar check in PropertyDialog
-//       plus button
 //       update window title to filename?
-//       undo/redo icons
+//       cyclobutadiene joke
 //
 // BIG TODO: write own implementation of everything
 //
@@ -61,9 +59,13 @@
  * @brief DrawDialog::DrawDialog
  * @param parent
  */
-DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent ), json( json ), ui( new Ui::DrawDialog ) {
+DrawDialog::DrawDialog( QWidget *parent, const QString &json, bool drawMode ) : QDialog( parent ), json( json ), ui( new Ui::DrawDialog ) {
     this->ui->setupUi( this );
     this->ui->contents->setWindowFlags( Qt::Widget );
+
+    // no button box in draw mode
+    if ( drawMode )
+        this->ui->buttonBox->hide();
 
     // check if draw component has been downloaded
     QDir dir( QDir::currentPath() + "/chemDoodle/" );
@@ -116,6 +118,8 @@ DrawDialog::DrawDialog( QWidget *parent, const QString &json ) : QDialog( parent
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchJSQ.captured( 1 ), NetworkManager::CDjQueryCSS );
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchCDW.captured( 1 ), NetworkManager::CDScript );
                 NetworkManager::instance()->execute( "https://web.chemdoodle.com/" + matchUI.captured( 1 ), NetworkManager::CDUIScript );
+
+                qDebug() << "Requesting scripts";
             } else {
                 QMessageBox::critical( this, DrawDialog::tr( "Error" ), DrawDialog::tr( "Something went wrong.\nTry again later." ));
                 QMetaObject::invokeMethod( this, "close", Qt::QueuedConnection );
@@ -306,7 +310,7 @@ QIcon DrawDialog::fetchIcon( const QString &name ) const {
     const bool isDarkMode = Variable::isEnabled( "darkMode" );
 
     // get icon from internal resources and invert it for dark mode when anebled
-    QIcon icon( QString( ":/chemDoodle/chemDoodle/icons/%1.png" ).arg( name ));
+    QIcon icon( QString( "://icons/draw/%1.png" ).arg( name ));
     if ( isDarkMode ) {
         QImage image( icon.pixmap( 24, 24 ).toImage());
         image.invertPixels();
@@ -324,6 +328,18 @@ void DrawDialog::resizeEvent( QResizeEvent *event ) {
     this->resizeTimer.start( 200 );
     this->m_resizeInProgress = true;
     QDialog::resizeEvent( event );
+}
+
+/**
+ * @brief DrawDialog::closeEvent
+ */
+void DrawDialog::closeEvent( QCloseEvent *event ) {
+    if ( this->hasInitialized()) {
+        Variable::setCompressedByteArray( "drawDialog/geometry", this->saveGeometry());
+        Variable::setCompressedByteArray( "drawDialog/state", this->ui->contents->saveState());
+    }
+
+    QDialog::closeEvent( event );
 }
 
 /**
@@ -358,9 +374,10 @@ void DrawDialog::loadComponent() {
 
     // setup timer (so that canvas is resized, when dialog window is resized)
     this->resizeTimer.setSingleShot( true );
-    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this ]() {
+    const QString resizeScript( "if ( typeof( sketcher) !== \"undefined\" ) { sketcher.resize( window.innerWidth, window.innerHeight ); sketcher.repaint(); }" );
+    QTimer::connect( &this->resizeTimer, &QTimer::timeout, this, [ this, resizeScript ]() {
         this->m_resizeInProgress = false;
-        this->ui->webView->page()->runJavaScript( "if ( typeof( sketcher) != \"undefined\" ) { sketcher.resize( window.innerWidth, window.innerHeight ); sketcher.repaint(); }" );
+        this->ui->webView->page()->runJavaScript( resizeScript );
     } );
 
     // reload content (edit mode)
@@ -372,7 +389,7 @@ void DrawDialog::loadComponent() {
 
     // initialize supplementary script when page is loaded
     // setup toolBars and actions
-    QWebEnginePage::connect( this->ui->webView->page(), &QWebEnginePage::loadFinished, [ this ]() {
+    QWebEnginePage::connect( this->ui->webView->page(), &QWebEnginePage::loadFinished, [ this, resizeScript ]() {
         // create and render a webpage, using draw components
         QFile file( "chemDoodle/script.js" );
         if ( file.open( QFile::ReadOnly )) {
@@ -386,71 +403,30 @@ void DrawDialog::loadComponent() {
 
             // setup toolBars
             QToolBar *bondToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Bond toolbar" ));
+            bondToolBar->setObjectName( "bondToolBar" );
             this->ui->contents->addToolBarBreak();
             QToolBar *ringToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Ring toolbar" ));
+            ringToolBar->setObjectName( "ringToolBar" );
             QToolBar *arrowToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Arrow toolbar" ));
+            arrowToolBar->setObjectName( "arrowToolBar" );
+            QToolBar *chargeToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Charge toolbar" ));
+            chargeToolBar->setObjectName( "chargeToolBar" );
             this->ui->contents->addToolBarBreak();
             QToolBar *elementToolBar = this->ui->contents->addToolBar( DrawDialog::tr( "Element toolbar" ));
+            elementToolBar->setObjectName( "elementToolBar" );
 
             // make actions exclusive via QActionGroup
             QActionGroup *group( new QActionGroup( this ));
             QMap<QString, QAction*> *toolButtons = new QMap<QString, QAction*>();
 
-            // add action to main toolBar lambda
-            auto addToolButton = [ this, toolButtons, group ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
-                QAction *action( this->ui->primaryToolBar->addAction( icon, name, [ this, script ]() {
+            // add action to toolBar lambda
+            auto addToolButton = [ this, toolButtons, group ]( QToolBar *toolBar, const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
+                QAction *action( toolBar->addAction( icon, name, [ this, script ]() {
                     this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
                 } ));
 
                 if ( toggle ) {
                     //group->setExclusionPolicy()
-                    action->setCheckable( true );
-                    group->addAction( action );
-                }
-
-                toolButtons->insert( script, action );
-                return action;
-            };
-
-            // add action to ring toolBar lambda
-            auto addRingButton = [ this, toolButtons, group, ringToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
-                QAction *action( ringToolBar->addAction( icon, name, [ this, script ]() {
-                    this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
-                } ));
-
-                if ( toggle ) {
-                    //group->setExclusionPolicy()
-                    action->setCheckable( true );
-                    group->addAction( action );
-                }
-
-                toolButtons->insert( script, action );
-                return action;
-            };
-
-            // add action to bond toolBar lambda
-            auto addBondButton = [ this, toolButtons, group, bondToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
-                QAction *action( bondToolBar->addAction( icon, name, [ this, script ]() {
-                    this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
-                } ));
-
-                if ( toggle ) {
-                    //group->setExclusionPolicy()
-                    action->setCheckable( true );
-                    group->addAction( action );
-                }
-
-                toolButtons->insert( script, action );
-                return action;
-            };
-
-            // add action to arrow toolBar lambda
-            auto addArrowButton = [ this, toolButtons, group, arrowToolBar ]( const QIcon &icon, const QString &name, const QString &script, bool toggle ) {
-                QAction *action( arrowToolBar->addAction( icon, name, [ this, script ]() {
-                    this->ui->webView->page()->runJavaScript( QString( "%1();" ).arg( script ));
-                } ));
-
-                if ( toggle ) {
                     action->setCheckable( true );
                     group->addAction( action );
                 }
@@ -476,18 +452,18 @@ void DrawDialog::loadComponent() {
             };
 
             // setup main toolBar
-            addToolButton( this->fetchIcon( "marquee" ), DrawDialog::tr( "Use marquee tool" ), "marqueeTool", true );
-            QAction *lasso( addToolButton( this->fetchIcon( "lasso" ), DrawDialog::tr( "Use lasso tool" ), "lassoTool", true ));
-            addToolButton( this->fetchIcon( "flip_horizontal" ), DrawDialog::tr( "Flip horizontally" ), "flipHTool", false );
-            addToolButton( this->fetchIcon( "flip_vertical" ), DrawDialog::tr( "Flip vertically" ), "flipVTool", false );
-            addToolButton( this->fetchIcon( "eraser" ), DrawDialog::tr( "Use eraser tool" ), "eraserTool", true );
-            addToolButton( this->fetchIcon( "centre" ), DrawDialog::tr( "Centre canvas" ), "centreTool", false );
+            addToolButton( this->ui->primaryToolBar, this->fetchIcon( "marquee" ), DrawDialog::tr( "Use marquee tool" ), "marqueeTool", true );
+            QAction *lasso( addToolButton( this->ui->primaryToolBar, this->fetchIcon( "lasso" ), DrawDialog::tr( "Use lasso tool" ), "lassoTool", true ));
+            addToolButton( this->ui->primaryToolBar, this->fetchIcon( "flip_horizontal" ), DrawDialog::tr( "Flip horizontally" ), "flipHTool", false );
+            addToolButton( this->ui->primaryToolBar, this->fetchIcon( "flip_vertical" ), DrawDialog::tr( "Flip vertically" ), "flipVTool", false );
+            addToolButton( this->ui->primaryToolBar, this->fetchIcon( "eraser" ), DrawDialog::tr( "Use eraser tool" ), "eraserTool", true );
+            addToolButton( this->ui->primaryToolBar, this->fetchIcon( "centre" ), DrawDialog::tr( "Centre canvas" ), "centreTool", false );
 
             // setup arrow toolBar
-            addArrowButton( this->fetchIcon( "arrow" ), DrawDialog::tr( "Use arrow tool" ), "arrowTool", true );
-            addArrowButton( this->fetchIcon( "retrosynthetic" ), DrawDialog::tr( "Use retrosynthetic arrow tool" ), "retrosyntheticTool", true );
-            addArrowButton( this->fetchIcon( "resonance" ), DrawDialog::tr( "Use resonance arrow tool" ), "resonanceTool", true );
-            addArrowButton( this->fetchIcon( "equilibrium" ), DrawDialog::tr( "Use equilibrium arrow tool" ), "equilibriumTool", true );
+            addToolButton( arrowToolBar, this->fetchIcon( "arrow" ), DrawDialog::tr( "Use arrow tool" ), "arrowTool", true );
+            addToolButton( arrowToolBar, this->fetchIcon( "retrosynthetic" ), DrawDialog::tr( "Use retrosynthetic arrow tool" ), "retrosyntheticTool", true );
+            addToolButton( arrowToolBar, this->fetchIcon( "resonance" ), DrawDialog::tr( "Use resonance arrow tool" ), "resonanceTool", true );
+            addToolButton( arrowToolBar, this->fetchIcon( "equilibrium" ), DrawDialog::tr( "Use equilibrium arrow tool" ), "equilibriumTool", true );
 
             // setup element toolBar
             addElementButton( this->fetchIcon( "hydrogen" ), DrawDialog::tr( "Hydrogen atom" ), "H", true );
@@ -504,25 +480,29 @@ void DrawDialog::loadComponent() {
             addElementButton( this->fetchIcon( "label" ), DrawDialog::tr( "Label tool" ), "", true );
 
             // setup ring toolBar
-            addRingButton( this->fetchIcon( "benzene" ), DrawDialog::tr( "Draw benzene ring" ), "benzeneTool", true );
-            addRingButton( this->fetchIcon( "cyclohexane" ), DrawDialog::tr( "Draw cyclohexane ring" ), "cyclohexaneTool", true );
-            addRingButton( this->fetchIcon( "cyclopentane" ), DrawDialog::tr( "Draw cyclopentane ring" ), "cyclopentaneTool", true );
-            addRingButton( this->fetchIcon( "cyclopropane" ), DrawDialog::tr( "Draw cyclopropane ring" ), "cyclopropaneTool", true );
-            addRingButton( this->fetchIcon( "cyclobutane" ), DrawDialog::tr( "Draw cyclobutane ring" ), "cyclobutaneTool", true );
-            addRingButton( this->fetchIcon( "ring" ), DrawDialog::tr( "Draw variable ring" ), "varRingTool", true );
-            addRingButton( this->fetchIcon( "chain" ), DrawDialog::tr( "Draw chains" ), "chainTool", true );
-            addRingButton( QIcon::fromTheme( "right" ), DrawDialog::tr( "Draw arrow" ), "arrowTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "benzene" ), DrawDialog::tr( "Draw benzene ring" ), "benzeneTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "cyclohexane" ), DrawDialog::tr( "Draw cyclohexane ring" ), "cyclohexaneTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "cyclopentane" ), DrawDialog::tr( "Draw cyclopentane ring" ), "cyclopentaneTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "cyclopropane" ), DrawDialog::tr( "Draw cyclopropane ring" ), "cyclopropaneTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "cyclobutane" ), DrawDialog::tr( "Draw cyclobutane ring" ), "cyclobutaneTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "ring" ), DrawDialog::tr( "Draw variable ring" ), "varRingTool", true );
+            addToolButton( ringToolBar, this->fetchIcon( "chain" ), DrawDialog::tr( "Draw chains" ), "chainTool", true );
 
             // setup bond toolBar
-            addBondButton( this->fetchIcon( "bond_solid" ), DrawDialog::tr( "Solid bond" ), "solidBondTool", true );
-            addBondButton( this->fetchIcon( "bond_double" ), DrawDialog::tr( "Double bond" ), "doubleBondTool", true );
-            addBondButton( this->fetchIcon( "bond_triple" ), DrawDialog::tr( "Triple bond" ), "tripleBondTool", true );
-            addBondButton( this->fetchIcon( "bond_wedged" ), DrawDialog::tr( "Wedged bond" ), "wedgedBondTool", true );
-            addBondButton( this->fetchIcon( "bond_wedged_hashed" ), DrawDialog::tr( "Wedged hashed bond" ), "wedgedHashedBondTool", true );
-            addBondButton( this->fetchIcon( "bond_wavy" ), DrawDialog::tr( "Wavy bond" ), "wavyBondTool", true );
-            addBondButton( this->fetchIcon( "bond_dashed" ), DrawDialog::tr( "Dashed bond" ), "dashedBondTool", true );
-            addBondButton( this->fetchIcon( "bond_double_dashed" ), DrawDialog::tr( "Double dashed bond" ), "doubleDashedBondTool", true );
-            addBondButton( this->fetchIcon( "bond_dotted" ), DrawDialog::tr( "Dotted bond" ), "dottedBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_solid" ), DrawDialog::tr( "Solid bond" ), "solidBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_double" ), DrawDialog::tr( "Double bond" ), "doubleBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_triple" ), DrawDialog::tr( "Triple bond" ), "tripleBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_wedged" ), DrawDialog::tr( "Wedged bond" ), "wedgedBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_wedged_hashed" ), DrawDialog::tr( "Wedged hashed bond" ), "wedgedHashedBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_wavy" ), DrawDialog::tr( "Wavy bond" ), "wavyBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_dashed" ), DrawDialog::tr( "Dashed bond" ), "dashedBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_double_dashed" ), DrawDialog::tr( "Double dashed bond" ), "doubleDashedBondTool", true );
+            addToolButton( bondToolBar, this->fetchIcon( "bond_dotted" ), DrawDialog::tr( "Dotted bond" ), "dottedBondTool", true );
+
+            // setup charge toolBar
+            // TODO: add other buttons
+            addToolButton( chargeToolBar, this->fetchIcon( "positive_charge" ), DrawDialog::tr( "Increase charge" ), "positiveChargeTool", true );
+            addToolButton( chargeToolBar, this->fetchIcon( "negative_charge" ), DrawDialog::tr( "Decrease charge" ), "negativeChargeTool", true );
 
             // zoom actions
             QAction::connect( this->ui->actionZoomIn, &QAction::triggered, [ this ]() { this->ui->webView->page()->runJavaScript( "zoomInTool();" ); } );
@@ -696,6 +676,22 @@ void DrawDialog::loadComponent() {
 
             // saveAs action
             QAction::connect( this->ui->actionSaveAs, &QAction::triggered, [ save ]() { save( false ); } );
+
+            // finally resize to fit screen
+            QTimer::singleShot( 50, [ this, resizeScript ]() { this->ui->webView->page()->runJavaScript( resizeScript ); } );
+
+            QAction::connect( this->ui->actionColouredAtoms, &QAction::toggled, [ this ]( bool state ) {
+                this->ui->webView->page()->runJavaScript( QString( "sketcher.styles.atoms_useJMOLColors = %1; sketcher.repaint();" ).arg( state ? "true" : "false" ));
+            } );
+
+            // we have fully initialized
+            this->m_initialized = true;
+
+            // restore state
+            if ( !Variable::value<QVariant>( "drawDialog/geometry" ).isNull() && !Variable::value<QVariant>( "drawDialog/state" ).isNull()) {
+                this->restoreGeometry( Variable::compressedByteArray( "drawDialog/geometry" ));
+                this->ui->contents->restoreState( Variable::compressedByteArray( "drawDialog/state" ));
+            }
         }
     } );
 }
@@ -713,7 +709,7 @@ void DrawDialog::on_buttonBox_accepted() {
  */
 void DrawBridge::getLabel(const QString &defaultLabel) {
     bool ok;
-    const QString label( QInputDialog::getText( nullptr, defaultLabel.isEmpty() ? DrawBridge::tr( "New label" ) : DrawBridge::tr(  "Edit label" ), DrawBridge::tr( "Implicit hydrogens are automatically resolved.\nCondensed labels currently not supported." ), QLineEdit::Normal, defaultLabel.isEmpty() ? "C" : defaultLabel, &ok ));
+    const QString label( QInputDialog::getText( qobject_cast<QWidget*>( this->parent()), defaultLabel.isEmpty() ? DrawBridge::tr( "New label" ) : DrawBridge::tr(  "Edit label" ), DrawBridge::tr( "Implicit hydrogens are automatically resolved.\nCondensed labels currently not supported." ), QLineEdit::Normal, defaultLabel.isEmpty() ? "C" : defaultLabel, &ok ));
 
     if ( !ok )
         return;

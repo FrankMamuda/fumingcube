@@ -676,5 +676,21 @@ let exportTool = function() {
 
     // export base64 png
     return ChemDoodle.io.png.string( canvas );
-}
+};
+
+/*
+ * positiveChargeTool
+ */
+let positiveChargeTool = function() {
+    sketcher.stateManager.setState( sketcher.stateManager.STATE_CHARGE );
+    sketcher.stateManager.STATE_CHARGE.delta = 1;
+};
+
+/*
+ * negativeChargeTool
+ */
+let negativeChargeTool = function() {
+    sketcher.stateManager.setState( sketcher.stateManager.STATE_CHARGE );
+    sketcher.stateManager.STATE_CHARGE.delta = -1;
+};
 

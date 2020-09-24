@@ -53,6 +53,12 @@
         <file alias="16x16/autocrop.png">icons/light/16x16/autocrop.png</file>
         <file alias="16x16/invert.png">icons/light/16x16/invert.png</file>
         <file alias="16x16/donate.png">icons/light/16x16/donate.png</file>
+		<file alias="16x16/cut.png">icons/light/16x16/cut.png</file>
+		<file alias="16x16/draw.png">icons/light/16x16/draw.png</file>
+		<file alias="16x16/new.png">icons/light/16x16/new.png</file>
+		<file alias="16x16/redo.png">icons/light/16x16/redo.png</file>
+		<file alias="16x16/select_all.png">icons/light/16x16/select_all.png</file>
+		<file alias="16x16/undo.png">icons/light/16x16/undo.png</file>
         <file alias="scalable/accept.svg">icons/light/scalable/accept.svg</file>
         <file alias="scalable/add.svg">icons/light/scalable/add.svg</file>
         <file alias="scalable/clean.svg">icons/light/scalable/clean.svg</file>
@@ -105,5 +111,11 @@
         <file alias="scalable/autocrop.svg">icons/light/scalable/autocrop.svg</file>
         <file alias="scalable/invert.svg">icons/light/scalable/invert.svg</file>
         <file alias="scalable/donate.svg">icons/light/scalable/donate.svg</file>
+		<file alias="scalable/cut.svg">icons/light/scalable/cut.svg</file>
+		<file alias="scalable/draw.svg">icons/light/scalable/draw.svg</file>
+		<file alias="scalable/new.svg">icons/light/scalable/new.svg</file>
+		<file alias="scalable/redo.svg">icons/light/scalable/redo.svg</file>
+		<file alias="scalable/select_all.svg">icons/light/scalable/select_all.svg</file>
+		<file alias="scalable/undo.svg">icons/light/scalable/undo.svg</file>
     </qresource>
 </RCC>

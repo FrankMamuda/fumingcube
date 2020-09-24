@@ -203,7 +203,7 @@
   </action>
   <action name="actionDraw">
    <property name="icon">
-    <iconset theme="structure">
+    <iconset theme="draw">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
