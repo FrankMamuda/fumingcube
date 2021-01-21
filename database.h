@@ -81,11 +81,6 @@ private:
      * @param initialised
      */
     void setInitialised( bool initialised = true ) { this->m_initialised = initialised; }
-
-    /**
-     * @brief createInstance
-     * @return
-     */
     QMap<QString, Table *> tables;
     bool m_initialised = false;
 };

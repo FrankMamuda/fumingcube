@@ -45,6 +45,7 @@
 #include <QSharedMemory>
 #include <QSettings>
 #include <QTranslator>
+#include <QCommandLineParser>
 #include "pixmaputils.h"
 #include "calcview.h"
 #include "tableentry.h"
@@ -231,6 +232,8 @@ int main( int argc, char *argv[] ) {
     Variable::add( "labelDock/selectedRows", "", Var::Flag::Hidden );
     Variable::add( "drawDialog/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::add( "drawDialog/state", QByteArray(), Var::Flag::ReadOnly );
+    Variable::add( "closeToTray", false, Var::Flag::Hidden );
+    Variable::add( "app/runOnStartup", false, Var::Flag::Hidden );
 
     // read configuration
     XMLTools::read();
@@ -249,6 +252,8 @@ int main( int argc, char *argv[] ) {
 #ifdef Q_OS_WIN
         delete emf;
 #endif
+        Variable::setCompressedByteArray( "mainWindow/geometry", MainWindow::instance()->saveGeometry());
+        Variable::setCompressedByteArray( "mainWindow/state", MainWindow::instance()->saveState());
 
         Variable::instance()->unbind( "labelDock/selectedRows" );
 
@@ -294,6 +299,7 @@ int main( int argc, char *argv[] ) {
         Variable::reset( "properyDock/selection" );
         Variable::reset( "searchFragment/history" );
         Variable::reset( "propertyFragment/selectedTags" );
+        Variable::reset( "app/runOnStartup" );
 
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));
@@ -415,6 +421,17 @@ int main( int argc, char *argv[] ) {
 
     // read reagent cache
     Cache::instance()->readReagentCache();
+
+    // minimize on startup
+#ifdef Q_OS_WIN
+    QCommandLineParser parser;
+    QCommandLineOption showSilentOption( QStringList() << "silent" << "s", QCoreApplication::translate( "main", "Show minimized" ));
+    parser.addOption( showSilentOption );
+    parser.process( a );
+
+    if ( bool showProgress = parser.isSet( showSilentOption ))
+        MainWindow::instance()->showMinimized();
+#endif
 
     return QApplication::exec();
 }

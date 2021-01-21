@@ -25,6 +25,7 @@
 #include "variable.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 /**
  * @brief Settings::Settings
@@ -71,20 +72,53 @@ SettingsDialog::SettingsDialog( QWidget *parent ) : QDialog( parent ), ui( new U
     this->variables << Variable::instance()->bind( "databasePath", this->ui->pathEdit );
     this->variables << Variable::instance()->bind( "theme", this->ui->themeCombo );
     this->variables << Variable::instance()->bind( "alwaysOnTop", this->ui->onTopCheck );
+    this->variables << Variable::instance()->bind( "closeToTray", this->ui->trayCheck );
 
     // setup decimal separator comboBox
     this->ui->decimalSepCombo->model()->setData( this->ui->decimalSepCombo->model()->index( 0, 0 ), ".", Qt::UserRole );
     this->ui->decimalSepCombo->model()->setData( this->ui->decimalSepCombo->model()->index( 1, 0 ), ",", Qt::UserRole );
     this->variables << Variable::instance()->bind( "decimalSeparator", this->ui->decimalSepCombo );
+
+#ifdef Q_OS_WIN
+    Variable::instance()->bind( "app/runOnStartup", this->ui->runOnStartupCheck );
+
+    // bind runOnStarup variable, to write out settings value
+    Variable::instance()->bind( "app/runOnStartup", this, SLOT( runOnStartupValueChanged( QVariant )));
+#else
+    // hide runOnStartup option on non-win32 systems
+    this->ui->runOnStartupCheck->hide();
+    this->resize( this->width(), 0 );
+#endif
 }
 
 /**
  * @brief SettingsDialog::~SettingsDialog
  */
 SettingsDialog::~SettingsDialog() {
+#ifdef Q_OS_WIN
+    Variable::instance()->unbind( "app/runOnStartup", this->ui->runOnStartupCheck );
+#endif
+
     // unbind vars
     for ( const QString &key : qAsConst( this->variables ))
         Variable::instance()->unbind( key );
 
     delete this->ui;
+}
+
+/**
+ * @brief Settings::runOnStartupValueChanged
+ * @param value
+ */
+void SettingsDialog::runOnStartupValueChanged( const QVariant &value ) {
+#ifdef QT_DEBUG
+    qDebug() << "runOnStartupValueChanged changed to" << value.toBool();
+#else
+    QSettings settings( "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat );
+
+    if ( value.toBool())
+        settings.setValue( "FumingCubeApp", QCoreApplication::applicationFilePath().replace( '/', '\\' ) + " --silent" );
+    else
+        settings.remove( "FumingCubeApp" );
+#endif
 }

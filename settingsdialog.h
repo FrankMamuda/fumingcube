@@ -22,6 +22,7 @@
  * includes
  */
 #include <QDialog>
+#include <QVariant>
 
 /**
  * @brief The Ui namespace
@@ -45,6 +46,9 @@ public:
     SettingsDialog& operator=( SettingsDialog&& ) = delete;
 
     ~SettingsDialog() override;
+
+private slots:
+    void runOnStartupValueChanged( const QVariant &value );
 
 private:
     QStringList variables;

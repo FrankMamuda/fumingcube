@@ -28,6 +28,9 @@
 //       cvar check in PropertyDialog
 //       update window title to filename?
 //       cyclobutadiene joke
+//       subscript/superscript in labels
+//       save last path
+//       multiline labels
 //
 // BIG TODO: write own implementation of everything
 //

@@ -194,12 +194,43 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         QTimer::singleShot( 2000, &menu, SLOT( close()));
         menu.exec( QCursor::pos());
     } );
+
+
+    if ( Variable::isEnabled( "closeToTray" )) {
+        this->tray = new QSystemTrayIcon( QIcon( ":/icons/icon_128" ));
+        this->tray->show();
+
+        auto raiseApp = [ this ]() {
+            this->setWindowState( this->windowState() & ~Qt::WindowMinimized );
+            this->raise();
+            this->activateWindow();
+        };
+
+        QMenu *menu( new QMenu());
+        menu->addAction( QIcon::fromTheme( "show" ), MainWindow::tr( "Show" ), raiseApp );
+        menu->addSeparator();
+        menu->addAction( QIcon::fromTheme( "find" ), MainWindow::tr( "Search" ), [ this ]() { this->on_actionSearch_triggered(); } );
+        menu->addAction( QIcon::fromTheme( "settings" ), MainWindow::tr( "Settings" ), [ this ]() { this->on_actionSettings_triggered(); } );
+        menu->addAction( QIcon::fromTheme( "info" ), MainWindow::tr( "About" ), [ this ]() { this->on_actionAbout_triggered(); } );
+        menu->addSeparator();
+        menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), [ this ]() { qApp->quit(); } );
+
+        this->tray->setContextMenu( menu );
+
+        QSystemTrayIcon::connect( this->tray, &QSystemTrayIcon::activated, [ raiseApp ]( const QSystemTrayIcon::ActivationReason &reason ) {
+            if ( reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick )
+                raiseApp();
+        } );
+    }
 }
 
 /**
  * @brief MainWindow::~MainWindow
  */
 MainWindow::~MainWindow() {
+    if ( this->tray != nullptr )
+        delete this->tray;
+
     // delete syntax highlighter
     delete this->highlighter;
     delete this->m_theme;
@@ -393,8 +424,12 @@ void MainWindow::on_actionTags_triggered() {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
-    Variable::setCompressedByteArray( "mainWindow/geometry", MainWindow::instance()->saveGeometry());
-    Variable::setCompressedByteArray( "mainWindow/state", MainWindow::instance()->saveState());
+    if ( Variable::isEnabled( "closeToTray" ) || this->tray != nullptr ) {
+        this->showMinimized();
+        event->ignore();
+        return;
+    }
+
     QMainWindow::closeEvent( event );
 }
 

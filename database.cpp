@@ -271,4 +271,3 @@ bool Database::add( Table *table ) {
 
     return true;
 }
-

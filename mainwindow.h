@@ -26,6 +26,7 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QTextBrowser>
+#include <QSystemTrayIcon>
 
 /**
  * @brief The Ui namespace
@@ -110,4 +111,5 @@ private:
     SyntaxHighlighter *highlighter;
     Theme *m_theme = new Theme();
     Theme *m_calcTheme = nullptr;
+    QSystemTrayIcon *tray = nullptr;
 };

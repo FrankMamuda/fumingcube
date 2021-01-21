@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>359</width>
-    <height>149</height>
+    <height>195</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,6 +81,20 @@
     <widget class="QCheckBox" name="onTopCheck">
      <property name="text">
       <string>Always on top (on restart)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="trayCheck">
+     <property name="text">
+      <string>Close to tray (on restart)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="runOnStartupCheck">
+     <property name="text">
+      <string>Run on startup (minimized)</string>
      </property>
     </widget>
    </item>
