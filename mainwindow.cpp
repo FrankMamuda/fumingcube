@@ -196,11 +196,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         menu.exec( QCursor::pos());
     } );
 
-
+    // handle system tray
     if ( Variable::isEnabled( "closeToTray" )) {
+        // create system tray
         this->tray = new QSystemTrayIcon( QIcon( ":/icons/icon_128" ));
         this->tray->show();
 
+        // add quit button
+        this->ui->toolBar->addSeparator();
+        this->ui->toolBar->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qApp->quit(); } );
+
+        // tray option will ignore closeEvent, therefore disallowing termination during sign off
+        // this will be intercepted here to allow proper shutdown
         QGuiApplication::connect( qApp, &QGuiApplication::commitDataRequest, [ this ]() {
             if ( this->tray != nullptr )
                 delete this->tray;
@@ -214,6 +221,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
             this->activateWindow();
         };
 
+        // create context menu
         QMenu *menu( new QMenu());
         menu->addAction( QIcon::fromTheme( "show" ), MainWindow::tr( "Show" ), raiseApp );
         menu->addSeparator();
@@ -222,9 +230,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         menu->addAction( QIcon::fromTheme( "info" ), MainWindow::tr( "About" ), [ this ]() { this->on_actionAbout_triggered(); } );
         menu->addSeparator();
         menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qApp->quit(); } );
-
         this->tray->setContextMenu( menu );
 
+        // hook up activation
         QSystemTrayIcon::connect( this->tray, &QSystemTrayIcon::activated, [ raiseApp ]( const QSystemTrayIcon::ActivationReason &reason ) {
             if ( reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick )
                 raiseApp();
@@ -433,11 +441,7 @@ void MainWindow::on_actionTags_triggered() {
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
     if ( !this->forceQuit ) {
-        if (( Variable::isEnabled( "closeToTray" ) || this->tray != nullptr )
-            //#ifdef Q_OS_WIN
-            //    && !GetSystemMetrics( 0x2000 )
-            //#endif
-                ) {
+        if (( Variable::isEnabled( "closeToTray" ) || this->tray != nullptr )) {
             this->showMinimized();
             event->ignore();
             return;

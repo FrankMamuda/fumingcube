@@ -92,7 +92,7 @@ future:
  - multiple references
  - use bind in queries
  - common reaction browser
- - molecule drawing (and search)
+ - molecule drawing (and search); (partially suported)
  - theme browser
  - all fileOpen dialogs must remember last location
  - warning when added property tag is hidden
