@@ -112,4 +112,5 @@ private:
     Theme *m_theme = new Theme();
     Theme *m_calcTheme = nullptr;
     QSystemTrayIcon *tray = nullptr;
+    bool forceQuit = false;
 };

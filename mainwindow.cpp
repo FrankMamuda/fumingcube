@@ -40,6 +40,7 @@
 #include <utility>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QGuiApplication>
 #include "extractiondialog.h"
 #include "listutils.h"
 #include "structurefragment.h"
@@ -200,6 +201,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         this->tray = new QSystemTrayIcon( QIcon( ":/icons/icon_128" ));
         this->tray->show();
 
+        QGuiApplication::connect( qApp, &QGuiApplication::commitDataRequest, [ this ]() {
+            if ( this->tray != nullptr )
+                delete this->tray;
+
+            this->forceQuit = true;
+        } );
+
         auto raiseApp = [ this ]() {
             this->setWindowState( this->windowState() & ~Qt::WindowMinimized );
             this->raise();
@@ -213,7 +221,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         menu->addAction( QIcon::fromTheme( "settings" ), MainWindow::tr( "Settings" ), [ this ]() { this->on_actionSettings_triggered(); } );
         menu->addAction( QIcon::fromTheme( "info" ), MainWindow::tr( "About" ), [ this ]() { this->on_actionAbout_triggered(); } );
         menu->addSeparator();
-        menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), [ this ]() { qApp->quit(); } );
+        menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qApp->quit(); } );
 
         this->tray->setContextMenu( menu );
 
@@ -424,10 +432,16 @@ void MainWindow::on_actionTags_triggered() {
  * @param event
  */
 void MainWindow::closeEvent( QCloseEvent *event ) {
-    if ( Variable::isEnabled( "closeToTray" ) || this->tray != nullptr ) {
-        this->showMinimized();
-        event->ignore();
-        return;
+    if ( !this->forceQuit ) {
+        if (( Variable::isEnabled( "closeToTray" ) || this->tray != nullptr )
+            //#ifdef Q_OS_WIN
+            //    && !GetSystemMetrics( 0x2000 )
+            //#endif
+                ) {
+            this->showMinimized();
+            event->ignore();
+            return;
+        }
     }
 
     QMainWindow::closeEvent( event );
