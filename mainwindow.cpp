@@ -47,7 +47,9 @@
 #include "labelset.h"
 #include "label.h"
 #include "tabledialog.h"
+#ifdef ENABLE_DRAW_TOOL
 #include "drawdialog.h"
+#endif
 
 /**
  * @brief MainWindow::MainWindow
@@ -238,6 +240,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
                 raiseApp();
         } );
     }
+
+#ifndef ENABLE_DRAW_TOOL
+    this->ui->toolBar->removeAction( this->ui->actionDraw );
+#endif
 }
 
 /**
@@ -485,6 +491,8 @@ void MainWindow::on_actionTables_triggered() {
  * @brief MainWindow::on_actionDraw_triggered
  */
 void MainWindow::on_actionDraw_triggered() {
+#ifdef ENABLE_DRAW_TOOL
     DrawDialog dd( this, "", true );
     dd.exec();
+#endif
 }

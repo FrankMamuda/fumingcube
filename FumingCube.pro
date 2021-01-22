@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql xml qml webenginewidgets
-QT += webchannel
+QT += core gui sql xml qml
 
 win32:QT += winextras
 win32:LIBS += -lgdi32 -luser32 -lole32
@@ -43,7 +42,6 @@ SOURCES += \
     charactermap.cpp \
     cropwidget.cpp \
     datepicker.cpp \
-    drawdialog.cpp \
     extractiondialog.cpp \
     fragmentnavigation.cpp \
     ghsbuilder.cpp \
@@ -110,7 +108,6 @@ HEADERS += \
     cropwidget.h \
     datepicker.h \
     dockwidget.h \
-    drawdialog.h \
     extractiondialog.h \
     extractionmodel.h \
     fragment.h \
@@ -182,7 +179,6 @@ HEADERS += \
 FORMS += \
         about.ui \
         datepicker.ui \
-        drawdialog.ui \
         extractiondialog.ui \
         imageutils.ui \
         labeldialog.ui \
@@ -203,6 +199,17 @@ FORMS += \
         tableviewer.ui \
         tagdialog.ui \
         tagselectiondialog.ui
+
+# enable/disable draw tool
+CONFIG += enableDrawTool
+
+enableDrawTool {
+SOURCES += drawdialog.cpp
+HEADERS += drawdialog.h
+FORMS += drawdialog.ui
+DEFINES += ENABLE_DRAW_TOOL
+QT += webenginewidgets webchannel
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

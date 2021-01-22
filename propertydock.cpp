@@ -40,7 +40,9 @@
 #include "htmlutils.h"
 #include "textutils.h"
 #include "datepicker.h"
+#ifdef ENABLE_DRAW_TOOL
 #include "drawdialog.h"
+#endif
 #include <QBuffer>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -226,8 +228,9 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 // load image
                 // TODO: check if title is not empty
                 const QByteArray data( Property::instance()->propertyData( propertyId ).toByteArray());
-#ifdef DRAW_TOOL_DISABLED
+#ifndef ENABLE_DRAW_TOOL
                 QPixmap pixmap;
+                bool ok;
                 if ( !data.isEmpty()) {
                     // TODO: check via cvar
                     ok = pixmap.loadFromData( data );
@@ -243,8 +246,8 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                 DrawDialog dd( PropertyDock::instance(), jsonData );
                 if ( dd.exec() == QDialog::Accepted ) {
                     return QPair<QString, QVariant>( QString(), dd.data );
-#endif
                 }
+#endif
 
                 break;
             }
@@ -448,6 +451,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 const QImage image( QImage::fromData( data ));
 
                 const QString jsonData( image.isNull() ? "" : image.text( "ChemDoodleData" ));
+#ifdef ENABLE_DRAW_TOOL
                 menu.addAction( PropertyDock::tr( "Edit" ), this, [ this, row, jsonData ]() {
                     DrawDialog dd( this, jsonData );
                     if ( dd.exec() == QDialog::Accepted ) {
@@ -455,6 +459,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                         this->updateView();
                     }
                 } )->setIcon( QIcon::fromTheme( "edit" ));
+#endif
             }
 
             QAction *copyAction( menu.addAction( PropertyDock::tr( "Copy" ), this, [ this, index, row, type, tagId

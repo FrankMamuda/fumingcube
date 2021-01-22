@@ -230,8 +230,10 @@ int main( int argc, char *argv[] ) {
     Variable::add( "searchFragment/history", "", Var::Flag::ReadOnly );
     Variable::add( "propertyFragment/selectedTags", "", Var::Flag::Hidden );
     Variable::add( "labelDock/selectedRows", "", Var::Flag::Hidden );
+#ifdef ENABLE_DRAW_TOOL
     Variable::add( "drawDialog/geometry", QByteArray(), Var::Flag::ReadOnly );
     Variable::add( "drawDialog/state", QByteArray(), Var::Flag::ReadOnly );
+#endif
     Variable::add( "closeToTray", false, Var::Flag::Hidden );
     Variable::add( "app/runOnStartup", false, Var::Flag::Hidden );
 
