@@ -39,6 +39,7 @@
  * includes
  */
 #include "drawdialog.h"
+#include "drawlabeleditor.h"
 #include "imageutils.h"
 #include "mainwindow.h"
 #include "networkmanager.h"
@@ -710,13 +711,13 @@ void DrawDialog::on_buttonBox_accepted() {
  * @brief DrawBridge::getLabel
  * @param defaultLabel
  */
-void DrawBridge::getLabel(const QString &defaultLabel) {
-    bool ok;
-    const QString label( QInputDialog::getText( qobject_cast<QWidget*>( this->parent()), defaultLabel.isEmpty() ? DrawBridge::tr( "New label" ) : DrawBridge::tr(  "Edit label" ), DrawBridge::tr( "Implicit hydrogens are automatically resolved.\nCondensed labels currently not supported." ), QLineEdit::Normal, defaultLabel.isEmpty() ? "C" : defaultLabel, &ok ));
+void DrawBridge::getLabel( const QString &defaultLabel ) {
+    DrawLabelEditor labelEditor( nullptr, defaultLabel );
 
-    if ( !ok )
+    if ( labelEditor.exec() != QDialog::Accepted )
         return;
 
+    const QString label( labelEditor.label());
     this->m_label = label.isEmpty() ? "C" : label;
     emit this->labelReady( label );
 }

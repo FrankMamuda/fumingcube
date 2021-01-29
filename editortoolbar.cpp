@@ -55,6 +55,11 @@ void EditorToolbar::setEditor( TextEdit *editor ) {
                        this,
                        SLOT( formatChanged( QTextCharFormat )));
     this->formatChanged( this->editor()->currentCharFormat());
+
+    TextEdit::connect( this->editor(), &TextEdit::cursorPositionChanged, [ this ]() {
+        this->alignmentChanged();
+    } );
+    this->alignmentChanged();
 }
 
 /**
@@ -206,6 +211,33 @@ void EditorToolbar::installFeature( const EditorToolbar::Feature &feature ) {
 
             break;
 
+
+    case HorizonatalAlignment:
+        // align left
+        this->actionAlignLeft = this->addAction( QIcon::fromTheme( "align_left" ), "" );
+        this->actionAlignLeft->setCheckable( true );
+        QAction::connect( this->actionAlignLeft, &QAction::triggered, [ this ]() {
+            this->editor()->setAlignment( Qt::AlignLeft | Qt::AlignAbsolute );
+            this->alignmentChanged();
+        } );
+
+        // align centred
+        this->actionAlignCentred = this->addAction( QIcon::fromTheme( "align_centre" ), "" );
+        this->actionAlignCentred->setCheckable( true );
+        QAction::connect( this->actionAlignCentred, &QAction::triggered, [ this ]() {
+            this->editor()->setAlignment( Qt::AlignHCenter | Qt::AlignAbsolute );
+            this->alignmentChanged();
+        } );
+
+        // align left
+        this->actionAlignRight = this->addAction( QIcon::fromTheme( "align_right" ), "" );
+        this->actionAlignRight->setCheckable( true );
+        QAction::connect( this->actionAlignRight, &QAction::triggered, [ this ]() {
+            this->editor()->setAlignment( Qt::AlignRight | Qt::AlignAbsolute );
+            this->alignmentChanged();
+        } );
+        break;
+
         case NoFeatures:
             break;
     }
@@ -260,4 +292,18 @@ void EditorToolbar::mergeFormat( const QTextCharFormat &format ) {
 
     cursor.mergeCharFormat( format );
     this->editor()->mergeCurrentCharFormat( format );
+}
+
+/**
+ * @brief EditorToolbar::alignmentChanged
+ */
+void EditorToolbar::alignmentChanged() {
+    if ( this->editor() == nullptr )
+        return;
+
+    if ( this->features().testFlag( HorizonatalAlignment )) {
+        this->actionAlignLeft->setChecked( this->editor()->alignment().testFlag( Qt::AlignLeft ));
+        this->actionAlignCentred->setChecked( this->editor()->alignment().testFlag( Qt::AlignHCenter ));
+        this->actionAlignRight->setChecked( this->editor()->alignment().testFlag( Qt::AlignRight ));
+    }
 }

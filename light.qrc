@@ -59,6 +59,9 @@
 		<file alias="16x16/redo.png">icons/light/16x16/redo.png</file>
 		<file alias="16x16/select_all.png">icons/light/16x16/select_all.png</file>
 		<file alias="16x16/undo.png">icons/light/16x16/undo.png</file>
+		<file alias="16x16/align_left.png">icons/light/16x16/align_left.png</file>
+		<file alias="16x16/align_right.png">icons/light/16x16/align_right.png</file>
+		<file alias="16x16/align_centre.png">icons/light/16x16/align_centre.png</file>
         <file alias="scalable/accept.svg">icons/light/scalable/accept.svg</file>
         <file alias="scalable/add.svg">icons/light/scalable/add.svg</file>
         <file alias="scalable/clean.svg">icons/light/scalable/clean.svg</file>
@@ -117,5 +120,8 @@
 		<file alias="scalable/redo.svg">icons/light/scalable/redo.svg</file>
 		<file alias="scalable/select_all.svg">icons/light/scalable/select_all.svg</file>
 		<file alias="scalable/undo.svg">icons/light/scalable/undo.svg</file>
+		<file alias="scalable/align_left.svg">icons/light/scalable/align_left.svg</file>
+		<file alias="scalable/align_right.svg">icons/light/scalable/align_right.svg</file>
+		<file alias="scalable/align_centre.svg">icons/light/scalable/align_centre.svg</file>
     </qresource>
 </RCC>

@@ -51,7 +51,8 @@ public:
         VerticalAlignment       = 0x08,
         CharacterMap            = 0x10,
         GHS                     = 0x20,
-        CleanHTML               = 0x40
+        CleanHTML               = 0x40,
+        HorizonatalAlignment    = 0x80
     };
 
     Q_DECLARE_FLAGS( Features, Feature )
@@ -71,6 +72,7 @@ private slots:
     void colourChanged( const QColor &colour );
     void formatChanged( const QTextCharFormat &format );
     void mergeFormat( const QTextCharFormat &format );
+    void alignmentChanged();
 
 private:
     QAction *actionSubScript = nullptr;
@@ -83,6 +85,10 @@ private:
     QAction *actionGHS = nullptr;
     QAction *actionCharacterMap = nullptr;
     QAction *actionCleanHTML = nullptr;
+
+    QAction *actionAlignLeft = nullptr;
+    QAction *actionAlignCentred = nullptr;
+    QAction *actionAlignRight = nullptr;
 
     TextEdit *m_editor = nullptr;
     Features m_features;

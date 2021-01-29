@@ -59,6 +59,9 @@
 		<file alias="16x16/redo.png">icons/dark/16x16/redo.png</file>
 		<file alias="16x16/select_all.png">icons/dark/16x16/select_all.png</file>
 		<file alias="16x16/undo.png">icons/dark/16x16/undo.png</file>
+		<file alias="16x16/align_left.png">icons/dark/16x16/align_left.png</file>
+		<file alias="16x16/align_right.png">icons/dark/16x16/align_right.png</file>
+		<file alias="16x16/align_centre.png">icons/dark/16x16/align_centre.png</file>
         <file alias="scalable/accept.svg">icons/dark/scalable/accept.svg</file>
         <file alias="scalable/add.svg">icons/dark/scalable/add.svg</file>
         <file alias="scalable/clean.svg">icons/dark/scalable/clean.svg</file>
@@ -117,5 +120,8 @@
 		<file alias="scalable/redo.svg">icons/dark/scalable/redo.svg</file>
 		<file alias="scalable/select_all.svg">icons/dark/scalable/select_all.svg</file>
 		<file alias="scalable/undo.svg">icons/dark/scalable/undo.svg</file>
+		<file alias="scalable/align_left.svg">icons/dark/scalable/align_left.svg</file>
+		<file alias="scalable/align_right.svg">icons/dark/scalable/align_right.svg</file>
+		<file alias="scalable/align_centre.svg">icons/dark/scalable/align_centre.svg</file>
     </qresource>
 </RCC>

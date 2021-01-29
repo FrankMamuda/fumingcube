@@ -42,6 +42,7 @@ SOURCES += \
     charactermap.cpp \
     cropwidget.cpp \
     datepicker.cpp \
+    drawlabeleditor.cpp \
     extractiondialog.cpp \
     fragmentnavigation.cpp \
     ghsbuilder.cpp \
@@ -108,6 +109,7 @@ HEADERS += \
     cropwidget.h \
     datepicker.h \
     dockwidget.h \
+    drawlabeleditor.h \
     extractiondialog.h \
     extractionmodel.h \
     fragment.h \
@@ -179,6 +181,7 @@ HEADERS += \
 FORMS += \
         about.ui \
         datepicker.ui \
+        drawlabeleditor.ui \
         extractiondialog.ui \
         imageutils.ui \
         labeldialog.ui \
