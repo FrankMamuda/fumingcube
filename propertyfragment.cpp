@@ -35,7 +35,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonDocument>
-#include <QDesktopWidget>
 #include <QWindow>
 #include <QScreen>
 #include "listutils.h"

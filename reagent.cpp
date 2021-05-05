@@ -31,8 +31,8 @@
  */
 Reagent::Reagent() : Table( "reagent" ) {
     this->addField( PRIMARY_FIELD( ID ) );
-    this->addField( FIELD( Name, String ) );
-    this->addField( FIELD( Reference, String ) );
+    this->addField( FIELD( Name, QString ) );
+    this->addField( FIELD( Reference, QString ) );
     this->addField( FIELD( ParentId, Int ));
     this->addField( FIELD( DateTime, Int ));
 }

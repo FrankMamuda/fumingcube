@@ -222,15 +222,15 @@ ImageUtils::ImageUtils( QWidget *parent, const Modes &mode, const QImage &image 
     this->ui->actionZoomIn->setShortcut( QKeySequence::ZoomIn );
     this->ui->actionZoomOut->setShortcut( QKeySequence::ZoomOut );
     this->ui->actionReplace->setShortcut( QKeySequence::Open );
-    this->ui->actionFit->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_F ));
-    this->ui->actionNormalSize->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_N ));
-    this->ui->actionAutocrop->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_C ));
-    this->ui->actionCrop->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_C ));
-    this->ui->actionMakeTransparent->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_T ));
-    this->ui->actionSetBackground->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_B ));
-    this->ui->actionInvert->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_I ));
-    this->ui->actionRotate->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_R ));
-    this->ui->actionRestoreOriginal->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_O ));
+    this->ui->actionFit->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_F ));
+    this->ui->actionNormalSize->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_N ));
+    this->ui->actionAutocrop->setShortcut( QKeySequence( Qt::CTRL | Qt::SHIFT | Qt::Key_C ));
+    this->ui->actionCrop->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_C ));
+    this->ui->actionMakeTransparent->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_T ));
+    this->ui->actionSetBackground->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_B ));
+    this->ui->actionInvert->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_I ));
+    this->ui->actionRotate->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_R ));
+    this->ui->actionRestoreOriginal->setShortcut( QKeySequence( Qt::CTRL | Qt::SHIFT | Qt::Key_O ));
 
     // set image if any
     if ( !image.isNull() && mode != OpenMode )

@@ -557,7 +557,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             ReagentDock::instance()->view()->updateView();
         } ));
         unHideAction->setIcon( QIcon::fromTheme( "show" ));
-        unHideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_H ));
+        unHideAction->setShortcut( QKeySequence( Qt::CTRL | Qt::SHIFT | Qt::Key_H ));
     }
 
     // paste property from clipboard (paste between reagents)

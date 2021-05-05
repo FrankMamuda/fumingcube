@@ -56,14 +56,14 @@ Q_DECLARE_METATYPE( Row )
 /*
  * FIELD macro generates a lowercase fieldName from field index (enum)
  */
-static const QMap<QVariant::Type, QString> _fieldTypes {{ QVariant::Int,       "integer" },
-                                                        { QVariant::Double,    "real" },
-                                                        { QVariant::String,    "text" },
-                                                        { QVariant::Color,     "colour" },
-                                                        { QVariant::ByteArray, "blob" }};
-#define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type]
-#define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QVariant::type, _fieldTypes[QVariant::type], true
-#define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QVariant::Int, "integer primary key", true, true
+static const QMap<QMetaType::Type, QString> _fieldTypes {{ QMetaType::Int,       "integer" },
+                                                        { QMetaType::Double,    "real" },
+                                                        { QMetaType::QString,    "text" },
+                                                        { QMetaType::QColor,     "colour" },
+                                                        { QMetaType::QByteArray, "blob" }};
+#define FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QMetaType::type, _fieldTypes[QMetaType::type]
+#define UNIQUE_FIELD( fieldId, type ) fieldId, QString( #fieldId ).replace( 0, 1, QString( #fieldId ).at( 0 ).toLower()), QMetaType::type, _fieldTypes[QMetaType::type], true
+#define PRIMARY_FIELD( fieldId ) fieldId, QString( #fieldId ).toLower(), QMetaType::Int, "integer primary key", true, true
 #define FIELD_GETTER( type, fieldId, name ) public: [[nodiscard]] type name( const Row &row ) const { return this->value( row, fieldId ).value<type>(); } type name( const Id &id ) const { return this->value( id, fieldId ).value<type>(); }
 #define FIELD_SETTER( type, fieldId ) public slots: void set##fieldId( const Row &row, const type &variable ) { this->setValue( row, fieldId, QVariant::fromValue( variable )); }
 #define INITIALIZE_FIELD( type, fieldId, name ) FIELD_GETTER( type, fieldId, name ) FIELD_SETTER( type, fieldId )
@@ -159,7 +159,7 @@ public slots:
      * @param valid
      */
     void setValid( bool valid = true ) { this->m_valid = valid; }
-    void addField( int id, const QString &fieldName = QString(), QVariant::Type type = QVariant::Invalid,
+    void addField( int id, const QString &fieldName = QString(), QMetaType::Type type = QMetaType::UnknownType,
                    const QString &format = QString( "text" ), bool unique = false, bool autoValue = false );
     Row add( const QVariantList &arguments );
     virtual void remove( const Row &row );

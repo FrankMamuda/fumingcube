@@ -31,6 +31,7 @@
 #include <QPainter>
 #include <QDesktopServices>
 #include <QCalendarWidget>
+#include <QDateTime>
 #include "reagent.h"
 #include "property.h"
 #include "variable.h"
@@ -265,8 +266,8 @@ QMenu *ReagentDock::buildMenu( bool context ) {
                 datePicker.setDate( current.isValid() ? current.date() : QDate::currentDate());
                 if ( datePicker.exec() == QDialog::Accepted ) {
                     // rename without resetting the model
-                    Reagent::instance()->setDateTime( Reagent::instance()->row( id ), QDateTime( datePicker.date()));
-                    const_cast<QStandardItem *>( item )->setData( QDateTime( datePicker.date()), ReagentModel::DateTime );
+                    Reagent::instance()->setDateTime( Reagent::instance()->row( id ), QDateTime( datePicker.date(), QTime()));
+                    const_cast<QStandardItem *>( item )->setData( QDateTime( datePicker.date(), QTime()), ReagentModel::DateTime );
                 }
             } )->setIcon( QIcon::fromTheme( current.isValid() ? "edit" : "add" ));
 

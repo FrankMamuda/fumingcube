@@ -143,7 +143,7 @@ QSize ReagentDelegate::sizeHint( const QStyleOptionViewItem &option, const QMode
     // otherwise html is fetched through model
     const QFont font( this->internalFont );
     QDate date( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::DateTime ).toDate());
-    const QString dateString( date.isValid() ? QString( " (%1)" ).arg( date.toString( Qt::SystemLocaleShortDate )) : "" );
+    const QString dateString( date.isValid() ? QString( " (%1)" ).arg( date.toString( QLocale::system().dateFormat( QLocale::ShortFormat ))) : "" );
     const QString html( this->sourceModel()->data( this->model()->mapToSource( index ), ReagentModel::HTML ).toString());
 
     // setup html document

@@ -27,7 +27,7 @@
  */
 TableEntry::TableEntry() : Table( "table_" ) {
     this->addField( PRIMARY_FIELD( ID ) );
-    this->addField( UNIQUE_FIELD( Name, String ));
+    this->addField( UNIQUE_FIELD( Name, QString ));
     this->addField( FIELD( Mode, Int ));
 }
 

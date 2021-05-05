@@ -35,8 +35,8 @@
  */
 Label::Label() : Table( "label" ) {
     this->addField( PRIMARY_FIELD( ID ) );
-    this->addField( FIELD( Name, String ) );
-    this->addField( FIELD( Colour, ByteArray ) );
+    this->addField( FIELD( Name, QString ) );
+    this->addField( FIELD( Colour, QByteArray ) );
 }
 
 /**

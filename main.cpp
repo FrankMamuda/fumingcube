@@ -41,7 +41,6 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QDesktopWidget>
 #include <QSharedMemory>
 #include <QSettings>
 #include <QTranslator>
@@ -51,6 +50,9 @@
 #include "tableproperty.h"
 #ifdef Q_OS_WIN
 #include "emfmime.h"
+#endif
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#include <QDesktopWidget>
 #endif
 
 /*
@@ -172,17 +174,17 @@ int main( int argc, char *argv[] ) {
     const QString locale( "en_EN" );
 #else
 #ifndef FORCE_LV_LOCALE
-    const QString locale( QLocale::system().name());
+    const QLocale locale( QLocale::system().name());
 #else
-    const QString locale( "lv_LV" );
+    const QLocale locale( QLocale::Latvia );
 #endif
 #endif
     QLocale::setDefault( locale );
-    translator.load( ":/i18n/fumingCube_" + locale );
-    QApplication::installTranslator( &translator );
+    if ( translator.load( ":/i18n/fumingCube_" + locale.name()))
+        QApplication::installTranslator( &translator );
 
     // read initial history
-    QFile file( !QString::compare( locale, "lv_LV" ) ? ":/initial/calculator_history_lv_LV" : ":/initial/calculator_history" );
+    QFile file( !QString::compare( locale.name(), "lv_LV" ) ? ":/initial/calculator_history_lv_LV" : ":/initial/calculator_history" );
     QString history;
     if ( file.open( QIODevice::ReadOnly )) {
         history = Variable::compressString( file.readAll());
@@ -222,11 +224,11 @@ int main( int argc, char *argv[] ) {
 
     // clean up on exit
     QApplication::connect( &a, &QApplication::aboutToQuit,
-        [
-#ifdef Q_OS_WIN
-        emf
-#endif
-        ]() {
+                           [
+                       #ifdef Q_OS_WIN
+                           emf
+                       #endif
+                           ]() {
 #ifdef Q_OS_WIN
         delete emf;
 #endif
@@ -262,8 +264,8 @@ int main( int argc, char *argv[] ) {
         // just change path
         Variable::setString( "databasePath", info.absolutePath() + "/database_"
                                                          + QDateTime::currentDateTime()
-                                                                 .toString( "yyyyMMdd_hhmmss" ) +
-                                                         ".db" );
+                             .toString( "yyyyMMdd_hhmmss" ) +
+                             ".db" );
         // reset vars
         Variable::reset( "calculator/commands" );
         Variable::reset( "calculator/history" );
@@ -279,7 +281,7 @@ int main( int argc, char *argv[] ) {
         // copy built-in demo version
         QFile::copy( ":/initial/database.db", Variable::string( "databasePath" ));
         QFile( Variable::string( "databasePath" )).setPermissions(
-                QFileDevice::ReadOwner | QFileDevice::WriteOwner );
+                    QFileDevice::ReadOwner | QFileDevice::WriteOwner );
 
         QFile::remove( apiFileName );
     }
@@ -310,12 +312,18 @@ int main( int argc, char *argv[] ) {
     };
 
     if ( !loadTables()) {
-        QMessageBox::critical( QApplication::desktop(),
-                               QObject::tr( "Internal error" ),
-                               QObject::tr( "Could not load database\n"
+        QMessageBox::critical(
+                    // FIXME
+            #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+                    QApplication::desktop(),
+            #else
+                    nullptr,
+            #endif
+                    QObject::tr( "Internal error" ),
+                    QObject::tr( "Could not load database\n"
                                             "New database will be created\n"
                                             "Please restart the application" ),
-                               QMessageBox::Ok );
+                    QMessageBox::Ok );
 
         QFile badAPIFile( apiFileName );
         if ( badAPIFile.open( QIODevice::WriteOnly ))
@@ -382,8 +390,8 @@ int main( int argc, char *argv[] ) {
          Variable::value<QVariant>( "mainWindow/state" ).isNull()) {
         MainWindow::instance()->resize( 1024, 650 );
         MainWindow::instance()->resizeDocks(
-                QList<QDockWidget *>() << PropertyDock::instance() << ReagentDock::instance() << LabelDock::instance(),
-                QList<int>() << 300 << 210 << 210, Qt::Horizontal );
+                    QList<QDockWidget *>() << PropertyDock::instance() << ReagentDock::instance() << LabelDock::instance(),
+                    QList<int>() << 300 << 210 << 210, Qt::Horizontal );
         MainWindow::instance()->resizeDocks( QList<QDockWidget *>() << LabelDock::instance(), QList<int>() << 96,
                                              Qt::Vertical );
     }

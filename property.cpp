@@ -31,9 +31,9 @@
  */
 Property::Property() : Table( "property" ) {
     this->addField( PRIMARY_FIELD( ID )); // Id
-    this->addField( FIELD( Name, String ));      // rich text
+    this->addField( FIELD( Name, QString ));      // rich text
     this->addField( FIELD( TagId, Int ));        // special tag
-    this->addField( FIELD( PropertyData, ByteArray ));  // value (can be anything)
+    this->addField( FIELD( PropertyData, QByteArray ));  // value (can be anything)
     this->addField( FIELD( ReagentId, Int ));    // Id in parent table
     this->addField( FIELD( TableOrder, Int ));        // order
     this->setSort( TableOrder, Qt::AscendingOrder );

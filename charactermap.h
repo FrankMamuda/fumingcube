@@ -31,6 +31,8 @@
 namespace CharacterNamespace {
     static const int GridSize = 16;
     static const QList<QChar> SpecialChars {
+        // FIXME
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
             /* degree, angstrom */
             0x00b0, 0x212b,
             /* uppercase greek */
@@ -55,6 +57,7 @@ namespace CharacterNamespace {
             /* misc */
             0x0024, 0x20ac, 0x2030, 0x26a0,
             0x2605, 0x2606, 0x2713, 0x2717
+#endif
     };
 }
 

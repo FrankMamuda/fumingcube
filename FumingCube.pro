@@ -14,6 +14,8 @@ win32:RC_FILE = icon.rc
 win32:SOURCES = emfmime.cpp
 win32:HEADERS = emfmime.h
 
+macx:CONFIG += sdk_no_version_check
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 win32:TARGET = fumingcube

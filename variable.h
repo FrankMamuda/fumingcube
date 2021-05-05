@@ -198,7 +198,11 @@ public:
      */
     [[nodiscard]] static QVariant validate( const QVariant &value ) {
         QVariant var( value );
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        if ( var.typeId() == QMetaType::QString ) {
+#else
         if ( var.type() == QVariant::String ) {
+#endif
             if ( !QString::compare( var.toString(), "true" )) {
                 var = true;
             } else if ( !QString::compare( var.toString(), "false" )) {

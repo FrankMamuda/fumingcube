@@ -180,7 +180,7 @@ TagDialog::TagDialog( QWidget *parent ) : QDialog( parent ), ui( new Ui::TagDial
         dp.setDate( QDate::currentDate());
         if ( dp.exec() == QDialog::Accepted ) {
             this->date = dp.date();
-            this->ui->valueEdit->setText( this->date.toString( Qt::DateFormat::LocalDate ));
+            this->ui->valueEdit->setText( this->date.toString( QLocale::system().dateFormat( QLocale::ShortFormat )));
         }
     } );
 
@@ -275,7 +275,7 @@ void TagDialog::on_actionEdit_triggered() {
     if ( isDate ) {
         const int julianDay = Tag::instance()->defaultValue( row ).toInt();
         const QDate date( julianDay == 0 ? QDate() : QDate::fromJulianDay( julianDay ));
-        this->ui->valueEdit->setText( date.toString( Qt::DateFormat::LocalDate ));
+        this->ui->valueEdit->setText( date.toString( QLocale::system().dateFormat( QLocale::ShortFormat )));
     } else {
         this->ui->valueEdit->setText( Tag::instance()->defaultValue( row ).toString());
     }
