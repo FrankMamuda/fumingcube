@@ -56,11 +56,16 @@
 #include <QDesktopWidget>
 #endif
 
+#ifdef ENABLE_DRAW_TOOL_FULL
+#include "datastream.h"
+#include "drawbridge.h"
+#include "chemicallabel.h"
+#endif
+
 /*
  TODO:
 
 urgent:
-  - tray icon button does not quit application
   - settings not saved/restored (last reagent)
 
 draw:
@@ -160,6 +165,13 @@ scripting:
  * @return
  */
 int main( int argc, char *argv[] ) {
+#ifdef ENABLE_DRAW_TOOL_FULL
+    qmlRegisterType<DrawBridge>( "DrawBridge", 1, 0, "DrawBridge" );
+    qRegisterMetaType<ChemicalLabel*>();
+    qmlRegisterType<ChemicalLabel>( "ChemicalLabel", 1, 0, "ChemicalLabel" );
+    qmlRegisterType<DataStream>( "DataStream", 1, 0, "DataStream" );
+#endif
+
     QApplication a( argc, argv );
 
     // simple single instance implementation

@@ -37,8 +37,8 @@
  * @brief DrawLabelEditor::DrawLabelEditor
  * @param parent
  */
-DrawLabelEditor::DrawLabelEditor( QWidget *parent, const QString &label )
-    : QDialog( parent ), ui( new Ui::DrawLabelEditor ) {
+DrawLabelEditor::DrawLabelEditor( QWidget *parent, const QString &label, bool html )
+    : QDialog( parent ), ui( new Ui::DrawLabelEditor ), m_html( html ) {
     this->ui->setupUi( this );
     this->ui->mainWindow->setWindowFlags( Qt::Widget );
 
@@ -86,7 +86,19 @@ QString DrawLabelEditor::label() const {
     html.replace( QRegularExpression( R"(vertical-align:\s*sub)" ), "vertical-align:sub;font-size:smaller" );
     html.replace( QRegularExpression( R"(vertical-align:\s*super)" ), "vertical-align:super;font-size:smaller" );
 
-    return HTMLUtils::toPlainText( html ).simplified().isEmpty() ? "" : qAsConst( html );
+    // TODO:
+    if ( this->m_html )
+        return HTMLUtils::toPlainText( html ).simplified().isEmpty() ? "" : qAsConst( html );
+    else
+        return HTMLUtils::toPlainText( html ).simplified();
+}
+
+/**
+ * @brief DrawLabelEditor::interpreted
+ * @return
+ */
+bool DrawLabelEditor::interpreted() const {
+    return this->ui->interpretCheck->isChecked();
 }
 
 /**
@@ -106,4 +118,11 @@ void DrawLabelEditor::showEvent( QShowEvent *event ) {
     QTimer::singleShot( 0, this, [ this ]() {
         this->resize( this->width(), this->minimumSizeHint().height());
     } );
+}
+
+/**
+ * @brief DrawLabelEditor::on_interpretCheck_clicked
+ */
+void DrawLabelEditor::on_interpretCheck_clicked() {
+    this->ui->editorToolBar->setVisible( !this->interpreted());
 }

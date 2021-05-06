@@ -129,10 +129,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         {
             QSqlQuery query;
             query.exec( QString( "select %1 from %2 where %3=%4" )
-                                .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ),
-                                      LabelSet::instance()->tableName(),
-                                      LabelSet::instance()->fieldName( LabelSet::ReagentId ),
-                                      QString::number( static_cast<int>( reagentId ))));
+                        .arg( LabelSet::instance()->fieldName( LabelSet::LabelId ),
+                              LabelSet::instance()->tableName(),
+                              LabelSet::instance()->fieldName( LabelSet::ReagentId ),
+                              QString::number( static_cast<int>( reagentId ))));
 
             // find the first label the reagent has
             if ( query.next()) {
@@ -179,7 +179,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // select property index
         const QModelIndex index(
-                Property::instance()->index( static_cast<int>( propertyRow ), Property::PropertyData ));
+                    Property::instance()->index( static_cast<int>( propertyRow ), Property::PropertyData ));
         if ( !index.isValid())
             return;
 
@@ -206,7 +206,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // add quit button
         this->ui->toolBar->addSeparator();
-        this->ui->toolBar->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qDebug() << "qApp->quit()"; qApp->quit(); } );
+        this->ui->toolBar->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+            qApp->quit();
+#else
+            QApplication::exit();
+#endif
+        } );
 
         // tray option will ignore closeEvent, therefore disallowing termination during sign off
         // this will be intercepted here to allow proper shutdown
@@ -231,7 +237,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
         menu->addAction( QIcon::fromTheme( "settings" ), MainWindow::tr( "Settings" ), [ this ]() { this->on_actionSettings_triggered(); } );
         menu->addAction( QIcon::fromTheme( "info" ), MainWindow::tr( "About" ), [ this ]() { this->on_actionAbout_triggered(); } );
         menu->addSeparator();
-        menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qApp->quit(); } );
+        menu->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+            qApp->quit();
+            QMetaObject::invokeMethod( qApp, "quit", Qt::QueuedConnection );
+#else
+            QApplication::exit();
+#endif
+        } );
         this->tray->setContextMenu( menu );
 
         // hook up activation
@@ -320,7 +333,7 @@ void MainWindow::appendToCalculator( const QString &line, bool debug ) {
         //       1) finds function( args, .. )
         //       2) encloses this with an anchor
         const QRegularExpression functionExpression(
-                  QString( "(?<function>%1)\\s*\\(\\s*(?<arguments>\".+?(?=\")\"(?:\\s*,\\s*?(?:\".+?(?=\"))\")?)\\s*\\)" )
+                    QString( "(?<function>%1)\\s*\\(\\s*(?<arguments>\".+?(?=\")\"(?:\\s*,\\s*?(?:\".+?(?=\"))\")?)\\s*\\)" )
                     .arg( functions.join( "|" ))
                     );
 
@@ -336,7 +349,7 @@ void MainWindow::appendToCalculator( const QString &line, bool debug ) {
             // then separate args
             const QRegularExpression argsExpression( "\"(.+?(?=\"))\"" );
             QRegularExpressionMatchIterator argsIterator(
-                    argsExpression.globalMatch( functionMatch.captured( "arguments" )));
+                        argsExpression.globalMatch( functionMatch.captured( "arguments" )));
             QStringList args;
             while ( argsIterator.hasNext()) {
                 const QRegularExpressionMatch argsMatch( argsIterator.next());
@@ -345,7 +358,7 @@ void MainWindow::appendToCalculator( const QString &line, bool debug ) {
 
             // build a list of functionNames, args, capture start and end positions for proper string replacement
             matches << Match( functionMatch.captured( "function" ) + ";" + args.join( ";" ),
-                              functionMatch.capturedStart(), functionMatch.capturedEnd());
+                              static_cast<int>( functionMatch.capturedStart()), static_cast<int>( functionMatch.capturedEnd()));
         }
 
         // perform string replacement

@@ -15,7 +15,7 @@ win32:RC_FILE = icon.rc
 
 winEMF {
 win32:SOURCES = emfmime.cpp
-win32:HEADERS = emfmime.
+win32:HEADERS = emfmime.h
 win32:DEFINES += ENABLE_WIN_EMF
 }
 
@@ -49,7 +49,6 @@ SOURCES += \
     charactermap.cpp \
     cropwidget.cpp \
     datepicker.cpp \
-    drawlabeleditor.cpp \
     extractiondialog.cpp \
     fragmentnavigation.cpp \
     ghsbuilder.cpp \
@@ -116,7 +115,6 @@ HEADERS += \
     cropwidget.h \
     datepicker.h \
     dockwidget.h \
-    drawlabeleditor.h \
     extractiondialog.h \
     extractionmodel.h \
     fragment.h \
@@ -188,7 +186,6 @@ HEADERS += \
 FORMS += \
         about.ui \
         datepicker.ui \
-        drawlabeleditor.ui \
         extractiondialog.ui \
         imageutils.ui \
         labeldialog.ui \
@@ -212,12 +209,20 @@ FORMS += \
 
 # enable/disable draw tool
 CONFIG += enableDrawTool
+# CONFIG += enableDrawToolFull
 
 enableDrawTool {
 SOURCES += drawdialog.cpp
 HEADERS += drawdialog.h
 FORMS += drawdialog.ui
 DEFINES += ENABLE_DRAW_TOOL
+}
+
+enableDrawToolFull {
+DEFINES += ENABLE_DRAW_TOOL_FULL
+SOURCES += drawbridge.cpp chemicallabel.cpp datastream.cpp drawlabeleditor.cpp
+HEADERS += drawbridge.h chemicallabel.h datastream.h drawlabeleditor.h
+FORMS += drawlabeleditor.ui
 }
 
 # Default rules for deployment.

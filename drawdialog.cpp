@@ -135,20 +135,6 @@ void DrawDialog::resizeEvent( QResizeEvent *event ) {
 }
 
 /**
- * @brief DrawDialog::closeEvent
- */
-void DrawDialog::closeEvent( QCloseEvent *event ) {
-    if ( this->hasInitialized()) {
-        Variable::setCompressedByteArray( "drawDialog/geometry", this->saveGeometry());
-        Variable::setCompressedByteArray( "drawDialog/state", this->ui->contents->saveState());
-    }
-
-    QDialog::closeEvent( event );
-    qApp->quit();
-    QMetaObject::invokeMethod( qApp, "quit", Qt::QueuedConnection );
-}
-
-/**
  * @brief DrawDialog::keyReleaseEvent
  */
 void DrawDialog::keyReleaseEvent( QKeyEvent *event ) {
@@ -401,7 +387,7 @@ void DrawDialog::loadComponent() {
     };*/
 
     // save action
-   /*QAction::connect( this->ui->actionSave, &QAction::triggered, [ this, save, write ]() {
+    /*QAction::connect( this->ui->actionSave, &QAction::triggered, [ this, save, write ]() {
         QVariant json;
         QMetaObject::invokeMethod( this->rootObject(), "quickSave", Q_RETURN_ARG( QVariant, json ));
         this->json = json.toString();

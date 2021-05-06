@@ -49,12 +49,10 @@ public:
 
 protected:
     void resizeEvent( QResizeEvent * ) override;
-    void closeEvent( QCloseEvent * ) override;
     void keyReleaseEvent( QKeyEvent * ) override;
 
 private slots:
     void loadComponent();
-
     void on_commandEdit_returnPressed();
 
 private:
