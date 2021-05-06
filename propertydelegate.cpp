@@ -141,7 +141,7 @@ void PropertyDelegate::setupDocument( const QModelIndex &index, const QFont &def
             }
         } else if ( type == Tag::Date ) {
             const QDate date( stringData.isEmpty() ? QDate() : QDate::fromJulianDay( stringData.toInt()));
-            stringData = date.isValid() ? date.toString( Qt::DateFormat::SystemLocaleDate ) : "";
+            stringData = date.isValid() ? date.toString( QLocale::system().dateFormat( QLocale::ShortFormat )) : "";
         }
     }
 

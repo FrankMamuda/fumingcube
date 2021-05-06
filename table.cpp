@@ -175,7 +175,7 @@ Field Table::field( int id ) const {
  * @param unique
  * @param autoValue
  */
-void Table::addField( int id, const QString &fieldName, QVariant::Type type, const QString &format, bool unique,
+void Table::addField( int id, const QString &fieldName, QMetaType::Type type, const QString &format, bool unique,
                       bool autoValue ) {
     if ( this->fields.contains( id ))
         return;

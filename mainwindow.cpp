@@ -206,7 +206,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
 
         // add quit button
         this->ui->toolBar->addSeparator();
-        this->ui->toolBar->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qApp->quit(); } );
+        this->ui->toolBar->addAction( QIcon::fromTheme( "close" ), MainWindow::tr( "Quit" ), []() { qDebug() << "qApp->quit()"; qApp->quit(); } );
 
         // tray option will ignore closeEvent, therefore disallowing termination during sign off
         // this will be intercepted here to allow proper shutdown

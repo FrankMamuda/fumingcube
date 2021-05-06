@@ -59,6 +59,7 @@ public:
     }
     ~LabelSet() override = default;
     Row add( const Id &labelId, const Id &reagentId );
+    void remove( const Row &row ) override { Table::remove( row ); }
     void remove( const Id &labelId, const Id &reagentId );
 
     // initialize field setters and getters

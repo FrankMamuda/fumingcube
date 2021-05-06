@@ -331,7 +331,7 @@ void TableViewer::populateTable( const QList<Id> tagIds, const QString &filter )
                 container->setAttribute( Qt::WA_DeleteOnClose, true );
                 QGridLayout *grid( new QGridLayout());
                 grid->setSpacing(0);
-                grid->setMargin(0);
+                grid->setContentsMargins( 0, 0, 0, 0 );
                 grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Fixed, QSizePolicy::Expanding ), 0, 0, 1, 3 );
                 grid->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed ), 1, 0 );
                 grid->addWidget( widget, 1, 1 );

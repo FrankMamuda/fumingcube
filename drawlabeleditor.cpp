@@ -30,6 +30,7 @@
 // TODO:
 //  alt->enter
 //  add charge actions
+//  rename window title... currently 'Add'
 //
 
 /**

@@ -240,13 +240,16 @@ PropertyDock::getPropertyValue( const Id &reagentId, const Id &tagId, const Id &
                         return QPair<QString, QVariant>( QString(), PixmapUtils::toData( QPixmap::fromImage( iu.image())));
                }
 #else
+                // FIXME
+#if 0
                 const QImage image( QImage::fromData( data ));
-                const QString jsonData( image.isNull() ? "" : image.text( "ChemDoodleData" ));
+                const QString jsonData( image.isNull() ? "" : image.text( "DrawToolData" ));
 
                 DrawDialog dd( PropertyDock::instance(), jsonData );
                 if ( dd.exec() == QDialog::Accepted ) {
                     return QPair<QString, QVariant>( QString(), dd.data );
                 }
+#endif
 #endif
 
                 break;
@@ -450,8 +453,10 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                 const QByteArray data( Property::instance()->propertyData( row ).toByteArray());
                 const QImage image( QImage::fromData( data ));
 
-                const QString jsonData( image.isNull() ? "" : image.text( "ChemDoodleData" ));
+                const QString jsonData( image.isNull() ? "" : image.text( "DrawToolData" ));
 #ifdef ENABLE_DRAW_TOOL
+                //FIXME
+#if 0
                 menu.addAction( PropertyDock::tr( "Edit" ), this, [ this, row, jsonData ]() {
                     DrawDialog dd( this, jsonData );
                     if ( dd.exec() == QDialog::Accepted ) {
@@ -459,6 +464,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
                         this->updateView();
                     }
                 } )->setIcon( QIcon::fromTheme( "edit" ));
+#endif
 #endif
             }
 
@@ -588,7 +594,7 @@ void PropertyDock::on_propertyView_customContextMenuRequested( const QPoint &pos
             ReagentDock::instance()->view()->updateView();
         } ));
         unHideAction->setIcon( QIcon::fromTheme( "show" ));
-        unHideAction->setShortcut( QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_H ));
+        unHideAction->setShortcut( QKeySequence( Qt::CTRL | Qt::SHIFT | Qt::Key_H ));
     }
 
     // paste property from clipboard (paste between reagents)

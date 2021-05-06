@@ -48,11 +48,7 @@ public:
         FormulaRequestBrowser,
         NameRequest,
         FavIcon,
-        DropImageRequest,
-        CDDemoPage,
-        CDScript,
-        CDUIScript,
-        CDjQueryCSS
+        DropImageRequest
     };
     Q_ENUM( Types )
 

@@ -91,9 +91,9 @@ void CalcView::contextMenuEvent(QContextMenuEvent *event) {
  * @param e
  */
 void CalcView::wheelEvent( QWheelEvent *event ){
-    if (( event->modifiers() == Qt::ControlModifier ) && ( event->delta() > 0 ))
+    if (( event->modifiers() == Qt::ControlModifier ) && ( event->angleDelta().y() > 0 ))
        this->zoomIn();
-    else if (( event->modifiers() == Qt::ControlModifier ) && ( event->delta() < 0 ))
+    else if (( event->modifiers() == Qt::ControlModifier ) && ( event->angleDelta().y() < 0 ))
         this->zoomOut();
     else
         QTextBrowser::wheelEvent( event );

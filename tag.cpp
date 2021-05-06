@@ -30,16 +30,16 @@
  */
 Tag::Tag() : Table( "tag" ) {
     this->addField( PRIMARY_FIELD( ID ) );
-    this->addField( UNIQUE_FIELD( Name, String ) );
+    this->addField( UNIQUE_FIELD( Name, QString ) );
     this->addField( FIELD( Type, Int ) );
-    this->addField( FIELD( Units, String ) );
-    this->addField( FIELD( MinValue, ByteArray ) );
-    this->addField( FIELD( MaxValue, ByteArray ) );
-    this->addField( FIELD( DefaultValue, ByteArray ) );
+    this->addField( FIELD( Units, QString ) );
+    this->addField( FIELD( MinValue, QByteArray ) );
+    this->addField( FIELD( MaxValue, QByteArray ) );
+    this->addField( FIELD( DefaultValue, QByteArray ) );
     this->addField( FIELD( Precision, Int ) );
-    this->addField( FIELD( Function, String ) );
+    this->addField( FIELD( Function, QString ) );
     this->addField( FIELD( Scale, Double ) );
-    this->addField( FIELD( Script, ByteArray ) );
+    this->addField( FIELD( Script, QByteArray ) );
     // right now 'Script' field holds a simple string list for PubChem parameters (heading, subheading, regExp)
     // however in the future it is intended to fully offload this task to javascript and have a working
     // and scripted (not hardcoded) property extraction system from multiple sources (PubChem, wiki, etc.)

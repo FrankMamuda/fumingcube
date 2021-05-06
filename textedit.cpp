@@ -27,7 +27,7 @@
 #include <QMimeData>
 #include <QDropEvent>
 #include <QRegularExpression>
-#ifdef Q_OS_WIN
+#ifdef ENABLE_WIN_EMF
 #include "emfmime.h"
 #endif
 #include "htmlutils.h"

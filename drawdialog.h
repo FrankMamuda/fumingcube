@@ -22,10 +22,9 @@
  * includes
  */
 #include <QDialog>
+#include <QQuickItem>
+#include <QQuickView>
 #include <QTimer>
-#include <QWebChannel>
-#include <QMessageBox>
-#include <QInputDialog>
 
 /**
  * @brief The Ui namespace
@@ -33,25 +32,6 @@
 namespace Ui {
 class DrawDialog;
 }
-
-/**
- * @brief The DrawBridge class
- */
-class DrawBridge : public QObject {
-    Q_OBJECT
-
-public:
-    DrawBridge( QObject *parent = nullptr ) : QObject( parent ) {}
-    QString m_label;
-
-signals:
-    void labelReady( const QString &label );
-
-public slots:
-    void getLabel( const QString &defaultLabel );
-
-private:
-};
 
 /**
  * @brief The DrawDialog class
@@ -62,29 +42,27 @@ class DrawDialog : public QDialog {
 public:
     explicit DrawDialog( QWidget *parent = nullptr, const QString &json = QString(), bool drawMode = false );
     ~DrawDialog() override;
-    void getPixmapAndAccept();
-    QByteArray data;
-    QString json;
     QString fileName;
+    QString json;
     QIcon fetchIcon( const QString &name ) const;
     bool hasInitialized() const { return this->m_initialized; }
 
 protected:
     void resizeEvent( QResizeEvent * ) override;
     void closeEvent( QCloseEvent * ) override;
+    void keyReleaseEvent( QKeyEvent * ) override;
 
 private slots:
     void loadComponent();
-    void on_buttonBox_accepted();
+
+    void on_commandEdit_returnPressed();
 
 private:
     Ui::DrawDialog *ui;
     QTimer resizeTimer;
     bool m_resizeInProgress = false;
-    bool script = false;
-    bool scriptUI = false;
-    bool jQuery = false;
-    QWebChannel *channel = nullptr;
-    DrawBridge *bridge = new DrawBridge( this );
     bool m_initialized = false;
+    QQuickItem *historyManager = nullptr;
+    QQuickItem *rootObject() const;
+    QQuickView *quickView = nullptr;
 };

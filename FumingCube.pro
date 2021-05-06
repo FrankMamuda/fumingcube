@@ -4,15 +4,22 @@
 #
 #-------------------------------------------------
 
-QT += core gui sql xml qml
+QT += core gui sql xml qml quickwidgets
 
-win32:QT += winextras
+lessThan(QT_MAJOR_VERSION, 6): QT += winextras
+lessThan(QT_MAJOR_VERSION, 6): CONFIG += winEMF
+
 win32:LIBS += -lgdi32 -luser32 -lole32
 win32:CONFIG += openssl-linked
 win32:RC_FILE = icon.rc
 
+winEMF {
 win32:SOURCES = emfmime.cpp
-win32:HEADERS = emfmime.h
+win32:HEADERS = emfmime.
+win32:DEFINES += ENABLE_WIN_EMF
+}
+
+macx:CONFIG += sdk_no_version_check
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -211,7 +218,6 @@ SOURCES += drawdialog.cpp
 HEADERS += drawdialog.h
 FORMS += drawdialog.ui
 DEFINES += ENABLE_DRAW_TOOL
-QT += webenginewidgets webchannel
 }
 
 # Default rules for deployment.
@@ -220,6 +226,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
+    qml.qrc \
     resources.qrc \
     dark.qrc \
     light.qrc
